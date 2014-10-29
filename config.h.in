@@ -69,3 +69,15 @@
 
 /* Version info for package */
 #undef VERSION_INFO
+
+/* Major version of this package */
+#undef VERSION_MAJOR
+
+/* Micro version of this package */
+#undef VERSION_MICRO
+
+/* Minor version of this package */
+#undef VERSION_MINOR
+
+/* Nano version of this package */
+#undef VERSION_NANO

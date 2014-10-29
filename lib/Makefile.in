@@ -82,7 +82,8 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(top_srcdir)/Makefile.common $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(srcdir)/plank.deps.in \
-	$(srcdir)/plank.pc.in $(top_srcdir)/build-aux/depcomp \
+	$(srcdir)/plank.pc.in $(srcdir)/Version.vala.in \
+	$(top_srcdir)/build-aux/depcomp \
 	$(top_srcdir)/build-aux/test-driver
 subdir = lib
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -94,7 +95,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = plank.deps plank.pc
+CONFIG_CLEAN_FILES = plank.deps plank.pc Version.vala
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -148,7 +149,8 @@ libplank_internal_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 libplank_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(builddir)/libplank-internal.la $(am__DEPENDENCIES_1)
 am__objects_3 = plank-resources.lo $(am__objects_1)
-am__objects_4 = DockController.lo DockPreferences.lo DockRenderer.lo \
+am__objects_4 = Version.lo $(am__objects_1)
+am__objects_5 = DockController.lo DockPreferences.lo DockRenderer.lo \
 	DragManager.lo HideManager.lo PositionManager.lo \
 	Drawing/AnimatedRenderer.lo Drawing/Color.lo \
 	Drawing/DrawingService.lo Drawing/DockSurface.lo \
@@ -156,7 +158,8 @@ am__objects_4 = DockController.lo DockPreferences.lo DockRenderer.lo \
 	Factories/AbstractMain.lo Factories/Factory.lo \
 	Factories/ItemFactory.lo Items/ApplicationDockItem.lo \
 	Items/ApplicationDockItemProvider.lo \
-	Items/DefaultApplicationDockItemProvider.lo Items/DockItem.lo \
+	Items/DefaultApplicationDockItemProvider.lo \
+	Items/DockContainer.lo Items/DockItem.lo \
 	Items/DockItemProvider.lo Items/DockItemPreferences.lo \
 	Items/DockElement.lo Items/FileDockItem.lo \
 	Items/PlaceholderDockItem.lo Items/PlankDockItem.lo \
@@ -166,7 +169,7 @@ am__objects_4 = DockController.lo DockPreferences.lo DockRenderer.lo \
 	Widgets/HoverWindow.lo Widgets/PoofWindow.lo \
 	Widgets/TitledSeparatorMenuItem.lo $(am__objects_1)
 nodist_libplank_la_OBJECTS = $(am__objects_3) $(am__objects_4) \
-	$(am__objects_1)
+	$(am__objects_5) $(am__objects_1)
 libplank_la_OBJECTS = $(nodist_libplank_la_OBJECTS)
 libplank_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -508,6 +511,10 @@ PLANK_CORE_OPTIONAL_PKGS = @PLANK_CORE_OPTIONAL_PKGS@
 PLANK_CORE_VALAFLAGS = @PLANK_CORE_VALAFLAGS@
 PLANK_DOCS_VALAFLAGS = @PLANK_DOCS_VALAFLAGS@
 PLANK_MAJOR_MINOR_VERSION = @PLANK_MAJOR_MINOR_VERSION@
+PLANK_MAJOR_VERSION = @PLANK_MAJOR_VERSION@
+PLANK_MICRO_VERSION = @PLANK_MICRO_VERSION@
+PLANK_MINOR_VERSION = @PLANK_MINOR_VERSION@
+PLANK_NANO_VERSION = @PLANK_NANO_VERSION@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -591,6 +598,7 @@ AM_CPPFLAGS = \
 
 AM_CFLAGS = \
 	-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
+	-include config.h \
 	$(PLANK_CORE_CFLAGS) \
 	-w \
 	$(NULL)
@@ -603,6 +611,7 @@ AM_VALAFLAGS = \
 	$(PLANK_CORE_VALAFLAGS) \
 	--vapidir $(top_srcdir)/vapi \
 	$(top_srcdir)/vapi/compat.vapi \
+	$(top_srcdir)/vapi/config.vapi \
 	--basedir $(srcdir) \
 	--directory $(builddir) \
 	-C \
@@ -662,6 +671,7 @@ libplank_la_VALASOURCES = \
 	Items/ApplicationDockItem.vala \
 	Items/ApplicationDockItemProvider.vala \
 	Items/DefaultApplicationDockItemProvider.vala \
+	Items/DockContainer.vala \
 	Items/DockItem.vala \
 	Items/DockItemProvider.vala \
 	Items/DockItemPreferences.vala \
@@ -681,8 +691,13 @@ libplank_la_VALASOURCES = \
 	Widgets/TitledSeparatorMenuItem.vala \
 	$(NULL)
 
+libplank_la_BUILT_VALASOURCES = \
+	Version.vala \
+	$(NULL)
+
 nodist_libplank_la_SOURCES = \
 	$(BUILT_SOURCES) \
+	$(libplank_la_BUILT_VALASOURCES:.vala=.c) \
 	$(libplank_la_VALASOURCES:.vala=.c) \
 	$(NULL)
 
@@ -722,6 +737,7 @@ CLEANFILES = \
 	plank.h \
 	plank-internal.vapi \
 	plank-internal.h \
+	Version.vala \
 	$(NULL)
 
 EXTRA_DIST = \
@@ -732,6 +748,7 @@ EXTRA_DIST = \
 	plank.deps.in \
 	plank.gresource.xml \
 	plank.pc.in \
+	Version.vala.in \
 	$(NULL)
 
 all: $(BUILT_SOURCES)
@@ -773,6 +790,8 @@ $(am__aclocal_m4_deps):
 plank.deps: $(top_builddir)/config.status $(srcdir)/plank.deps.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 plank.pc: $(top_builddir)/config.status $(srcdir)/plank.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+Version.vala: $(top_builddir)/config.status $(srcdir)/Version.vala.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
@@ -875,6 +894,8 @@ Items/ApplicationDockItemProvider.lo: Items/$(am__dirstamp) \
 	Items/$(DEPDIR)/$(am__dirstamp)
 Items/DefaultApplicationDockItemProvider.lo: Items/$(am__dirstamp) \
 	Items/$(DEPDIR)/$(am__dirstamp)
+Items/DockContainer.lo: Items/$(am__dirstamp) \
+	Items/$(DEPDIR)/$(am__dirstamp)
 Items/DockItem.lo: Items/$(am__dirstamp) \
 	Items/$(DEPDIR)/$(am__dirstamp)
 Items/DockItemProvider.lo: Items/$(am__dirstamp) \
@@ -941,6 +962,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DragManager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HideManager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PositionManager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Version.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plank-resources.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@Drawing/$(DEPDIR)/AnimatedRenderer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@Drawing/$(DEPDIR)/Color.Plo@am__quote@
@@ -954,6 +976,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/ApplicationDockItem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/ApplicationDockItemProvider.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/DefaultApplicationDockItemProvider.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/DockContainer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/DockElement.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/DockItem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/DockItemPreferences.Plo@am__quote@
@@ -1488,7 +1511,7 @@ plank-resources.c: plank.gresource.xml Makefile $(shell $(GLIB_COMPILE_RESOURCES
 
 plank.h plank.vapi: libplank_la_vala.stamp
 
-libplank_la_vala.stamp build-abi: libplank_internal_la_vala.stamp $(libplank_la_VALASOURCES) Makefile
+libplank_la_vala.stamp build-abi: libplank_internal_la_vala.stamp $(libplank_la_VALASOURCES) $(libplank_la_BUILT_VALASOURCES) Makefile
 	$(AM_V_VALA)$(VALAC) \
 		$(AM_VALAFLAGS) $(libplank_la_VALAFLAGS) \
 		-H plank.h \

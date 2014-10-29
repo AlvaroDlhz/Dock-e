@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <html>
   <head>
+    <meta charset="UTF-8"/>
     <title>Plank.Drawing.AnimatedRenderer.animation_needed &ndash; plank &ndash; Vala Binding Reference</title>
     <link href="devhelpstyle.css" rel="stylesheet" type="text/css"/><script src="scripts.js" type="text/javascript">
     </script>
@@ -12,7 +13,7 @@
         <h1 class="main_title">animation_needed</h1>
         <hr class="main_hr"/>
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">abstract</span> <span class="main_basic_type"><code>bool</code></span> <b><span css="abstract_method">animation_needed</span></b> (<span class="main_type"><code>DateTime</code></span> render_time)
+        <div class="main_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">abstract</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><span class="abstract_method">animation_needed</span></b> (<span class="main_basic_type"><span class="struct">int64</span></span> render_time)
         </div>
         <div class="description">
           <p>Determines if animation should continue.</p>
@@ -20,13 +21,17 @@
           <table class="main_parameter_table">
             <tr>
               <td class="main_parameter_table_name">render_time</td>
-              <td>the current time for this frame's render </td>
+              <td>
+                <p>the current time for this frame's render </p>
+              </td>
             </tr>
           </table>
           <h2 class="main_title">Returns:</h2>
           <table class="main_parameter_table">
             <tr>
-              <td>if another animation frame is needed </td>
+              <td>
+                <p>if another animation frame is needed </p>
+              </td>
             </tr>
           </table>
         </div>

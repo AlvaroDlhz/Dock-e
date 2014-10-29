@@ -15,11 +15,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Gee;
 
 using Plank.Factories;
-using Plank.Widgets;
-
 using Plank.Services;
 using Plank.Services.Windows;
 
@@ -39,30 +36,17 @@ namespace Plank.Items
 		 */
 		public DefaultApplicationDockItemProvider (DockPreferences prefs, File launchers_dir)
 		{
-			// If we made the default-launcher-directory,
-			// assume a first run and pre-populate with launchers
-			if (Paths.ensure_directory_exists (launchers_dir)) {
-				debug ("Adding default dock items...");
-				Factory.item_factory.make_default_items ();
-				debug ("done.");
-			}
-			
 			Object (Prefs : prefs, LaunchersDir : launchers_dir, HandlesTransients : true);
 		}
 		
 		construct
 		{
-			serialize_item_positions ();
-			
 			Prefs.notify["CurrentWorkspaceOnly"].connect (handle_setting_changed);
 			
 			var wnck_screen = Wnck.Screen.get_default ();
-			wnck_screen.active_window_changed.connect (handle_window_changed);
-			wnck_screen.active_workspace_changed.connect (handle_workspace_changed);
-			wnck_screen.viewports_changed.connect (handle_viewports_changed);
-			
-			item_positions_changed.connect (serialize_item_positions);
-			items_changed.connect (serialize_item_positions);
+			wnck_screen.active_window_changed.connect_after (handle_window_changed);
+			wnck_screen.active_workspace_changed.connect_after (handle_workspace_changed);
+			wnck_screen.viewports_changed.connect_after (handle_viewports_changed);
 		}
 		
 		~DefaultApplicationDockItemProvider ()
@@ -73,9 +57,6 @@ namespace Plank.Items
 			wnck_screen.active_window_changed.disconnect (handle_window_changed);
 			wnck_screen.active_workspace_changed.disconnect (handle_workspace_changed);
 			wnck_screen.viewports_changed.disconnect (handle_viewports_changed);
-			
-			item_positions_changed.disconnect (serialize_item_positions);
-			items_changed.disconnect (serialize_item_positions);
 		}
 		
 		protected override void update_visible_items ()
@@ -98,63 +79,14 @@ namespace Plank.Items
 		}
 		
 		/**
-		 * Serializes the item positions to the preferences.
+		 * {@inheritDoc}
 		 */
-		void serialize_item_positions ()
+		public override void prepare ()
 		{
-			var item_list = "";
-			foreach (var item in internal_items) {
-				if (!(item is TransientDockItem) && item.DockItemFilename.length > 0) {
-					if (item_list.length > 0)
-						item_list += ";;";
-					item_list += item.DockItemFilename;
-				}
-			}
+			// Make sure internal window-list of Wnck is most up to date
+			Wnck.Screen.get_default ().force_update ();
 			
-			if (Prefs.DockItems != item_list)
-				Prefs.DockItems = item_list;
-		}
-		
-		protected override ArrayList<DockItem> load_items ()
-		{
-			var result = new ArrayList<DockItem> ();
-			
-			var items = base.load_items ();
-			
-			var existing_items = new ArrayList<DockItem> ();
-			var new_items = new ArrayList<DockItem> ();
-			var favs = new ArrayList<string> ();
-			
-			foreach (var item in items) {
-				if (Prefs.DockItems.contains (item.DockItemFilename))
-					existing_items.add (item);
-				else
-					new_items.add (item);
-			
-				if ((item is ApplicationDockItem) && !(item is TransientDockItem))
-					favs.add (item.Launcher);
-			}
-			
-			// add saved dockitems based on their serialized order
-			var dockitems = Prefs.DockItems.split (";;");
-			foreach (var dockitem in dockitems)
-				foreach (var item in existing_items)
-					if (dockitem == item.DockItemFilename) {
-						result.add (item);
-						break;
-					}
-			
-			// add new dockitems
-			foreach (var item in new_items)
-				result.add (item);
-			
-			Matcher.get_default ().set_favorites (favs);
-			
-			return result;
-		}
-		
-		protected override void add_running_apps ()
-		{
+			// Match running applications to their available dock-items
 			foreach (var app in Matcher.get_default ().active_launchers ()) {
 				var found = item_for_application (app);
 				if (found != null) {
@@ -169,10 +101,25 @@ namespace Plank.Items
 				
 				add_item_without_signaling (new_item);
 			}
+			
+			update_visible_items ();
+			
+			var favs = new Gee.ArrayList<string> ();
+			
+			foreach (var element in internal_items) {
+				unowned ApplicationDockItem? item = (element as ApplicationDockItem);
+				if (item != null && !(item is TransientDockItem))
+					favs.add (item.Launcher);
+			}
+			
+			Matcher.get_default ().set_favorites (favs);
 		}
 		
 		protected override void app_opened (Bamf.Application app)
 		{
+			// Make sure internal window-list of Wnck is most up to date
+			Wnck.Screen.get_default ().force_update ();
+			
 			var found = item_for_application (app);
 			if (found != null) {
 				found.App = app;
@@ -224,26 +171,48 @@ namespace Plank.Items
 			update_visible_items ();
 		}
 		
-		protected override void item_signals_connect (DockItem item)
+		void handle_setting_changed ()
 		{
-			base.item_signals_connect (item);
+			update_visible_items ();
+		}
+		
+		protected override void connect_element (DockElement element)
+		{
+			base.connect_element (element);
 			
-			unowned ApplicationDockItem? appitem = (item as ApplicationDockItem);
+			unowned ApplicationDockItem? appitem = (element as ApplicationDockItem);
 			if (appitem != null) {
 				appitem.app_closed.connect (app_closed);
 				appitem.pin_launcher.connect (pin_item);
 			}
 		}
 		
-		protected override void item_signals_disconnect (DockItem item)
+		protected override void disconnect_element (DockElement element)
 		{
-			base.item_signals_disconnect (item);
+			base.disconnect_element (element);
 			
-			unowned ApplicationDockItem? appitem = (item as ApplicationDockItem);
+			unowned ApplicationDockItem? appitem = (element as ApplicationDockItem);
 			if (appitem != null) {
 				appitem.app_closed.disconnect (app_closed);
 				appitem.pin_launcher.disconnect (pin_item);
 			}
+		}
+		
+		protected override void handle_item_deleted (DockItem item)
+		{
+			unowned Bamf.Application? app = null;
+			if (item is ApplicationDockItem)
+				app = (item as ApplicationDockItem).App;
+			
+			if (app == null || !app.is_running ()) {
+				remove_item (item);
+				return;
+			}
+			
+			var new_item = new TransientDockItem.with_application (app);
+			item.copy_values_to (new_item);
+			
+			replace_item (new_item, item);
 		}
 		
 		public void pin_item (DockItem item)
@@ -271,7 +240,6 @@ namespace Plank.Items
 				item.copy_values_to (new_item);
 				
 				replace_item (new_item, item);
-				serialize_item_positions ();
 			} else {
 				item.delete ();
 			}

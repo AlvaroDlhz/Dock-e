@@ -15,10 +15,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Gdk;
-using Gee;
-using Gtk;
-
 using Plank.Drawing;
 using Plank.Services;
 using Plank.Services.Windows;
@@ -95,16 +91,11 @@ namespace Plank.Items
 		public signal void launcher_changed ();
 		
 		/**
-		 * The dock item's provider which it is added too (if any).
-		 */
-		public DockItemProvider? Provider { get; set; }
-		
-		/**
 		 * The dock item's icon.
 		 */
 		public string Icon { get; set; default = ""; }
 		
-		protected Pixbuf? ForcePixbuf { get; set; default = null; }
+		protected Gdk.Pixbuf? ForcePixbuf { get; set; default = null; }
 		
 		/**
 		 * The count for the dock item.
@@ -145,7 +136,7 @@ namespace Plank.Items
 				
 				// Only trigger animation if this isn't the initial position set
 				if (LastPosition > -1) {
-					LastMove = new DateTime.now_utc ();
+					LastMove = GLib.get_monotonic_time ();
 					State |= ItemState.MOVE;
 				}
 			}
@@ -169,7 +160,7 @@ namespace Plank.Items
 		/**
 		 * The average color of this item's icon.
 		 */
-		public Drawing.Color AverageIconColor { get; protected set; default = Drawing.Color () { R = 0.0, G = 0.0, B = 0.0, A = 0.0 }; }
+		public Drawing.Color AverageIconColor { get; protected set; default = Drawing.Color () { red = 0.0, green = 0.0, blue = 0.0, alpha = 0.0 }; }
 		
 		/**
 		 * The filename of the preferences backing file.
@@ -194,6 +185,8 @@ namespace Plank.Items
 		DockSurface? background_surface = null;
 		DockSurface? foreground_surface = null;
 		
+		FileMonitor? icon_file_monitor = null;
+		
 		/**
 		 * Creates a new dock item.
 		 */
@@ -206,8 +199,8 @@ namespace Plank.Items
 		{
 			Prefs.deleted.connect (handle_deleted);
 			Gtk.IconTheme.get_default ().changed.connect (icon_theme_changed);
-			notify["Icon"].connect (reset_icon_buffer);
-			notify["ForcePixbuf"].connect (reset_icon_buffer);
+			notify["Icon"].connect (icon_changed);
+			notify["ForcePixbuf"].connect (icon_changed);
 			
 			notify["Count"].connect (reset_foreground_buffer);
 			notify["CountVisible"].connect (reset_foreground_buffer);
@@ -219,13 +212,15 @@ namespace Plank.Items
 		{
 			Prefs.deleted.disconnect (handle_deleted);
 			Gtk.IconTheme.get_default ().changed.disconnect (icon_theme_changed);
-			notify["Icon"].disconnect (reset_icon_buffer);
-			notify["ForcePixbuf"].disconnect (reset_icon_buffer);
+			notify["Icon"].disconnect (icon_changed);
+			notify["ForcePixbuf"].disconnect (icon_changed);
 			
 			notify["Count"].disconnect (reset_foreground_buffer);
 			notify["CountVisible"].disconnect (reset_foreground_buffer);
 			notify["Progress"].disconnect (reset_foreground_buffer);
 			notify["ProgressVisible"].disconnect (reset_foreground_buffer);
+			
+			icon_file_monitor_stop ();
 		}
 		
 		/**
@@ -259,7 +254,7 @@ namespace Plank.Items
 		/**
 		 * Resets the buffers for this item's icon.
 		 */
-		public void reset_buffers ()
+		public override void reset_buffers ()
 		{
 			background_surface = null;
 			foreground_surface = null;
@@ -283,6 +278,41 @@ namespace Plank.Items
 				reset_icon_buffer ();
 				return false;
 			});
+		}
+		
+		void icon_changed ()
+		{
+			icon_file_monitor_stop ();
+			
+			if (ForcePixbuf == null)
+				icon_file_monitor_start ();
+			
+			reset_icon_buffer ();
+		}
+		
+		void icon_file_monitor_start ()
+		{
+			var icon_file = DrawingService.try_get_icon_file (Icon);
+			if (icon_file == null)
+				return;
+			
+			try {
+				icon_file_monitor = icon_file.monitor (0);
+				icon_file_monitor.changed.connect (reset_icon_buffer);
+			} catch (Error e) {
+				critical ("Unable to watch the icon file '%s'", icon_file.get_path () ?? "");
+				debug (e.message);
+			}
+		}
+		
+		void icon_file_monitor_stop ()
+		{
+			if (icon_file_monitor == null)
+				return;
+			
+			icon_file_monitor.changed.disconnect (reset_icon_buffer);
+			icon_file_monitor.cancel ();
+			icon_file_monitor = null;
 		}
 		
 		unowned DockSurface get_surface (int width, int height, DockSurface model)
@@ -366,14 +396,14 @@ namespace Plank.Items
 		 */
 		protected virtual void draw_icon (DockSurface surface)
 		{
-			Pixbuf? pbuf = ForcePixbuf;
+			Gdk.Pixbuf? pbuf = ForcePixbuf;
 			if (pbuf == null)
 				pbuf = DrawingService.load_icon (Icon, surface.Width, surface.Height);
 			else
 				pbuf = DrawingService.ar_scale (pbuf, surface.Width, surface.Height);
 			
 			unowned Cairo.Context cr = surface.Context;
-			cairo_set_source_pixbuf (cr, pbuf, (surface.Width - pbuf.width) / 2, (surface.Height - pbuf.height) / 2);
+			Gdk.cairo_set_source_pixbuf (cr, pbuf, (surface.Width - pbuf.width) / 2, (surface.Height - pbuf.height) / 2);
 			cr.paint ();
 		}
 		
@@ -400,10 +430,10 @@ namespace Plank.Items
 					|| (prop.flags & ParamFlags.CONSTRUCT_ONLY) != 0)
 					continue;
 				
-				var name = prop.get_name ();
+				unowned string name = prop.get_name ();
 				
 				// Do not copy these
-				if (name == "Provider")
+				if (name == "Container")
 				    continue;
 				
 				var type = prop.value_type;

@@ -15,11 +15,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Gee;
-
 using Plank.Factories;
-using Plank.Widgets;
-
 using Plank.Services;
 using Plank.Services.Windows;
 
@@ -41,7 +37,7 @@ namespace Plank.Items
 		
 		FileMonitor? items_monitor = null;
 		bool delay_items_monitor_handle = false;
-		ArrayList<GLib.File> queued_files = new ArrayList<GLib.File> ();
+		Gee.ArrayList<GLib.File> queued_files = new Gee.ArrayList<GLib.File> ();
 		
 		uint launcher_entry_dbus_signal_id = 0;
 		uint dbus_name_owner_changed_signal_id = 0;
@@ -60,11 +56,6 @@ namespace Plank.Items
 		{
 			// Make sure our launchers-directory exists
 			Paths.ensure_directory_exists (LaunchersDir);
-			
-			foreach (var item in load_items ())
-				add_item_without_signaling (item);
-			add_running_apps ();
-			update_visible_items ();
 			
 			Matcher.get_default ().application_opened.connect (app_opened);
 			
@@ -193,7 +184,7 @@ namespace Plank.Items
 				if (item_app != null && item_app == app)
 					return appitem;
 				
-				var launcher = appitem.Launcher;
+				unowned string launcher = appitem.Launcher;
 				if (launcher != "" && app_desktop_file != null && launcher == app_desktop_file)
 					return appitem;
 			}
@@ -228,7 +219,7 @@ namespace Plank.Items
 			if (uri == null || uri == "")
 				return;
 			
-			if (target != null && !internal_items.contains (target)) {
+			if (target != null && target != placeholder_item && !internal_items.contains (target)) {
 				critical ("Item '%s' does not exist in this DockItemProvider.", target.Text);
 				return;
 			}
@@ -242,47 +233,25 @@ namespace Plank.Items
 			delay_items_monitor ();
 			
 			var dockitem_file = Factory.item_factory.make_dock_item (uri, LaunchersDir);
-			if (dockitem_file == null)
+			if (dockitem_file == null) {
+				resume_items_monitor ();
 				return;
+			}
 			
-			var item = Factory.item_factory.make_item (dockitem_file);
-			add_item (item, target);
+			var element = Factory.item_factory.make_element (dockitem_file);
+			var item = (element as DockItem);
+			if (item != null)
+				add_item (item, target);
 			
 			resume_items_monitor ();
 		}
 		
-		protected virtual ArrayList<DockItem> load_items ()
+		/**
+		 * {@inheritDoc}
+		 */
+		public override void prepare ()
 		{
-			Paths.ensure_directory_exists (LaunchersDir);
-			
-			debug ("Loading dock items from '%s'", LaunchersDir.get_path ());
-			
-			var result = new ArrayList<DockItem> ();
-			
-			try {
-				var enumerator = LaunchersDir.enumerate_children (FileAttribute.STANDARD_NAME + "," + FileAttribute.STANDARD_IS_HIDDEN, 0);
-				FileInfo info;
-				while ((info = enumerator.next_file ()) != null)
-					if (file_is_dockitem (info)) {
-						var file = LaunchersDir.get_child (info.get_name ());
-						var item = Factory.item_factory.make_item (file);
-						
-						if (!item.is_valid ()) {
-							warning ("The launcher '%s' in dock item '%s' does not exist", item.Launcher, file.get_path ());
-							continue;
-						}
-						
-						result.add (item);
-					}
-			} catch (Error e) {
-				critical ("Error loading dock items from '%s'. (%s)", LaunchersDir.get_path () ?? "", e.message);
-			}
-			
-			return result;
-		}
-		
-		protected virtual void add_running_apps ()
-		{
+			// Match running applications to their available dock-items
 			foreach (var app in Matcher.get_default ().active_launchers ()) {
 				var found = item_for_application (app);
 				if (found != null)
@@ -290,8 +259,31 @@ namespace Plank.Items
 			}
 		}
 		
+		/**
+		 * Serializes the dockitem-filenames
+		 *
+		 * @return string containing all filesnames separated by ';;'
+		 */
+		public string get_item_list_string ()
+		{
+			var item_list = "";
+			foreach (var element in internal_items) {
+				unowned DockItem? item = (element as DockItem);
+				if (item != null && !(item is TransientDockItem) && item.DockItemFilename.length > 0) {
+					if (item_list.length > 0)
+						item_list += ";;";
+					item_list += item.DockItemFilename;
+				}
+			}
+			
+			return item_list;
+		}
+		
 		protected virtual void app_opened (Bamf.Application app)
 		{
+			// Make sure internal window-list of Wnck is most up to date
+			Wnck.Screen.get_default ().force_update ();
+			
 			var found = item_for_application (app);
 			if (found != null)
 				found.App = app;
@@ -318,8 +310,9 @@ namespace Plank.Items
 			foreach (var file in queued_files) {
 				var basename = file.get_basename ();
 				bool skip = false;
-				foreach (var item in internal_items) {
-					if (basename == item.DockItemFilename) {
+				foreach (var element in internal_items) {
+					unowned DockItem? item = (element as DockItem);
+					if (item != null && basename == item.DockItemFilename) {
 						skip = true;
 						break;
 					}
@@ -329,7 +322,11 @@ namespace Plank.Items
 					continue;
 				
 				Logger.verbose ("ApplicationDockItemProvider.process_queued_files ('%s')", basename);
-				var item = Factory.item_factory.make_item (file);
+				var element = Factory.item_factory.make_element (file);
+				var item = (element as DockItem);
+				if (item == null)
+					continue;
+				
 				if (item.is_valid ())
 					add_item (item);
 				else
@@ -354,9 +351,11 @@ namespace Plank.Items
 				return;
 			
 			// bail if an item already manages this dockitem-file
-			foreach (var item in internal_items)
-				if (f.get_basename () == item.DockItemFilename)
+			foreach (var element in internal_items) {
+				unowned DockItem? item = (element as DockItem);
+				if (item != null && f.get_basename () == item.DockItemFilename)
 					return;
+			}
 			
 			Logger.verbose ("ApplicationDockItemProvider.handle_items_dir_changed (processing '%s')", f.get_path ());
 			
@@ -366,21 +365,21 @@ namespace Plank.Items
 				process_queued_files ();
 		}
 		
-		protected override void item_signals_connect (DockItem item)
+		protected override void connect_element (DockElement element)
 		{
-			base.item_signals_connect (item);
+			base.connect_element (element);
 			
-			unowned ApplicationDockItem? appitem = (item as ApplicationDockItem);
+			unowned ApplicationDockItem? appitem = (element as ApplicationDockItem);
 			if (appitem != null) {
 				appitem.app_window_added.connect (handle_item_app_window_added);
 			}
 		}
 		
-		protected override void item_signals_disconnect (DockItem item)
+		protected override void disconnect_element (DockElement element)
 		{
-			base.item_signals_disconnect (item);
+			base.disconnect_element (element);
 			
-			unowned ApplicationDockItem? appitem = (item as ApplicationDockItem);
+			unowned ApplicationDockItem? appitem = (element as ApplicationDockItem);
 			if (appitem != null) {
 				appitem.app_window_added.disconnect (handle_item_app_window_added);
 			}
@@ -391,29 +390,12 @@ namespace Plank.Items
 			item_window_added (item);
 		}
 		
-		protected override void handle_item_deleted (DockItem item)
-		{
-			unowned Bamf.Application? app = null;
-			if (item is ApplicationDockItem)
-				app = (item as ApplicationDockItem).App;
-			
-			if (app == null || !app.is_running ()) {
-				remove_item (item);
-				return;
-			}
-			
-			var new_item = new TransientDockItem.with_application (app);
-			item.copy_values_to (new_item);
-			
-			replace_item (new_item, item);
-		}
-		
-		public override bool can_accept_drop (ArrayList<string> uris)
+		public override bool can_accept_drop (Gee.ArrayList<string> uris)
 		{
 			return false;
 		}
 		
-		public override bool accept_drop (ArrayList<string> uris)
+		public override bool accept_drop (Gee.ArrayList<string> uris)
 		{
 			return false;
 		}
@@ -438,7 +420,6 @@ namespace Plank.Items
 				return;
 			
 			// Reset item since there is no new NameOwner
-			unowned TransientDockItem? transient_item = null;
 			foreach (var item in internal_items) {
 				unowned ApplicationDockItem? app_item = item as ApplicationDockItem;
 				if (app_item == null)
@@ -448,23 +429,19 @@ namespace Plank.Items
 					continue;
 				
 				app_item.unity_reset ();
-				transient_item = item as TransientDockItem;
 				
-				item_state_changed ();
-				break;
+				// Remove item which only exists because of the presence of
+				// this removed LauncherEntry interface
+				unowned TransientDockItem? transient_item = item as TransientDockItem;
+				if (transient_item != null && transient_item.App == null)
+					remove_item (transient_item);
+				else
+					item_state_changed ();
 			}
-			
-			// Remove item which only exists because of the presence of
-			// this removed LauncherEntry interface
-			if (transient_item != null && transient_item.App == null)
-				remove_item (transient_item);
 		}
 		
-		void handle_update_request (string sender_name, Variant parameters)
+		void handle_update_request (string sender_name, Variant parameters, bool is_retry = false)
 		{
-			if (parameters == null)
-				return;
-			
 			if (!parameters.is_of_type (new VariantType ("(sa{sv})"))) {
 				warning ("Unity.handle_update_request (illegal payload signature '%s' from %s. expected '(sa{sv})')", parameters.get_type_string (), sender_name);
 				return;
@@ -476,18 +453,25 @@ namespace Plank.Items
 			
 			Logger.verbose ("Unity.handle_update_request (processing update for %s)", app_uri);
 			
-			ApplicationDockItem? current_item = null;
+			ApplicationDockItem? current_item = null, alternate_item = null;
 			foreach (var item in internal_items) {
 				unowned ApplicationDockItem? app_item = item as ApplicationDockItem;
 				if (app_item == null)
 					continue;
 				
-				if (app_item.get_unity_dbusname () == sender_name
-					|| app_item.get_unity_application_uri () == app_uri) {
+				// Prefer matching application-uri of available items
+				if (app_item.get_unity_application_uri () == app_uri) {
 					current_item = app_item;
 					break;
 				}
+				
+				if (app_item.get_unity_dbusname () == sender_name)
+					alternate_item = app_item;
 			}
+			
+			// Fallback to matching dbus-sender-name
+			if (current_item == null)
+				current_item = alternate_item;
 			
 			// Update our entry and trigger a redraw
 			if (current_item != null) {
@@ -501,7 +485,22 @@ namespace Plank.Items
 					remove_item (transient_item);
 				else
 					item_state_changed ();
-			} else if (HandlesTransients) {
+				
+				return;
+			}
+			
+			if (!is_retry) {
+				// Wait to let further update requests come in to catch the case where one application
+				// sends out multiple LauncherEntry-updates with different application-uris, e.g. Nautilus
+				Idle.add (() => {
+					handle_update_request (sender_name, parameters, true);
+					return false;
+				});
+				
+				return;
+			}
+			
+			if (!HandlesTransients) {
 				// Find a matching desktop-file and create new TransientDockItem for this LauncherEntry
 				var desktop_file = desktop_file_for_application_uri (app_uri);
 				if (desktop_file != null) {

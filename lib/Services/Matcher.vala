@@ -15,8 +15,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Gee;
-
 namespace Plank.Services.Windows
 {
 	/**
@@ -41,16 +39,16 @@ namespace Plank.Services.Windows
 			return matcher;
 		}
 		
-		HashSet<Bamf.View> pending_views = new HashSet<Bamf.View> ();
+		Gee.HashSet<Bamf.View> pending_views = new Gee.HashSet<Bamf.View> ();
 		Bamf.Matcher? bamf_matcher;
 		
 		private Matcher ()
 		{
 			bamf_matcher = Bamf.Matcher.get_default ();
-			bamf_matcher.active_application_changed.connect (handle_active_application_changed);
-			bamf_matcher.active_window_changed.connect (handle_active_window_changed);
-			bamf_matcher.view_opened.connect (handle_view_opened);
-			bamf_matcher.view_closed.connect (handle_view_closed);
+			bamf_matcher.active_application_changed.connect_after (handle_active_application_changed);
+			bamf_matcher.active_window_changed.connect_after (handle_active_window_changed);
+			bamf_matcher.view_opened.connect_after (handle_view_opened);
+			bamf_matcher.view_closed.connect_after (handle_view_closed);
 		}
 		
 		~Matcher ()
@@ -87,7 +85,7 @@ namespace Plank.Services.Windows
 		{
 			if (arg1 is Bamf.Application && !arg1.is_user_visible ()) {
 				pending_views.add (arg1);
-				arg1.user_visible_changed.connect (handle_view_user_visible_changed);
+				arg1.user_visible_changed.connect_after (handle_view_user_visible_changed);
 				return;
 			}
 			
@@ -110,10 +108,10 @@ namespace Plank.Services.Windows
 				application_closed ((Bamf.Application) arg1);
 		}
 		
-		public ArrayList<Bamf.Application> active_launchers ()
+		public Gee.ArrayList<Bamf.Application> active_launchers ()
 		{
 			var apps = bamf_matcher.get_running_applications ();
-			var list = new ArrayList<Bamf.Application> ();
+			var list = new Gee.ArrayList<Bamf.Application> ();
 			
 			warn_if_fail (apps != null);
 			if (apps == null)
@@ -142,7 +140,7 @@ namespace Plank.Services.Windows
 			return app;
 		}
 		
-		public void set_favorites (ArrayList<string> favs)
+		public void set_favorites (Gee.ArrayList<string> favs)
 		{
 			var paths = new string[favs.size];
 			

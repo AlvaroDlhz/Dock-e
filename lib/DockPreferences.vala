@@ -15,11 +15,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Gdk;
-using Gtk;
-
 using Plank.Services;
-using Plank.Widgets;
 
 namespace Plank
 {
@@ -50,7 +46,7 @@ namespace Plank
 		public string DockItems { get; set; }
 		
 		[Description(nick = "position", blurb = "The position for the dock on the monitor.  If 0, left.  If 1, right.  If 2, top.  If 3, bottom.")]
-		public PositionType Position { get; set; }
+		public Gtk.PositionType Position { get; set; }
 		
 		[Description(nick = "offset", blurb = "The dock's position offset from center (in percent).")]
 		public int Offset { get; set; }
@@ -58,14 +54,23 @@ namespace Plank
 		[Description(nick = "theme", blurb = "The name of the dock's theme to use.")]
 		public string Theme { get; set; }
 		
-		[Description(nick = "alignment", blurb = "The alignment for the dock on the monitor's edge.  If 0, panel-mode.  If 1, right-aligned.  If 2, left-aligned.  If 3, centered.")]
+		[Description(nick = "alignment", blurb = "The alignment for the dock on the monitor's edge.  If 0, panel-mode.  If 1, left-aligned.  If 2, right-aligned.  If 3, centered.")]
 		public Gtk.Align Alignment { get; set; }
 		
-		[Description(nick = "items-alignment", blurb = "The alignment of the items in this dock if panel-mode is used.  If 1, right-aligned.  If 2, left-aligned.  If 3, centered.")]
+		[Description(nick = "items-alignment", blurb = "The alignment of the items in this dock if panel-mode is used.  If 1, left-aligned.  If 2, right-aligned.  If 3, centered.")]
 		public Gtk.Align ItemsAlignment { get; set; }
 		
 		[Description(nick = "lock-items", blurb = "Whether to prevent drag'n'drop actions and lock items on the dock.")]
 		public bool LockItems { get; set; }
+		
+		[Description(nick = "pressure-reveal", blurb = "Whether to use pressure-based revealing of the dock if the support is available.")]
+		public bool PressureReveal { get; set; }
+		
+		[Description(nick = "pinned-only", blurb = "Whether to show only pinned applications. Useful for running more then one dock.")]
+		public bool PinnedOnly { get; set; }
+		
+		[Description(nick = "auto-pinning", blurb = "Whether to automatically pin an application if it seems useful to do.")]
+		public bool AutoPinning { get; set; }
 		
 		/**
 		 * {@inheritDoc}
@@ -108,12 +113,15 @@ namespace Plank
 			UnhideDelay = 0;
 			Monitor = -1;
 			DockItems = "";
-			Position = PositionType.BOTTOM;
+			Position = Gtk.PositionType.BOTTOM;
 			Offset = 0;
 			Theme = Plank.Drawing.Theme.DEFAULT_NAME;
 			Alignment = Gtk.Align.CENTER;
 			ItemsAlignment = Gtk.Align.CENTER;
 			LockItems = false;
+			PressureReveal = false;
+			PinnedOnly = false;
+			AutoPinning = true;
 		}
 		
 		/**
@@ -123,7 +131,7 @@ namespace Plank
 		 */
 		public int get_monitor ()
 		{
-			unowned Screen screen = Screen.get_default ();
+			unowned Gdk.Screen screen = Gdk.Screen.get_default ();
 			if (Monitor <= -1 || Monitor >= screen.get_n_monitors ())
 				return screen.get_primary_monitor ();
 			return Monitor;
@@ -154,7 +162,7 @@ namespace Plank
 		 */
 		public bool is_horizontal_dock ()
 		{
-			return (Position == PositionType.TOP || Position == PositionType.BOTTOM);
+			return (Position == Gtk.PositionType.TOP || Position == Gtk.PositionType.BOTTOM);
 		}
 		
 		/**
@@ -184,8 +192,8 @@ namespace Plank
 			case "Monitor":
 				if (Monitor < -1)
 					Monitor = -1;
-				else if (Monitor != -1 && Monitor >= Screen.get_default ().get_n_monitors ())
-					Monitor = Screen.get_default ().get_primary_monitor ();
+				else if (Monitor != -1 && Monitor >= Gdk.Screen.get_default ().get_n_monitors ())
+					Monitor = Gdk.Screen.get_default ().get_primary_monitor ();
 				break;
 			
 			case "DockItems":
@@ -215,6 +223,15 @@ namespace Plank
 				break;
 			
 			case "LockItems":
+				break;
+			
+			case "PressureReveal":
+				break;
+			
+			case "PinnedOnly":
+				break;
+			
+			case "AutoPinning":
 				break;
 			}
 		}

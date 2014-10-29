@@ -338,7 +338,7 @@ namespace Plank.Services
 				file.load_from_file (backing_file.get_path () ?? "", 0);
 				
 				foreach (var prop in get_class ().list_properties ()) {
-					var group_name = prop.owner_type.name ();
+					unowned string group_name = prop.owner_type.name ();
 					
 					if (!file.has_group (group_name) || !file.has_key (group_name, prop.name)) {
 						warning ("Missing key '%s' for group '%s' in preferences file '%s' - using default value", prop.name, group_name, backing_file.get_path () ?? "");
@@ -391,15 +391,15 @@ namespace Plank.Services
 							if (old_val == new_val)
 								continue;
 							@set (prop.name, new_val);
-						} else if (type.is_a (typeof (Drawing.Color))) {
+						} else if (type.is_a (typeof (Drawing.Color)) || type.is_a (typeof (Gdk.RGBA))) {
 							var val = Value (type);
 							get_property (prop.name, ref val);
 							Drawing.Color* old_val = val.get_boxed ();
-							var old_val_string = old_val.to_string ();
+							var old_val_string = old_val.to_prefs_string ();
 							var new_val_string = file.get_string (group_name, prop.name);
 							if (old_val_string == new_val_string)
 								continue;
-							var new_val = Drawing.Color.from_string (new_val_string);
+							var new_val = Drawing.Color.from_prefs_string (new_val_string);
 							val.set_boxed (&new_val);
 							set_property (prop.name, val);
 						} else if (type.is_a (typeof (PrefsSerializable))) {
@@ -459,7 +459,7 @@ namespace Plank.Services
 			} catch { }
 			
 			foreach (var prop in get_class ().list_properties ()) {
-				var group_name = prop.owner_type.name ();
+				unowned string group_name = prop.owner_type.name ();
 				var type = prop.value_type;
 				
 				if (type == typeof (int)) {
@@ -486,11 +486,11 @@ namespace Plank.Services
 					int new_val;
 					@get (prop.name, out new_val);
 					file.set_integer (group_name, prop.name, new_val);
-				} else if (type.is_a (typeof (Drawing.Color))) {
+				} else if (type.is_a (typeof (Drawing.Color)) || type.is_a (typeof (Gdk.RGBA))) {
 					var val = Value (type);
 					get_property (prop.name, ref val);
 					Drawing.Color* color = val.get_boxed ();
-					file.set_string (group_name, prop.name, (color.to_string ()));
+					file.set_string (group_name, prop.name, (color.to_prefs_string ()));
 				} else if (type.is_a (typeof (PrefsSerializable))) {
 					var val = Value (type);
 					get_property (prop.name, ref val);
