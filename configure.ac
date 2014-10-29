@@ -2,7 +2,7 @@
 m4_define([plank_released], [1])
 
 m4_define([plank_major_version], [0])
-m4_define([plank_minor_version], [6])
+m4_define([plank_minor_version], [7])
 m4_define([plank_micro_version], [1])
 m4_define([plank_nano_version], [0])
 
@@ -33,6 +33,10 @@ AC_INIT([plank], plank_version,
         [https://launchpad.net/plank])
 AC_DEFINE(RELEASE_NAME, "Stupidly simple.", Codename of this release)
 AC_DEFINE(VERSION_INFO, m4_if(plank_released, [1], "Release", "Development"), Version info for package)
+AC_DEFINE(VERSION_MAJOR, [plank_major_version], Major version of this package)
+AC_DEFINE(VERSION_MINOR, [plank_minor_version], Minor version of this package)
+AC_DEFINE(VERSION_MICRO, [plank_micro_version], Micro version of this package)
+AC_DEFINE(VERSION_NANO, [plank_nano_version], Nano version of this package)
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
@@ -68,6 +72,14 @@ AC_SUBST([LT_AGE])
 
 PLANK_MAJOR_MINOR_VERSION=plank_major_minor_version
 AC_SUBST([PLANK_MAJOR_MINOR_VERSION])
+PLANK_MAJOR_VERSION=plank_major_version
+AC_SUBST([PLANK_MAJOR_VERSION])
+PLANK_MINOR_VERSION=plank_minor_version
+AC_SUBST([PLANK_MINOR_VERSION])
+PLANK_MICRO_VERSION=plank_micro_version
+AC_SUBST([PLANK_MICRO_VERSION])
+PLANK_NANO_VERSION=plank_nano_version
+AC_SUBST([PLANK_NANO_VERSION])
 
 API_VERSION=0.3
 AC_SUBST([API_VERSION])
@@ -76,12 +88,11 @@ AC_SUBST([API_VERSION])
 # -----------------------------------------------------------
 # Vala
 # -----------------------------------------------------------
-VALA_MIN_VERSION=0.16.0
+VALA_MIN_VERSION=0.22.0
 
-AM_PROG_VALAC([$VALA_MIN_VERSION])
-if test "x$VALAC" = "x"; then
-    AC_MSG_ERROR([Vala requested but valac >= $VALA_MIN_VERSION is not installed])
-fi
+AM_PROG_VALAC([$VALA_MIN_VERSION],
+    [],
+    [AC_MSG_ERROR([valac >= $VALA_MIN_VERSION is required])])
 
 AC_PATH_PROG([VAPIGEN], [vapigen], [])
 if test "x$VAPIGEN" = "x"; then
@@ -177,6 +188,26 @@ else
 fi
 AM_CONDITIONAL([HAVE_GEE_0_8], [test "x$enable_gee_0_8" = "xyes"])
 AC_SUBST(GEE_DEPEND)
+
+# Support barrier-supported unhiding using Xinput 2.3
+XFIXES_MIN_VERSION=5.0
+XINPUT_MIN_VERSION=1.6.99.1
+XINPUT_PKGS="xi >= $XINPUT_MIN_VERSION xfixes >= $XFIXES_MIN_VERSION"
+AC_ARG_ENABLE([barriers],
+              AS_HELP_STRING([--enable-barriers],
+                             [Enable use of barriers]),
+              [enable_barriers=$enableval],
+              [enable_barriers=yes])
+AC_CHECK_LIB([Xi], [XIBarrierReleasePointer], [enable_xinput23=yes], [enable_xinput23=no])
+AC_CHECK_LIB([Xfixes], [XFixesDestroyPointerBarrier], [enable_xfixes50=yes], [enable_xfixes50=no])
+if test "x$enable_barriers" = "xyes" -a "x$enable_xinput23" = "xyes" -a "x$enable_xfixes50" = "xyes" ; then
+    PLANK_CORE_OPTIONAL_PKGS="$PLANK_CORE_OPTIONAL_PKGS $XINPUT_PKGS"
+    PLANK_CORE_VALA_PKGS="$PLANK_CORE_VALA_PKGS --pkg xi --pkg xfixes"
+    VALAFLAGS="$VALAFLAGS --define HAVE_BARRIERS"
+else
+	enable_barriers=no
+fi
+AM_CONDITIONAL([HAVE_BARRIERS], [test "x$enable_barriers" = "xyes" -a "x$enable_xinput23" = "xyes" -a "x$enable_xfixes50" = "xyes"])
 
 # Support dynamic quicklists provided with dbusmenu
 DBUSMENU_MIN_VERSION=0.4
@@ -300,6 +331,7 @@ data/themes/Makefile
 lib/Makefile
 lib/plank.deps
 lib/plank.pc
+lib/Version.vala
 src/Makefile
 docs/Makefile
 po/Makefile.in
@@ -320,6 +352,7 @@ ${PACKAGE} ${VERSION}
     Use gee-0.8.................:  ${enable_gee_0_8}
     Dbusmenu support............:  ${enable_dbusmenu}
     HiDPI support...............:  ${enable_hidpi}
+    XInput Barriers support.....:  ${enable_barriers}
 
     Apport support..............:  ${enable_apport}
 

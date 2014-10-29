@@ -15,10 +15,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Gdk;
-using Gee;
-using Gtk;
-
 using Plank.Drawing;
 
 namespace Plank.Items
@@ -76,7 +72,7 @@ namespace Plank.Items
 		 * @param event the event to map
 		 * @return the PopupButton representation of the event
 		 */
-		public static PopupButton from_event_button (EventButton event)
+		public static PopupButton from_event_button (Gdk.EventButton event)
 		{
 			switch (event.button) {
 			default:
@@ -101,6 +97,11 @@ namespace Plank.Items
 		 * Signal fired when the dock element needs redrawn.
 		 */
 		public signal void needs_redraw ();
+		
+		/**
+		 * The dock element's container which it is added too (if any).
+		 */
+		public DockContainer? Container { get; set; default = null; }
 		
 		/**
 		 * The dock item's text.
@@ -135,42 +136,42 @@ namespace Plank.Items
 		/**
 		 * The time the item was added to the dock.
 		 */
-		public DateTime AddTime { get; set; default = new DateTime.from_unix_utc (0); }
+		public int64 AddTime { get; set; }
 		
 		/**
 		 * The time the item was removed from the dock.
 		 */
-		public DateTime RemoveTime { get; set; default = new DateTime.from_unix_utc (0); }
+		public int64 RemoveTime { get; set; }
 		
 		/**
 		 * The last time the item was clicked.
 		 */
-		public DateTime LastClicked { get; protected set; default = new DateTime.from_unix_utc (0); }
+		public int64 LastClicked { get; protected set; }
 		
 		/**
 		 * The last time the item was hovered.
 		 */
-		public DateTime LastHovered { get; protected set; default = new DateTime.from_unix_utc (0); }
+		public int64 LastHovered { get; protected set; }
 		
 		/**
 		 * The last time the item was scrolled.
 		 */
-		public DateTime LastScrolled { get; protected set; default = new DateTime.from_unix_utc (0); }
+		public int64 LastScrolled { get; protected set; }
 		
 		/**
 		 * The last time the item changed its urgent status.
 		 */
-		public DateTime LastUrgent { get; protected set; default = new DateTime.from_unix_utc (0); }
+		public int64 LastUrgent { get; protected set; }
 		
 		/**
 		 * The last time the item changed its active status.
 		 */
-		public DateTime LastActive { get; protected set; default = new DateTime.from_unix_utc (0); }
+		public int64 LastActive { get; protected set; }
 		
 		/**
 		 * The last time the item changed its position.
 		 */
-		public DateTime LastMove { get; protected set; default = new DateTime.from_unix_utc (0); }
+		public int64 LastMove { get; protected set; }
 		
 		/**
 		 * Called when an item is clicked on.
@@ -178,10 +179,10 @@ namespace Plank.Items
 		 * @param button the button clicked
 		 * @param mod the modifiers
 		 */
-		public void clicked (PopupButton button, ModifierType mod)
+		public void clicked (PopupButton button, Gdk.ModifierType mod)
 		{
 			ClickedAnimation = on_clicked (button, mod);
-			LastClicked = new DateTime.now_utc ();
+			LastClicked = GLib.get_monotonic_time ();
 		}
 		
 		/**
@@ -191,7 +192,7 @@ namespace Plank.Items
 		 * @param mod the modifiers
 		 * @return which type of animation to trigger
 		 */
-		protected virtual Animation on_clicked (PopupButton button, ModifierType mod)
+		protected virtual Animation on_clicked (PopupButton button, Gdk.ModifierType mod)
 		{
 			return Animation.NONE;
 		}
@@ -202,7 +203,7 @@ namespace Plank.Items
 		public void hovered ()
 		{
 			HoveredAnimation = on_hovered ();
-			LastHovered = new DateTime.now_utc ();
+			LastHovered = GLib.get_monotonic_time ();
 		}
 		
 		/**
@@ -219,7 +220,7 @@ namespace Plank.Items
 		 * @param direction the scroll direction
 		 * @param mod the modifiers
 		 */
-		public void scrolled (ScrollDirection direction, ModifierType mod)
+		public void scrolled (Gdk.ScrollDirection direction, Gdk.ModifierType mod)
 		{
 			ScrolledAnimation = on_scrolled (direction, mod);
 		}
@@ -231,9 +232,9 @@ namespace Plank.Items
 		 * @param mod the modifiers
 		 * @return which type of animation to trigger
 		 */
-		protected virtual Animation on_scrolled (ScrollDirection direction, ModifierType mod)
+		protected virtual Animation on_scrolled (Gdk.ScrollDirection direction, Gdk.ModifierType mod)
 		{
-			LastScrolled = new DateTime.now_utc ();
+			LastScrolled = GLib.get_monotonic_time ();
 			return Animation.NONE;
 		}
 		
@@ -242,9 +243,9 @@ namespace Plank.Items
 		 *
 		 * @return the item's menu items
 		 */
-		public virtual ArrayList<Gtk.MenuItem> get_menu_items ()
+		public virtual Gee.ArrayList<Gtk.MenuItem> get_menu_items ()
 		{
-			return new ArrayList<Gtk.MenuItem> ();
+			return new Gee.ArrayList<Gtk.MenuItem> ();
 		}
 		
 		/**
@@ -263,7 +264,7 @@ namespace Plank.Items
 		 * @param uris the URIs to check
 		 * @return if the item accepts a drop of the given URIs
 		 */
-		public virtual bool can_accept_drop (ArrayList<string> uris)
+		public virtual bool can_accept_drop (Gee.ArrayList<string> uris)
 		{
 			return false;
 		}
@@ -274,7 +275,7 @@ namespace Plank.Items
 		 * @param uris the URIs to accept
 		 * @return if the item accepted a drop of the given URIs
 		 */
-		public virtual bool accept_drop (ArrayList<string> uris)
+		public virtual bool accept_drop (Gee.ArrayList<string> uris)
 		{
 			return false;
 		}
@@ -302,6 +303,11 @@ namespace Plank.Items
 		}
 		
 		/**
+		 * Resets the buffers for this element.
+		 */
+		public abstract void reset_buffers ();
+		
+		/**
 		 * Creates a new menu item.
 		 *
 		 * @param title the title of the menu item
@@ -315,9 +321,9 @@ namespace Plank.Items
 				return new Gtk.MenuItem.with_mnemonic (title);
 			
 			int width, height;
-			icon_size_lookup (IconSize.MENU, out width, out height);
+			Gtk.icon_size_lookup (Gtk.IconSize.MENU, out width, out height);
 			
-			var item = new ImageMenuItem.with_mnemonic (title);
+			var item = new Gtk.ImageMenuItem.with_mnemonic (title);
 			item.set_image (new Gtk.Image.from_pixbuf (DrawingService.load_icon (icon, width, height)));
 			if (force_show_icon)
 				item.always_show_image = true;
@@ -336,12 +342,12 @@ namespace Plank.Items
 		protected static Gtk.MenuItem create_menu_item_with_pixbuf (string title, owned Gdk.Pixbuf pixbuf, bool force_show_icon = false)
 		{
 			int width, height;
-			icon_size_lookup (IconSize.MENU, out width, out height);
+			Gtk.icon_size_lookup (Gtk.IconSize.MENU, out width, out height);
 			
 			if (width != pixbuf.width || height != pixbuf.height)
 				pixbuf = DrawingService.ar_scale (pixbuf, width, height);
 			
-			var item = new ImageMenuItem.with_mnemonic (title);
+			var item = new Gtk.ImageMenuItem.with_mnemonic (title);
 			item.set_image (new Gtk.Image.from_pixbuf (pixbuf));
 			if (force_show_icon)
 				item.always_show_image = true;

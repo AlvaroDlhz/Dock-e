@@ -25,30 +25,91 @@ namespace Plank.Factories
 	 */
 	public class ItemFactory : GLib.Object
 	{
+		const string[] DEFAULT_APP_WEB = {
+			"file:///usr/share/applications/chromium-browser.desktop",
+			"file:///usr/share/applications/google-chrome.desktop",
+			"file:///usr/share/applications/firefox.desktop",
+			"file:///usr/share/applications/epiphany.desktop",
+			"file:///usr/share/applications/midori.desktop",
+			"file:///usr/share/applications/kde4/konqbrowser.desktop"
+		};
+		
+		const string[] DEFAULT_APP_MAIL = {
+			"file:///usr/share/applications/thunderbird.desktop",
+			"file:///usr/share/applications/evolution.desktop",
+			"file:///usr/share/applications/geary.desktop",
+			"file:///usr/share/applications/kde4/KMail2.desktop"
+		};
+		
+		const string[] DEFAULT_APP_CALENDAR = {
+			"file:///usr/share/applications/thunderbird.desktop",
+			"file:///usr/share/applications/evolution.desktop",
+			"file:///usr/share/applications/maya-calendar.desktop",
+			"file:///usr/share/applications/kde4/korganizer.desktop"
+		};
+		
+		const string[] DEFAULT_APP_TERMINAL = {
+			"file:///usr/share/applications/terminator.desktop",
+			"file:///usr/share/applications/gnome-terminal.desktop",
+			"file:///usr/share/applications/pantheon-terminal.desktop",
+			"file:///usr/share/applications/kde4/konsole.desktop"
+		};
+		
+		const string[] DEFAULT_APP_AUDIO = {
+			"file:///usr/share/applications/exaile.desktop",
+			"file:///usr/share/applications/songbird.desktop",
+			"file:///usr/share/applications/rhythmbox.desktop",
+			"file:///usr/share/applications/noise.desktop",
+			"file:///usr/share/applications/banshee-1.desktop",
+			"file:///usr/share/applications/kde4/amarok.desktop"
+		};
+		
+		const string[] DEFAULT_APP_VIDEO = {
+			"file:///usr/share/applications/vlc.desktop",
+			"file:///usr/share/applications/totem.desktop",
+			"file:///usr/share/applications/audience.desktop",
+			"file:///usr/share/applications/kde4/amarok.desktop"
+		};
+		
+		const string[] DEFAULT_APP_PHOTO = {
+			"file:///usr/share/applications/eog.desktop",
+			"file:///usr/share/applications/gnome-photos.desktop",
+			"file:///usr/share/applications/org.gnome.Photos.desktop",
+			"file:///usr/share/applications/shotwell.desktop",
+			"file:///usr/share/applications/kde4/digikam.desktop"
+		};
+		
+		const string[] DEFAULT_APP_MESSENGER = {
+			"file:///usr/share/applications/pidgin.desktop",
+			"file:///usr/share/applications/empathy.desktop",
+			"file:///usr/share/applications/birdie.desktop",
+			"file:///usr/share/applications/kde4/kopete.desktop"
+		};
+		
 		/**
 		 * The directory containing .dockitem files.
 		 */
 		public File launchers_dir;
 		
 		/**
-		 * Creates a new {@link Items.DockItem} from a .dockitem.
+		 * Creates a new {@link Items.DockElement} from a .dockitem.
 		 *
 		 * @param file the {@link GLib.File} of .dockitem file to parse
-		 * @return the new {@link Items.DockItem} created
+		 * @return the new {@link Items.DockElement} created
 		 */
-		public virtual DockItem make_item (GLib.File file)
+		public virtual DockElement make_element (GLib.File file)
 		{
-			return default_make_item (file, get_launcher_from_dockitem (file));
+			return default_make_element (file, get_launcher_from_dockitem (file));
 		}
 		
 		/**
-		 * Creates a new {@link Items.DockItem} for a launcher parsed from a .dockitem.
+		 * Creates a new {@link Items.DockElement} for a launcher parsed from a .dockitem.
 		 *
 		 * @param file the {@link GLib.File} of .dockitem file that was parsed
 		 * @param launcher the launcher name from the .dockitem
-		 * @return the new {@link Items.DockItem} created
+		 * @return the new {@link Items.DockElement} created
 		 */
-		protected DockItem default_make_item (GLib.File file, string launcher)
+		protected DockElement default_make_element (GLib.File file, string launcher)
 		{
 			if (Factory.main.is_launcher_for_dock (launcher))
 				return new PlankDockItem.with_dockitem_file (file);
@@ -74,21 +135,104 @@ namespace Plank.Factories
 				return "";
 			}
 		}
+			
+		/**
+		 * Creates a list of Dockitems based on .dockitem files found in the given source_dir.
+		 *
+		 * @param source_dir the folder where to load .dockitem from
+		 * @param ordering a ";;"-separated string to be used to order the loaded DockItems
+		 * @return the new List of DockItems
+		 */
+		public Gee.ArrayList<DockItem> load_items (GLib.File source_dir, string? ordering = null)
+		{
+			var result = new Gee.ArrayList<DockItem> ();
+			
+			if (!source_dir.query_exists ()) {
+				critical ("Given folder '%s' does not exist.", source_dir.get_path ());
+				return result;
+			}
+
+			debug ("Loading dock items from '%s'", source_dir.get_path ());
+			
+			try {
+				var enumerator = source_dir.enumerate_children (FileAttribute.STANDARD_NAME + "," + FileAttribute.STANDARD_IS_HIDDEN, 0);
+				FileInfo info;
+				while ((info = enumerator.next_file ()) != null) {
+					if (info.get_is_hidden () || !info.get_name ().has_suffix (".dockitem"))
+						continue;
+					
+					var file = source_dir.get_child (info.get_name ());
+					var element = make_element (file);
+					var item = (element as DockItem);
+					if (item == null)
+						continue;
+					
+					if (!item.is_valid ()) {
+						warning ("The launcher '%s' in dock item '%s' does not exist", item.Launcher, file.get_path ());
+						continue;
+					}
+					
+					result.add (item);
+				}
+			} catch (Error e) {
+				critical ("Error loading dock items from '%s'. (%s)", source_dir.get_path () ?? "", e.message);
+			}
+			
+			if (ordering == null)
+				return result;
+			
+			var existing_items = new Gee.ArrayList<DockItem> ();
+			var new_items = new Gee.ArrayList<DockItem> ();
+			
+			foreach (var item in result) {
+				if (ordering.contains (item.DockItemFilename))
+					existing_items.add (item);
+				else
+					new_items.add (item);
+			}
+			
+			result.clear ();
+			
+			// add saved dockitems based on their serialized order
+			var dockitems = ordering.split (";;");
+			foreach (unowned string dockitem in dockitems)
+				foreach (var item in existing_items)
+					if (dockitem == item.DockItemFilename) {
+						result.add (item);
+						break;
+					}
+			
+			// add new dockitems
+			foreach (var item in new_items)
+				result.add (item);
+			
+			return result;
+		}
 		
 		bool make_default_gnome_items ()
 		{
-			var browser = AppInfo.get_default_for_type ("text/html", false);
+			var browser = AppInfo.get_default_for_type ("x-scheme-handler/http", false);
+			var mail = AppInfo.get_default_for_type ("x-scheme-handler/mailto", false);
 			// FIXME dont know how to get terminal...
 			var terminal = AppInfo.get_default_for_uri_scheme ("ssh");
 			var calendar = AppInfo.get_default_for_type ("text/calendar", false);
-			var media = AppInfo.get_default_for_type ("video/mpeg", false);
-			
-			if (browser == null && terminal == null && calendar == null && media == null)
+			var audio = AppInfo.get_default_for_type ("audio/x-vorbis+ogg", false);
+			var video = AppInfo.get_default_for_type ("video/x-ogm+ogg", false);
+			var photo = AppInfo.get_default_for_type ("image/jpeg", false);
+
+			if (browser == null && mail == null && calendar == null && terminal == null
+				&& audio == null && video == null && photo == null)
 				return false;
 			
 			if (browser != null)
 				try {
 					make_dock_item (Filename.to_uri (new DesktopAppInfo (browser.get_id ()).get_filename ()));
+				} catch (ConvertError e) {
+					warning (e.message);
+				}
+			if (mail != null)
+				try {
+					make_dock_item (Filename.to_uri (new DesktopAppInfo (mail.get_id ()).get_filename ()));
 				} catch (ConvertError e) {
 					warning (e.message);
 				}
@@ -104,9 +248,21 @@ namespace Plank.Factories
 				} catch (ConvertError e) {
 					warning (e.message);
 				}
-			if (media != null)
+			if (audio != null)
 				try {
-					make_dock_item (Filename.to_uri (new DesktopAppInfo (media.get_id ()).get_filename ()));
+					make_dock_item (Filename.to_uri (new DesktopAppInfo (audio.get_id ()).get_filename ()));
+				} catch (ConvertError e) {
+					warning (e.message);
+				}
+			if (video != null)
+				try {
+					make_dock_item (Filename.to_uri (new DesktopAppInfo (video.get_id ()).get_filename ()));
+				} catch (ConvertError e) {
+					warning (e.message);
+				}
+			if (photo != null)
+				try {
+					make_dock_item (Filename.to_uri (new DesktopAppInfo (photo.get_id ()).get_filename ()));
 				} catch (ConvertError e) {
 					warning (e.message);
 				}
@@ -126,27 +282,39 @@ namespace Plank.Factories
 				return;
 			
 			// add browser
-			if (make_dock_item ("file:///usr/share/applications/chromium-browser.desktop") == null)
-				if (make_dock_item ("file:///usr/share/applications/google-chrome.desktop") == null)
-					if (make_dock_item ("file:///usr/share/applications/firefox.desktop") == null)
-						if (make_dock_item ("file:///usr/share/applications/epiphany.desktop") == null)
-							make_dock_item ("file:///usr/share/applications/kde4/konqbrowser.desktop");
+			foreach (unowned string uri in DEFAULT_APP_WEB)
+				if (make_dock_item (uri) != null)
+					break;
+			
+			// add mail-client
+			foreach (unowned string uri in DEFAULT_APP_MAIL)
+				if (make_dock_item (uri) != null)
+					break;
 			
 			// add terminal
-			if (make_dock_item ("file:///usr/share/applications/terminator.desktop") == null)
-				if (make_dock_item ("file:///usr/share/applications/gnome-terminal.desktop") == null)
-					make_dock_item ("file:///usr/share/applications/kde4/konsole.desktop");
+			foreach (unowned string uri in DEFAULT_APP_TERMINAL)
+				if (make_dock_item (uri) != null)
+					break;
 			
-			// add music player
-			if (make_dock_item ("file:///usr/share/applications/exaile.desktop") == null)
-				if (make_dock_item ("file:///usr/share/applications/songbird.desktop") == null)
-					if (make_dock_item ("file:///usr/share/applications/rhythmbox.desktop") == null)
-						if (make_dock_item ("file:///usr/share/applications/banshee-1.desktop") == null)
-							make_dock_item ("file:///usr/share/applications/kde4/amarok.desktop");
+			// add audio player
+			foreach (unowned string uri in DEFAULT_APP_AUDIO)
+				if (make_dock_item (uri) != null)
+					break;
+			
+			// add video player
+			foreach (unowned string uri in DEFAULT_APP_VIDEO)
+				if (make_dock_item (uri) != null)
+					break;
+			
+			// add photo viewer
+			foreach (unowned string uri in DEFAULT_APP_PHOTO)
+				if (make_dock_item (uri) != null)
+					break;
 			
 			// add IM client
-			if (make_dock_item ("file:///usr/share/applications/pidgin.desktop") == null)
-				make_dock_item ("file:///usr/share/applications/empathy.desktop");
+			foreach (unowned string uri in DEFAULT_APP_MESSENGER)
+				if (make_dock_item (uri) != null)
+					break;
 		}
 		
 		/**
@@ -170,7 +338,9 @@ namespace Plank.Factories
 				
 				try {
 					// find a unique file name, based on the name of the launcher
-					var launcher_base = (launcher_file.get_basename () ?? "unknown").split (".") [0];
+					var basename = (launcher_file.get_basename () ?? "unknown");
+					var index_of_last_dot = basename.last_index_of (".");
+					var launcher_base = (index_of_last_dot >= 0 ? basename.slice (0, index_of_last_dot) : basename);
 					var dockitem = launcher_base + ".dockitem";
 					var dockitem_file = target_dir.get_child (dockitem);
 					var counter = 1;

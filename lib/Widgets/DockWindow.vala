@@ -15,14 +15,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Cairo;
-using Gdk;
-using Gee;
-using Gtk;
-
 using Plank.Items;
-using Plank.Drawing;
-using Plank.Factories;
 using Plank.Services;
 using Plank.Services.Windows;
 
@@ -83,7 +76,7 @@ namespace Plank.Widgets
 		 */
 		public DockWindow (DockController controller)
 		{
-			GLib.Object (controller: controller, type: Gtk.WindowType.TOPLEVEL, type_hint: WindowTypeHint.DOCK);
+			GLib.Object (controller: controller, type: Gtk.WindowType.TOPLEVEL, type_hint: Gdk.WindowTypeHint.DOCK);
 		}
 		
 		construct
@@ -95,12 +88,12 @@ namespace Plank.Widgets
 			
 			stick ();
 			
-			add_events (EventMask.BUTTON_PRESS_MASK |
-						EventMask.BUTTON_RELEASE_MASK |
-						EventMask.ENTER_NOTIFY_MASK |
-						EventMask.LEAVE_NOTIFY_MASK |
-						EventMask.POINTER_MOTION_MASK |
-						EventMask.SCROLL_MASK);
+			add_events (Gdk.EventMask.BUTTON_PRESS_MASK |
+						Gdk.EventMask.BUTTON_RELEASE_MASK |
+						Gdk.EventMask.ENTER_NOTIFY_MASK |
+						Gdk.EventMask.LEAVE_NOTIFY_MASK |
+						Gdk.EventMask.POINTER_MOTION_MASK |
+						Gdk.EventMask.SCROLL_MASK);
 			
 			hover = new HoverWindow ();
 			
@@ -129,7 +122,7 @@ namespace Plank.Widgets
 		/**
 		 * {@inheritDoc}
 		 */
-		public override bool button_press_event (EventButton event)
+		public override bool button_press_event (Gdk.EventButton event)
 		{
 			// If the dock is hidden we should ignore it.
 			if (controller.hide_manager.Hidden)
@@ -150,7 +143,7 @@ namespace Plank.Widgets
 			
 			var button = PopupButton.from_event_button (event);
 			if ((button & PopupButton.RIGHT) == PopupButton.RIGHT
-				&& (HoveredItem == null || (event.state & ModifierType.CONTROL_MASK) == ModifierType.CONTROL_MASK))
+				&& (HoveredItem == null || (event.state & Gdk.ModifierType.CONTROL_MASK) == Gdk.ModifierType.CONTROL_MASK))
 				show_menu (event.button, true);
 			else if (HoveredItem != null && (HoveredItem.Button & button) == button)
 				show_menu (event.button, false);
@@ -172,7 +165,7 @@ namespace Plank.Widgets
 		/**
 		 * {@inheritDoc}
 		 */
-		public override bool button_release_event (EventButton event)
+		public override bool button_release_event (Gdk.EventButton event)
 		{
 			// If the dock is hidden we should ignore it.
 			if (controller.hide_manager.Hidden)
@@ -202,7 +195,7 @@ namespace Plank.Widgets
 		/**
 		 * {@inheritDoc}
 		 */
-		public override bool enter_notify_event (EventCrossing event)
+		public override bool enter_notify_event (Gdk.EventCrossing event)
 		{
 			update_hovered ((int) event.x, (int) event.y);
 			
@@ -212,7 +205,7 @@ namespace Plank.Widgets
 		/**
 		 * {@inheritDoc}
 		 */
-		public override bool leave_notify_event (EventCrossing event)
+		public override bool leave_notify_event (Gdk.EventCrossing event)
 		{
 			// ignore this event if it was sent explicitly
 			if ((bool) event.send_event)
@@ -230,7 +223,7 @@ namespace Plank.Widgets
 		/**
 		 * {@inheritDoc}
 		 */
-		public override bool motion_notify_event (EventMotion event)
+		public override bool motion_notify_event (Gdk.EventMotion event)
 		{
 			update_hovered ((int) event.x, (int) event.y);
 			return true;
@@ -239,7 +232,7 @@ namespace Plank.Widgets
 		/**
 		 * {@inheritDoc}
 		 */
-		public override void drag_begin (DragContext context)
+		public override void drag_begin (Gdk.DragContext context)
 		{
 			long_press_active = false;
 			if (long_press_timer > 0) {
@@ -251,7 +244,7 @@ namespace Plank.Widgets
 		/**
 		 * {@inheritDoc}
 		 */
-		public override bool scroll_event (EventScroll event)
+		public override bool scroll_event (Gdk.EventScroll event)
 		{
 			// If the dock is hidden we should ignore it.
 			if (controller.hide_manager.Hidden)
@@ -264,10 +257,10 @@ namespace Plank.Widgets
 			if (event.direction >= 4)
 				return true;
 			
-			if ((event.state & ModifierType.CONTROL_MASK) != 0) {
-				if (event.direction == ScrollDirection.UP)
+			if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
+				if (event.direction == Gdk.ScrollDirection.UP)
 					controller.prefs.increase_icon_size ();
-				else if (event.direction == ScrollDirection.DOWN)
+				else if (event.direction == Gdk.ScrollDirection.DOWN)
 					controller.prefs.decrease_icon_size ();
 				
 				return true;
@@ -284,7 +277,7 @@ namespace Plank.Widgets
 		/**
 		 * {@inheritDoc}
 		 */
-		public override bool draw (Context cr)
+		public override bool draw (Cairo.Context cr)
 		{
 			if (dock_is_starting) {
 				debug ("dock window loaded");
@@ -309,7 +302,7 @@ namespace Plank.Widgets
 		/**
 		 * {@inheritDoc}
 		 */
-		public override bool map_event (EventAny event)
+		public override bool map_event (Gdk.EventAny event)
 		{
 			set_struts ();
 			
@@ -408,11 +401,11 @@ namespace Plank.Widgets
 			
 			// check if there already was a hovered-item and if it is still hovered to speed up things
 			if (HoveredItem != null) {
-				rect = position_manager.item_hover_region (HoveredItem);
+				rect = position_manager.get_item_hover_region (HoveredItem);
 				if (y >= rect.y && y < rect.y + rect.height && x >= rect.x && x < rect.x + rect.width)
 					// Do not allow the hovered-item to be the drag-item
 					if (drag_item == HoveredItem) {
-						set_hovered_provider (HoveredItem.Provider);
+						set_hovered_provider (HoveredItem.Container as DockItemProvider);
 						set_hovered (null);
 						return false;
 					} else {
@@ -430,16 +423,20 @@ namespace Plank.Widgets
 			
 			bool found_hovered_provider = false;
 			
-			foreach (var provider in controller.Providers) {
-				rect = position_manager.provider_hover_region (provider);
+			foreach (var element in controller.Elements) {
+				unowned DockItemProvider? provider = (element as DockItemProvider);
+				if (provider == null)
+					continue;
+				
+				rect = position_manager.get_item_hover_region (provider);
 				if (y < rect.y || y >= rect.y + rect.height || x < rect.x || x >= rect.x + rect.width)
 					continue;
 				
 				set_hovered_provider (provider);
 				found_hovered_provider = true;
 				
-				foreach (var item in provider.Items) {
-					rect = position_manager.item_hover_region (item);
+				foreach (var item in provider.Elements) {
+					rect = position_manager.get_item_hover_region (item);
 					if (y < rect.y || y >= rect.y + rect.height || x < rect.x || x >= rect.x + rect.width)
 						continue;
 					
@@ -447,7 +444,7 @@ namespace Plank.Widgets
 					if (drag_item == item)
 						break;
 				
-					set_hovered (item);
+					set_hovered (item as DockItem);
 					return true;
 				}
 			}
@@ -464,7 +461,6 @@ namespace Plank.Widgets
 		public void update_size_and_position ()
 		{
 			unowned PositionManager position_manager = controller.position_manager;
-			position_manager.update_dock_position ();
 			
 			var x = position_manager.win_x;
 			var y = position_manager.win_y;
@@ -516,7 +512,6 @@ namespace Plank.Widgets
 				reposition_timer = 0;
 				
 				unowned PositionManager position_manager = controller.position_manager;
-				position_manager.update_dock_position ();
 				
 				var x = position_manager.win_x;
 				var y = position_manager.win_y;
@@ -600,7 +595,7 @@ namespace Plank.Widgets
 				menu = null;
 			}
 			
-			ArrayList<Gtk.MenuItem> items;
+			Gee.ArrayList<Gtk.MenuItem> items;
 			if (show_plank_menu) {
 				items = PlankDockItem.get_plank_menu_items ();
 				set_hovered_provider (null);
@@ -623,9 +618,9 @@ namespace Plank.Widgets
 			}
 			
 			if (show_plank_menu)
-				menu.popup (null, null, null, button, get_current_event_time ());
+				menu.popup (null, null, null, button, Gtk.get_current_event_time ());
 			else
-				menu.popup (null, null, position_menu, button, get_current_event_time ());
+				menu.popup (null, null, position_menu, button, Gtk.get_current_event_time ());
 		}
 		
 		/**
@@ -678,10 +673,10 @@ namespace Plank.Widgets
 			return_if_fail (cursor.width > 0);
 			return_if_fail (cursor.height > 0);
 			
-			RectangleInt rect = {cursor.x, cursor.y, cursor.width, cursor.height};
+			Cairo.RectangleInt rect = {cursor.x, cursor.y, cursor.width, cursor.height};
 			if (rect != input_rect) {
 				input_rect = rect;
-				get_window ().input_shape_combine_region (new Region.rectangle (rect), 0, 0);
+				get_window ().input_shape_combine_region (new Cairo.Region.rectangle (rect), 0, 0);
 			}
 		}
 		

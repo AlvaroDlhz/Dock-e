@@ -15,11 +15,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Cairo;
-using Gdk;
-using Gee;
-using Gtk;
-
 using Plank.Drawing;
 using Plank.Services;
 
@@ -33,7 +28,7 @@ namespace Plank.Items
 	 */
 	public class FileDockItem : DockItem
 	{
-		const string DEFAULT_ICON = "inode-directory";
+		const string DEFAULT_ICONS = "inode-directory;;folder";
 		
 		File OwnedFile { get; set; }
 		FileMonitor? dir_monitor;
@@ -77,7 +72,7 @@ namespace Plank.Items
 		{
 			stop_monitor ();
 			
-			Icon = DrawingService.get_icon_from_file (OwnedFile) ?? DEFAULT_ICON;
+			Icon = DrawingService.get_icon_from_file (OwnedFile) ?? DEFAULT_ICONS;
 			
 			if (!OwnedFile.is_native ()) {
 				Text = OwnedFile.get_uri ();
@@ -113,17 +108,30 @@ namespace Plank.Items
 			reset_icon_buffer ();
 		}
 		
+		bool has_default_icon_match ()
+		{
+			if (Icon == DEFAULT_ICONS)
+				return true;
+			
+			var default_icons = DEFAULT_ICONS.split (";;");
+			foreach (string icon in Icon.split (";;"))
+				if (icon in default_icons)
+					return true;
+			
+			return false;
+		}
+		
 		/**
 		 * {@inheritDoc}
 		 */
 		protected override void draw_icon (DockSurface surface)
 		{
-			if (!Icon.has_prefix (DEFAULT_ICON)) {
+			if (!has_default_icon_match ()) {
 				base.draw_icon (surface);
 				return;
 			}
 			
-			unowned Context cr = surface.Context;
+			unowned Cairo.Context cr = surface.Context;
 			var width = surface.Width;
 			var height = surface.Height;
 			var radius = 3 + 6 * height / (128 - 48);
@@ -138,7 +146,7 @@ namespace Plank.Items
 			cr.set_line_width (1);
 			cr.stroke_preserve ();
 			
-			var rg = new Pattern.radial (width / 2, height, height / 8, width / 2, height, height);
+			var rg = new Cairo.Pattern.radial (width / 2, height, height / 8, width / 2, height, height);
 			rg.add_color_stop_rgba (0, 0, 0, 0, 1);
 			rg.add_color_stop_rgba (1, 0, 0, 0, 0.6);
 			
@@ -146,11 +154,11 @@ namespace Plank.Items
 			cr.fill ();
 			
 #if HAVE_GEE_0_8
-			var icons = new HashMap<string, string> ();
+			var icons = new Gee.HashMap<string, string> ();
 #else
-			var icons = new HashMap<string, string> (str_hash, str_equal);
+			var icons = new Gee.HashMap<string, string> (str_hash, str_equal);
 #endif
-			var keys = new ArrayList<string> ();
+			var keys = new Gee.ArrayList<string> ();
 			
 			foreach (var file in get_files ()) {
 				string icon, text;
@@ -184,7 +192,7 @@ namespace Plank.Items
 					break;
 				
 				var pbuf = DrawingService.load_icon (icons.get (s), icon_width, icon_height);
-				cairo_set_source_pixbuf (cr, pbuf,
+				Gdk.cairo_set_source_pixbuf (cr, pbuf,
 					x * (icon_width + offset) + offset + (icon_width - pbuf.width) / 2,
 					y * (icon_height + offset) + offset + (icon_height - pbuf.height) / 2);
 				cr.paint ();
@@ -207,13 +215,13 @@ namespace Plank.Items
 		{
 			Services.System.open (OwnedFile);
 			ClickedAnimation = Animation.BOUNCE;
-			LastClicked = new DateTime.now_utc ();
+			LastClicked = GLib.get_monotonic_time ();
 		}
 		
 		/**
 		 * {@inheritDoc}
 		 */
-		protected override Animation on_clicked (PopupButton button, ModifierType mod)
+		protected override Animation on_clicked (PopupButton button, Gdk.ModifierType mod)
 		{
 			if (button == PopupButton.MIDDLE) {
 				launch ();
@@ -232,7 +240,7 @@ namespace Plank.Items
 		/**
 		 * {@inheritDoc}
 		 */
-		public override ArrayList<Gtk.MenuItem> get_menu_items ()
+		public override Gee.ArrayList<Gtk.MenuItem> get_menu_items ()
 		{
 			if (OwnedFile.query_file_type (0) == FileType.DIRECTORY)
 				return get_dir_menu_items ();
@@ -240,16 +248,16 @@ namespace Plank.Items
 			return get_file_menu_items ();
 		}
 		
-		ArrayList<Gtk.MenuItem> get_dir_menu_items ()
+		Gee.ArrayList<Gtk.MenuItem> get_dir_menu_items ()
 		{
-			var items = new ArrayList<Gtk.MenuItem> ();
+			var items = new Gee.ArrayList<Gtk.MenuItem> ();
 		
 #if HAVE_GEE_0_8
-			var menu_items = new HashMap<string, Gtk.MenuItem> ();
+			var menu_items = new Gee.HashMap<string, Gtk.MenuItem> ();
 #else
-			var menu_items = new HashMap<string, Gtk.MenuItem> (str_hash, str_equal);
+			var menu_items = new Gee.HashMap<string, Gtk.MenuItem> (str_hash, str_equal);
 #endif
-			var keys = new ArrayList<string> ();
+			var keys = new Gee.ArrayList<string> ();
 			
 			foreach (var file in get_files ()) {
 				Gtk.MenuItem item;
@@ -261,7 +269,7 @@ namespace Plank.Items
 					item.activate.connect (() => {
 						Services.System.launch (file);
 						ClickedAnimation = Animation.BOUNCE;
-						LastClicked = new DateTime.now_utc ();
+						LastClicked = GLib.get_monotonic_time ();
 					});
 				} else {
 					icon = DrawingService.get_icon_from_file (file) ?? "";
@@ -270,7 +278,7 @@ namespace Plank.Items
 					item.activate.connect (() => {
 						Services.System.open (file);
 						ClickedAnimation = Animation.BOUNCE;
-						LastClicked = new DateTime.now_utc ();
+						LastClicked = GLib.get_monotonic_time ();
 					});
 				}
 				
@@ -287,9 +295,9 @@ namespace Plank.Items
 				items.add (menu_items.get (s));
 			
 			if (keys.size > 0)
-				items.add (new SeparatorMenuItem ());
+				items.add (new Gtk.SeparatorMenuItem ());
 			
-			var delete_item = new CheckMenuItem.with_mnemonic (_("_Keep in Dock"));
+			var delete_item = new Gtk.CheckMenuItem.with_mnemonic (_("_Keep in Dock"));
 			delete_item.active = true;
 			delete_item.activate.connect (() => delete ());
 			items.add (delete_item);
@@ -303,11 +311,11 @@ namespace Plank.Items
 			return items;
 		}
 		
-		ArrayList<Gtk.MenuItem> get_file_menu_items ()
+		Gee.ArrayList<Gtk.MenuItem> get_file_menu_items ()
 		{
-			var items = new ArrayList<Gtk.MenuItem> ();
+			var items = new Gee.ArrayList<Gtk.MenuItem> ();
 			
-			var delete_item = new CheckMenuItem.with_mnemonic (_("_Keep in Dock"));
+			var delete_item = new Gtk.CheckMenuItem.with_mnemonic (_("_Keep in Dock"));
 			delete_item.active = true;
 			delete_item.activate.connect (() => delete ());
 			items.add (delete_item);
@@ -320,16 +328,16 @@ namespace Plank.Items
 			item.activate.connect (() => {
 				Services.System.open (OwnedFile.get_parent ());
 				ClickedAnimation = Animation.BOUNCE;
-				LastClicked = new DateTime.now_utc ();
+				LastClicked = GLib.get_monotonic_time ();
 			});
 			items.add (item);
 			
 			return items;
 		}
 		
-		ArrayList<File> get_files ()
+		Gee.ArrayList<File> get_files ()
 		{
-			var files = new ArrayList<File> ();
+			var files = new Gee.ArrayList<File> ();
 			
 			try {
 				var enumerator = OwnedFile.enumerate_children (FileAttribute.STANDARD_NAME + ","

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <html>
   <head>
+    <meta charset="UTF-8"/>
     <title>Plank.Items.DrawItemFunc &ndash; plank &ndash; Vala Binding Reference</title>
     <link href="devhelpstyle.css" rel="stylesheet" type="text/css"/><script src="scripts.js" type="text/javascript">
     </script>
@@ -12,7 +13,7 @@
         <h1 class="main_title">DrawItemFunc</h1>
         <hr class="main_hr"/>
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">delegate</span> <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span> <b><span css="delegate">DrawItemFunc</span></b> (<span class="main_type"><a href="Plank.Items.DockItem.html" class="class">DockItem</a></span> item, <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span> source, <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span>? target)
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">delegate</span> <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span> <b><span class="delegate">DrawItemFunc</span></b> (<span class="main_type"><a href="Plank.Items.DockItem.html" class="class">DockItem</a></span> item, <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span> source, <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span>? target)
         </div>
         <div class="description">
           <p>Draws a modified surface onto another newly created or given surface</p>
@@ -20,21 +21,29 @@
           <table class="main_parameter_table">
             <tr>
               <td class="main_parameter_table_name">item</td>
-              <td>the dock-item </td>
+              <td>
+                <p>the dock-item </p>
+              </td>
             </tr>
             <tr>
               <td class="main_parameter_table_name">source</td>
-              <td>original surface which may not be changed </td>
+              <td>
+                <p>original surface which may not be changed </p>
+              </td>
             </tr>
             <tr>
               <td class="main_parameter_table_name">target</td>
-              <td>the previously modified surface </td>
+              <td>
+                <p>the previously modified surface </p>
+              </td>
             </tr>
           </table>
           <h2 class="main_title">Returns:</h2>
           <table class="main_parameter_table">
             <tr>
-              <td>the modified surface or passed through target </td>
+              <td>
+                <p>the modified surface or passed through target </p>
+              </td>
             </tr>
           </table>
         </div><br/>

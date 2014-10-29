@@ -15,10 +15,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Gee;
-using Gtk;
-
-using Plank.Drawing;
 using Plank.Services.Windows;
 
 namespace Plank.Items
@@ -44,7 +40,7 @@ namespace Plank.Items
 		construct
 		{
 			if (App != null) {
-				var launcher = App.get_desktop_file ();
+				unowned string? launcher = App.get_desktop_file ();
 				if (launcher == null || launcher == "") {
 					Text = App.get_name ();
 					ForcePixbuf = WindowControl.get_app_icon (App);

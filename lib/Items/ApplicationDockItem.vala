@@ -15,10 +15,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Gdk;
-using Gee;
-using Gtk;
-
 using Plank.Drawing;
 using Plank.Services;
 using Plank.Services.Windows;
@@ -107,13 +103,13 @@ namespace Plank.Items
 			}
 		}
 		
-		ArrayList<string> supported_mime_types = new ArrayList<string> ();
+		Gee.ArrayList<string> supported_mime_types = new Gee.ArrayList<string> ();
 		
-		ArrayList<string> actions = new ArrayList<string> ();
+		Gee.ArrayList<string> actions = new Gee.ArrayList<string> ();
 #if HAVE_GEE_0_8
-		HashMap<string, string> actions_map = new HashMap<string, string> ();
+		Gee.HashMap<string, string> actions_map = new Gee.HashMap<string, string> ();
 #else
-		HashMap<string, string> actions_map = new HashMap<string, string> (str_hash, str_equal);
+		Gee.HashMap<string, string> actions_map = new Gee.HashMap<string, string> (str_hash, str_equal);
 #endif
 		
 		string? unity_application_uri = null;
@@ -158,14 +154,14 @@ namespace Plank.Items
 		
 		void app_signals_connect (Bamf.Application app)
 		{
-			app.active_changed.connect (handle_active_changed);
-			app.name_changed.connect (handle_name_changed);
-			app.running_changed.connect (handle_running_changed);
-			app.urgent_changed.connect (handle_urgent_changed);
-			app.user_visible_changed.connect (handle_user_visible_changed);
-			app.window_added.connect (handle_window_added);
-			app.window_removed.connect (handle_window_removed);
-			app.closed.connect (handle_closed);
+			app.active_changed.connect_after (handle_active_changed);
+			app.name_changed.connect_after (handle_name_changed);
+			app.running_changed.connect_after (handle_running_changed);
+			app.urgent_changed.connect_after (handle_urgent_changed);
+			app.user_visible_changed.connect_after (handle_user_visible_changed);
+			app.window_added.connect_after (handle_window_added);
+			app.window_removed.connect_after (handle_window_removed);
+			app.closed.connect_after (handle_closed);
 		}
 		
 		void app_signals_disconnect (Bamf.Application app)
@@ -239,10 +235,10 @@ namespace Plank.Items
 			var was_active = (State & ItemState.ACTIVE) == ItemState.ACTIVE;
 			
 			if (is_active && !was_active) {
-				LastActive = new DateTime.now_utc ();
+				LastActive = GLib.get_monotonic_time ();
 				State |= ItemState.ACTIVE;
 			} else if (!is_active && was_active) {
-				LastActive = new DateTime.now_utc ();
+				LastActive = GLib.get_monotonic_time ();
 				State &= ~ItemState.ACTIVE;
 			}
 		}
@@ -274,7 +270,7 @@ namespace Plank.Items
 			var was_urgent = (State & ItemState.URGENT) == ItemState.URGENT;
 			
 			if (is_urgent && !was_urgent) {
-				LastUrgent = new DateTime.now_utc ();
+				LastUrgent = GLib.get_monotonic_time ();
 				State |= ItemState.URGENT;
 			} else if (!is_urgent && was_urgent) {
 				State &= ~ItemState.URGENT;
@@ -324,12 +320,12 @@ namespace Plank.Items
 		/**
 		 * {@inheritDoc}
 		 */
-		protected override Animation on_clicked (PopupButton button, ModifierType mod)
+		protected override Animation on_clicked (PopupButton button, Gdk.ModifierType mod)
 		{
 			if (!is_window ())
 				if (button == PopupButton.MIDDLE
 					|| (button == PopupButton.LEFT && (App == null || WindowControl.get_num_windows (App) == 0
-					|| (mod & ModifierType.CONTROL_MASK) == ModifierType.CONTROL_MASK))) {
+					|| (mod & Gdk.ModifierType.CONTROL_MASK) == Gdk.ModifierType.CONTROL_MASK))) {
 					launch ();
 					return Animation.BOUNCE;
 				}
@@ -345,17 +341,17 @@ namespace Plank.Items
 		/**
 		 * {@inheritDoc}
 		 */
-		protected override Animation on_scrolled (ScrollDirection direction, ModifierType mod)
+		protected override Animation on_scrolled (Gdk.ScrollDirection direction, Gdk.ModifierType mod)
 		{
 			if (App == null || WindowControl.get_num_windows (App) == 0)
 				return Animation.NONE;
 			
-			if (new DateTime.now_utc ().difference (LastScrolled) < 300 * 1000)
+			if (GLib.get_monotonic_time () - LastScrolled < 300 * 1000)
 				return Animation.DARKEN;
 			
-			LastScrolled = new DateTime.now_utc ();
+			LastScrolled = GLib.get_monotonic_time ();
 			
-			if (direction == ScrollDirection.UP || direction == ScrollDirection.LEFT)
+			if (direction == Gdk.ScrollDirection.UP || direction == Gdk.ScrollDirection.LEFT)
 				WindowControl.focus_previous (App);
 			else
 				WindowControl.focus_next (App);
@@ -363,41 +359,96 @@ namespace Plank.Items
 			return Animation.DARKEN;
 		}
 		
+		static void combine_strings (ref string[] result, string delimiter, int n, int i)
+		{
+			if (i <= 1)
+				return;
+			
+			int pos = n;
+			for (int j = 0; j < i - 1; j++) {
+				pos += (i - j);
+				result[n + j + 1] = "%s%s%s".printf (result[n + j], delimiter, result[pos]);
+			}
+			
+			combine_strings (ref result, delimiter, n + i, i - 1);
+		}
+		
+		/**
+		 * Generates an array containing all combinations of a splitted string parts
+		 * while preserving the given order of them.
+		 */
+		static string[] split_combine_string (string s, string delimiter = " ")
+		{
+			var parts = s.split (delimiter);
+			var count = parts.length;
+			var result = new string[count * (count + 1) / 2];
+			
+			// Initialize array with the elementary parts
+			int pos = 0;
+			for (int i = 0; i < count; i++) {
+				result[pos] = parts[i];
+				pos += (count - i);
+			}
+			
+			// Recursively filling up the result array
+			combine_strings (ref result, delimiter, 0, count);
+			
+			return result;
+		}
+		
+		string shorten_window_name (string window_name)
+		{
+			const string[] WINDOW_NAME_PATTERN = { "%s - (.+)", "(.+) - %s", "%s – (.+)", "(.+) – %s", "%s: (.+)" };
+			const string[] APP_NAME_DELIMITER = { " ", "-", "–" };
+			
+			string[] app_strings = null;
+			foreach (unowned string d in APP_NAME_DELIMITER) {
+				app_strings = split_combine_string (Text, d);
+				if (app_strings.length > 1)
+					break;
+			}
+			
+			MatchInfo? m;
+			foreach (unowned string p in WINDOW_NAME_PATTERN) {
+				foreach (unowned string s in app_strings) {
+					if (s.char_count () < 3)
+						continue;
+					
+					var r = new Regex ("^%s$".printf (p.printf (s)),
+						RegexCompileFlags.CASELESS | RegexCompileFlags.ANCHORED | RegexCompileFlags.DOLLAR_ENDONLY,
+						RegexMatchFlags.ANCHORED | RegexMatchFlags.NOTEMPTY);
+					r.match (window_name, RegexMatchFlags.ANCHORED | RegexMatchFlags.NOTEMPTY, out m);
+					if (m.matches ())
+						return m.fetch (1);
+				}
+			}
+			
+			return window_name;
+		}
+		
 		/**
 		 * {@inheritDoc}
 		 */
-		public override ArrayList<Gtk.MenuItem> get_menu_items ()
+		public override Gee.ArrayList<Gtk.MenuItem> get_menu_items ()
 		{
-			var items = new ArrayList<Gtk.MenuItem> ();
+			var items = new Gee.ArrayList<Gtk.MenuItem> ();
 			
 			GLib.List<unowned Bamf.View>? windows = null;
 			if (App != null)
 				windows = App.get_windows ();
 			
-			unowned DefaultApplicationDockItemProvider? default_provider = (Provider as DefaultApplicationDockItemProvider);
+			unowned DefaultApplicationDockItemProvider? default_provider = (Container as DefaultApplicationDockItemProvider);
 			if (default_provider != null
 				&& !default_provider.Prefs.LockItems
 				&& !is_window ()) {
-				var item = new CheckMenuItem.with_mnemonic (_("_Keep in Dock"));
+				var item = new Gtk.CheckMenuItem.with_mnemonic (_("_Keep in Dock"));
 				item.active = !(this is TransientDockItem);
 				item.activate.connect (() => pin_launcher ());
 				items.add (item);
 			}
 			
 			if (is_running () && windows != null && windows.length () > 0) {
-				Gtk.MenuItem item;
-				
-				if (WindowControl.has_maximized_window (App)) {
-					item = create_menu_item (_("Unma_ximize"), "view-fullscreen");
-					item.activate.connect (() => WindowControl.unmaximize (App));
-					items.add (item);
-				} else {
-					item = create_menu_item (_("Ma_ximize"), "view-fullscreen");
-					item.activate.connect (() => WindowControl.maximize (App));
-					items.add (item);
-				}
-				
-				item = create_menu_item (_("_Close All"), "window-close-symbolic;;window-close");
+				var item = create_menu_item (_("_Close All"), "window-close-symbolic;;window-close");
 				item.activate.connect (() => WindowControl.close_all (App));
 				items.add (item);
 			}
@@ -405,7 +456,7 @@ namespace Plank.Items
 #if HAVE_DBUSMENU
 			if (Quicklist != null) {
 				if (items.size > 0)
-					items.add (new SeparatorMenuItem ());
+					items.add (new Gtk.SeparatorMenuItem ());
 				
 				var dm_root = Quicklist.get_root ();
 				if (dm_root != null) {
@@ -418,7 +469,7 @@ namespace Plank.Items
 			
 			if (!is_window () && actions.size > 0) {
 				if (items.size > 0)
-					items.add (new SeparatorMenuItem ());
+					items.add (new Gtk.SeparatorMenuItem ());
 				
 				foreach (var s in actions) {
 					var values = actions_map.get (s).split (";;");
@@ -435,19 +486,22 @@ namespace Plank.Items
 			
 			if (is_running () && windows != null && windows.length () > 0) {
 				if (items.size > 0)
-					items.add (new SeparatorMenuItem ());
+					items.add (new Gtk.SeparatorMenuItem ());
 				
 				foreach (var view in windows) {
 					unowned Bamf.Window? window = (view as Bamf.Window);
-					if (window == null)
+					if (window == null || window.get_transient () != null)
 						continue;
 					
 					Gtk.MenuItem window_item;
 					var pbuf = WindowControl.get_window_icon (window);
+					var window_name = window.get_name ();
+					window_name = shorten_window_name (window_name);
+					
 					if (pbuf == null)
-						window_item = create_menu_item_with_pixbuf (window.get_name (), pbuf, true);
+						window_item = create_menu_item_with_pixbuf (window_name, pbuf, true);
 					else 
-						window_item = create_menu_item (window.get_name (), Icon, true);
+						window_item = create_menu_item (window_name, Icon, true);
 					
 					if (window.is_active ())
 						window_item.set_sensitive (false);
@@ -464,7 +518,7 @@ namespace Plank.Items
 		/**
 		 * {@inheritDoc}
 		 */
-		public override bool can_accept_drop (ArrayList<string> uris)
+		public override bool can_accept_drop (Gee.ArrayList<string> uris)
 		{
 			if (uris == null || is_window ())
 				return false;
@@ -477,7 +531,7 @@ namespace Plank.Items
 			try {
 				foreach (var uri in uris) {
 					var info = File.new_for_uri (uri).query_info (FileAttribute.STANDARD_CONTENT_TYPE, FileQueryInfoFlags.NONE);
-					var uri_content_type = info.get_content_type ();
+					unowned string uri_content_type = info.get_content_type ();
 					foreach (var content_type in supported_mime_types)
 						if (ContentType.is_a (uri_content_type, content_type) || ContentType.equals (uri_content_type, content_type))
 							return true;
@@ -490,9 +544,9 @@ namespace Plank.Items
 		/**
 		 * {@inheritDoc}
 		 */
-		public override bool accept_drop (ArrayList<string> uris)
+		public override bool accept_drop (Gee.ArrayList<string> uris)
 		{
-			var files = new ArrayList<File> ();
+			var files = new Gee.ArrayList<File> ();
 			foreach (var uri in uris)
 				files.add (File.new_for_uri (uri));
 			
@@ -508,7 +562,7 @@ namespace Plank.Items
 		{
 			unity_update_application_uri ();
 			
-			var launcher = Prefs.Launcher;
+			unowned string? launcher = Prefs.Launcher;
 			if (launcher == null || launcher == "")
 				return;
 			
@@ -533,7 +587,7 @@ namespace Plank.Items
 		 * @param actions_map a map of actions from name to exec;;icon
 		 * @param mimes a list of all supported mime types
 		 */
-		public static void parse_launcher (string launcher, out string icon, out string text, ArrayList<string>? actions = null, Map<string, string>? actions_map = null, ArrayList<string>? mimes = null)
+		public static void parse_launcher (string launcher, out string icon, out string text, Gee.ArrayList<string>? actions = null, Gee.Map<string, string>? actions_map = null, Gee.ArrayList<string>? mimes = null)
 		{
 			icon = "";
 			text = "";
@@ -579,12 +633,12 @@ namespace Plank.Items
 			try {
 				if (mimes != null && file.has_key (KeyFileDesktop.GROUP, KeyFileDesktop.KEY_MIME_TYPE)) {
 					var mimestrings = file.get_string_list (KeyFileDesktop.GROUP, KeyFileDesktop.KEY_MIME_TYPE);
-					foreach (var mime in mimestrings)
+					foreach (unowned string mime in mimestrings)
 						mimes.add (ContentType.from_mime_type (mime));
 				}
 				
 				string? textdomain = null;
-				foreach (var domain_key in SUPPORTED_GETTEXT_DOMAINS_KEYS)
+				foreach (unowned string domain_key in SUPPORTED_GETTEXT_DOMAINS_KEYS)
 					if (file.has_key (KeyFileDesktop.GROUP, domain_key)) {
 						textdomain = file.get_string (KeyFileDesktop.GROUP, domain_key);
 						break;
@@ -600,11 +654,11 @@ namespace Plank.Items
 					
 					string[] keys = {DESKTOP_ACTION_KEY, UNITY_QUICKLISTS_KEY};
 					
-					foreach (var key in keys) {
+					foreach (unowned string key in keys) {
 						if (!file.has_key (KeyFileDesktop.GROUP, key))
 							continue;
 						
-						foreach (var action in file.get_string_list (KeyFileDesktop.GROUP, key)) {
+						foreach (unowned string action in file.get_string_list (KeyFileDesktop.GROUP, key)) {
 							var group = DESKTOP_ACTION_GROUP_NAME.printf (action);
 							if (!file.has_group (group)) {
 								group = UNITY_QUICKLISTS_SHORTCUT_GROUP_NAME.printf (action);
@@ -623,7 +677,7 @@ namespace Plank.Items
 							if (file.has_key (group, KeyFileDesktop.KEY_NOT_SHOW_IN)) {
 								var found = false;
 								
-								foreach (var s in file.get_string_list (group, KeyFileDesktop.KEY_NOT_SHOW_IN))
+								foreach (unowned string s in file.get_string_list (group, KeyFileDesktop.KEY_NOT_SHOW_IN))
 									if (s == "Plank") {
 										found = true;
 										break;
@@ -637,7 +691,7 @@ namespace Plank.Items
 							if (file.has_key (group, KeyFileDesktop.KEY_ONLY_SHOW_IN)) {
 								var found = false;
 								
-								foreach (var s in file.get_string_list (group, KeyFileDesktop.KEY_ONLY_SHOW_IN))
+								foreach (unowned string s in file.get_string_list (group, KeyFileDesktop.KEY_ONLY_SHOW_IN))
 									if (s == UNITY_QUICKLISTS_TARGET_VALUE || s == "Plank") {
 										found = true;
 										break;
@@ -719,7 +773,7 @@ namespace Plank.Items
 		{
 			unity_application_uri = null;
 			
-			var desktop_file = (App != null ? App.get_desktop_file () : Launcher);
+			unowned string? desktop_file = (App != null ? App.get_desktop_file () : Launcher);
 			if (desktop_file == null || desktop_file == "")
 				return;
 			
@@ -735,7 +789,7 @@ namespace Plank.Items
 		 *
 		 * @return the libunity application uri of this item, or NULL
 		 */
-		public string? get_unity_application_uri ()
+		public unowned string? get_unity_application_uri ()
 		{
 			return unity_application_uri;
 		}
@@ -745,7 +799,7 @@ namespace Plank.Items
 		 *
 		 * @return the dbusname which provides the LauncherEntry interface, or NULL
 		 */
-		public string? get_unity_dbusname ()
+		public unowned string? get_unity_dbusname ()
 		{
 			return unity_dbusname;
 		}

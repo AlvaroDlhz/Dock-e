@@ -1,3 +1,307 @@
+2014-09-21  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	hidemanager: Improve build- and runtime-checks for barrier-support
+
+2014-09-21  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Fix hide/unhide in non-compositing mode
+
+	Regression of r1059
+
+2014-09-21  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Missing the required valac version must be fatal
+
+2014-09-21  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	hidemanager: Add missing HAVE_BARRIERS conditional
+
+	It is needed to guard all initialize_barriers_support calls.
+
+2014-09-17  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockrenderer: No need to have a background if there is none
+
+2014-09-17  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	docktheme: Bail early if there is nothing to draw
+
+2014-09-17  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	positionmanager: Do not allow negative dimensions for the background
+
+2014-09-17  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Clean up internal "using ..." dependencies
+
+2014-09-17  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Avoid "using ..." for external dependencies
+
+	This has gotten a bit inconsistent so drop those for good and fully
+	qualify external symbols in all places.
+
+2014-09-15  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Back to development
+
+2014-09-15  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Prepare 0.7.0 release
+
+2014-09-15  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Update symbols
+
+2014-07-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	positionmanager: Update the barrier if needed
+
+2014-09-15  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	filedockitem: Properly compare all separate icons for a single match
+
+	Fixes regression of r1038 with gtk+ < 3.13
+
+2014-09-11  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	positionmanager: Fix docs for get_item_hover_region()
+
+2014-09-11  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	AUTHORS: Promote myself to primary contact
+
+2014-09-11  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Hide "Quit" while running on Pantheon
+
+2014-09-09  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	controller: Add missing call of prepare()
+
+	Regression from r1066 while changing PinnedOnly setting on runtime.
+
+2014-09-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	docs: Fix build and add DockContainer
+
+2014-09-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Introduce abstract DockContainer and let DockController implement it
+
+	This removes some logic/code duplications and makes thing more abstract
+	while handling DockItemProviders like DockItems.
+
+2014-09-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockpreferences: Fix mix-up in Alignment blurbs
+
+2014-09-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Avoid some superfluous string-copying
+
+2014-09-03  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	drawing: Let Drawing.Color inherit from Gdk.RGBA
+
+2014-09-03  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	drawing: Drop usage of deprecated Gdk.Color
+
+2014-09-02  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	positionmanager: Prefix functions with "get_" accordingly
+
+2014-09-02  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Handle changed compositing-support without delay in position-manager
+
+2014-09-02  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Clean up resize/repositioning code and api of position-manager
+
+2014-09-02  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Minor clean up using position-manager
+
+2014-09-01  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Try to avoid adding superfluous LauncherEntry-items
+
+	If an application sends multiple requests referring to different
+	application-uris try not to use/add more than one item.
+
+2014-09-01  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Remove all LauncherEntry-items which match the vanished
+	dbus-sender-name
+
+2014-09-01  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Force internal Wnck update when needed and try to redruce races
+	with Bamf
+
+	This is more a workaround. The better solution would be to avoid/reduce
+	the mixed usage of Wnck and Bamf signals.
+
+	The problem surfaced and became reproducable with r1041 which relies on
+	consistency between Wnck and Bamf.
+
+2014-08-31  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add auto-pinning setting and enable by default
+
+	This makes it possible to disable this existing feature if wanted.
+
+2014-08-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockitem: Monitor icon changes if it points to an existing local file
+
+2014-08-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	drawingservice: Add try_get_icon_file() to handle of possible
+	icon-files
+
+2014-08-01  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Silence c-warnings for plank-binary too
+
+2014-07-31  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Creating transient-items on dockitem-deletion belongs in
+	default-provider
+
+	Leftover from the refactoring which should have been there since then.
+	Surfaced due the usage of PinnedOnly where the default-provider is
+	actually a simple ApplicationDockItemProvider.
+
+2014-07-31  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	itemfactory: Only strip the extension from the launcher-filename
+
+	There are desktop-files named like "org.gnome.Polari.desktop" now.
+
+2014-07-31  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	provider: Handle item-target is placeholder-item correctly
+
+2014-07-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Update symbols
+
+2014-07-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	hidemanager: Make pressure debug-output optional
+
+2014-07-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	drawing/load_pixbuf: Properly try icon-name with stripped extension
+
+	This fixes e.g. looking for "skype.png" which is registered as "skype".
+
+2014-07-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	itemfactory: Update creation of default applications-items
+
+2014-07-26  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	controller: Set Add/RemoveTime of item-providers accordingly
+
+2014-07-26  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add ability to show pinned applications only
+
+	This adds the "PinnedOnly" setting which defaults to false. If
+	set there
+	will be no transient items shown.
+
+2014-07-24  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Don't count or provide menu-entries for windows which have a transient
+
+2014-07-24  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2014-07-21  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	drawing: Don't use IconTheme.has_icon()
+
+	While we are checking/handling null this check is superfluous.
+
+2014-07-21  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	filedockitem: Consider "folder" being a default-icon too
+
+2014-07-21  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Don't optimize drawing of the first frame
+
+2014-07-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Use GLib.get_monotonic_time() for timestamps used to calculate
+	animations
+
+	This drop all non-user visible usage of GLib.DateTime.
+
+2014-06-17  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Make sure to update visibile-items in prepare
+
+	Not pinned items doesnt show up initially.
+
+	Regression caused by r1029
+
+2014-06-17  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	positionmanager: Precalculate top_offset to have it include TopPadding
+
+	This avoids doing this over and over again in several places.
+
+2014-06-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add pressure-reveal setting and disable by default
+
+2014-04-13  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add pressure-reveal support to unhide the dockwindow
+
+	Conditionally use XInput2.3 barriers if available to do this.
+
+2014-06-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	appdockitem: Drop debug output
+
+2014-06-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	appdockitem: Shorten window-title shown in menu using application-name
+
+2014-06-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Refactor dockitem-loading and serialization of pinned items
+
+	Move dock-item creation to item-factory and move more bits of global
+	settings handling to the controller.
+
+2014-06-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	items: Drop maximize/unmaximize menu-entries
+
+	They are considered clutter and of no real use. Interacting with the
+	actual window is prefered to achieve those actions.
+
+2014-06-02  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add compile time and runtime retrievable version information
+
+2014-05-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Require valac >= 0.22.0 and obsolete conditionals
+
+2014-05-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Back to development
+
 2014-05-20  Rico Tzschichholz  <ricotz@ubuntu.com>
 
 	Prepare 0.6.1 release

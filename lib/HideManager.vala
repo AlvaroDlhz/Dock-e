@@ -15,10 +15,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Gdk;
-using Wnck;
-
-using Plank.Services.Windows;
+using Plank.Services;
 using Plank.Widgets;
 
 namespace Plank
@@ -56,6 +53,12 @@ namespace Plank
 		// the results of our update
 		const uint UPDATE_TIMEOUT = 200;
 		
+#if HAVE_BARRIERS
+		// FIXME Use an IconSize-based value?
+		const double PRESSURE_THRESHOLD = 60.0;
+		const int PRESSURE_TIMEOUT = 1000;
+#endif
+		
 		public DockController controller { private get; construct; }
 		
 		/**
@@ -86,6 +89,14 @@ namespace Plank
 		uint timer_geo = 0;
 		uint timer_window_changed = 0;
 		
+#if HAVE_BARRIERS
+		XFixes.PointerBarrier barrier = 0;
+		int opcode = 0;
+		double pressure = 0.0;
+		uint pressure_timer = 0;
+		bool barriers_supported = false;
+#endif
+		
 		/**
 		 * Creates a new instance of a HideManager, which handles
 		 * checking if a dock should hide or not.
@@ -99,7 +110,7 @@ namespace Plank
 		
 		construct
 		{
-			controller.prefs.notify["HideMode"].connect (prefs_changed);
+			controller.prefs.notify.connect (prefs_changed);
 		}
 		
 		/**
@@ -111,13 +122,20 @@ namespace Plank
 			unowned DockWindow window = controller.window;
 			unowned Wnck.Screen wnck_screen = Wnck.Screen.get_default ();
 			
+#if HAVE_BARRIERS
+			if (controller.prefs.PressureReveal)
+				initialize_barriers_support ();
+			else
+				window.enter_notify_event.connect (enter_notify_event);
+#else
 			window.enter_notify_event.connect (enter_notify_event);
+#endif
 			window.leave_notify_event.connect (leave_notify_event);
 			
-			wnck_screen.window_opened.connect (schedule_update);
-			wnck_screen.window_closed.connect (schedule_update);
-			wnck_screen.active_window_changed.connect (handle_window_changed);
-			wnck_screen.active_workspace_changed.connect (handle_workspace_changed);
+			wnck_screen.window_opened.connect_after (schedule_update);
+			wnck_screen.window_closed.connect_after (schedule_update);
+			wnck_screen.active_window_changed.connect_after (handle_window_changed);
+			wnck_screen.active_workspace_changed.connect_after (handle_workspace_changed);
 			
 			setup_active_window ();
 		}
@@ -128,7 +146,7 @@ namespace Plank
 			unowned DragManager drag_manager = controller.drag_manager;
 			unowned Wnck.Screen wnck_screen = Wnck.Screen.get_default ();
 			
-			controller.prefs.notify["HideMode"].disconnect (prefs_changed);
+			controller.prefs.notify.disconnect (prefs_changed);
 			
 			window.enter_notify_event.disconnect (enter_notify_event);
 			window.leave_notify_event.disconnect (leave_notify_event);
@@ -139,6 +157,17 @@ namespace Plank
 			wnck_screen.active_workspace_changed.disconnect (handle_workspace_changed);
 			
 			stop_timers ();
+			
+#if HAVE_BARRIERS
+			gdk_window_remove_filter (null, (Gdk.FilterFunc)xevent_filter);
+			
+			if (barrier != 0) {
+				unowned Gdk.X11.Display gdk_display = (controller.window.get_display () as Gdk.X11.Display);
+				unowned X.Display display = gdk_display.get_xdisplay ();
+				XFixes.destroy_pointer_barrier (display, barrier);
+				barrier = 0;
+			}
+#endif
 		}
 		
 		/**
@@ -191,18 +220,40 @@ namespace Plank
 			thaw_notify ();
 		}
 		
-		void prefs_changed ()
+		void prefs_changed (Object prefs, ParamSpec prop)
 		{
-			if (timer_prefs_changed > 0) {
-				GLib.Source.remove (timer_prefs_changed);
-				timer_prefs_changed = 0;
+			switch (prop.name) {
+			case "HideMode":
+			case "Position":
+				if (timer_prefs_changed > 0) {
+					GLib.Source.remove (timer_prefs_changed);
+					timer_prefs_changed = 0;
+				}
+				
+				timer_prefs_changed = Gdk.threads_add_timeout (UPDATE_TIMEOUT, () => {
+					update_window_intersect ();
+#if HAVE_BARRIERS
+					update_barrier ();
+#endif
+					timer_prefs_changed = 0;
+					return false;
+				});
+				break;
+			case "PressureReveal":
+#if HAVE_BARRIERS
+				unowned DockWindow window = controller.window;
+				if (controller.prefs.PressureReveal) {
+					window.enter_notify_event.disconnect (enter_notify_event);
+					initialize_barriers_support ();
+				} else {
+					window.enter_notify_event.connect (enter_notify_event);
+				}
+#endif
+				break;
+			default:
+				// Nothing important for us changed
+				break;
 			}
-			
-			timer_prefs_changed = Gdk.threads_add_timeout (UPDATE_TIMEOUT, () => {
-				update_window_intersect ();
-				timer_prefs_changed = 0;
-				return false;
-			});
 		}
 		
 		void update_hidden ()
@@ -276,9 +327,9 @@ namespace Plank
 			});
 		}
 		
-		bool enter_notify_event (EventCrossing event)
+		bool enter_notify_event (Gdk.EventCrossing event)
 		{
-			if (event.detail == NotifyType.INFERIOR)
+			if (event.detail == Gdk.NotifyType.INFERIOR)
 				return Hidden;
 			
 			if ((bool) event.send_event) {
@@ -295,9 +346,9 @@ namespace Plank
 			return Hidden;
 		}
 		
-		bool leave_notify_event (EventCrossing event)
+		bool leave_notify_event (Gdk.EventCrossing event)
 		{
-			if (event.detail == NotifyType.INFERIOR)
+			if (event.detail == Gdk.NotifyType.INFERIOR)
 				return false;
 			
 			// ignore this event if it was sent explicitly
@@ -318,11 +369,7 @@ namespace Plank
 		{
 			var dock_rect = controller.position_manager.get_static_dock_region ();
 #if HAVE_GTK_3_10
-#if VALA_0_22
 			var window_scale_factor = controller.window.get_window ().get_scale_factor ();
-#else
-			var window_scale_factor = gdk_window_get_scale_factor (controller.window.get_window ());
-#endif
 			if (window_scale_factor > 1) {
 				dock_rect.x *= window_scale_factor;
 				dock_rect.y *= window_scale_factor;
@@ -405,8 +452,8 @@ namespace Plank
 			
 			if (active_window != null) {
 				last_window_rect = window_geometry (active_window);
-				active_window.geometry_changed.connect (handle_geometry_changed);
-				active_window.state_changed.connect (handle_state_changed);
+				active_window.geometry_changed.connect_after (handle_geometry_changed);
+				active_window.state_changed.connect_after (handle_state_changed);
 			}
 			
 			schedule_update ();
@@ -469,5 +516,163 @@ namespace Plank
 				timer_unhide = 0;
 			}
 		}
+		
+#if HAVE_BARRIERS
+		void initialize_barriers_support ()
+		{
+			unowned DockWindow window = controller.window;
+			unowned Gdk.X11.Display gdk_display = (controller.window.get_display () as Gdk.X11.Display);
+			unowned X.Display display = gdk_display.get_xdisplay ();
+			int error_base, first_event_return;
+			
+			if (!display.query_extension ("XInputExtension", out opcode, out first_event_return, out error_base)) {
+				debug ("Barriers disabled (XInput needed)");
+				barriers_supported = false;
+				window.enter_notify_event.connect (enter_notify_event);
+			} else {
+				int major = 2, minor = 3;
+				var has_xinput = (XInput.query_version (display, ref major, ref minor) == X.Success);
+				if (has_xinput && major >= 2 && minor >= 3) {
+					message ("Barriers enabled (XInput %i.%i support)\n", major, minor);
+					barriers_supported = true;
+					gdk_window_add_filter (null, (Gdk.FilterFunc)xevent_filter);
+				} else {
+					debug ("Barriers disabled (XInput %i.%i not sufficient)", major, minor);
+					barriers_supported = false;
+					window.enter_notify_event.connect (enter_notify_event);
+				}
+			}
+		}
+
+		/**
+		 * Event filter method needed to fetch X.Events
+		 */
+		[CCode (instance_pos = 2.9)]
+		Gdk.FilterReturn xevent_filter (Gdk.XEvent gdk_xevent, Gdk.Event gdk_event)
+		{
+			X.Event* xevent = (X.Event*) gdk_xevent;
+			X.GenericEventCookie* xcookie = &xevent.xcookie;
+			unowned X.Display display = xcookie.display;
+			
+			// Did we got a barrier-event?
+			if (barrier == 0
+				|| (xcookie.extension != opcode)
+				|| (xcookie.evtype != XInput.EventType.BARRIER_HIT && xcookie.evtype != XInput.EventType.BARRIER_LEAVE))
+				return Gdk.FilterReturn.CONTINUE;
+			
+			X.get_event_data (display, xcookie);
+			
+			// Does it match our registered barrier?
+			XInput.BarrierEvent* barrier_event = (XInput.BarrierEvent*) (xcookie.data);
+			if (barrier_event.barrier != barrier) {
+				X.free_event_data (display, xcookie);
+				return Gdk.FilterReturn.CONTINUE;
+			}
+			
+			switch (xcookie.evtype) {
+			case XInput.EventType.BARRIER_HIT:
+				double slide = 0.0, distance = 0.0;
+				switch (controller.prefs.Position) {
+				default:
+				case Gtk.PositionType.BOTTOM:
+				case Gtk.PositionType.TOP:
+					distance = Math.fabs (barrier_event.dy);
+					slide = Math.fabs (barrier_event.dx);
+					break;
+				case Gtk.PositionType.LEFT:
+				case Gtk.PositionType.RIGHT:
+					distance = Math.fabs (barrier_event.dx);
+					slide = Math.fabs (barrier_event.dy);
+					break;
+				}
+				
+				if (slide < distance) {
+					distance = Math.fmin (15.0, distance);
+					pressure += distance;
+					Logger.verbose ("HideManager (pressure = %f)", pressure);
+				}
+				
+				if (pressure >= PRESSURE_THRESHOLD) {
+					pressure = 0;
+					
+					if (pressure_timer > 0) {
+						GLib.Source.remove (pressure_timer);
+						pressure_timer = 0;
+					}
+					
+					Logger.verbose ("HideManager (pressure-threshold reached > unhide (%f))", PRESSURE_THRESHOLD);
+					
+					freeze_notify ();
+					
+					if (!Hovered) {
+						Hovered = true;
+						update_hidden ();
+					}
+					
+					thaw_notify ();
+				}
+				break;
+			case XInput.EventType.BARRIER_LEAVE:
+				if (pressure_timer == 0)
+					pressure_timer = Gdk.threads_add_timeout (PRESSURE_TIMEOUT, () => {
+						pressure = 0;
+						pressure_timer = 0;
+						return false;
+					});
+				break;
+			default:
+				break;
+			}
+			
+			XInput.barrier_release_pointer (display, barrier_event.deviceid,
+				barrier, barrier_event.eventid);
+			
+			display.flush ();
+			
+			X.free_event_data (display, xcookie);
+			return Gdk.FilterReturn.REMOVE;
+		}
+		
+		public void update_barrier ()
+		{
+			if (!barriers_supported)
+				return;
+			
+			unowned Gdk.X11.Display gdk_display = (controller.window.get_display () as Gdk.X11.Display);
+			unowned X.Display display = gdk_display.get_xdisplay ();
+			
+			if (barrier > 0) {
+				XFixes.destroy_pointer_barrier (display, barrier);
+				barrier = 0;
+			}
+			
+			if (!controller.prefs.PressureReveal)
+				return;
+			
+			if (controller.prefs.HideMode == HideType.NONE)
+				return;
+			
+			var root_xwindow = display.default_root_window ();
+			var barrier_area = controller.position_manager.get_barrier ();
+			
+			// Enable barrier events
+			uchar[] mask_bits = new uchar[XInput.mask_length (XInput.EventType.LASTEVENT)];
+			XInput.EventMask mask = { XInput.ALL_MASTER_DEVICES, (int) (sizeof (uchar) * mask_bits.length), mask_bits };
+			XInput.set_mask (mask.mask, XInput.EventType.BARRIER_HIT);
+			XInput.set_mask (mask.mask, XInput.EventType.BARRIER_LEAVE);
+			XInput.select_events (display, root_xwindow, &mask, 1);
+
+			debug ("Barrier: %i,%i - %i,%i\n", barrier_area.x, barrier_area.y, barrier_area.x + barrier_area.width, barrier_area.y + barrier_area.height);
+			
+			barrier = XFixes.create_pointer_barrier (
+				display, root_xwindow,
+				barrier_area.x, barrier_area.y, barrier_area.x + barrier_area.width,
+				barrier_area.y + barrier_area.height,
+				0,
+				0, null);
+			
+			warn_if_fail (barrier > 0);
+		}
+#endif
 	}
 }
