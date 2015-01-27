@@ -1,3 +1,368 @@
+2015-01-25  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Prepare 0.8.1 release
+
+2015-01-25  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-01-21  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Make use of Gdk.EVENT_PROPAGATE and Gdk.EVENT_STOP
+
+2015-01-21  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Compatibility for BSD, use replacement for sys/prctl.h
+
+2015-01-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Request gee-0.8 without an automatic fallback to gee-1.0
+
+2015-01-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	positionmanager: Alignment should have same meaning for dock and items
+
+	START and END were treated differently resulting in a contradicting
+	settings-behaviour of Aligment and ItemsAlignment
+
+2015-01-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Fix broken virtual LauncherEntry-items
+
+	Regression of r1057
+
+2015-01-18  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockwindow: Clean up some API
+
+2015-01-18  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockwindow: Mark a few more workarounds as such
+
+2015-01-18  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockwindow: Fix menu-position with gtk+ 3.15+
+
+2015-01-17  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	hidemanager: Fix valac warning
+
+2015-01-17  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	hidemanager: Fix enable/disable pressure-reveal on runtime
+
+2015-01-15  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-01-13  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	abstractmain: Output information for more enabled features
+
+2015-01-06  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	prefswindow: Fix some sensitivity assignments
+
+2015-01-06  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Move plank.gresource.xml to data
+
+2015-01-05  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Fix benchmark build
+
+2015-01-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Welcome to 2015
+
+2015-01-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translation template
+
+2015-01-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Update symbols
+
+2015-01-02  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Back to development
+
+2015-01-02  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Prepare 0.8.0 release
+
+2015-01-02  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	appdockitem: Fix warning and handle RegexError
+
+2015-01-02  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2014-12-31  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	appdockitem: Always reset App when "closed" was signaled
+
+2014-12-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	theme: Avoid depending on initialized AbstractMain implementation
+
+2014-12-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Use selected-focused background-color from current gtk+ theme
+
+2014-12-23  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Fix FileDockItem's constructors
+
+2014-12-22  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Add FileDockItem.with_file() and expose OwnedFile
+
+2014-12-22  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	plank.pc: Add pkgdatadir
+
+2014-12-22  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	plank.pc: Add missing dependency on libbamf3
+
+2014-12-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2014-12-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	theme: Add special theme "Gtk+" which looks in the currently selected
+	gtk-theme
+
+2014-12-13  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	appdockitem: Show window-list and use "Close All" for more than
+	one window
+
+2014-12-02  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Handle DesktopAppInfo constructors returning NULL
+
+2014-11-27  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	positionmanager: No need for return-values for
+	DockItemDrawValue-methods
+
+2014-11-26  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	itemfactory: Do not allow multiple dockitems pointing to same launcher
+
+	Same as r1124
+
+2014-11-21  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	hidemanager: Use posix's getpid() to avoid bumping glib
+
+2014-11-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	hidemanager: Don't hide while obstructed by one of our dialogs/windows
+
+2014-11-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add missing Cairo.Context.close_path() calls in conjunction to
+	move_to()
+
+2014-11-19  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Fallback on "application-default-icon" icon only or use internal
+	default
+
+	Also Wnck is returning its default window-icon ignore it and use
+	the our
+	fallback chain instead.
+
+2014-11-19  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockitem: Handle null-return of DrawingService.load_icon_for_scale()
+
+2014-11-19  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	appdockitem: Fix nasty typo in get_menu_items()
+
+2014-11-18  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Do not allow multiple dockitems pointing to the same
+	application/launcher
+
+2014-11-18  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Only allow DefaultApplicationDockItemProvider to handle unpinned apps
+
+	Don't expose this property and completely handle it internal.
+
+2014-11-18  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockcontainer: Reuse retrieved index and add additional argument check
+
+2014-11-17  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	appddockitemprovider: Fix gee assert caused by
+	handle_name_owner_changed
+
+	Don't expect more item matches after one was already found and bail.
+	There is only one match possible and remove_item() obviously
+	changes the
+	internal_items list which is iterated in this scope.
+
+2014-11-17  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Explicitly move some field initalizers to construct
+
+2014-11-14  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockitemprovider: Add item_for_uri()
+
+2014-11-13  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Add more checks for wnck-related null-values
+
+2014-11-13  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Various optimizations
+
+2014-11-12  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	abstractmain: Add command-line option to show preferences dialog
+
+2014-11-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Rely on new-dtags support to replace RPATH with RUNPATH
+
+2014-11-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	data: Update manpage
+
+2014-11-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	controller: Fix updating item-positions in panel-mode
+
+2014-11-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dragmanager: Accept all supported URIs
+
+2014-11-02  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Fix updating item-positiions in panel-mode
+
+	Regression of r1059
+
+2014-10-27  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update Finnish, Norwegian Bokmal, Serbian
+
+2014-10-26  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Preserve compatibility with valac 0.22/24
+
+2014-10-26  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	abstractmain: Avoid setting empty strings/array
+
+2014-10-25  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dragmanager: Still allow opening dropped files if LockItems is true
+
+2014-10-24  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockwindow: Handle propagated mouse-events if menu is visible
+
+	Gtk+ 3.14 propagates button-press/release and motion-events further
+	even while an attached Gtk.Menu is shown. We need to handle those to
+	restore and preserve the old behaviour.
+
+	Reference gtk+ commit:
+	https://git.gnome.org/browse/gtk+/commit/?id=6b7b55f9b2b9eb7e05f68e9
+
+2014-10-23  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockwindow: Reset ClickedItem after processing the button-release-event
+
+2014-10-21  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	position-manager: Add cached Position of dock and prefer using it
+
+2014-10-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockwindow: No need to copy since GdkRectangle is a CairoRectangleInt
+
+2014-10-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	position-manager: Clean up and remove unused public API
+
+2014-10-15  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockwindow: Increase hover-window delay to 200ms
+
+2014-10-15  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	items: Drop obsolete controller-argument from get_plank_menu_items()
+
+2014-10-15  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Use ActionGroup/ActionMap capabilities to provide global-menu functions
+
+2014-10-14  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	abstractmain: Stay compatible with gtk+ 3.4
+
+2014-10-14  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	controller: No need to rebuild settings-dialog if it is already open
+
+2014-10-14  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	abstractmain: Set about-dialog as transient for dock-window
+
+2014-10-13  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Port AbstractMain to inherit directly from Gtk.Application
+
+2014-10-11  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Fix make check
+
+2014-10-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Implement (can_)accept_drop() for DockItemProviders and make use of it
+
+2014-10-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Really be compatible with gtk+ 3.4
+
+2014-10-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	docs: Add missing source references aka "fix the build"
+
+2014-09-14  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add simple settings tool
+
+2014-10-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Fixing some HiDPI issues
+
+	Additionally require cairo >= 1.13 to enable support.
+	Use Gtk.IconTheme.lookup_icon_for_scale() to pick the proper icon.
+
+2014-09-23  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	items: Fix DockContainer destructor name
+
+2014-09-23  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Back to development
+
+2014-09-23  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Prepare 0.7.1 release
+
 2014-09-21  Rico Tzschichholz  <ricotz@ubuntu.com>
 
 	hidemanager: Improve build- and runtime-checks for barrier-support

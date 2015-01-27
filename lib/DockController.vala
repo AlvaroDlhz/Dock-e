@@ -61,6 +61,9 @@ namespace Plank
 		 */
 		public DockController (File config_folder)
 		{
+			// Make sure our config-directory exists
+			Paths.ensure_directory_exists (config_folder);
+			
 			Logger.verbose ("DockController (config_folder = %s)", config_folder.get_path ());
 			
 			Object (config_folder : config_folder,
@@ -225,10 +228,12 @@ namespace Plank
 			update_visible_items ();
 			
 			if (prefs.Alignment != Gtk.Align.FILL
-				&& added.size != removed.size)
+				&& added.size != removed.size) {
 				position_manager.update (renderer.theme);
-			else
+			} else {
 				position_manager.reset_item_caches ();
+				position_manager.update_regions ();
+			}
 			window.update_icon_regions ();
 		}
 		

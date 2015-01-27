@@ -44,14 +44,6 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Plank.PositionManager.win_x.html" class="property">win_x</a></b> { <span class="main_keyword">protected</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Cached x position of the dock window.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Plank.PositionManager.win_y.html" class="property">win_y</a></b> { <span class="main_keyword">protected</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Cached y position of the dock window.</span>
-            </div></li>
           <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Plank.PositionManager.LineWidth.html" class="property">LineWidth</a></b> { <span class="main_keyword">get</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Theme-based line-width.</span>
@@ -59,6 +51,10 @@
           <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Plank.PositionManager.IconSize.html" class="property">IconSize</a></b> { <span class="main_keyword">get</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Cached current icon size for the dock.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="enum">PositionType</span></span> <b><a href="Plank.PositionManager.Position.html" class="property">Position</a></b> { <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Cached position of the dock.</span>
             </div></li>
           <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Plank.PositionManager.IndicatorSize.html" class="property">IndicatorSize</a></b> { <span class="main_keyword">get</span>; }
             </span>
@@ -92,29 +88,9 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Theme-based urgent-bounce height, scaled by icon size.</span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Plank.PositionManager.VisibleDockHeight.html" class="property">VisibleDockHeight</a></b> { <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Plank.PositionManager.LaunchBounceHeight.html" class="property">LaunchBounceHeight</a></b> { <span class="main_keyword">get</span>; }
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">The currently visible height of the dock.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Plank.PositionManager.DockHeight.html" class="property">DockHeight</a></b> { <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The static height of the dock.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Plank.PositionManager.DockBackgroundHeight.html" class="property">DockBackgroundHeight</a></b> { <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The height of the dock's background image.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Plank.PositionManager.VisibleDockWidth.html" class="property">VisibleDockWidth</a></b> { <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The currently visible width of the dock.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Plank.PositionManager.DockWidth.html" class="property">DockWidth</a></b> { <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The static width of the dock.</span>
-            </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Plank.PositionManager.DockBackgroundWidth.html" class="property">DockBackgroundWidth</a></b> { <span class="main_keyword">get</span>; }
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The width of the dock's background image.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Theme-based launch-bounce height, scaled by icon size.</span>
             </div></li>
           <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Plank.PositionManager.MaxItemCount.html" class="property">MaxItemCount</a></b> { <span class="main_keyword">get</span>; }
             </span>
@@ -147,6 +123,10 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Resets all internal item caches.</span>
             </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Plank.PositionManager.is_horizontal_dock.html" class="method">is_horizontal_dock</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Return whether or not a dock is a horizontal dock.</span>
+            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="struct">Rectangle</span></span> <b><a href="Plank.PositionManager.get_cursor_region.html" class="method">get_cursor_region</a></b> ()
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Returns the cursor region for the dock. This is the region that the 
@@ -156,6 +136,10 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Returns the static dock region for the dock. This is the region that 
                 the dock occupies when not hidden.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Plank.PositionManager.update_regions.html" class="method">update_regions</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Call when any cached region needs updating.</span>
             </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Plank.PositionManager.DockItemDrawValue.html" class="struct">DockItemDrawValue</a></span> <b><a href="Plank.PositionManager.get_draw_value_for_item.html" class="method">get_draw_value_for_item</a></b> (<span class="main_type"><a href="Plank.Items.DockItem.html" class="class">DockItem</a></span> item)
             </span>
@@ -186,6 +170,10 @@
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Plank.PositionManager.get_dock_draw_position.html" class="method">get_dock_draw_position</a></b> (<span class="main_keyword">out</span> <span class="main_basic_type"><span class="struct">int</span></span> x, <span class="main_keyword">out</span> <span class="main_basic_type"><span class="struct">int</span></span> y)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Get's the x and y position to display the main dock buffer.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="struct">Rectangle</span></span> <b><a href="Plank.PositionManager.get_dock_window_region.html" class="method">get_dock_window_region</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Get's the region to display the dock window at.</span>
             </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="struct">Rectangle</span></span> <b><a href="Plank.PositionManager.get_background_region.html" class="method">get_background_region</a></b> ()
             </span>

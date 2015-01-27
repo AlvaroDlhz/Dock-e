@@ -103,14 +103,9 @@ namespace Plank.Items
 			}
 		}
 		
-		Gee.ArrayList<string> supported_mime_types = new Gee.ArrayList<string> ();
-		
-		Gee.ArrayList<string> actions = new Gee.ArrayList<string> ();
-#if HAVE_GEE_0_8
-		Gee.HashMap<string, string> actions_map = new Gee.HashMap<string, string> ();
-#else
-		Gee.HashMap<string, string> actions_map = new Gee.HashMap<string, string> (str_hash, str_equal);
-#endif
+		Gee.ArrayList<string> supported_mime_types;
+		Gee.ArrayList<string> actions;
+		Gee.HashMap<string, string> actions_map;
 		
 		string? unity_application_uri = null;
 		string? unity_dbusname = null;
@@ -133,6 +128,14 @@ namespace Plank.Items
 		
 		construct
 		{
+			supported_mime_types = new Gee.ArrayList<string> ();
+			actions = new Gee.ArrayList<string> ();
+#if HAVE_GEE_0_8
+			actions_map = new Gee.HashMap<string, string> ();
+#else
+			actions_map = new Gee.HashMap<string, string> (str_hash, str_equal);
+#endif
+			
 			Prefs.notify["Launcher"].connect (handle_launcher_changed);
 			
 			if (!is_valid ())
@@ -143,6 +146,10 @@ namespace Plank.Items
 		
 		~ApplicationDockItem ()
 		{
+			supported_mime_types = null;
+			actions = null;
+			actions_map = null;
+			
 			Prefs.notify["Launcher"].disconnect (handle_launcher_changed);
 			
 			App = null;
@@ -192,7 +199,11 @@ namespace Plank.Items
 		
 		public bool is_window ()
 		{
-			return (App != null && (App.get_desktop_file () == null || App.get_desktop_file () == ""));
+			if (App == null)
+				return false;
+			
+			unowned string? desktop_file = App.get_desktop_file ();
+			return (desktop_file == null || desktop_file == "");
 		}
 		
 		void handle_launcher_changed ()
@@ -222,10 +233,7 @@ namespace Plank.Items
 		
 		void handle_closed ()
 		{
-			if (this is TransientDockItem)
-				App = null;
-			
-			reset_application_status ();
+			App = null;
 			
 			app_closed ();
 		}
@@ -414,12 +422,16 @@ namespace Plank.Items
 					if (s.char_count () < 3)
 						continue;
 					
-					var r = new Regex ("^%s$".printf (p.printf (s)),
-						RegexCompileFlags.CASELESS | RegexCompileFlags.ANCHORED | RegexCompileFlags.DOLLAR_ENDONLY,
-						RegexMatchFlags.ANCHORED | RegexMatchFlags.NOTEMPTY);
-					r.match (window_name, RegexMatchFlags.ANCHORED | RegexMatchFlags.NOTEMPTY, out m);
-					if (m.matches ())
-						return m.fetch (1);
+					try {
+						var r = new Regex ("^%s$".printf (p.printf (s)),
+							RegexCompileFlags.CASELESS | RegexCompileFlags.ANCHORED | RegexCompileFlags.DOLLAR_ENDONLY,
+							RegexMatchFlags.ANCHORED | RegexMatchFlags.NOTEMPTY);
+						r.match (window_name, RegexMatchFlags.ANCHORED | RegexMatchFlags.NOTEMPTY, out m);
+						if (m.matches ())
+							return m.fetch (1);
+					} catch (RegexError e) {
+						warning (e.message);
+					}
 				}
 			}
 			
@@ -437,6 +449,10 @@ namespace Plank.Items
 			if (App != null)
 				windows = App.get_windows ();
 			
+			var window_count = 0U;
+			if (windows != null)
+				window_count = windows.length ();
+			
 			unowned DefaultApplicationDockItemProvider? default_provider = (Container as DefaultApplicationDockItemProvider);
 			if (default_provider != null
 				&& !default_provider.Prefs.LockItems
@@ -447,8 +463,8 @@ namespace Plank.Items
 				items.add (item);
 			}
 			
-			if (is_running () && windows != null && windows.length () > 0) {
-				var item = create_menu_item (_("_Close All"), "window-close-symbolic;;window-close");
+			if (is_running () && window_count > 0) {
+				var item = create_menu_item ((window_count > 1 ? _("_Close All") : _("_Close")), "window-close-symbolic;;window-close");
 				item.activate.connect (() => WindowControl.close_all (App));
 				items.add (item);
 			}
@@ -484,7 +500,7 @@ namespace Plank.Items
 				}
 			}
 			
-			if (is_running () && windows != null && windows.length () > 0) {
+			if (is_running () && window_count > 1) {
 				if (items.size > 0)
 					items.add (new Gtk.SeparatorMenuItem ());
 				
@@ -498,7 +514,7 @@ namespace Plank.Items
 					var window_name = window.get_name ();
 					window_name = shorten_window_name (window_name);
 					
-					if (pbuf == null)
+					if (pbuf != null)
 						window_item = create_menu_item_with_pixbuf (window_name, pbuf, true);
 					else 
 						window_item = create_menu_item (window_name, Icon, true);
@@ -839,7 +855,7 @@ namespace Plank.Items
 #if HAVE_DBUSMENU
 				else if (prop_key == "quicklist") {
 					/* The value is the object path of the dbusmenu */
-					var dbus_path = prop_value.get_string ();
+					unowned string dbus_path = prop_value.get_string ();
 					// Make sure we don't update our Quicklist instance if isn't necessary
 					if (Quicklist == null || Quicklist.dbus_object != dbus_path)
 						if (dbus_path != "") {

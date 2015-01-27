@@ -2,7 +2,7 @@
 m4_define([plank_released], [1])
 
 m4_define([plank_major_version], [0])
-m4_define([plank_minor_version], [7])
+m4_define([plank_minor_version], [8])
 m4_define([plank_micro_version], [1])
 m4_define([plank_nano_version], [0])
 
@@ -102,7 +102,7 @@ fi
 # -----------------------------------------------------------
 # Dependencies
 # -----------------------------------------------------------
-GTK_MIN_VERSION=3.0.0
+GTK_MIN_VERSION=3.4.0
 GLIB_MIN_VERSION=2.32.0
 GDK_PIXBUF_MIN_VERSION=2.26.0
 BAMF_MIN_VERSION=0.2.92
@@ -152,14 +152,23 @@ fi
 # Optional Dependencies
 # -----------------------------------------------------------
 
-# Check for HiDPI support of Gtk+
+# Check for HiDPI support of Gtk+ and Cairo
 GTK_MIN_VERSION=3.10.0
-GTK_PKGS="gtk+-3.0 >= $GTK_MIN_VERSION"
-PKG_CHECK_MODULES(GTK, $GTK_PKGS, [enable_hidpi=yes], [enable_hidpi=no])
+CAIRO_MIN_VERSION=1.13
+HIDPI_PKGS="gtk+-3.0 >= $GTK_MIN_VERSION cairo >= $CAIRO_MIN_VERSION"
+PKG_CHECK_MODULES(HIDPI, $HIDPI_PKGS, [enable_hidpi=yes], [enable_hidpi=no])
 if test "x$enable_hidpi" = "xyes" ; then
+    VALAFLAGS="$VALAFLAGS --define HAVE_HIDPI"
+fi
+AM_CONDITIONAL([HAVE_HIDPI], [test "x$enable_hidpi" = "xyes"])
+
+# Check for CSD support of Gtk+
+GTK_PKGS="gtk+-3.0 >= $GTK_MIN_VERSION"
+PKG_CHECK_MODULES(GTK, $GTK_PKGS, [enable_gtk310=yes], [enable_gtk310=no])
+if test "x$enable_gtk310" = "xyes" ; then
     VALAFLAGS="$VALAFLAGS --define HAVE_GTK_3_10"
 fi
-AM_CONDITIONAL([HAVE_hidpi], [test "x$enable_hidpi" = "xyes"])
+AM_CONDITIONAL([HAVE_GTK_3_10], [test "x$enable_gtk310" = "xyes"])
 
 # Check for newer BAMF
 BAMF_MIN_VERSION=0.4.0
@@ -170,12 +179,12 @@ if test "x$enable_bamf_0_4" = "xyes" ; then
 fi
 AM_CONDITIONAL([HAVE_BAMF_0_4], [test "x$enable_bamf_0_4" = "xyes"])
 
-# Check for gee-0.8 and use it if available, fallback to gee-1.0 (0.6) by default
+# Check for gee-0.8 and prefer to use it, no automatic fallback to gee-1.0 (0.6)
 AC_ARG_ENABLE([gee-0.8],
               AS_HELP_STRING([--enable-gee-0.8],
                              [Enable use of gee-0.8 instead of gee-1.0]),
               [enable_gee_0_8=$enableval],
-              [PKG_CHECK_MODULES(GEE_0_8, gee-0.8, [enable_gee_0_8=yes], [enable_gee_0_8=no])])
+              [enable_gee_0_8=yes])
 if test "x$enable_gee_0_8" = "xyes" ; then
     GEE_DEPEND=gee-0.8
     PLANK_CORE_PKGS="$PLANK_CORE_PKGS gee-0.8"
@@ -259,11 +268,22 @@ if test "x$enable_benchmark" = "xyes" ; then
     VALAFLAGS="$VALAFLAGS --define BENCHMARK"
 fi
 
+# Run checks and add build-flags to e.g. differenciate between Linux and BSD
+AC_CHECK_HEADERS([sys/prctl.h], [VALAFLAGS="$VALAFLAGS --define HAVE_SYS_PRCTL_H"])
+
+
 PLANK_CORE_VALAFLAGS="$VALAFLAGS_CORE $VALAFLAGS $PLANK_CORE_VALA_PKGS"
 AC_SUBST(PLANK_CORE_VALAFLAGS)
 PLANK_DOCS_VALAFLAGS="$VALAFLAGS $PLANK_CORE_VALA_PKGS"
 AC_SUBST(PLANK_DOCS_VALAFLAGS)
 
+
+# -----------------------------------------------------------
+# Additional build flags
+# -----------------------------------------------------------
+
+# Use RUNPATH instead of RPATH if needed
+CFLAGS="$CFLAGS -Wl,--enable-new-dtags"
 
 # -----------------------------------------------------------
 # Documentation

@@ -167,6 +167,7 @@ am__objects_5 = DockController.lo DockPreferences.lo DockRenderer.lo \
 	Services/Paths.lo Services/Preferences.lo Services/System.lo \
 	Widgets/CompositedWindow.lo Widgets/DockWindow.lo \
 	Widgets/HoverWindow.lo Widgets/PoofWindow.lo \
+	Widgets/PreferencesWindow.lo \
 	Widgets/TitledSeparatorMenuItem.lo $(am__objects_1)
 nodist_libplank_la_OBJECTS = $(am__objects_3) $(am__objects_4) \
 	$(am__objects_5) $(am__objects_1)
@@ -448,8 +449,6 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
-GEE_0_8_CFLAGS = @GEE_0_8_CFLAGS@
-GEE_0_8_LIBS = @GEE_0_8_LIBS@
 GEE_DEPEND = @GEE_DEPEND@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
 GLIB_COMPILE_RESOURCES = @GLIB_COMPILE_RESOURCES@
@@ -457,6 +456,8 @@ GMSGFMT = @GMSGFMT@
 GREP = @GREP@
 GTK_CFLAGS = @GTK_CFLAGS@
 GTK_LIBS = @GTK_LIBS@
+HIDPI_CFLAGS = @HIDPI_CFLAGS@
+HIDPI_LIBS = @HIDPI_LIBS@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -688,6 +689,7 @@ libplank_la_VALASOURCES = \
 	Widgets/DockWindow.vala \
 	Widgets/HoverWindow.vala \
 	Widgets/PoofWindow.vala \
+	Widgets/PreferencesWindow.vala \
 	Widgets/TitledSeparatorMenuItem.vala \
 	$(NULL)
 
@@ -746,7 +748,6 @@ EXTRA_DIST = \
 	abicheck.sh \
 	libplank.symbols \
 	plank.deps.in \
-	plank.gresource.xml \
 	plank.pc.in \
 	Version.vala.in \
 	$(NULL)
@@ -934,6 +935,8 @@ Widgets/HoverWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
 Widgets/PoofWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
+Widgets/PreferencesWindow.lo: Widgets/$(am__dirstamp) \
+	Widgets/$(DEPDIR)/$(am__dirstamp)
 Widgets/TitledSeparatorMenuItem.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
 
@@ -995,6 +998,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/DockWindow.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/HoverWindow.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/PoofWindow.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/PreferencesWindow.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo@am__quote@
 
 .c.o:
@@ -1506,7 +1510,7 @@ uninstall-am: uninstall-libLTLIBRARIES \
 	uninstall-nodist_pkgconfigDATA uninstall-nodist_vapiDATA
 
 
-plank-resources.c: plank.gresource.xml Makefile $(shell $(GLIB_COMPILE_RESOURCES) --generate-dependencies --sourcedir $(top_srcdir)/data $(srcdir)/plank.gresource.xml)
+plank-resources.c: $(top_srcdir)/data/plank.gresource.xml Makefile $(shell $(GLIB_COMPILE_RESOURCES) --generate-dependencies --sourcedir $(top_srcdir)/data $(top_srcdir)/data/plank.gresource.xml)
 	$(AM_V_GEN) XMLLINT=$(XMLLINT) $(GLIB_COMPILE_RESOURCES) --target $@ --sourcedir $(top_srcdir)/data --generate --c-name plank $<
 
 plank.h plank.vapi: libplank_la_vala.stamp

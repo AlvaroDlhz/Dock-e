@@ -167,12 +167,14 @@ namespace Plank.Factories
 					if (item == null)
 						continue;
 					
-					if (!item.is_valid ()) {
+					unowned DockItem? dupe;
+					if ((dupe = find_item_for_uri (result, item.Launcher)) != null)
+						warning ("The launcher '%s' in dock item '%s' is already managed by dock item '%s'",
+							item.Launcher, file.get_path (), dupe.DockItemFilename);
+					else if (!item.is_valid ())
 						warning ("The launcher '%s' in dock item '%s' does not exist", item.Launcher, file.get_path ());
-						continue;
-					}
-					
-					result.add (item);
+					else
+						result.add (item);
 				}
 			} catch (Error e) {
 				critical ("Error loading dock items from '%s'. (%s)", source_dir.get_path () ?? "", e.message);
@@ -209,6 +211,41 @@ namespace Plank.Factories
 			return result;
 		}
 		
+		unowned DockItem? find_item_for_uri (Gee.ArrayList<DockItem> items, string uri)
+		{
+			foreach (var element in items) {
+				unowned DockItem? item = (element as DockItem);
+				if (item != null && item.Launcher == uri)
+					return item;
+			}
+			
+			return null;
+		}
+
+		void make_dock_item_for_desktop_id (string id)
+		{
+			var app_info = new DesktopAppInfo (id);
+			if (app_info == null) {
+				warning ("Failed to create dock item for '%s'", id);
+				return;
+			}
+			
+			var filename = app_info.get_filename ();
+			if (filename == null) {
+				warning ("Failed to create dock item for '%s'", id);
+				return;
+			}
+			
+			try {
+				var uri = Filename.to_uri (filename);
+				if (make_dock_item (uri) == null)
+					warning ("Failed to create dock item for '%s' ('%s')", id, uri);
+			} catch (ConvertError e) {
+				warning ("Failed to create dock item for '%s'", id);
+				warning (e.message);
+			}
+		}
+
 		bool make_default_gnome_items ()
 		{
 			var browser = AppInfo.get_default_for_type ("x-scheme-handler/http", false);
@@ -225,47 +262,19 @@ namespace Plank.Factories
 				return false;
 			
 			if (browser != null)
-				try {
-					make_dock_item (Filename.to_uri (new DesktopAppInfo (browser.get_id ()).get_filename ()));
-				} catch (ConvertError e) {
-					warning (e.message);
-				}
+				make_dock_item_for_desktop_id (browser.get_id ());
 			if (mail != null)
-				try {
-					make_dock_item (Filename.to_uri (new DesktopAppInfo (mail.get_id ()).get_filename ()));
-				} catch (ConvertError e) {
-					warning (e.message);
-				}
+				make_dock_item_for_desktop_id (mail.get_id ());
 			if (terminal != null)
-				try {
-					make_dock_item (Filename.to_uri (new DesktopAppInfo (terminal.get_id ()).get_filename ()));
-				} catch (ConvertError e) {
-					warning (e.message);
-				}
+				make_dock_item_for_desktop_id (terminal.get_id ());
 			if (calendar != null)
-				try {
-					make_dock_item (Filename.to_uri (new DesktopAppInfo (calendar.get_id ()).get_filename ()));
-				} catch (ConvertError e) {
-					warning (e.message);
-				}
+				make_dock_item_for_desktop_id (calendar.get_id ());
 			if (audio != null)
-				try {
-					make_dock_item (Filename.to_uri (new DesktopAppInfo (audio.get_id ()).get_filename ()));
-				} catch (ConvertError e) {
-					warning (e.message);
-				}
+				make_dock_item_for_desktop_id (audio.get_id ());
 			if (video != null)
-				try {
-					make_dock_item (Filename.to_uri (new DesktopAppInfo (video.get_id ()).get_filename ()));
-				} catch (ConvertError e) {
-					warning (e.message);
-				}
+				make_dock_item_for_desktop_id (video.get_id ());
 			if (photo != null)
-				try {
-					make_dock_item (Filename.to_uri (new DesktopAppInfo (photo.get_id ()).get_filename ()));
-				} catch (ConvertError e) {
-					warning (e.message);
-				}
+				make_dock_item_for_desktop_id (photo.get_id ());
 			
 			return true;
 		}

@@ -33,11 +33,11 @@ namespace Plank.Items
 		
 		public File LaunchersDir { get; construct; }
 		
-		public bool HandlesTransients { get; construct; }
+		bool handles_transients;
 		
 		FileMonitor? items_monitor = null;
 		bool delay_items_monitor_handle = false;
-		Gee.ArrayList<GLib.File> queued_files = new Gee.ArrayList<GLib.File> ();
+		Gee.ArrayList<GLib.File> queued_files;
 		
 		uint launcher_entry_dbus_signal_id = 0;
 		uint dbus_name_owner_changed_signal_id = 0;
@@ -49,11 +49,15 @@ namespace Plank.Items
 		 */
 		public ApplicationDockItemProvider (File launchers_dir)
 		{
-			Object (LaunchersDir : launchers_dir, HandlesTransients : false);
+			Object (LaunchersDir : launchers_dir);
 		}
 		
 		construct
 		{
+			handles_transients = (this is DefaultApplicationDockItemProvider);
+			
+			queued_files = new Gee.ArrayList<GLib.File> ();
+			
 			// Make sure our launchers-directory exists
 			Paths.ensure_directory_exists (LaunchersDir);
 			
@@ -80,6 +84,8 @@ namespace Plank.Items
 		
 		~ApplicationDockItemProvider ()
 		{
+			queued_files = null;
+			
 			Matcher.get_default ().application_opened.disconnect (app_opened);
 			
 			if (items_monitor != null) {
@@ -327,10 +333,14 @@ namespace Plank.Items
 				if (item == null)
 					continue;
 				
-				if (item.is_valid ())
-					add_item (item);
-				else
+				unowned DockItem? dupe;
+				if ((dupe = item_for_uri (item.Launcher)) != null)
+					warning ("The launcher '%s' in dock item '%s' is already managed by dock item '%s'",
+						item.Launcher, file.get_path (), dupe.DockItemFilename);
+				else if (!item.is_valid ())
 					warning ("The launcher '%s' in dock item '%s' does not exist", item.Launcher, file.get_path ());
+				else
+					add_item (item);
 			}
 			
 			queued_files.clear ();
@@ -390,16 +400,6 @@ namespace Plank.Items
 			item_window_added (item);
 		}
 		
-		public override bool can_accept_drop (Gee.ArrayList<string> uris)
-		{
-			return false;
-		}
-		
-		public override bool accept_drop (Gee.ArrayList<string> uris)
-		{
-			return false;
-		}
-		
 		void handle_entry_signal (DBusConnection connection, string sender_name, string object_path,
 			string interface_name, string signal_name, Variant parameters)
 		{
@@ -437,6 +437,8 @@ namespace Plank.Items
 					remove_item (transient_item);
 				else
 					item_state_changed ();
+				
+				break;
 			}
 		}
 		
@@ -500,7 +502,7 @@ namespace Plank.Items
 				return;
 			}
 			
-			if (!HandlesTransients) {
+			if (handles_transients) {
 				// Find a matching desktop-file and create new TransientDockItem for this LauncherEntry
 				var desktop_file = desktop_file_for_application_uri (app_uri);
 				if (desktop_file != null) {

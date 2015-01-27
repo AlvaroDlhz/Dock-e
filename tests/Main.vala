@@ -73,38 +73,46 @@ namespace Plank.Tests
 	{
 		public TestMain ()
 		{
-			build_data_dir = Config.DATA_DIR;
-			build_pkg_data_dir = Config.DATA_DIR + "/test";
-			build_release_name = "testname";
-			build_version = "0.0.0";
-			build_version_info = "testing";
+			var authors = new string[] {
+					"Robert Dyer <robert@go-docky.com>",
+					"Rico Tzschichholz <rtz@go-docky.com>",
+					"Michal Hruby <michal.mhr@gmail.com>"
+				};
 			
-			program_name = "Test";
-			exec_name = "test";
+			var documenters = new string[] {
+					"Robert Dyer <robert@go-docky.com>",
+					"Rico Tzschichholz <rtz@go-docky.com>"
+				};
 			
-			app_copyright = "2014";
-			app_dbus = "net.launchpad.planktest";
-			app_icon = "test";
-			app_launcher = "test.desktop";
+			var artists = new string[] {
+					"Daniel Foré <bunny@go-docky.com>"
+				};
 			
-			main_url = "https://launchpad.net/plank";
-			help_url = "https://answers.launchpad.net/plank";
-			translate_url = "https://translations.launchpad.net/plank";
+			Object (
+				build_data_dir : Config.DATA_DIR,
+				build_pkg_data_dir : Config.DATA_DIR + "/test",
+				build_release_name : "testname",
+				build_version : "0.0.0",
+				build_version_info : "testing",
 			
-			about_authors = {
-				"Robert Dyer <robert@go-docky.com>",
-				"Rico Tzschichholz <rtz@go-docky.com>",
-				"Michal Hruby <michal.mhr@gmail.com>"
-			};
-			about_documenters = {
-				"Robert Dyer <robert@go-docky.com>",
-				"Rico Tzschichholz <rtz@go-docky.com>"
-			};
-			about_artists = {
-				"Daniel Foré <bunny@go-docky.com>"
-			};
-			about_translators = "";
-			about_license_type = Gtk.License.GPL_3_0;
+				program_name : "Test",
+				exec_name : "test",
+			
+				app_copyright : "2014",
+				app_dbus : "net.launchpad.planktest",
+				app_icon : "test",
+				app_launcher : "test.desktop",
+			
+				main_url : "https://launchpad.net/plank",
+				help_url : "https://answers.launchpad.net/plank",
+				translate_url : "https://translations.launchpad.net/plank",
+			
+				about_authors : authors,
+				about_documenters : documenters,
+				about_artists : artists,
+				about_translators : "",
+				about_license_type : Gtk.License.GPL_3_0
+			);
 		}
 	}
 }

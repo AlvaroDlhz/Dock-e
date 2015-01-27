@@ -7,53 +7,187 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plank\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2013-06-16 15:15+0000\n"
-"PO-Revision-Date: 2011-12-02 08:58+0000\n"
-"Last-Translator: Wylmer Wang <Unknown>\n"
+"POT-Creation-Date: 2015-01-21 12:36+0000\n"
+"PO-Revision-Date: 2015-01-10 10:34+0000\n"
+"Last-Translator: colindemian <dengmengpc@gmail.com>\n"
 "Language-Team: Chinese (Simplified) <zh_CN@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-06-17 07:12+0000\n"
-"X-Generator: Launchpad (build 16667)\n"
+"X-Launchpad-Export-Date: 2015-01-22 05:50+0000\n"
+"X-Generator: Launchpad (build 17306)\n"
+
+#: ../data/plank.appdata.xml.in.h:1
+msgid ""
+"Plank is meant to be the simplest dock on the planet. The goal is to provide "
+"just what a dock needs and absolutely nothing more."
+msgstr "Plank绝对是地球上最简洁的Dock。宗旨是拒绝华而不实、只提供一个Dock该有的功能。"
+
+#: ../data/plank.appdata.xml.in.h:2
+msgid ""
+"It is, however, a library which can be extended to create other dock "
+"programs with more advanced features. Thus, Plank is the underlying "
+"technology for Docky (starting in version 3.0.0) and aims to provide all the "
+"core features while Docky extends it to add fancier things like Docklets, "
+"painters, settings dialogs, etc."
+msgstr ""
+"与此同时，它也是一个可以扩展创建更多特性的Dock程序库。因此，Plank实际上是Docky(从版本3.0.0开始)的底层技术，为Docky提供了所有核心"
+"的功能。Docky在其基础上扩展了更多酷炫特性如Docklet、画笔、设置对话框等。"
 
 #: ../data/plank.desktop.in.h:1
 msgid "Plank. Stupidly simple."
 msgstr "Plank. 简单得无语。"
 
-#: ../lib/Items/ApplicationDockItem.vala:356
-#: ../lib/Items/FileDockItem.vala:290 ../lib/Items/FileDockItem.vala:308
+#: ../data/ui/preferences.ui.h:1
+msgid "Theme:"
+msgstr "主题："
+
+#: ../data/ui/preferences.ui.h:2
+msgid "Position:"
+msgstr "位置："
+
+#: ../data/ui/preferences.ui.h:3
+msgid "Left"
+msgstr "左侧"
+
+#: ../data/ui/preferences.ui.h:4
+msgid "Right"
+msgstr "右侧"
+
+#: ../data/ui/preferences.ui.h:5
+msgid "Top"
+msgstr "顶部"
+
+#: ../data/ui/preferences.ui.h:6
+msgid "Bottom"
+msgstr "底部"
+
+#: ../data/ui/preferences.ui.h:7
+msgid "Alignment:"
+msgstr "对齐方式："
+
+#: ../data/ui/preferences.ui.h:8
+msgid "Fill"
+msgstr "填充"
+
+#: ../data/ui/preferences.ui.h:9
+msgid "Start"
+msgstr "首部"
+
+#: ../data/ui/preferences.ui.h:10
+msgid "End"
+msgstr "尾部"
+
+#: ../data/ui/preferences.ui.h:11
+msgid "Center"
+msgstr "中部"
+
+#: ../data/ui/preferences.ui.h:12
+msgid "On Primary Display:"
+msgstr "在主显示器上："
+
+#: ../data/ui/preferences.ui.h:13
+msgid "Offset in percent from the center of the screen-edge"
+msgstr "从屏幕边缘的中心按比例微调"
+
+#: ../data/ui/preferences.ui.h:14
+msgid "Icon Alignment:"
+msgstr "图标排列："
+
+#: ../data/ui/preferences.ui.h:15
+msgid "Icon Size:"
+msgstr "图标尺寸："
+
+#: ../data/ui/preferences.ui.h:16
+msgid "Appearance"
+msgstr "外观"
+
+#: ../data/ui/preferences.ui.h:17
+msgid "Show Unpinned:"
+msgstr "显示未收藏项："
+
+#: ../data/ui/preferences.ui.h:18
+msgid "Restrict to Workspace:"
+msgstr "限制到工作区："
+
+#: ../data/ui/preferences.ui.h:19
+msgid "Lock Icons:"
+msgstr "锁定图标："
+
+#: ../data/ui/preferences.ui.h:20
+msgid "Automatic Pinning:"
+msgstr "自动加入收藏："
+
+#: ../data/ui/preferences.ui.h:21
+msgid "Intellihide"
+msgstr "智能隐藏"
+
+#: ../data/ui/preferences.ui.h:22
+msgid "Autohide"
+msgstr "自动隐藏"
+
+#: ../data/ui/preferences.ui.h:23
+msgid "Dodge maximized window"
+msgstr "最大化窗口时避开"
+
+#: ../data/ui/preferences.ui.h:24
+msgid "Delay in ms before showing the dock"
+msgstr ""
+
+#: ../data/ui/preferences.ui.h:25
+msgid "Pressure Reveal:"
+msgstr ""
+
+#: ../data/ui/preferences.ui.h:26
+msgid "Item Management"
+msgstr "项目管理"
+
+#: ../data/ui/preferences.ui.h:27
+msgid "Hide Dock"
+msgstr "影藏Dock"
+
+#: ../data/ui/preferences.ui.h:28
+msgid "Behaviour"
+msgstr "行为"
+
+#: ../lib/Items/ApplicationDockItem.vala:460
+#: ../lib/Items/FileDockItem.vala:327 ../lib/Items/FileDockItem.vala:345
 msgid "_Keep in Dock"
 msgstr "固定在 Dock 上(_K)"
 
-#: ../lib/Items/ApplicationDockItem.vala:366
-msgid "Unma_ximize"
-msgstr "取消最大化(_X)"
-
-#: ../lib/Items/ApplicationDockItem.vala:370
-msgid "Ma_ximize"
-msgstr "最大化(_X)"
-
-#: ../lib/Items/ApplicationDockItem.vala:375
+#: ../lib/Items/ApplicationDockItem.vala:467
 msgid "_Close All"
 msgstr "全部关闭(_C)"
 
-#: ../lib/Items/FileDockItem.vala:295
+#: ../lib/Items/ApplicationDockItem.vala:467
+msgid "_Close"
+msgstr "关闭(_C)"
+
+#: ../lib/Items/FileDockItem.vala:332
 msgid "_Open in File Browser"
 msgstr "在文件管理器中打开(_O)"
 
-#: ../lib/Items/FileDockItem.vala:313
+#: ../lib/Items/FileDockItem.vala:350
 msgid "_Open"
 msgstr "打开(_O)"
 
-#: ../lib/Items/FileDockItem.vala:317
+#: ../lib/Items/FileDockItem.vala:354
 msgid "Open Containing _Folder"
 msgstr "打开所在的文件夹(_F)"
 
-#: ../lib/Items/PlankDockItem.vala:79
+#: ../lib/Items/PlaceholderDockItem.vala:35
+msgid "Drop applications or files here"
+msgstr "将应用程序或文件拖放至此处"
+
+#: ../lib/Items/PlankDockItem.vala:78
 msgid "Get _Help Online..."
 msgstr "获得在线帮助(_H)..."
 
-#: ../lib/Items/PlankDockItem.vala:83
+#: ../lib/Items/PlankDockItem.vala:82
 msgid "_Translate This Application..."
 msgstr "翻译该应用程序(_T)..."
+
+#: ../lib/Widgets/PreferencesWindow.vala:62
+#: ../lib/Widgets/PreferencesWindow.vala:72
+msgid "Preferences"
+msgstr "首选项"

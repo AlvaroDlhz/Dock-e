@@ -27,6 +27,7 @@ namespace Plank.Widgets
 	public class DockWindow : CompositedWindow
 	{
 		const uint LONG_PRESS_TIME = 750;
+		const uint HOVER_DELAY_TIME = 200;
 		
 		/**
 		 * The controller for this dock.
@@ -37,28 +38,28 @@ namespace Plank.Widgets
 		/**
 		 * The currently hovered item (if any).
 		 */
-		public DockItem? HoveredItem { get; protected set; }
+		public DockItem? HoveredItem { get; private set; }
 		
 		/**
 		 * The currently hovered item-provider (if any).
 		 */
-		public DockItemProvider? HoveredItemProvider { get; protected set; }
+		public DockItemProvider? HoveredItemProvider { get; private set; }
 		
 		
 		/**
 		 * The item which "received" the button-pressed signal (if any).
 		 */
-		unowned DockItem? ClickedItem { get; protected set; }
+		unowned DockItem? ClickedItem { get; private set; }
 		
 		/**
 		 * The popup menu for this dock.
 		 */
-		protected Gtk.Menu? menu;
+		Gtk.Menu? menu;
 		
 		/**
 		 * The tooltip window for this dock.
 		 */
-		protected HoverWindow hover;
+		HoverWindow hover;
 		
 		uint reposition_timer = 0;
 		uint hover_reposition_timer = 0;
@@ -69,7 +70,7 @@ namespace Plank.Widgets
 
 		bool dock_is_starting = true;
 		
-		Cairo.RectangleInt input_rect;
+		Gdk.Rectangle input_rect;
 		
 		/**
 		 * Creates a new dock window.
@@ -124,14 +125,18 @@ namespace Plank.Widgets
 		 */
 		public override bool button_press_event (Gdk.EventButton event)
 		{
+			// FIXME Needed for gtk+ 3.14+
+			if (menu_is_visible ())
+				return Gdk.EVENT_STOP;
+			
 			// If the dock is hidden we should ignore it.
 			if (controller.hide_manager.Hidden)
-				return true;
+				return Gdk.EVENT_STOP;
 			
 			// This event gets fired before the drag end event,
 			// in this case we ignore it.
 			if (controller.drag_manager.InternalDragActive)
-				return true;
+				return Gdk.EVENT_STOP;
 			
 			// If the cursor got hidden due inactivity or the HoveredItem got
 			// set null for other reasons we need to make sure this click gets
@@ -159,7 +164,7 @@ namespace Plank.Widgets
 				});
 			}
 			
-			return true;
+			return Gdk.EVENT_STOP;
 		}
 		
 		/**
@@ -169,7 +174,7 @@ namespace Plank.Widgets
 		{
 			// If the dock is hidden we should ignore it.
 			if (controller.hide_manager.Hidden)
-				return true;
+				return Gdk.EVENT_STOP;
 			
 			if (long_press_timer > 0) {
 				Source.remove (long_press_timer);
@@ -179,17 +184,23 @@ namespace Plank.Widgets
 			if (long_press_active && long_press_button == event.button) {
 				long_press_active = false;
 				long_press_button = 0;
-				return true;
+				return Gdk.EVENT_STOP;
 			}
 			
 			if (controller.drag_manager.InternalDragActive)
-				return true;
+				return Gdk.EVENT_STOP;
 
+			// FIXME Needed for gtk+ 3.14+
+			if (ClickedItem == null && menu_is_visible ())
+				menu.hide ();
+			
 			// Make sure the HoveredItem is still the same since button-pressed
 			if (ClickedItem != null && HoveredItem == ClickedItem && !menu_is_visible ())
 				HoveredItem.clicked (PopupButton.from_event_button (event), event.state);
 			
-			return true;
+			ClickedItem = null;
+			
+			return Gdk.EVENT_STOP;
 		}
 		
 		/**
@@ -199,7 +210,7 @@ namespace Plank.Widgets
 		{
 			update_hovered ((int) event.x, (int) event.y);
 			
-			return true;
+			return Gdk.EVENT_STOP;
 		}
 		
 		/**
@@ -209,7 +220,7 @@ namespace Plank.Widgets
 		{
 			// ignore this event if it was sent explicitly
 			if ((bool) event.send_event)
-				return false;
+				return Gdk.EVENT_PROPAGATE;
 			
 			if (!menu_is_visible ()) {
 				set_hovered_provider (null);
@@ -217,7 +228,7 @@ namespace Plank.Widgets
 			} else
 				hover.hide ();
 			
-			return true;
+			return Gdk.EVENT_STOP;
 		}
 		
 		/**
@@ -225,8 +236,12 @@ namespace Plank.Widgets
 		 */
 		public override bool motion_notify_event (Gdk.EventMotion event)
 		{
+			// FIXME Needed for gtk+ 3.14+
+			if (menu_is_visible ())
+				return Gdk.EVENT_STOP;
+			
 			update_hovered ((int) event.x, (int) event.y);
-			return true;
+			return Gdk.EVENT_STOP;
 		}
 		
 		/**
@@ -248,14 +263,14 @@ namespace Plank.Widgets
 		{
 			// If the dock is hidden we should ignore it.
 			if (controller.hide_manager.Hidden)
-				return true;
+				return Gdk.EVENT_STOP;
 			
 			if (controller.drag_manager.InternalDragActive)
-				return true;
+				return Gdk.EVENT_STOP;
 			
-			// Ignore events for ScrollDirection.SMOOTH (since Gtk+ 3.4)
+			// FIXME Ignore events for ScrollDirection.SMOOTH (since gtk+ 3.4)
 			if (event.direction >= 4)
-				return true;
+				return Gdk.EVENT_STOP;
 			
 			if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
 				if (event.direction == Gdk.ScrollDirection.UP)
@@ -263,7 +278,7 @@ namespace Plank.Widgets
 				else if (event.direction == Gdk.ScrollDirection.DOWN)
 					controller.prefs.decrease_icon_size ();
 				
-				return true;
+				return Gdk.EVENT_STOP;
 			}
 			
 			if (HoveredItem != null) {
@@ -271,7 +286,7 @@ namespace Plank.Widgets
 				controller.renderer.animated_draw ();
 			}
 			
-			return true;
+			return Gdk.EVENT_STOP;
 		}
 		
 		/**
@@ -296,7 +311,7 @@ namespace Plank.Widgets
 			controller.renderer.draw_dock (cr);
 			set_input_mask ();
 			
-			return true;
+			return Gdk.EVENT_STOP;
 		}
 		
 		/**
@@ -314,7 +329,7 @@ namespace Plank.Widgets
 		 *
 		 * @param provider the hovered item-provider (if any) for this dock
 		 */
-		protected void set_hovered_provider (DockItemProvider? provider)
+		void set_hovered_provider (DockItemProvider? provider)
 		{
 			if (HoveredItemProvider == provider)
 				return;
@@ -327,7 +342,7 @@ namespace Plank.Widgets
 		 *
 		 * @param item the hovered item (if any) for this dock
 		 */
-		protected void set_hovered (DockItem? item)
+		void set_hovered (DockItem? item)
 		{
 			if (HoveredItem == item)
 				return;
@@ -348,13 +363,11 @@ namespace Plank.Widgets
 			
 			hover.hide ();
 			
-			if (HoveredItem == null || controller.drag_manager.InternalDragActive) {
-				ClickedItem = null;
+			if (HoveredItem == null || controller.drag_manager.InternalDragActive)
 				return;
-			}
 			
 			// don't be that demanding this delay is still fast enough
-			hover_reposition_timer = Gdk.threads_add_timeout (33, () => {
+			hover_reposition_timer = Gdk.threads_add_timeout (HOVER_DELAY_TIME, () => {
 				if (HoveredItem == null) {
 					hover_reposition_timer = 0;
 					return false;
@@ -370,7 +383,7 @@ namespace Plank.Widgets
 				int x, y;
 				hover.set_text (HoveredItem.Text);
 				controller.position_manager.get_hover_position (HoveredItem, out x, out y);
-				hover.show_at (x, y, controller.prefs.Position);
+				hover.show_at (x, y, controller.position_manager.Position);
 				
 				if (menu_is_visible ())
 					hover.hide ();
@@ -462,26 +475,22 @@ namespace Plank.Widgets
 		{
 			unowned PositionManager position_manager = controller.position_manager;
 			
-			var x = position_manager.win_x;
-			var y = position_manager.win_y;
-			
-			var width = position_manager.DockWidth;
-			var height = position_manager.DockHeight;
+			var win_rect = position_manager.get_dock_window_region ();
 			
 			int width_current, height_current;
 			get_size_request (out width_current, out height_current);
-			var needs_resize = (width != width_current || height != height_current);
+			var needs_resize = (win_rect.width != width_current || win_rect.height != height_current);
 			
 			var needs_reposition = true;
 			if (get_realized ()) {
 				int x_current, y_current;
 				get_position (out x_current, out y_current);
-				needs_reposition = (x != x_current || y != y_current);
+				needs_reposition = (win_rect.x != x_current || win_rect.y != y_current);
 			}
 			
 			if (needs_resize) {
-				Logger.verbose ("DockWindow.set_size_request (width = %i, height = %i)", width, height);
-				set_size_request (width, height);
+				Logger.verbose ("DockWindow.set_size_request (width = %i, height = %i)", win_rect.width, win_rect.height);
+				set_size_request (win_rect.width, win_rect.height);
 				controller.renderer.reset_buffers ();
 				
 				if (!needs_reposition) {
@@ -494,7 +503,7 @@ namespace Plank.Widgets
 			
 			if (needs_reposition) {
 				if (dock_is_starting) {
-					position (x, y);
+					position (win_rect.x, win_rect.y);
 				} else {
 					schedule_position ();
 				}
@@ -512,11 +521,9 @@ namespace Plank.Widgets
 				reposition_timer = 0;
 				
 				unowned PositionManager position_manager = controller.position_manager;
+				var win_rect = position_manager.get_dock_window_region ();
 				
-				var x = position_manager.win_x;
-				var y = position_manager.win_y;
-				
-				position (x, y);
+				position (win_rect.x, win_rect.y);
 				
 				return false;
 			});
@@ -583,7 +590,7 @@ namespace Plank.Widgets
 		 * @param button the button used to trigger the popup
 		 * @param show_plank_menu if the 'global' menu should be shown
 		 */
-		protected void show_menu (uint button, bool show_plank_menu)
+		void show_menu (uint button, bool show_plank_menu)
 		{
 			if (menu != null) {
 				foreach (var w in menu.get_children ())
@@ -620,13 +627,16 @@ namespace Plank.Widgets
 			if (show_plank_menu)
 				menu.popup (null, null, null, button, Gtk.get_current_event_time ());
 			else
-				menu.popup (null, null, position_menu, button, Gtk.get_current_event_time ());
+				menu.popup (null, null, (Gtk.MenuPositionFunc) position_menu, button, Gtk.get_current_event_time ());
+			
+			// FIXME Force a position-recalculation which fixes placement with gtk+ 3.15+
+			menu.reposition ();
 		}
 		
 		/**
 		 * Called when the popup menu hides.
 		 */
-		protected void on_menu_hide ()
+		void on_menu_hide ()
 		{
 			update_icon_regions ();
 			unowned HideManager hide_manager = controller.hide_manager;
@@ -640,7 +650,7 @@ namespace Plank.Widgets
 		/**
 		 * Called when the popup menu shows.
 		 */
-		protected void on_menu_show ()
+		void on_menu_show ()
 		{
 			update_icon_regions ();
 			hover.hide ();
@@ -655,7 +665,8 @@ namespace Plank.Widgets
 		 * @param y the y location to show the menu
 		 * @param push_in if the menu should push into the screen
 		 */
-		protected void position_menu (Gtk.Menu menu, out int x, out int y, out bool push_in)
+		[CCode (instance_pos = 4.1)]
+		void position_menu (Gtk.Menu menu, out int x, out int y, out bool push_in)
 		{
 			Gtk.Requisition requisition;
 			menu.get_preferred_size (null, out requisition);
@@ -668,15 +679,14 @@ namespace Plank.Widgets
 			if (!get_realized ())
 				return;
 			
-			var cursor = controller.position_manager.get_cursor_region ();
+			var cursor_rect = controller.position_manager.get_cursor_region ();
 			// FIXME bug 768722 - this fixes the crash, but not WHY this happens
-			return_if_fail (cursor.width > 0);
-			return_if_fail (cursor.height > 0);
+			return_if_fail (cursor_rect.width > 0);
+			return_if_fail (cursor_rect.height > 0);
 			
-			Cairo.RectangleInt rect = {cursor.x, cursor.y, cursor.width, cursor.height};
-			if (rect != input_rect) {
-				input_rect = rect;
-				get_window ().input_shape_combine_region (new Cairo.Region.rectangle (rect), 0, 0);
+			if (cursor_rect != input_rect) {
+				input_rect = cursor_rect;
+				get_window ().input_shape_combine_region (new Cairo.Region.rectangle ((Cairo.RectangleInt) cursor_rect), 0, 0);
 			}
 		}
 		
