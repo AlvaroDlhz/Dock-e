@@ -27,8 +27,8 @@
         <sub name="IndicatorState" link="Plank.Items.IndicatorState.html"></sub><sub name="ItemState" link="Plank.Items.ItemState.html"></sub></sub>
       <sub name="Widgets" link="Plank.Widgets.html"><sub name="CompositedWindow" link="Plank.Widgets.CompositedWindow.html"></sub>
         <sub name="DockWindow" link="Plank.Widgets.DockWindow.html"></sub><sub name="HoverWindow" link="Plank.Widgets.HoverWindow.html"></sub>
-        <sub name="PoofWindow" link="Plank.Widgets.PoofWindow.html"></sub>
-        <sub name="TitledSeparatorMenuItem" link="Plank.Widgets.TitledSeparatorMenuItem.html"></sub></sub>
+        <sub name="PoofWindow" link="Plank.Widgets.PoofWindow.html"></sub><sub name="PreferencesWindow" link="Plank.Widgets.PreferencesWindow.html">
+        </sub><sub name="TitledSeparatorMenuItem" link="Plank.Widgets.TitledSeparatorMenuItem.html"></sub></sub>
       <sub name="HideType" link="Plank.HideType.html"></sub></sub>
   </chapters><functions><keyword type="function" name="Plank.DockController.initialize" link="Plank.DockController.initialize.html"/>
     <keyword type="function" name="Plank.DockController.add_default_provider" link="Plank.DockController.add_default_provider.html"/>
@@ -106,8 +106,10 @@
     <keyword type="function" name="Plank.PositionManager.update" link="Plank.PositionManager.update.html"/>
     <keyword type="function" name="Plank.PositionManager.reset_item_cache" link="Plank.PositionManager.reset_item_cache.html"/>
     <keyword type="function" name="Plank.PositionManager.reset_item_caches" link="Plank.PositionManager.reset_item_caches.html"/>
+    <keyword type="function" name="Plank.PositionManager.is_horizontal_dock" link="Plank.PositionManager.is_horizontal_dock.html"/>
     <keyword type="function" name="Plank.PositionManager.get_cursor_region" link="Plank.PositionManager.get_cursor_region.html"/>
     <keyword type="function" name="Plank.PositionManager.get_static_dock_region" link="Plank.PositionManager.get_static_dock_region.html"/>
+    <keyword type="function" name="Plank.PositionManager.update_regions" link="Plank.PositionManager.update_regions.html"/>
     <keyword type="function" name="Plank.PositionManager.get_draw_value_for_item" link="Plank.PositionManager.get_draw_value_for_item.html"/>
     <keyword type="function" name="Plank.PositionManager.get_item_hover_region" link="Plank.PositionManager.get_item_hover_region.html"/>
     <keyword type="function" name="Plank.PositionManager.get_menu_position" link="Plank.PositionManager.get_menu_position.html"/>
@@ -115,6 +117,7 @@
     <keyword type="function" name="Plank.PositionManager.get_urgent_glow_position" link="Plank.PositionManager.get_urgent_glow_position.html"/>
     <keyword type="function" name="Plank.PositionManager.update_dock_position" link="Plank.PositionManager.update_dock_position.html"/>
     <keyword type="function" name="Plank.PositionManager.get_dock_draw_position" link="Plank.PositionManager.get_dock_draw_position.html"/>
+    <keyword type="function" name="Plank.PositionManager.get_dock_window_region" link="Plank.PositionManager.get_dock_window_region.html"/>
     <keyword type="function" name="Plank.PositionManager.get_background_region" link="Plank.PositionManager.get_background_region.html"/>
     <keyword type="function" name="Plank.PositionManager.get_icon_geometry" link="Plank.PositionManager.get_icon_geometry.html"/>
     <keyword type="function" name="Plank.PositionManager.get_struts" link="Plank.PositionManager.get_struts.html"/>
@@ -122,10 +125,9 @@
     <keyword type="function" name="Plank.PositionManager.PositionManager" link="Plank.PositionManager.PositionManager.html"/>
     <keyword type="property" name="Plank.PositionManager.controller" link="Plank.PositionManager.controller.html"/>
     <keyword type="property" name="Plank.PositionManager.screen_is_composited" link="Plank.PositionManager.screen_is_composited.html"/>
-    <keyword type="property" name="Plank.PositionManager.win_x" link="Plank.PositionManager.win_x.html"/>
-    <keyword type="property" name="Plank.PositionManager.win_y" link="Plank.PositionManager.win_y.html"/>
     <keyword type="property" name="Plank.PositionManager.LineWidth" link="Plank.PositionManager.LineWidth.html"/>
     <keyword type="property" name="Plank.PositionManager.IconSize" link="Plank.PositionManager.IconSize.html"/>
+    <keyword type="property" name="Plank.PositionManager.Position" link="Plank.PositionManager.Position.html"/>
     <keyword type="property" name="Plank.PositionManager.IndicatorSize" link="Plank.PositionManager.IndicatorSize.html"/>
     <keyword type="property" name="Plank.PositionManager.IconShadowSize" link="Plank.PositionManager.IconShadowSize.html"/>
     <keyword type="property" name="Plank.PositionManager.GlowSize" link="Plank.PositionManager.GlowSize.html"/>
@@ -134,12 +136,7 @@
     <keyword type="property" name="Plank.PositionManager.BottomPadding" link="Plank.PositionManager.BottomPadding.html"/>
     <keyword type="property" name="Plank.PositionManager.ItemPadding" link="Plank.PositionManager.ItemPadding.html"/>
     <keyword type="property" name="Plank.PositionManager.UrgentBounceHeight" link="Plank.PositionManager.UrgentBounceHeight.html"/>
-    <keyword type="property" name="Plank.PositionManager.VisibleDockHeight" link="Plank.PositionManager.VisibleDockHeight.html"/>
-    <keyword type="property" name="Plank.PositionManager.DockHeight" link="Plank.PositionManager.DockHeight.html"/>
-    <keyword type="property" name="Plank.PositionManager.DockBackgroundHeight" link="Plank.PositionManager.DockBackgroundHeight.html"/>
-    <keyword type="property" name="Plank.PositionManager.VisibleDockWidth" link="Plank.PositionManager.VisibleDockWidth.html"/>
-    <keyword type="property" name="Plank.PositionManager.DockWidth" link="Plank.PositionManager.DockWidth.html"/>
-    <keyword type="property" name="Plank.PositionManager.DockBackgroundWidth" link="Plank.PositionManager.DockBackgroundWidth.html"/>
+    <keyword type="property" name="Plank.PositionManager.LaunchBounceHeight" link="Plank.PositionManager.LaunchBounceHeight.html"/>
     <keyword type="property" name="Plank.PositionManager.MaxItemCount" link="Plank.PositionManager.MaxItemCount.html"/>
     <keyword type="function" name="Plank.PositionManager.DockItemDrawValue.move_in" link="Plank.PositionManager.DockItemDrawValue.move_in.html"/>
     <keyword type="function" name="Plank.PositionManager.DockItemDrawValue.move_right" link="Plank.PositionManager.DockItemDrawValue.move_right.html"/>
@@ -164,6 +161,7 @@
     <keyword type="property" name="Plank.Services.Paths.AppDataFolder" link="Plank.Services.Paths.AppDataFolder.html"/>
     <keyword type="property" name="Plank.Services.Paths.AppThemeFolder" link="Plank.Services.Paths.AppThemeFolder.html"/>
     <keyword type="property" name="Plank.Services.Paths.AppCacheFolder" link="Plank.Services.Paths.AppCacheFolder.html"/>
+    <keyword type="property" name="Plank.Services.Paths.AppName" link="Plank.Services.Paths.AppName.html"/>
     <keyword type="function" name="Plank.Services.Paths.initialize" link="Plank.Services.Paths.initialize.html"/>
     <keyword type="function" name="Plank.Services.Paths.ensure_directory_exists" link="Plank.Services.Paths.ensure_directory_exists.html"/>
     <keyword type="" name="Plank.Services.Paths" link="Plank.Services.Paths.html"/>
@@ -218,6 +216,7 @@
     <keyword type="function" name="Plank.Drawing.DrawingService.get_icon_from_gicon" link="Plank.Drawing.DrawingService.get_icon_from_gicon.html"/>
     <keyword type="function" name="Plank.Drawing.DrawingService.load_icon" link="Plank.Drawing.DrawingService.load_icon.html"/>
     <keyword type="function" name="Plank.Drawing.DrawingService.try_get_icon_file" link="Plank.Drawing.DrawingService.try_get_icon_file.html"/>
+    <keyword type="function" name="Plank.Drawing.DrawingService.load_icon_for_scale" link="Plank.Drawing.DrawingService.load_icon_for_scale.html"/>
     <keyword type="function" name="Plank.Drawing.DrawingService.ar_scale" link="Plank.Drawing.DrawingService.ar_scale.html"/>
     <keyword type="function" name="Plank.Drawing.DrawingService.average_color" link="Plank.Drawing.DrawingService.average_color.html"/>
     <keyword type="" name="Plank.Drawing.DrawingService" link="Plank.Drawing.DrawingService.html"/>
@@ -277,6 +276,7 @@
     <keyword type="function" name="Plank.Drawing.Theme.draw_inner_rect" link="Plank.Drawing.Theme.draw_inner_rect.html"/>
     <keyword type="function" name="Plank.Drawing.Theme.verify" link="Plank.Drawing.Theme.verify.html"/>
     <keyword type="constant" name="Plank.Drawing.Theme.DEFAULT_NAME" link="Plank.Drawing.Theme.DEFAULT_NAME.html"/>
+    <keyword type="constant" name="Plank.Drawing.Theme.GTK_THEME_NAME" link="Plank.Drawing.Theme.GTK_THEME_NAME.html"/>
     <keyword type="function" name="Plank.Drawing.Theme.Theme" link="Plank.Drawing.Theme.Theme.html"/>
     <keyword type="function" name="Plank.Drawing.Theme.Theme.with_name" link="Plank.Drawing.Theme.Theme.with_name.html"/>
     <keyword type="property" name="Plank.Drawing.Theme.TopRoundness" link="Plank.Drawing.Theme.TopRoundness.html"/>
@@ -313,47 +313,34 @@
     <keyword type="function" name="Plank.Drawing.Color.from_prefs_string" link="Plank.Drawing.Color.from_prefs_string.html"/>
     <keyword type="struct" name="Plank.Drawing.Color" link="Plank.Drawing.Color.html"/>
     <keyword type="" name="Plank.Drawing" link="Plank.Drawing.html"/>
-    <keyword type="function" name="Plank.Factories.AbstractMain.run" link="Plank.Factories.AbstractMain.run.html"/>
-    <keyword type="function" name="Plank.Factories.AbstractMain.initialize_program" link="Plank.Factories.AbstractMain.initialize_program.html"/>
-    <keyword type="function" name="Plank.Factories.AbstractMain.parse_commandline" link="Plank.Factories.AbstractMain.parse_commandline.html"/>
-    <keyword type="function" name="Plank.Factories.AbstractMain.set_options" link="Plank.Factories.AbstractMain.set_options.html"/>
-    <keyword type="function" name="Plank.Factories.AbstractMain.initialize_libraries" link="Plank.Factories.AbstractMain.initialize_libraries.html"/>
-    <keyword type="function" name="Plank.Factories.AbstractMain.initialize_services" link="Plank.Factories.AbstractMain.initialize_services.html"/>
+    <keyword type="function" name="Plank.Factories.AbstractMain.activate" link="Plank.Factories.AbstractMain.activate.html"/>
+    <keyword type="function" name="Plank.Factories.AbstractMain.local_command_line" link="Plank.Factories.AbstractMain.local_command_line.html"/>
+    <keyword type="function" name="Plank.Factories.AbstractMain.startup" link="Plank.Factories.AbstractMain.startup.html"/>
+    <keyword type="function" name="Plank.Factories.AbstractMain.initialize" link="Plank.Factories.AbstractMain.initialize.html"/>
     <keyword type="function" name="Plank.Factories.AbstractMain.create_controller" link="Plank.Factories.AbstractMain.create_controller.html"/>
+    <keyword type="function" name="Plank.Factories.AbstractMain.create_actions" link="Plank.Factories.AbstractMain.create_actions.html"/>
     <keyword type="function" name="Plank.Factories.AbstractMain.is_launcher_for_dock" link="Plank.Factories.AbstractMain.is_launcher_for_dock.html"/>
-    <keyword type="function" name="Plank.Factories.AbstractMain.help" link="Plank.Factories.AbstractMain.help.html"/>
-    <keyword type="function" name="Plank.Factories.AbstractMain.translate" link="Plank.Factories.AbstractMain.translate.html"/>
-    <keyword type="function" name="Plank.Factories.AbstractMain.quit" link="Plank.Factories.AbstractMain.quit.html"/>
-    <keyword type="function" name="Plank.Factories.AbstractMain.on_item_clicked" link="Plank.Factories.AbstractMain.on_item_clicked.html"/>
-    <keyword type="function" name="Plank.Factories.AbstractMain.show_about" link="Plank.Factories.AbstractMain.show_about.html"/>
-    <keyword type="constant" name="Plank.Factories.AbstractMain.options" link="Plank.Factories.AbstractMain.options.html"/>
     <keyword type="function" name="Plank.Factories.AbstractMain.AbstractMain" link="Plank.Factories.AbstractMain.AbstractMain.html"/>
-    <keyword type="signal" name="Plank.Factories.AbstractMain.initialized" link="Plank.Factories.AbstractMain.initialized.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.build_data_dir" link="Plank.Factories.AbstractMain.build_data_dir.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.build_pkg_data_dir" link="Plank.Factories.AbstractMain.build_pkg_data_dir.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.build_release_name" link="Plank.Factories.AbstractMain.build_release_name.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.build_version" link="Plank.Factories.AbstractMain.build_version.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.build_version_info" link="Plank.Factories.AbstractMain.build_version_info.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.program_name" link="Plank.Factories.AbstractMain.program_name.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.exec_name" link="Plank.Factories.AbstractMain.exec_name.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.app_copyright" link="Plank.Factories.AbstractMain.app_copyright.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.app_dbus" link="Plank.Factories.AbstractMain.app_dbus.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.dock_name" link="Plank.Factories.AbstractMain.dock_name.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.app_icon" link="Plank.Factories.AbstractMain.app_icon.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.app_launcher" link="Plank.Factories.AbstractMain.app_launcher.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.main_url" link="Plank.Factories.AbstractMain.main_url.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.help_url" link="Plank.Factories.AbstractMain.help_url.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.translate_url" link="Plank.Factories.AbstractMain.translate_url.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.about_authors" link="Plank.Factories.AbstractMain.about_authors.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.about_documenters" link="Plank.Factories.AbstractMain.about_documenters.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.about_artists" link="Plank.Factories.AbstractMain.about_artists.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.about_translators" link="Plank.Factories.AbstractMain.about_translators.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.about_license_type" link="Plank.Factories.AbstractMain.about_license_type.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.application" link="Plank.Factories.AbstractMain.application.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.DEBUG" link="Plank.Factories.AbstractMain.DEBUG.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.VERBOSE" link="Plank.Factories.AbstractMain.VERBOSE.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.DOCK_NAME" link="Plank.Factories.AbstractMain.DOCK_NAME.html"/>
-    <keyword type="variable" name="Plank.Factories.AbstractMain.about_dlg" link="Plank.Factories.AbstractMain.about_dlg.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.build_data_dir" link="Plank.Factories.AbstractMain.build_data_dir.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.build_pkg_data_dir" link="Plank.Factories.AbstractMain.build_pkg_data_dir.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.build_release_name" link="Plank.Factories.AbstractMain.build_release_name.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.build_version" link="Plank.Factories.AbstractMain.build_version.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.build_version_info" link="Plank.Factories.AbstractMain.build_version_info.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.program_name" link="Plank.Factories.AbstractMain.program_name.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.exec_name" link="Plank.Factories.AbstractMain.exec_name.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.app_copyright" link="Plank.Factories.AbstractMain.app_copyright.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.app_dbus" link="Plank.Factories.AbstractMain.app_dbus.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.dock_name" link="Plank.Factories.AbstractMain.dock_name.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.app_icon" link="Plank.Factories.AbstractMain.app_icon.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.app_launcher" link="Plank.Factories.AbstractMain.app_launcher.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.main_url" link="Plank.Factories.AbstractMain.main_url.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.help_url" link="Plank.Factories.AbstractMain.help_url.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.translate_url" link="Plank.Factories.AbstractMain.translate_url.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.about_authors" link="Plank.Factories.AbstractMain.about_authors.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.about_documenters" link="Plank.Factories.AbstractMain.about_documenters.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.about_artists" link="Plank.Factories.AbstractMain.about_artists.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.about_translators" link="Plank.Factories.AbstractMain.about_translators.html"/>
+    <keyword type="property" name="Plank.Factories.AbstractMain.about_license_type" link="Plank.Factories.AbstractMain.about_license_type.html"/>
     <keyword type="" name="Plank.Factories.AbstractMain" link="Plank.Factories.AbstractMain.html"/>
     <keyword type="function" name="Plank.Factories.Factory.Factory" link="Plank.Factories.Factory.Factory.html"/>
     <keyword type="function" name="Plank.Factories.Factory.init" link="Plank.Factories.Factory.init.html"/>
@@ -403,11 +390,8 @@
     <keyword type="function" name="Plank.Items.ApplicationDockItemProvider.resume_items_monitor" link="Plank.Items.ApplicationDockItemProvider.resume_items_monitor.html"/>
     <keyword type="function" name="Plank.Items.ApplicationDockItemProvider.connect_element" link="Plank.Items.ApplicationDockItemProvider.connect_element.html"/>
     <keyword type="function" name="Plank.Items.ApplicationDockItemProvider.disconnect_element" link="Plank.Items.ApplicationDockItemProvider.disconnect_element.html"/>
-    <keyword type="function" name="Plank.Items.ApplicationDockItemProvider.can_accept_drop" link="Plank.Items.ApplicationDockItemProvider.can_accept_drop.html"/>
-    <keyword type="function" name="Plank.Items.ApplicationDockItemProvider.accept_drop" link="Plank.Items.ApplicationDockItemProvider.accept_drop.html"/>
     <keyword type="function" name="Plank.Items.ApplicationDockItemProvider.ApplicationDockItemProvider" link="Plank.Items.ApplicationDockItemProvider.ApplicationDockItemProvider.html"/>
     <keyword type="property" name="Plank.Items.ApplicationDockItemProvider.LaunchersDir" link="Plank.Items.ApplicationDockItemProvider.LaunchersDir.html"/>
-    <keyword type="property" name="Plank.Items.ApplicationDockItemProvider.HandlesTransients" link="Plank.Items.ApplicationDockItemProvider.HandlesTransients.html"/>
     <keyword type="signal" name="Plank.Items.ApplicationDockItemProvider.item_window_added" link="Plank.Items.ApplicationDockItemProvider.item_window_added.html"/>
     <keyword type="function" name="Plank.Items.ApplicationDockItemProvider.acquire_unity_dbus" link="Plank.Items.ApplicationDockItemProvider.acquire_unity_dbus.html"/>
     <keyword type="function" name="Plank.Items.ApplicationDockItemProvider.release_unity_dbus" link="Plank.Items.ApplicationDockItemProvider.release_unity_dbus.html"/>
@@ -450,6 +434,7 @@
     <keyword type="function" name="Plank.Items.DockElement.on_hovered" link="Plank.Items.DockElement.on_hovered.html"/>
     <keyword type="function" name="Plank.Items.DockElement.scrolled" link="Plank.Items.DockElement.scrolled.html"/>
     <keyword type="function" name="Plank.Items.DockElement.on_scrolled" link="Plank.Items.DockElement.on_scrolled.html"/>
+    <keyword type="function" name="Plank.Items.DockElement.get_dock" link="Plank.Items.DockElement.get_dock.html"/>
     <keyword type="function" name="Plank.Items.DockElement.get_menu_items" link="Plank.Items.DockElement.get_menu_items.html"/>
     <keyword type="function" name="Plank.Items.DockElement.can_be_removed" link="Plank.Items.DockElement.can_be_removed.html"/>
     <keyword type="function" name="Plank.Items.DockElement.can_accept_drop" link="Plank.Items.DockElement.can_accept_drop.html"/>
@@ -507,7 +492,10 @@
     <keyword type="signal" name="Plank.Items.DockItem.launcher_changed" link="Plank.Items.DockItem.launcher_changed.html"/>
     <keyword type="" name="Plank.Items.DockItem" link="Plank.Items.DockItem.html"/>
     <keyword type="function" name="Plank.Items.DockItemProvider.item_exists_for_uri" link="Plank.Items.DockItemProvider.item_exists_for_uri.html"/>
+    <keyword type="function" name="Plank.Items.DockItemProvider.item_for_uri" link="Plank.Items.DockItemProvider.item_for_uri.html"/>
     <keyword type="function" name="Plank.Items.DockItemProvider.add_item_with_uri" link="Plank.Items.DockItemProvider.add_item_with_uri.html"/>
+    <keyword type="function" name="Plank.Items.DockItemProvider.can_accept_drop" link="Plank.Items.DockItemProvider.can_accept_drop.html"/>
+    <keyword type="function" name="Plank.Items.DockItemProvider.accept_drop" link="Plank.Items.DockItemProvider.accept_drop.html"/>
     <keyword type="function" name="Plank.Items.DockItemProvider.connect_element" link="Plank.Items.DockItemProvider.connect_element.html"/>
     <keyword type="function" name="Plank.Items.DockItemProvider.disconnect_element" link="Plank.Items.DockItemProvider.disconnect_element.html"/>
     <keyword type="function" name="Plank.Items.DockItemProvider.handle_item_state_changed" link="Plank.Items.DockItemProvider.handle_item_state_changed.html"/>
@@ -524,11 +512,14 @@
     <keyword type="" name="Plank.Items.DockItemPreferences" link="Plank.Items.DockItemPreferences.html"/>
     <keyword type="function" name="Plank.Items.FileDockItem.draw_icon" link="Plank.Items.FileDockItem.draw_icon.html"/>
     <keyword type="function" name="Plank.Items.FileDockItem.launch" link="Plank.Items.FileDockItem.launch.html"/>
+    <keyword type="function" name="Plank.Items.FileDockItem.is_valid" link="Plank.Items.FileDockItem.is_valid.html"/>
     <keyword type="function" name="Plank.Items.FileDockItem.on_clicked" link="Plank.Items.FileDockItem.on_clicked.html"/>
     <keyword type="function" name="Plank.Items.FileDockItem.get_menu_items" link="Plank.Items.FileDockItem.get_menu_items.html"/>
+    <keyword type="function" name="Plank.Items.FileDockItem.FileDockItem.with_file" link="Plank.Items.FileDockItem.FileDockItem.with_file.html"/>
     <keyword type="function" name="Plank.Items.FileDockItem.FileDockItem.with_dockitem_file" link="Plank.Items.FileDockItem.FileDockItem.with_dockitem_file.html"/>
     <keyword type="function" name="Plank.Items.FileDockItem.FileDockItem.with_dockitem_filename" link="Plank.Items.FileDockItem.FileDockItem.with_dockitem_filename.html"/>
     <keyword type="function" name="Plank.Items.FileDockItem.FileDockItem" link="Plank.Items.FileDockItem.FileDockItem.html"/>
+    <keyword type="property" name="Plank.Items.FileDockItem.OwnedFile" link="Plank.Items.FileDockItem.OwnedFile.html"/>
     <keyword type="" name="Plank.Items.FileDockItem" link="Plank.Items.FileDockItem.html"/>
     <keyword type="function" name="Plank.Items.PlaceholderDockItem.on_clicked" link="Plank.Items.PlaceholderDockItem.on_clicked.html"/>
     <keyword type="function" name="Plank.Items.PlaceholderDockItem.can_be_removed" link="Plank.Items.PlaceholderDockItem.can_be_removed.html"/>
@@ -580,23 +571,15 @@
     <keyword type="function" name="Plank.Widgets.DockWindow.scroll_event" link="Plank.Widgets.DockWindow.scroll_event.html"/>
     <keyword type="function" name="Plank.Widgets.DockWindow.draw" link="Plank.Widgets.DockWindow.draw.html"/>
     <keyword type="function" name="Plank.Widgets.DockWindow.map_event" link="Plank.Widgets.DockWindow.map_event.html"/>
-    <keyword type="function" name="Plank.Widgets.DockWindow.set_hovered_provider" link="Plank.Widgets.DockWindow.set_hovered_provider.html"/>
-    <keyword type="function" name="Plank.Widgets.DockWindow.set_hovered" link="Plank.Widgets.DockWindow.set_hovered.html"/>
     <keyword type="function" name="Plank.Widgets.DockWindow.update_hovered" link="Plank.Widgets.DockWindow.update_hovered.html"/>
     <keyword type="function" name="Plank.Widgets.DockWindow.update_size_and_position" link="Plank.Widgets.DockWindow.update_size_and_position.html"/>
     <keyword type="function" name="Plank.Widgets.DockWindow.update_icon_regions" link="Plank.Widgets.DockWindow.update_icon_regions.html"/>
     <keyword type="function" name="Plank.Widgets.DockWindow.update_icon_region" link="Plank.Widgets.DockWindow.update_icon_region.html"/>
     <keyword type="function" name="Plank.Widgets.DockWindow.menu_is_visible" link="Plank.Widgets.DockWindow.menu_is_visible.html"/>
-    <keyword type="function" name="Plank.Widgets.DockWindow.show_menu" link="Plank.Widgets.DockWindow.show_menu.html"/>
-    <keyword type="function" name="Plank.Widgets.DockWindow.on_menu_hide" link="Plank.Widgets.DockWindow.on_menu_hide.html"/>
-    <keyword type="function" name="Plank.Widgets.DockWindow.on_menu_show" link="Plank.Widgets.DockWindow.on_menu_show.html"/>
-    <keyword type="function" name="Plank.Widgets.DockWindow.position_menu" link="Plank.Widgets.DockWindow.position_menu.html"/>
     <keyword type="function" name="Plank.Widgets.DockWindow.DockWindow" link="Plank.Widgets.DockWindow.DockWindow.html"/>
     <keyword type="property" name="Plank.Widgets.DockWindow.controller" link="Plank.Widgets.DockWindow.controller.html"/>
     <keyword type="property" name="Plank.Widgets.DockWindow.HoveredItem" link="Plank.Widgets.DockWindow.HoveredItem.html"/>
     <keyword type="property" name="Plank.Widgets.DockWindow.HoveredItemProvider" link="Plank.Widgets.DockWindow.HoveredItemProvider.html"/>
-    <keyword type="variable" name="Plank.Widgets.DockWindow.menu" link="Plank.Widgets.DockWindow.menu.html"/>
-    <keyword type="variable" name="Plank.Widgets.DockWindow.hover" link="Plank.Widgets.DockWindow.hover.html"/>
     <keyword type="" name="Plank.Widgets.DockWindow" link="Plank.Widgets.DockWindow.html"/>
     <keyword type="function" name="Plank.Widgets.HoverWindow.show_at" link="Plank.Widgets.HoverWindow.show_at.html"/>
     <keyword type="function" name="Plank.Widgets.HoverWindow.set_text" link="Plank.Widgets.HoverWindow.set_text.html"/>
@@ -608,6 +591,9 @@
     <keyword type="function" name="Plank.Widgets.PoofWindow.PoofWindow" link="Plank.Widgets.PoofWindow.PoofWindow.html"/>
     <keyword type="function" name="Plank.Widgets.PoofWindow.get_default" link="Plank.Widgets.PoofWindow.get_default.html"/>
     <keyword type="" name="Plank.Widgets.PoofWindow" link="Plank.Widgets.PoofWindow.html"/>
+    <keyword type="function" name="Plank.Widgets.PreferencesWindow.PreferencesWindow" link="Plank.Widgets.PreferencesWindow.PreferencesWindow.html"/>
+    <keyword type="property" name="Plank.Widgets.PreferencesWindow.prefs" link="Plank.Widgets.PreferencesWindow.prefs.html"/>
+    <keyword type="" name="Plank.Widgets.PreferencesWindow" link="Plank.Widgets.PreferencesWindow.html"/>
     <keyword type="function" name="Plank.Widgets.TitledSeparatorMenuItem.draw" link="Plank.Widgets.TitledSeparatorMenuItem.draw.html"/>
     <keyword type="function" name="Plank.Widgets.TitledSeparatorMenuItem.TitledSeparatorMenuItem" link="Plank.Widgets.TitledSeparatorMenuItem.TitledSeparatorMenuItem.html"/>
     <keyword type="function" name="Plank.Widgets.TitledSeparatorMenuItem.TitledSeparatorMenuItem.no_line" link="Plank.Widgets.TitledSeparatorMenuItem.TitledSeparatorMenuItem.no_line.html"/>

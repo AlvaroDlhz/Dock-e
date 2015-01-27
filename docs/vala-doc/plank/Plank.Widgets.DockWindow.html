@@ -16,8 +16,8 @@
         <img class="main_diagram" usemap="#Plank.Widgets.DockWindow" alt="Object hierarchy for DockWindow" src="img/Plank.Widgets.DockWindow.png"/>
 
       <map id="Plank.Widgets.DockWindow" name="Plank.Widgets.DockWindow">
-<area shape="rect" id="node1" href="Plank.Widgets.DockWindow.html" title="Plank.Widgets.DockWindow" alt="" coords="155,677,391,725"/>
-<area shape="rect" id="node2" href="Plank.Widgets.CompositedWindow.html" title="Plank.Widgets.CompositedWindow" alt="" coords="131,581,416,629"/>
+<area shape="rect" id="node1" href="Plank.Widgets.DockWindow.html" title="Plank.Widgets.DockWindow" alt="" coords="156,677,391,725"/>
+<area shape="rect" id="node2" href="Plank.Widgets.CompositedWindow.html" title="Plank.Widgets.CompositedWindow" alt="" coords="131,581,415,629"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
@@ -37,11 +37,11 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description">The controller for this dock.</span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Plank.Items.DockItem.html" class="class">DockItem</a></span>? <b><a href="Plank.Widgets.DockWindow.HoveredItem.html" class="property">HoveredItem</a></b> { <span class="main_keyword">protected</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Plank.Items.DockItem.html" class="class">DockItem</a></span>? <b><a href="Plank.Widgets.DockWindow.HoveredItem.html" class="property">HoveredItem</a></b> { <span class="main_keyword">get</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">The currently hovered item (if any).</span>
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Plank.Items.DockItemProvider.html" class="class">DockItemProvider</a></span>? <b><a href="Plank.Widgets.DockWindow.HoveredItemProvider.html" class="property">HoveredItemProvider</a></b> { <span class="main_keyword">protected</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Plank.Items.DockItemProvider.html" class="class">DockItemProvider</a></span>? <b><a href="Plank.Widgets.DockWindow.HoveredItemProvider.html" class="property">HoveredItemProvider</a></b> { <span class="main_keyword">get</span>; }
             </span>
             <div class="leaf_brief_description"><span class="brief_description">The currently hovered item-provider (if any).</span>
             </div></li>
@@ -91,14 +91,6 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description"></span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">void</span> <b><a href="Plank.Widgets.DockWindow.set_hovered_provider.html" class="method">set_hovered_provider</a></b> (<span class="main_type"><a href="Plank.Items.DockItemProvider.html" class="class">DockItemProvider</a></span>? provider)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Sets the currently hovered item-provider for this dock.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">void</span> <b><a href="Plank.Widgets.DockWindow.set_hovered.html" class="method">set_hovered</a></b> (<span class="main_type"><a href="Plank.Items.DockItem.html" class="class">DockItem</a></span>? item)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Sets the currently hovered item for this dock.</span>
-            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Plank.Widgets.DockWindow.update_hovered.html" class="method">update_hovered</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> x, <span class="main_basic_type"><span class="struct">int</span></span> y)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Determines if an item is hovered by the cursor at the x/y position.
@@ -120,42 +112,15 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description">If the popup menu is currently visible.</span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">void</span> <b><a href="Plank.Widgets.DockWindow.show_menu.html" class="method">show_menu</a></b> (<span class="main_basic_type"><span class="struct">uint</span></span> button, <span class="main_basic_type"><span class="struct">bool</span></span> show_plank_menu)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Shows the popup menu.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">void</span> <b><a href="Plank.Widgets.DockWindow.on_menu_hide.html" class="method">on_menu_hide</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Called when the popup menu hides.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">void</span> <b><a href="Plank.Widgets.DockWindow.on_menu_show.html" class="method">on_menu_show</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Called when the popup menu shows.</span>
-            </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">void</span> <b><a href="Plank.Widgets.DockWindow.position_menu.html" class="method">position_menu</a></b> (<span class="main_type"><span class="class">Menu</span></span> menu, <span class="main_keyword">out</span> <span class="main_basic_type"><span class="struct">int</span></span> x, <span class="main_keyword">out</span> <span class="main_basic_type"><span class="struct">int</span></span> y, <span class="main_keyword">out</span> <span class="main_basic_type"><span class="struct">bool</span></span> push_in)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Positions the popup menu.</span>
-            </div></li>
-        </ul>
-        <h3 class="main_title">Fields:</h3>
-        <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_type"><span class="class">Menu</span></span>? <b><a href="Plank.Widgets.DockWindow.menu.html" class="field">menu</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The popup menu for this dock.</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_type"><a href="Plank.Widgets.HoverWindow.html" class="class">HoverWindow</a></span> <b><a href="Plank.Widgets.DockWindow.hover.html" class="field">hover</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The tooltip window for this dock.</span>
-            </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
           <div class="headline">
             <div class="text">All known members inherited from class Plank.Widgets.CompositedWindow</div>
             <div class="toggle">
-              <img onclick="toggle_box  (this, 'box-content-80')" src="coll_open.png">&nbsp;</div>
+              <img onclick="toggle_box  (this, 'box-content-84')" src="coll_open.png">&nbsp;</div>
             </div>
-            <div class="content" id="box-content-80">
+            <div class="content" id="box-content-84">
               <div class="column">
                 <ul class="navi_inline">
                   <li class="virtual_method"><a href="Plank.Widgets.CompositedWindow.draw.html">draw</a></li>
@@ -175,9 +140,9 @@
             <div class="headline">
               <div class="text">All known members inherited from class Gtk.Window</div>
               <div class="toggle">
-                <img onclick="toggle_box  (this, 'box-content-81')" src="coll_open.png">&nbsp;</div>
+                <img onclick="toggle_box  (this, 'box-content-85')" src="coll_open.png">&nbsp;</div>
               </div>
-              <div class="content" id="box-content-81">
+              <div class="content" id="box-content-85">
                 <div class="column">
                   <ul class="navi_inline">
                     <li class="property">accept_focus</li>
@@ -230,11 +195,11 @@
                     <li class="method">begin_move_drag</li>
                     <li class="method">begin_resize_drag</li>
                     <li class="method">close</li>
+                    <li class="method">deiconify</li>
                   </ul>
                 </div>
                 <div class="column">
                   <ul class="navi_inline">
-                    <li class="method">deiconify</li>
                     <li class="method">fullscreen</li>
                     <li class="method">get_accept_focus</li>
                     <li class="method">get_application</li>
@@ -267,6 +232,7 @@
                     <li class="method">get_skip_pager_hint</li>
                     <li class="method">get_skip_taskbar_hint</li>
                     <li class="method">get_title</li>
+                    <li class="method">get_titlebar</li>
                     <li class="method">get_transient_for</li>
                     <li class="method">get_type_hint</li>
                     <li class="method">get_urgency_hint</li>
@@ -346,9 +312,9 @@
               <div class="headline">
                 <div class="text">All known members inherited from class Gtk.Bin</div>
                 <div class="toggle">
-                  <img onclick="toggle_box  (this, 'box-content-82')" src="coll_open.png">&nbsp;</div>
+                  <img onclick="toggle_box  (this, 'box-content-86')" src="coll_open.png">&nbsp;</div>
                 </div>
-                <div class="content" id="box-content-82">
+                <div class="content" id="box-content-86">
                   <div class="column">
                     <ul class="navi_inline">
                       <li class="method">get_child</li>
@@ -368,9 +334,9 @@
                 <div class="headline">
                   <div class="text">All known members inherited from class Gtk.Container</div>
                   <div class="toggle">
-                    <img onclick="toggle_box  (this, 'box-content-83')" src="coll_open.png">&nbsp;</div>
+                    <img onclick="toggle_box  (this, 'box-content-87')" src="coll_open.png">&nbsp;</div>
                   </div>
-                  <div class="content" id="box-content-83">
+                  <div class="content" id="box-content-87">
                     <div class="column">
                       <ul class="navi_inline">
                         <li class="property">border_width</li>
@@ -432,9 +398,9 @@
                   <div class="headline">
                     <div class="text">All known members inherited from class Gtk.Widget</div>
                     <div class="toggle">
-                      <img onclick="toggle_box  (this, 'box-content-84')" src="coll_open.png">&nbsp;</div>
+                      <img onclick="toggle_box  (this, 'box-content-88')" src="coll_open.png">&nbsp;</div>
                     </div>
-                    <div class="content" id="box-content-84">
+                    <div class="content" id="box-content-88">
                       <div class="column">
                         <ul class="navi_inline">
                           <li class="property">app_paintable</li>
@@ -513,6 +479,7 @@
                           <li class="method">error_bell</li>
                           <li class="method">freeze_child_notify</li>
                           <li class="virtual_method">get_accessible</li>
+                          <li class="method">get_action_group</li>
                           <li class="method">get_allocated_baseline</li>
                           <li class="method">get_allocated_height</li>
                           <li class="method">get_allocated_width</li>
@@ -548,11 +515,11 @@
                           <li class="method">get_modifier_mask</li>
                           <li class="method">get_modifier_style</li>
                           <li class="method">get_no_show_all</li>
-                          <li class="method">get_opacity</li>
                         </ul>
                       </div>
                       <div class="column">
                         <ul class="navi_inline">
+                          <li class="method">get_opacity</li>
                           <li class="method">get_pango_context</li>
                           <li class="method">get_parent</li>
                           <li class="method">get_parent_window</li>
@@ -612,6 +579,7 @@
                           <li class="method">is_toplevel</li>
                           <li class="method">is_visible</li>
                           <li class="method">list_accel_closures</li>
+                          <li class="method">list_action_prefixes</li>
                           <li class="method">list_mnemonic_labels</li>
                           <li class="method">modify_base</li>
                           <li class="method">modify_bg</li>
@@ -663,11 +631,11 @@
                           <li class="method">set_hexpand</li>
                           <li class="method">set_hexpand_set</li>
                           <li class="method">set_mapped</li>
-                          <li class="method">set_margin_bottom</li>
                         </ul>
                       </div>
                       <div class="column">
                         <ul class="navi_inline">
+                          <li class="method">set_margin_bottom</li>
                           <li class="method">set_margin_end</li>
                           <li class="method">set_margin_left</li>
                           <li class="method">set_margin_right</li>
@@ -787,9 +755,9 @@
                     <div class="headline">
                       <div class="text">All known members inherited from class GLib.Object</div>
                       <div class="toggle">
-                        <img onclick="toggle_box  (this, 'box-content-85')" src="coll_open.png">&nbsp;</div>
+                        <img onclick="toggle_box  (this, 'box-content-89')" src="coll_open.png">&nbsp;</div>
                       </div>
-                      <div class="content" id="box-content-85">
+                      <div class="content" id="box-content-89">
                         <div class="column">
                           <ul class="navi_inline">
                             <li class="static_method">@new</li>
@@ -844,9 +812,9 @@
                       <div class="headline">
                         <div class="text">All known members inherited from interface Atk.Implementor</div>
                         <div class="toggle">
-                          <img onclick="toggle_box  (this, 'box-content-86')" src="coll_open.png">&nbsp;</div>
+                          <img onclick="toggle_box  (this, 'box-content-90')" src="coll_open.png">&nbsp;</div>
                         </div>
-                        <div class="content" id="box-content-86">
+                        <div class="content" id="box-content-90">
                           <div class="column">
                             <ul class="navi_inline">
                               <li class="abstract_method">ref_accessible</li>
@@ -866,9 +834,9 @@
                         <div class="headline">
                           <div class="text">All known members inherited from interface Gtk.Buildable</div>
                           <div class="toggle">
-                            <img onclick="toggle_box  (this, 'box-content-87')" src="coll_open.png">&nbsp;</div>
+                            <img onclick="toggle_box  (this, 'box-content-91')" src="coll_open.png">&nbsp;</div>
                           </div>
-                          <div class="content" id="box-content-87">
+                          <div class="content" id="box-content-91">
                             <div class="column">
                               <ul class="navi_inline">
                                 <li class="abstract_method">add_child</li>

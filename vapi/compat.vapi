@@ -17,6 +17,13 @@
 
 namespace Plank
 {
+#if HAVE_HIDPI
+	[CCode (cheader_filename = "cairo.h", cname = "cairo_surface_get_device_scale")]
+	public void cairo_surface_get_device_scale (Cairo.Surface surface, out double x_scale, out double y_scale);
+	[CCode (cheader_filename = "cairo.h", cname = "cairo_surface_set_device_scale")]
+	public void cairo_surface_set_device_scale (Cairo.Surface surface, double x_scale, double y_scale);
+#endif
+
 	[CCode (cheader_filename = "gdk/gdk.h", cname = "gdk_window_add_filter", instance_pos = 1.9)]
 	public void gdk_window_add_filter (Gdk.Window? window, Gdk.FilterFunc function);
 	[CCode (cheader_filename = "gdk/gdk.h", cname = "gdk_window_add_filter", instance_pos = 1.9)]
@@ -26,13 +33,27 @@ namespace Plank
 	[CCode (cheader_filename = "gtk/gtk.h", cname = "gtk_widget_shape_combine_region")]
 	public void gtk_widget_shape_combine_region (Gtk.Widget widget, Cairo.Region? region);
 #endif
+
+#if HAVE_SYS_PRCTL_H
 	[CCode (cheader_filename = "sys/prctl.h", cname = "prctl", sentinel = "")]
 	public int prctl (int option, ...);
+#else
+	[CCode (cheader_filename = "unistd.h", cname = "setproctitle", sentinel = "")]
+	public void setproctitle (string fmt, ...);
+#endif
+
+	[CCode (cheader_filename = "unistd.h", cname = "getpid")]
+	public int getpid ();
 }
 
 namespace Gdk
 {
 #if !VALA_0_24
+	[CCode (cheader_filename = "gdk/gdk.h", cname = "GDK_EVENT_PROPAGATE")]
+	public const bool EVENT_PROPAGATE;
+	[CCode (cheader_filename = "gdk/gdk.h", cname = "GDK_EVENT_STOP")]
+	public const bool EVENT_STOP;
+
 	[CCode (cheader_filename = "gdk/gdkx.h")]
 	namespace X11 {
 		[CCode (cheader_filename = "gdk/gdkx.h", type_check_function = "GDK_IS_X11_DISPLAY", type_id = "gdk_x11_display_get_type ()")]

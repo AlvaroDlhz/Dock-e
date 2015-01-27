@@ -59,6 +59,12 @@ namespace Plank
 		int window_scale_factor = 1;
 		bool is_first_frame = true;
 		
+		ulong gtk_theme_name_changed_id = 0;
+		
+#if BENCHMARK
+		Gee.ArrayList<string> benchmark;
+#endif
+		
 		/**
 		 * Create a new dock renderer for a dock.
 		 *
@@ -72,6 +78,9 @@ namespace Plank
 		
 		construct
 		{
+#if BENCHMARK
+			benchmark = new Gee.ArrayList<string> ();
+#endif
 			controller.prefs.notify.connect (prefs_changed);
 			
 			load_theme ();
@@ -153,13 +162,21 @@ namespace Plank
 			if (is_reload)
 				theme.notify.disconnect (theme_changed);
 			
-			theme = new DockTheme (controller.prefs.Theme);
+			unowned string name = controller.prefs.Theme;
+			if (name == Drawing.Theme.GTK_THEME_NAME) {
+				if (gtk_theme_name_changed_id <= 0)
+					gtk_theme_name_changed_id = Gtk.Settings.get_default ().notify["gtk-theme-name"].connect (load_theme);
+			} else if (gtk_theme_name_changed_id > 0) {
+				SignalHandler.disconnect (Gtk.Settings.get_default (), gtk_theme_name_changed_id);
+				gtk_theme_name_changed_id = 0;
+			}
+			
+			theme = new DockTheme (name);
 			theme.load ("dock");
 			theme.notify.connect (theme_changed);
 			
-			if (is_reload) {
-				reset_position_manager ();
-			}
+			if (is_reload)
+				theme_changed ();
 		}
 		
 		/**
@@ -213,10 +230,6 @@ namespace Plank
 				opacity = 1.0;
 		}
 		
-#if BENCHMARK
-		ArrayList<string> benchmark = new ArrayList<string> ();
-#endif
-		
 		/**
 		 * Draws the dock onto a context.
 		 *
@@ -224,7 +237,7 @@ namespace Plank
 		 */
 		public void draw_dock (Cairo.Context cr)
 		{
-#if HAVE_GTK_3_10
+#if HAVE_HIDPI
 			window_scale_factor = controller.window.get_window ().get_scale_factor ();
 #endif
 			// take the previous frame values into account to decide if we
@@ -235,16 +248,21 @@ namespace Plank
 			
 			unowned PositionManager position_manager = controller.position_manager;
 			unowned DockItem dragged_item = controller.drag_manager.DragItem;
-			var width = position_manager.DockWidth;
-			var height = position_manager.DockHeight;
+			var win_rect = position_manager.get_dock_window_region ();
 			var items = controller.Items;
 			
 			if (main_buffer == null) {
-				main_buffer = new DockSurface.with_surface (width, height, cr.get_target ());
+				main_buffer = new DockSurface.with_surface (win_rect.width, win_rect.height, cr.get_target ());
+#if HAVE_HIDPI
+				cairo_surface_set_device_scale (main_buffer.Internal, window_scale_factor, window_scale_factor);
+#endif
 			}
 			
 			if (shadow_buffer == null) {
-				shadow_buffer = new DockSurface.with_surface (width, height, cr.get_target ());
+				shadow_buffer = new DockSurface.with_surface (win_rect.width, win_rect.height, cr.get_target ());
+#if HAVE_HIDPI
+				cairo_surface_set_device_scale (shadow_buffer.Internal, window_scale_factor, window_scale_factor);
+#endif
 			}
 			
 			// if the dock is completely hidden and not transparently drawn
@@ -340,7 +358,9 @@ namespace Plank
 		
 		void draw_dock_background ()
 		{
-			background_rect = controller.position_manager.get_background_region ();
+			unowned PositionManager position_manager = controller.position_manager;
+			
+			background_rect = position_manager.get_background_region ();
 			
 			if (background_rect.width <= 0 || background_rect.height <= 0) {
 				background_buffer = null;
@@ -350,7 +370,7 @@ namespace Plank
 			if (background_buffer == null || background_buffer.Width != background_rect.width
 				|| background_buffer.Height != background_rect.height)
 				background_buffer = theme.create_background (background_rect.width, background_rect.height,
-					controller.prefs.Position, main_buffer);
+					position_manager.Position, main_buffer);
 			
 			unowned Cairo.Context cr = main_buffer.Context;
 			cr.set_source_surface (background_buffer.Internal, background_rect.x, background_rect.y);
@@ -367,7 +387,7 @@ namespace Plank
 			unowned Cairo.Context shadow_cr = shadow_buffer.Context;
 			var icon_size = position_manager.IconSize;
 			var shadow_size = position_manager.IconShadowSize;
-			var position = controller.prefs.Position;
+			var position = position_manager.Position;
 			
 			// load the icon
 #if BENCHMARK
@@ -414,8 +434,8 @@ namespace Plank
 				case Animation.BOUNCE:
 					if (!screen_is_composited)
 						break;
-					var change = Math.fabs (Math.sin (2 * Math.PI * click_animation_progress) * icon_size * theme.LaunchBounceHeight * double.min (1.0, 1.3333 * (1.0 - click_animation_progress)));
-					draw_value = draw_value.move_in (position, change);
+					var change = Math.fabs (Math.sin (2 * Math.PI * click_animation_progress) * position_manager.LaunchBounceHeight * double.min (1.0, 1.3333 * (1.0 - click_animation_progress)));
+					draw_value.move_in (position, change);
 					break;
 				case Animation.DARKEN:
 					darken = double.max (0, Math.sin (Math.PI * click_animation_progress)) * 0.5;
@@ -497,8 +517,8 @@ namespace Plank
 				var urgent_time = frame_time - item.LastUrgent;
 				var bounce_animation_progress = urgent_time / (double) (theme.UrgentBounceTime * 1000);
 				if (bounce_animation_progress < 1.0) {
-					var change = Math.fabs (Math.sin (Math.PI * bounce_animation_progress) * icon_size * theme.UrgentBounceHeight * double.min (1.0, 2.0 * (1.0 - bounce_animation_progress)));
-					draw_value = draw_value.move_in (position, change);
+					var change = Math.fabs (Math.sin (Math.PI * bounce_animation_progress) * position_manager.UrgentBounceHeight * double.min (1.0, 2.0 * (1.0 - bounce_animation_progress)));
+					draw_value.move_in (position, change);
 				}
 			}
 			
@@ -508,7 +528,7 @@ namespace Plank
 				var move_animation_progress = move_time / (double) (theme.ItemMoveTime * 1000);
 				if (move_animation_progress < 1.0) {
 					var change = (1.0 - move_animation_progress) * (icon_size + position_manager.ItemPadding);
-					draw_value = draw_value.move_right (position, (item.Position < item.LastPosition ? change : -change));
+					draw_value.move_right (position, (item.Position < item.LastPosition ? change : -change));
 				} else {
 					item.unset_move_state ();
 				}
@@ -581,7 +601,8 @@ namespace Plank
 		
 		DockSurface draw_item_shadow (DockItem item, DockSurface icon_surface, DockSurface? current_surface)
 		{
-			var shadow_size = controller.position_manager.IconShadowSize * window_scale_factor;
+			unowned PositionManager position_manager = controller.position_manager;
+			var shadow_size = position_manager.IconShadowSize * window_scale_factor;
 			
 			// Inflate size to fit shadow
 			var width = icon_surface.Width + 2 * shadow_size;
@@ -597,7 +618,7 @@ namespace Plank
 			var shadow_surface = icon_surface.create_mask (0.4, null);
 			
 			var xoffset = 0, yoffset = 0;
-			switch (controller.prefs.Position) {
+			switch (position_manager.Position) {
 			default:
 			case Gtk.PositionType.BOTTOM:
 				yoffset = -shadow_size / 4;
@@ -622,23 +643,25 @@ namespace Plank
 		
 		void draw_indicator_state (Gdk.Rectangle item_rect, IndicatorState indicator, ItemState item_state)
 		{
+			unowned PositionManager position_manager = controller.position_manager;
+			
 			if (indicator_buffer == null) {
 				var indicator_color = get_styled_color ();
 				indicator_color.set_min_sat (0.4);
-				indicator_buffer = theme.create_indicator (controller.position_manager.IndicatorSize, indicator_color, main_buffer);
+				indicator_buffer = theme.create_indicator (position_manager.IndicatorSize, indicator_color, main_buffer);
 			}
 			if (urgent_indicator_buffer == null) {
 				var urgent_indicator_color = get_styled_color ();
 				urgent_indicator_color.add_hue (theme.UrgentHueShift);
 				urgent_indicator_color.set_sat (1.0);
-				urgent_indicator_buffer = theme.create_indicator (controller.position_manager.IndicatorSize, urgent_indicator_color, main_buffer);
+				urgent_indicator_buffer = theme.create_indicator (position_manager.IndicatorSize, urgent_indicator_color, main_buffer);
 			}
 			
 			unowned DockSurface indicator_surface = (item_state & ItemState.URGENT) != 0 ? urgent_indicator_buffer : indicator_buffer;
 			unowned Cairo.Context main_cr = main_buffer.Context;
 			
 			var x = 0.0, y = 0.0;
-			switch (controller.prefs.Position) {
+			switch (position_manager.Position) {
 			default:
 			case Gtk.PositionType.BOTTOM:
 				x = item_rect.x + item_rect.width / 2.0 - indicator_surface.Width / 2.0;
@@ -663,10 +686,10 @@ namespace Plank
 				main_cr.paint ();
 			} else {
 				var x_offset = 0.0, y_offset = 0.0;
-				if (controller.prefs.is_horizontal_dock ())
-					x_offset = controller.position_manager.IconSize / 16.0;
+				if (position_manager.is_horizontal_dock ())
+					x_offset = position_manager.IconSize / 16.0;
 				else
-					y_offset = controller.position_manager.IconSize / 16.0;
+					y_offset = position_manager.IconSize / 16.0;
 				
 				main_cr.set_source_surface (indicator_surface.Internal, x - x_offset, y - y_offset);
 				main_cr.paint ();
@@ -703,7 +726,7 @@ namespace Plank
 		
 		Drawing.Color get_styled_color ()
 		{
-			var background_selected_color = controller.window.get_style_context ().get_background_color (Gtk.StateFlags.SELECTED);
+			var background_selected_color = controller.window.get_style_context ().get_background_color (Gtk.StateFlags.SELECTED | Gtk.StateFlags.FOCUSED);
 			var selected_color = (Drawing.Color) background_selected_color;
 			selected_color.set_min_value (90 / (double) uint16.MAX);
 			return selected_color;

@@ -59,6 +59,13 @@ namespace Plank
 		const int PRESSURE_TIMEOUT = 1000;
 #endif
 		
+		static int plank_pid;
+		
+		static construct
+		{
+			plank_pid = getpid ();
+		}
+		
 		public DockController controller { private get; construct; }
 		
 		/**
@@ -123,13 +130,10 @@ namespace Plank
 			unowned Wnck.Screen wnck_screen = Wnck.Screen.get_default ();
 			
 #if HAVE_BARRIERS
-			if (controller.prefs.PressureReveal)
-				initialize_barriers_support ();
-			else
-				window.enter_notify_event.connect (enter_notify_event);
-#else
-			window.enter_notify_event.connect (enter_notify_event);
+			initialize_barriers_support ();
 #endif
+			
+			window.enter_notify_event.connect (enter_notify_event);
 			window.leave_notify_event.connect (leave_notify_event);
 			
 			wnck_screen.window_opened.connect_after (schedule_update);
@@ -190,13 +194,12 @@ namespace Plank
 				get_device_manager ().get_client_pointer ().get_position (null, out x, out y);
 			
 			// get window location
-			var win_x = position_manager.win_x;
-			var win_y = position_manager.win_y;
+			var win_rect = position_manager.get_dock_window_region ();
 			
 			// compute rect of the window
 			var dock_rect = position_manager.get_cursor_region ();
-			dock_rect.x += win_x;
-			dock_rect.y += win_y;
+			dock_rect.x += win_rect.x;
+			dock_rect.y += win_rect.y;
 			
 			// use the dock rect and cursor location to determine if dock is hovered
 			var hovered = (x >= dock_rect.x && x < dock_rect.x + dock_rect.width
@@ -241,13 +244,7 @@ namespace Plank
 				break;
 			case "PressureReveal":
 #if HAVE_BARRIERS
-				unowned DockWindow window = controller.window;
-				if (controller.prefs.PressureReveal) {
-					window.enter_notify_event.disconnect (enter_notify_event);
-					initialize_barriers_support ();
-				} else {
-					window.enter_notify_event.connect (enter_notify_event);
-				}
+				update_barrier ();
 #endif
 				break;
 			default:
@@ -332,6 +329,11 @@ namespace Plank
 			if (event.detail == Gdk.NotifyType.INFERIOR)
 				return Hidden;
 			
+#if HAVE_BARRIERS
+			if (Hidden && barriers_supported && controller.prefs.PressureReveal)
+				return Hidden;
+#endif
+			
 			if ((bool) event.send_event) {
 				if (!Hovered) {
 					freeze_notify ();
@@ -349,16 +351,16 @@ namespace Plank
 		bool leave_notify_event (Gdk.EventCrossing event)
 		{
 			if (event.detail == Gdk.NotifyType.INFERIOR)
-				return false;
+				return Gdk.EVENT_PROPAGATE;
 			
 			// ignore this event if it was sent explicitly
 			if ((bool) event.send_event)
-				return false;
+				return Gdk.EVENT_PROPAGATE;
 			
 			if (Hovered && !controller.window.menu_is_visible ())
 				update_hovered ();
 			
-			return false;
+			return Gdk.EVENT_PROPAGATE;
 		}
 		
 		//
@@ -368,7 +370,7 @@ namespace Plank
 		void update_window_intersect ()
 		{
 			var dock_rect = controller.position_manager.get_static_dock_region ();
-#if HAVE_GTK_3_10
+#if HAVE_HIDPI
 			var window_scale_factor = controller.window.get_window ().get_scale_factor ();
 			if (window_scale_factor > 1) {
 				dock_rect.x *= window_scale_factor;
@@ -381,9 +383,9 @@ namespace Plank
 			var intersect = false;
 			var dialog_intersect = false;
 			var active_maximized_intersect = false;
-			var screen = Wnck.Screen.get_default ();
-			var active_window = screen.get_active_window ();
-			var active_workspace = screen.get_active_workspace ();
+			unowned Wnck.Screen screen = Wnck.Screen.get_default ();
+			unowned Wnck.Window? active_window = screen.get_active_window ();
+			unowned Wnck.Workspace? active_workspace = screen.get_active_workspace ();
 			
 			if (active_window != null && active_workspace != null)
 				foreach (var w in screen.get_windows ()) {
@@ -395,7 +397,8 @@ namespace Plank
 						continue;
 					if (!w.is_visible_on_workspace (active_workspace))
 						continue;
-					if (w.get_pid () != active_window.get_pid ())
+					var pid = w.get_pid ();
+					if (pid == plank_pid || pid != active_window.get_pid ())
 						continue;
 					
 					if (window_geometry (w).intersect (dock_rect, null)) {
@@ -520,15 +523,15 @@ namespace Plank
 #if HAVE_BARRIERS
 		void initialize_barriers_support ()
 		{
-			unowned DockWindow window = controller.window;
 			unowned Gdk.X11.Display gdk_display = (controller.window.get_display () as Gdk.X11.Display);
 			unowned X.Display display = gdk_display.get_xdisplay ();
 			int error_base, first_event_return;
 			
+			gdk_window_remove_filter (null, (Gdk.FilterFunc)xevent_filter);
+			
 			if (!display.query_extension ("XInputExtension", out opcode, out first_event_return, out error_base)) {
 				debug ("Barriers disabled (XInput needed)");
 				barriers_supported = false;
-				window.enter_notify_event.connect (enter_notify_event);
 			} else {
 				int major = 2, minor = 3;
 				var has_xinput = (XInput.query_version (display, ref major, ref minor) == X.Success);
@@ -539,7 +542,6 @@ namespace Plank
 				} else {
 					debug ("Barriers disabled (XInput %i.%i not sufficient)", major, minor);
 					barriers_supported = false;
-					window.enter_notify_event.connect (enter_notify_event);
 				}
 			}
 		}
@@ -572,7 +574,7 @@ namespace Plank
 			switch (xcookie.evtype) {
 			case XInput.EventType.BARRIER_HIT:
 				double slide = 0.0, distance = 0.0;
-				switch (controller.prefs.Position) {
+				switch (controller.position_manager.Position) {
 				default:
 				case Gtk.PositionType.BOTTOM:
 				case Gtk.PositionType.TOP:

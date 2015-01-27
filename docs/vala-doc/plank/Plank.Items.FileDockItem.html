@@ -33,8 +33,19 @@
         <div class="package_note"><b>Package:</b> <a href="index.htm">plank</a>
         </div>
         <h2 class="main_title">Content:</h2>
+        <h3 class="main_title">Properties:</h3>
+        <ul class="navi_inline">
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="interface">File</span></span> <b><a href="Plank.Items.FileDockItem.OwnedFile.html" class="property">OwnedFile</a></b> { <span class="main_keyword">protected</span> <span class="main_keyword">construct</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+        </ul>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
+          <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Plank.Items.FileDockItem.FileDockItem.with_file.html" class="creation_method">FileDockItem.with_file</a></b> (<span class="main_type"><span class="interface">File</span></span> file)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description"></span>
+            </div></li>
           <li class="creation_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <b><a href="Plank.Items.FileDockItem.FileDockItem.with_dockitem_file.html" class="creation_method">FileDockItem.with_dockitem_file</a></b> (<span class="main_type"><span class="interface">File</span></span> file)
             </span>
             <div class="leaf_brief_description"><span class="brief_description"></span>
@@ -58,6 +69,10 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Launches the application associated with this item.</span>
             </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Plank.Items.FileDockItem.is_valid.html" class="virtual_method">is_valid</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Check the validity of this item.</span>
+            </div></li>
           <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">override</span> <span class="main_type"><a href="Plank.Items.Animation.html" class="enum">Animation</a></span> <b><a href="Plank.Items.FileDockItem.on_clicked.html" class="virtual_method">on_clicked</a></b> (<span class="main_type"><a href="Plank.Items.PopupButton.html" class="enum">PopupButton</a></span> button, <span class="main_type"><span class="enum">ModifierType</span></span> mod)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Called when an item is clicked on.</span>
@@ -72,9 +87,9 @@
           <div class="headline">
             <div class="text">All known members inherited from class Plank.Items.DockItem</div>
             <div class="toggle">
-              <img onclick="toggle_box  (this, 'box-content-58')" src="coll_open.png">&nbsp;</div>
+              <img onclick="toggle_box  (this, 'box-content-62')" src="coll_open.png">&nbsp;</div>
             </div>
-            <div class="content" id="box-content-58">
+            <div class="content" id="box-content-62">
               <div class="column">
                 <ul class="navi_inline">
                   <li class="property"><a href="Plank.Items.DockItem.Icon.html">Icon</a></li>
@@ -120,9 +135,9 @@
             <div class="headline">
               <div class="text">All known members inherited from class Plank.Items.DockElement</div>
               <div class="toggle">
-                <img onclick="toggle_box  (this, 'box-content-59')" src="coll_open.png">&nbsp;</div>
+                <img onclick="toggle_box  (this, 'box-content-63')" src="coll_open.png">&nbsp;</div>
               </div>
-              <div class="content" id="box-content-59">
+              <div class="content" id="box-content-63">
                 <div class="column">
                   <ul class="navi_inline">
                     <li class="property"><a href="Plank.Items.DockElement.Container.html">Container</a></li>
@@ -151,12 +166,13 @@
                     <li class="virtual_method"><a href="Plank.Items.DockElement.on_clicked.html">on_clicked</a></li>
                     <li class="method"><a href="Plank.Items.DockElement.hovered.html">hovered</a></li>
                     <li class="virtual_method"><a href="Plank.Items.DockElement.on_hovered.html">on_hovered</a></li>
+                    <li class="method"><a href="Plank.Items.DockElement.scrolled.html">scrolled</a></li>
                   </ul>
                 </div>
                 <div class="column">
                   <ul class="navi_inline">
-                    <li class="method"><a href="Plank.Items.DockElement.scrolled.html">scrolled</a></li>
                     <li class="virtual_method"><a href="Plank.Items.DockElement.on_scrolled.html">on_scrolled</a></li>
+                    <li class="method"><a href="Plank.Items.DockElement.get_dock.html">get_dock</a></li>
                     <li class="virtual_method"><a href="Plank.Items.DockElement.get_menu_items.html">get_menu_items</a></li>
                     <li class="virtual_method"><a href="Plank.Items.DockElement.can_be_removed.html">can_be_removed</a></li>
                     <li class="virtual_method"><a href="Plank.Items.DockElement.can_accept_drop.html">can_accept_drop</a></li>
@@ -173,9 +189,9 @@
               <div class="headline">
                 <div class="text">All known members inherited from class GLib.Object</div>
                 <div class="toggle">
-                  <img onclick="toggle_box  (this, 'box-content-60')" src="coll_open.png">&nbsp;</div>
+                  <img onclick="toggle_box  (this, 'box-content-64')" src="coll_open.png">&nbsp;</div>
                 </div>
-                <div class="content" id="box-content-60">
+                <div class="content" id="box-content-64">
                   <div class="column">
                     <ul class="navi_inline">
                       <li class="static_method">@new</li>

@@ -22,7 +22,7 @@ namespace Plank.Drawing
 	 */
 	public class DrawingService : GLib.Object
 	{
-		const string MISSING_ICONS = "application-default-icon;;application-x-executable";
+		const string DEFAULT_ICON = "application-default-icon";
 		
 		const string FILE_ATTRIBUTE_CUSTOM_ICON = "metadata::custom-icon";
 		const string FILE_ATTRIBUTE_CUSTOM_ICON_NAME = "metadata::custom-icon-name";
@@ -110,8 +110,7 @@ namespace Plank.Drawing
 			
 			foreach (unowned string s in names.split (";;"))
 				all_names.add (s);
-			foreach (unowned string s in MISSING_ICONS.split (";;"))
-				all_names.add (s);
+			all_names.add (DEFAULT_ICON);
 			
 			Gdk.Pixbuf? pbuf = null;
 			
@@ -130,6 +129,15 @@ namespace Plank.Drawing
 				if (name != all_names.last ())
 					message ("Could not find icon '%s'", name);
 			}
+			
+			// Load internal default icon as last resort
+			if (pbuf == null)
+				try {
+					pbuf = new Gdk.Pixbuf.from_resource_at_scale ("%s/img/application-default-icon.svg".printf (Plank.G_RESOURCE_PATH),
+						width, height, true);
+				} catch (Error e) {
+					critical (e.message);
+				}
 			
 			if (pbuf != null) {
 				if (width != -1 && height != -1 && (width != pbuf.width || height != pbuf.height))
@@ -201,6 +209,91 @@ namespace Plank.Drawing
 			
 			return pbuf;
 		}
+		
+#if HAVE_HIDPI
+		/**
+		 * Loads an icon based on names and the given width/height
+		 *
+		 * @param names a delimited (with ";;") list of icon names, first one found is used
+		 * @param width the requested width of the icon
+		 * @param height the requested height of the icon
+		 * @param scale the implicit requested scale of the icon
+		 * @return the {link Cairo.Surface} containing the requested icon, do not alter this surface
+		 */
+		public static Cairo.Surface? load_icon_for_scale (string names, int width, int height, int scale)
+		{
+			var all_names = new Gee.ArrayList<string> ();
+			
+			foreach (unowned string s in names.split (";;"))
+				all_names.add (s);
+			all_names.add (DEFAULT_ICON);
+			
+			Cairo.Surface? surface = null;
+			
+			foreach (var name in all_names) {
+				var file = try_get_icon_file (name);
+				if (file != null) {
+					var pbuf = load_pixbuf_from_file (file, width, height);
+					if (pbuf != null) {
+						surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, width, height);
+						var cr = new Cairo.Context (surface);
+						Gdk.cairo_set_source_pixbuf (cr, pbuf, (width - pbuf.width) / 2, (height - pbuf.height) / 2);
+						cr.paint ();
+						cairo_surface_set_device_scale (surface, scale, scale);
+						break;
+					}
+				}
+				
+				surface = load_surface (name, int.max (width, height) / scale, scale);
+				if (surface != null)
+					break;
+				
+				if (name != all_names.last ())
+					message ("Could not find icon '%s'", name);
+			}
+			
+			// Load internal default icon as last resort
+			if (surface == null) {
+				try {
+					var pbuf = new Gdk.Pixbuf.from_resource_at_scale ("%s/img/application-default-icon.svg".printf (Plank.G_RESOURCE_PATH),
+						width, height, true);
+					surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, width, height);
+					var cr = new Cairo.Context (surface);
+					Gdk.cairo_set_source_pixbuf (cr, pbuf, (width - pbuf.width) / 2, (height - pbuf.height) / 2);
+					cr.paint ();
+					cairo_surface_set_device_scale (surface, scale, scale);
+				} catch (Error e) {
+					critical (e.message);
+				}
+			}
+			
+			return surface;
+		}
+		
+		static Cairo.Surface? load_surface (string icon, int size, int scale)
+		{
+			Cairo.Surface? surface = null;
+			Gtk.IconInfo? info = null;
+			unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_default ();
+			
+			try {
+				info = icon_theme.lookup_icon_for_scale (icon, size, scale, Gtk.IconLookupFlags.FORCE_SIZE);
+				if (info != null)
+					surface = info.load_surface (null);
+			} catch { }
+			
+			try {
+				if (surface == null && icon.contains (".")) {
+					var parts = icon.split (".");
+					info = icon_theme.lookup_icon_for_scale (parts [0], size, scale, Gtk.IconLookupFlags.FORCE_SIZE);
+					if (info != null)
+						surface = info.load_surface (null);
+				}
+			} catch { }
+			
+			return surface;
+		}
+#endif
 		
 		/**
 		 * Scales a {@link Gdk.Pixbuf}, maintaining the original aspect ratio.

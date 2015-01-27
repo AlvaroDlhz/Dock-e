@@ -18,11 +18,11 @@
       
 
       <map id="Plank.Factories.AbstractMain" name="Plank.Factories.AbstractMain">
-<area shape="rect" id="node1" href="Plank.Factories.AbstractMain.html" title="Plank.Factories.AbstractMain" alt="" coords="5,101,244,149"/>
+<area shape="rect" id="node1" href="Plank.Factories.AbstractMain.html" title="Plank.Factories.AbstractMain" alt="" coords="125,293,364,341"/>
 </map>
 
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">abstract</span> <span class="main_keyword">class</span> <b><span class="abstract_class">AbstractMain</span></b> : <span class="main_type"><span class="class">Object</span></span>
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">abstract</span> <span class="main_keyword">class</span> <b><span class="abstract_class">AbstractMain</span></b> : <span class="main_type"><span class="class">Application</span></span>
         </div>
         <div class="description">
           <p>The main class for all dock applications. All docks should extend this class. In the constructor, the string fields should be initialized
@@ -33,11 +33,87 @@
         <div class="package_note"><b>Package:</b> <a href="index.htm">plank</a>
         </div>
         <h2 class="main_title">Content:</h2>
-        <h3 class="main_title">Constants:</h3>
+        <h3 class="main_title">Properties:</h3>
         <ul class="navi_inline">
-          <li class="constant"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">const</span> <span class="main_keyword">unowned</span> <span class="main_type"><span class="struct">OptionEntry</span></span>[] <b><a href="Plank.Factories.AbstractMain.options.html" class="constant">options</a></b>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.build_data_dir.html" class="property">build_data_dir</a></b> { <span class="main_keyword">construct</span>; <span class="main_keyword">get</span>; }
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">The default command-line options for the dock.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Should be Build.DATADIR</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.build_pkg_data_dir.html" class="property">build_pkg_data_dir</a></b> { <span class="main_keyword">construct</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Should be Build.PKGDATADIR</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.build_release_name.html" class="property">build_release_name</a></b> { <span class="main_keyword">construct</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Should be Build.RELEASE_NAME</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.build_version.html" class="property">build_version</a></b> { <span class="main_keyword">construct</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Should be Build.VERSION</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.build_version_info.html" class="property">build_version_info</a></b> { <span class="main_keyword">construct</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Should be Build.VERSION_INFO</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.program_name.html" class="property">program_name</a></b> { <span class="main_keyword">construct</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The displayed name of the program.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.exec_name.html" class="property">exec_name</a></b> { <span class="main_keyword">construct</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The executable name of the program.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.app_copyright.html" class="property">app_copyright</a></b> { <span class="main_keyword">construct</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The copyright year(s).</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.app_dbus.html" class="property">app_dbus</a></b> { <span class="main_keyword">construct</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The (unique) dbus path for this program.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.dock_name.html" class="property">dock_name</a></b> { <span class="main_keyword">protected</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The name of the path containing the dock's preferences.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.app_icon.html" class="property">app_icon</a></b> { <span class="main_keyword">construct</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The name of this program's icon.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.app_launcher.html" class="property">app_launcher</a></b> { <span class="main_keyword">construct</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The name of the launcher (.desktop file) for this program.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.main_url.html" class="property">main_url</a></b> { <span class="main_keyword">construct</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The URL for this program's website.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.help_url.html" class="property">help_url</a></b> { <span class="main_keyword">construct</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The URL for this program's help.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.translate_url.html" class="property">translate_url</a></b> { <span class="main_keyword">construct</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The URL for translating this program.</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>[] <b><a href="Plank.Factories.AbstractMain.about_authors.html" class="property">about_authors</a></b> { <span class="main_keyword">construct</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The list of authors (to show in about dialog).</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>[] <b><a href="Plank.Factories.AbstractMain.about_documenters.html" class="property">about_documenters</a></b> { <span class="main_keyword">construct</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The list of documenters (to show in about dialog).</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span>[] <b><a href="Plank.Factories.AbstractMain.about_artists.html" class="property">about_artists</a></b> { <span class="main_keyword">construct</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The list of artists (to show in about dialog).</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.about_translators.html" class="property">about_translators</a></b> { <span class="main_keyword">construct</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The list of translators (to show in about dialog).</span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="enum">License</span></span> <b><a href="Plank.Factories.AbstractMain.about_license_type.html" class="property">about_license_type</a></b> { <span class="main_keyword">construct</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The license of this program (to show in about dialog).</span>
             </div></li>
         </ul>
         <h3 class="main_title">Creation methods:</h3>
@@ -49,233 +125,274 @@
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Plank.Factories.AbstractMain.run.html" class="virtual_method">run</a></b> (<span class="main_keyword">ref</span> <span class="main_basic_type"><span class="class">string</span></span>[] args)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Plank.Factories.AbstractMain.activate.html" class="virtual_method">activate</a></b> ()
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Initializes the program, makes the dock and runs it.</span>
+            <div class="leaf_brief_description"><span class="brief_description"></span>
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Plank.Factories.AbstractMain.initialize_program.html" class="virtual_method">initialize_program</a></b> ()
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Plank.Factories.AbstractMain.local_command_line.html" class="virtual_method">local_command_line</a></b> (<span class="main_keyword">ref</span> <span class="main_basic_type"><span class="class">string</span></span>[] args, <span class="main_keyword">out</span> <span class="main_basic_type"><span class="struct">int</span></span> exit_status)
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Sets the program executable's name, traps signals and intializes 
-                logging.</span>
+            <div class="leaf_brief_description"><span class="brief_description"></span>
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Plank.Factories.AbstractMain.parse_commandline.html" class="virtual_method">parse_commandline</a></b> (<span class="main_keyword">ref</span> <span class="main_basic_type"><span class="class">string</span></span>[] args)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Plank.Factories.AbstractMain.startup.html" class="virtual_method">startup</a></b> ()
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Parses the command-line for options, but does not set them.</span>
+            <div class="leaf_brief_description"><span class="brief_description"></span>
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Plank.Factories.AbstractMain.set_options.html" class="virtual_method">set_options</a></b> ()
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Plank.Factories.AbstractMain.initialize.html" class="virtual_method">initialize</a></b> ()
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Sets options based on the parsed command-line.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Plank.Factories.AbstractMain.initialize_libraries.html" class="virtual_method">initialize_libraries</a></b> (<span class="main_keyword">ref</span> <span class="main_basic_type"><span class="class">string</span></span>[] args)
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Initializes most libraries used (GTK, GDK, etc).</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Plank.Factories.AbstractMain.initialize_services.html" class="virtual_method">initialize_services</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Initializes the Plank services.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Additional initializations before the dock is created.</span>
             </div></li>
           <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Plank.Factories.AbstractMain.create_controller.html" class="virtual_method">create_controller</a></b> ()
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Creates the dock controller.</span>
             </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Plank.Factories.AbstractMain.create_actions.html" class="virtual_method">create_actions</a></b> ()
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Creates the actions and adds them to this <span class="class">
+                  GLib.Application</span>.</span>
+            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Plank.Factories.AbstractMain.is_launcher_for_dock.html" class="method">is_launcher_for_dock</a></b> (<span class="main_basic_type"><span class="class">string</span></span> launcher)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Is true if the launcher given is the launcher for this dock.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Plank.Factories.AbstractMain.help.html" class="virtual_method">help</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Displays the help page.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Plank.Factories.AbstractMain.translate.html" class="virtual_method">translate</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Displays the translate page.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Plank.Factories.AbstractMain.quit.html" class="virtual_method">quit</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Quits the program.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Plank.Factories.AbstractMain.on_item_clicked.html" class="virtual_method">on_item_clicked</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Called when a <a href="Plank.Items.PlankDockItem.html" class="class">
-                  Items.PlankDockItem</a> is clicked.</span>
-            </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Plank.Factories.AbstractMain.show_about.html" class="virtual_method">show_about</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Displays the about dialog.</span>
-            </div></li>
-        </ul>
-        <h3 class="main_title">Signals:</h3>
-        <ul class="navi_inline">
-          <li class="signal"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">signal</span> <span class="main_keyword">void</span> <b><a href="Plank.Factories.AbstractMain.initialized.html" class="signal">initialized</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Signal fired when the program is fully initialized, before creating 
-                and showing the dock.</span>
-            </div></li>
-        </ul>
-        <h3 class="main_title">Fields:</h3>
-        <ul class="navi_inline">
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.build_data_dir.html" class="field">build_data_dir</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Should be Build.DATADIR</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.build_pkg_data_dir.html" class="field">build_pkg_data_dir</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Should be Build.PKGDATADIR</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.build_release_name.html" class="field">build_release_name</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Should be Build.RELEASE_NAME</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.build_version.html" class="field">build_version</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Should be Build.VERSION</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.build_version_info.html" class="field">build_version_info</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Should be Build.VERSION_INFO</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.program_name.html" class="field">program_name</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The displayed name of the program.</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.exec_name.html" class="field">exec_name</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The executable name of the program.</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.app_copyright.html" class="field">app_copyright</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The copyright year(s).</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.app_dbus.html" class="field">app_dbus</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The (unique) dbus path for this program.</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.dock_name.html" class="field">dock_name</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The name of the path containing the dock's preferences.</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.app_icon.html" class="field">app_icon</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The name of this program's icon.</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.app_launcher.html" class="field">app_launcher</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The name of the launcher (.desktop file) for this program.</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.main_url.html" class="field">main_url</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The URL for this program's website.</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.help_url.html" class="field">help_url</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The URL for this program's help.</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.translate_url.html" class="field">translate_url</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The URL for translating this program.</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span>[] <b><a href="Plank.Factories.AbstractMain.about_authors.html" class="field">about_authors</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The list of authors (to show in about dialog).</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span>[] <b><a href="Plank.Factories.AbstractMain.about_documenters.html" class="field">about_documenters</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The list of documenters (to show in about dialog).</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span>[] <b><a href="Plank.Factories.AbstractMain.about_artists.html" class="field">about_artists</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The list of artists (to show in about dialog).</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.about_translators.html" class="field">about_translators</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The list of translators (to show in about dialog).</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_type"><span class="enum">License</span></span> <b><a href="Plank.Factories.AbstractMain.about_license_type.html" class="field">about_license_type</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The license of this program (to show in about dialog).</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_type"><span class="class">Application</span></span> <b><a href="Plank.Factories.AbstractMain.application.html" class="field">application</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The Application for preserving uniqueness</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">static</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Plank.Factories.AbstractMain.DEBUG.html" class="field">DEBUG</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">If debug mode is enabled.</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">static</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Plank.Factories.AbstractMain.VERBOSE.html" class="field">VERBOSE</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">If verbose mode is enabled.</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">static</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Factories.AbstractMain.DOCK_NAME.html" class="field">DOCK_NAME</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The given dock_name</span>
-            </div></li>
-          <li class="field"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">static</span> <span class="main_type"><span class="class">AboutDialog</span></span>? <b><a href="Plank.Factories.AbstractMain.about_dlg.html" class="field">about_dlg</a></b>
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">The about dialog for the program.</span>
             </div></li>
         </ul>
         <h3 class="main_title">Inherited Members:</h3>
         <div class="box">
           <div class="headline">
-            <div class="text">All known members inherited from class GLib.Object</div>
+            <div class="text">All known members inherited from class Gtk.Application</div>
             <div class="toggle">
               <img onclick="toggle_box  (this, 'box-content-27')" src="coll_open.png">&nbsp;</div>
             </div>
             <div class="content" id="box-content-27">
               <div class="column">
                 <ul class="navi_inline">
-                  <li class="static_method">@new</li>
-                  <li class="static_method">newv</li>
-                  <li class="static_method">new_valist</li>
-                  <li class="method">get_type</li>
-                  <li class="method">get_class</li>
-                  <li class="method">@ref</li>
-                  <li class="method">unref</li>
-                  <li class="method">ref_sink</li>
-                  <li class="method">weak_ref</li>
-                  <li class="method">weak_unref</li>
-                  <li class="method">add_weak_pointer</li>
-                  <li class="method">remove_weak_pointer</li>
+                  <li class="property">active_window</li>
+                  <li class="property">app_menu</li>
+                  <li class="property">menubar</li>
+                  <li class="property">register_session</li>
+                  <li class="method">add_accelerator</li>
+                  <li class="method">add_window</li>
+                  <li class="method">get_accels_for_action</li>
+                  <li class="method">get_actions_for_accel</li>
+                  <li class="method">get_active_window</li>
                 </ul>
               </div>
               <div class="column">
                 <ul class="navi_inline">
-                  <li class="method">@get</li>
-                  <li class="method">@set</li>
-                  <li class="method">get_property</li>
-                  <li class="method">set_property</li>
-                  <li class="method">get_data</li>
-                  <li class="method">set_data</li>
-                  <li class="method">set_data_full</li>
-                  <li class="method">steal_data</li>
-                  <li class="method">get_qdata</li>
-                  <li class="method">set_qdata</li>
-                  <li class="method">set_qdata_full</li>
-                  <li class="method">steal_qdata</li>
+                  <li class="method">get_app_menu</li>
+                  <li class="method">get_menu_by_id</li>
+                  <li class="method">get_menubar</li>
+                  <li class="method">get_window_by_id</li>
+                  <li class="method">get_windows</li>
+                  <li class="method">inhibit</li>
+                  <li class="method">is_inhibited</li>
+                  <li class="method">list_action_descriptions</li>
+                  <li class="method">prefers_app_menu</li>
                 </ul>
               </div>
               <div class="column">
                 <ul class="navi_inline">
-                  <li class="method">freeze_notify</li>
-                  <li class="method">thaw_notify</li>
-                  <li class="virtual_method">dispose</li>
-                  <li class="virtual_method">constructed</li>
-                  <li class="method">notify_property</li>
-                  <li class="method">connect</li>
-                  <li class="method">disconnect</li>
-                  <li class="method">add_toggle_ref</li>
-                  <li class="method">remove_toggle_ref</li>
-                  <li class="method">bind_property</li>
-                  <li class="signal">notify</li>
-                  <li class="field">ref_count</li>
+                  <li class="method">remove_accelerator</li>
+                  <li class="method">remove_window</li>
+                  <li class="method">set_accels_for_action</li>
+                  <li class="method">set_app_menu</li>
+                  <li class="method">set_menubar</li>
+                  <li class="method">uninhibit</li>
+                  <li class="signal">window_added</li>
+                  <li class="signal">window_removed</li>
                 </ul>
               </div>
             </div>
           </div>
-        </div>
-      </div><br/>
-      <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
-      </div>
-    </body>
-  </html>
+          <div class="box">
+            <div class="headline">
+              <div class="text">All known members inherited from class GLib.Application</div>
+              <div class="toggle">
+                <img onclick="toggle_box  (this, 'box-content-28')" src="coll_open.png">&nbsp;</div>
+              </div>
+              <div class="content" id="box-content-28">
+                <div class="column">
+                  <ul class="navi_inline">
+                    <li class="property">action_group</li>
+                    <li class="property">application_id</li>
+                    <li class="property">flags</li>
+                    <li class="property">inactivity_timeout</li>
+                    <li class="property">is_registered</li>
+                    <li class="property">is_remote</li>
+                    <li class="property">resource_base_path</li>
+                    <li class="static_method">get_default</li>
+                    <li class="static_method">id_is_valid</li>
+                    <li class="method">add_main_option</li>
+                    <li class="method">add_main_option_entries</li>
+                    <li class="method">add_option_group</li>
+                    <li class="virtual_method">add_platform_data</li>
+                    <li class="virtual_method">after_emit</li>
+                    <li class="virtual_method">before_emit</li>
+                    <li class="virtual_method">dbus_register</li>
+                    <li class="virtual_method">dbus_unregister</li>
+                  </ul>
+                </div>
+                <div class="column">
+                  <ul class="navi_inline">
+                    <li class="method">get_application_id</li>
+                    <li class="method">get_dbus_connection</li>
+                    <li class="method">get_dbus_object_path</li>
+                    <li class="method">get_flags</li>
+                    <li class="method">get_inactivity_timeout</li>
+                    <li class="method">get_is_registered</li>
+                    <li class="method">get_is_remote</li>
+                    <li class="method">get_resource_base_path</li>
+                    <li class="method">hold</li>
+                    <li class="virtual_method">local_command_line</li>
+                    <li class="method">mark_busy</li>
+                    <li class="method">quit</li>
+                    <li class="virtual_method">quit_mainloop</li>
+                    <li class="method">register</li>
+                    <li class="method">release</li>
+                    <li class="method">run</li>
+                  </ul>
+                </div>
+                <div class="column">
+                  <ul class="navi_inline">
+                    <li class="virtual_method">run_mainloop</li>
+                    <li class="method">send_notification</li>
+                    <li class="method">set_action_group</li>
+                    <li class="method">set_application_id</li>
+                    <li class="method">set_default</li>
+                    <li class="method">set_flags</li>
+                    <li class="method">set_inactivity_timeout</li>
+                    <li class="method">set_resource_base_path</li>
+                    <li class="method">unmark_busy</li>
+                    <li class="method">withdraw_notification</li>
+                    <li class="signal">activate</li>
+                    <li class="signal">command_line</li>
+                    <li class="signal">handle_local_options</li>
+                    <li class="signal">open</li>
+                    <li class="signal">shutdown</li>
+                    <li class="signal">startup</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="box">
+              <div class="headline">
+                <div class="text">All known members inherited from class GLib.Object</div>
+                <div class="toggle">
+                  <img onclick="toggle_box  (this, 'box-content-29')" src="coll_open.png">&nbsp;</div>
+                </div>
+                <div class="content" id="box-content-29">
+                  <div class="column">
+                    <ul class="navi_inline">
+                      <li class="static_method">@new</li>
+                      <li class="static_method">newv</li>
+                      <li class="static_method">new_valist</li>
+                      <li class="method">get_type</li>
+                      <li class="method">get_class</li>
+                      <li class="method">@ref</li>
+                      <li class="method">unref</li>
+                      <li class="method">ref_sink</li>
+                      <li class="method">weak_ref</li>
+                      <li class="method">weak_unref</li>
+                      <li class="method">add_weak_pointer</li>
+                      <li class="method">remove_weak_pointer</li>
+                    </ul>
+                  </div>
+                  <div class="column">
+                    <ul class="navi_inline">
+                      <li class="method">@get</li>
+                      <li class="method">@set</li>
+                      <li class="method">get_property</li>
+                      <li class="method">set_property</li>
+                      <li class="method">get_data</li>
+                      <li class="method">set_data</li>
+                      <li class="method">set_data_full</li>
+                      <li class="method">steal_data</li>
+                      <li class="method">get_qdata</li>
+                      <li class="method">set_qdata</li>
+                      <li class="method">set_qdata_full</li>
+                      <li class="method">steal_qdata</li>
+                    </ul>
+                  </div>
+                  <div class="column">
+                    <ul class="navi_inline">
+                      <li class="method">freeze_notify</li>
+                      <li class="method">thaw_notify</li>
+                      <li class="virtual_method">dispose</li>
+                      <li class="virtual_method">constructed</li>
+                      <li class="method">notify_property</li>
+                      <li class="method">connect</li>
+                      <li class="method">disconnect</li>
+                      <li class="method">add_toggle_ref</li>
+                      <li class="method">remove_toggle_ref</li>
+                      <li class="method">bind_property</li>
+                      <li class="signal">notify</li>
+                      <li class="field">ref_count</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="box">
+                <div class="headline">
+                  <div class="text">All known members inherited from interface GLib.ActionGroup</div>
+                  <div class="toggle">
+                    <img onclick="toggle_box  (this, 'box-content-30')" src="coll_open.png">&nbsp;</div>
+                  </div>
+                  <div class="content" id="box-content-30">
+                    <div class="column">
+                      <ul class="navi_inline">
+                        <li class="abstract_method">activate_action</li>
+                        <li class="abstract_method">change_action_state</li>
+                        <li class="abstract_method">get_action_enabled</li>
+                        <li class="abstract_method">get_action_parameter_type</li>
+                        <li class="abstract_method">get_action_state</li>
+                      </ul>
+                    </div>
+                    <div class="column">
+                      <ul class="navi_inline">
+                        <li class="abstract_method">get_action_state_hint</li>
+                        <li class="abstract_method">get_action_state_type</li>
+                        <li class="abstract_method">has_action</li>
+                        <li class="abstract_method">list_actions</li>
+                        <li class="virtual_method">query_action</li>
+                      </ul>
+                    </div>
+                    <div class="column">
+                      <ul class="navi_inline">
+                        <li class="signal">action_added</li>
+                        <li class="signal">action_enabled_changed</li>
+                        <li class="signal">action_removed</li>
+                        <li class="signal">action_state_changed</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div class="box">
+                  <div class="headline">
+                    <div class="text">All known members inherited from interface GLib.ActionMap</div>
+                    <div class="toggle">
+                      <img onclick="toggle_box  (this, 'box-content-31')" src="coll_open.png">&nbsp;</div>
+                    </div>
+                    <div class="content" id="box-content-31">
+                      <div class="column">
+                        <ul class="navi_inline">
+                          <li class="abstract_method">add_action</li>
+                          <li class="method">add_action_entries</li>
+                        </ul>
+                      </div>
+                      <div class="column">
+                        <ul class="navi_inline">
+                          <li class="abstract_method">lookup_action</li>
+                        </ul>
+                      </div>
+                      <div class="column">
+                        <ul class="navi_inline">
+                          <li class="abstract_method">remove_action</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div><br/>
+              <div class="site_footer">Generated by <a href="http://www.valadoc.org/">Valadoc</a>
+              </div>
+            </body>
+          </html>

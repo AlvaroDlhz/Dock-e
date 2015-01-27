@@ -17,51 +17,59 @@
 
 using Plank.Factories;
 
-namespace PlankMain
+namespace Plank
 {
 	public class PlankMain : AbstractMain
 	{
 		public static int main (string[] args)
 		{
-			var main_class = new PlankMain ();
-			Factory.init (main_class, new ItemFactory ());
-			return main_class.run (ref args);
+			var application = new PlankMain ();
+			Factory.init (application, new ItemFactory ());
+			return application.run (args);
 		}
 		
 		public PlankMain ()
 		{
-			build_data_dir = Build.DATADIR;
-			build_pkg_data_dir = Build.PKGDATADIR;
-			build_release_name = Build.RELEASE_NAME;
-			build_version = Build.VERSION;
-			build_version_info = Build.VERSION_INFO;
+			var authors = new string[] {
+					"Robert Dyer <robert@go-docky.com>",
+					"Rico Tzschichholz <rtz@go-docky.com>",
+					"Michal Hruby <michal.mhr@gmail.com>"
+				};
 			
-			program_name = "Plank";
-			exec_name = "plank";
+			var documenters = new string[] {
+					"Robert Dyer <robert@go-docky.com>",
+					"Rico Tzschichholz <rtz@go-docky.com>"
+				};
 			
-			app_copyright = "2011-2014";
-			app_dbus = "net.launchpad.plank";
-			app_icon = "plank";
-			app_launcher = "plank.desktop";
+			var artists = new string[] {
+					"Daniel Foré <bunny@go-docky.com>"
+				};
 			
-			main_url = "https://launchpad.net/plank";
-			help_url = "https://answers.launchpad.net/plank";
-			translate_url = "https://translations.launchpad.net/plank";
+			Object (
+				build_data_dir : Build.DATADIR,
+				build_pkg_data_dir : Build.PKGDATADIR,
+				build_release_name : Build.RELEASE_NAME,
+				build_version : Build.VERSION,
+				build_version_info : Build.VERSION_INFO,
 			
-			about_authors = {
-				"Robert Dyer <robert@go-docky.com>",
-				"Rico Tzschichholz <rtz@go-docky.com>",
-				"Michal Hruby <michal.mhr@gmail.com>"
-			};
-			about_documenters = {
-				"Robert Dyer <robert@go-docky.com>",
-				"Rico Tzschichholz <rtz@go-docky.com>"
-			};
-			about_artists = {
-				"Daniel Foré <bunny@go-docky.com>"
-			};
-			about_translators = "";
-			about_license_type = Gtk.License.GPL_3_0;
+				program_name : "Plank",
+				exec_name : "plank",
+			
+				app_copyright : "2011-2015",
+				app_dbus : "net.launchpad.plank",
+				app_icon : "plank",
+				app_launcher : "plank.desktop",
+			
+				main_url : "https://launchpad.net/plank",
+				help_url : "https://answers.launchpad.net/plank",
+				translate_url : "https://translations.launchpad.net/plank",
+			
+				about_authors : authors,
+				about_documenters : documenters,
+				about_artists : artists,
+				about_translators : "",
+				about_license_type : Gtk.License.GPL_3_0
+			);
 		}
 	}
 }

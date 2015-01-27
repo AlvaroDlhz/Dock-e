@@ -76,7 +76,7 @@ namespace Plank.Widgets
 						x + w - padding.right - 1, y + padding.top);
 			}
 			
-			var font_desc = style.font_desc;
+			unowned Pango.FontDescription font_desc = style.font_desc;
 			font_desc.set_absolute_size ((int) (h * Pango.SCALE * Pango.Scale.LARGE));
 			font_desc.set_weight (Pango.Weight.BOLD);
 			
@@ -96,7 +96,7 @@ namespace Plank.Widgets
 			cr.move_to (x + padding.left, y + (h - logical_rect.height) / 2);
 			Pango.cairo_show_layout (cr, layout);
 			
-			return true;
+			return Gdk.EVENT_STOP;
 		}
 	}
 }
