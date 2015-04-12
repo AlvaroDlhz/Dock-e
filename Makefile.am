@@ -1,4 +1,5 @@
 include $(top_srcdir)/Makefile.common
+include $(top_srcdir)/Makefile.coverage
 
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
@@ -9,6 +10,7 @@ SUBDIRS = \
 	vapi \
 	src \
 	tests \
+	examples \
 	$(NULL)
 
 if HAVE_VALADOC
@@ -16,7 +18,11 @@ SUBDIRS += docs
 endif
 
 DISTCHECK_CONFIGURE_FLAGS = \
+	--enable-barriers \
+	--enable-dbusmenu \
 	--enable-docs \
+	--enable-gee-0.8 \
+	--enable-headless-tests \
 	$(NULL)
 
 EXTRA_DIST = \

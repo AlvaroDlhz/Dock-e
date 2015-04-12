@@ -42,16 +42,28 @@ namespace Plank
 		public DockRenderer renderer { get; protected set; }
 		public DockWindow window { get; protected set; }
 		
-		ApplicationDockItemProvider? default_provider;
+		public ApplicationDockItemProvider? default_provider { get; private set; }
+		
+		DBusManager dbus_manager;
+		Gee.ArrayList<unowned DockItem> visible_items;
 		Gee.ArrayList<unowned DockItem> items;
 		
 		/**
-		 * Ordered list of all visible items on this dock
+		 * List of all items on this dock
 		 */
 		public Gee.ArrayList<unowned DockItem> Items {
 			get {
 				return items;
- 			}
+			}
+		}
+		
+		/**
+		 * Ordered list of all visible items on this dock
+		 */
+		public Gee.ArrayList<unowned DockItem> VisibleItems {
+			get {
+				return visible_items;
+			}
 		}
 		
 		/**
@@ -76,8 +88,11 @@ namespace Plank
 			Factory.item_factory.launchers_dir = launchers_folder;
 			
 			items = new Gee.ArrayList<unowned DockItem> ();
+			visible_items = new Gee.ArrayList<unowned DockItem> ();
 			
 			prefs.notify["PinnedOnly"].connect (update_default_provider);
+			
+			dbus_manager = new DBusManager (this);
 			
 			position_manager = new PositionManager (this);
 			drag_manager = new DragManager (this);
@@ -91,6 +106,7 @@ namespace Plank
 			prefs.notify["PinnedOnly"].disconnect (update_default_provider);
 			
 			items.clear ();
+			visible_items.clear ();
 		}
 		
 		/**
@@ -100,8 +116,10 @@ namespace Plank
 		 */
 		public void initialize ()
 		{
-			if (internal_items.size <= 0)
+			if (internal_elements.size <= 0)
 				add_default_provider ();
+			
+			update_items ();
 			
 			position_manager.initialize ();
 			drag_manager.initialize ();
@@ -121,12 +139,12 @@ namespace Plank
 				return;
 			
 			Logger.verbose ("DockController.add_default_provider ()");
-			default_provider = get_default_provider ();
+			default_provider = create_default_provider ();
 			
 			add_item (default_provider);
 		}
 		
-		ApplicationDockItemProvider get_default_provider ()
+		ApplicationDockItemProvider create_default_provider ()
 		{
 			ApplicationDockItemProvider provider;
 			
@@ -155,9 +173,11 @@ namespace Plank
 				return;
 			
 			var old_default_provider = default_provider;
-			default_provider = get_default_provider ();
+			default_provider = create_default_provider ();
 			default_provider.prepare ();
 			replace_item (default_provider, old_default_provider);
+			
+			update_items ();
 			
 			// Do a thorough update since we actually dropped all previous items
 			// of the default-provider
@@ -201,10 +221,32 @@ namespace Plank
 			
 			Logger.verbose ("DockController.update_visible_items ()");
 			
-			items.clear ();
+			visible_items.clear ();
 			
 			var current_pos = 0;
-			foreach (var element in visible_items) {
+			foreach (var element in visible_elements) {
+				unowned DockContainer? container = (element as DockContainer);
+				if (container == null)
+					continue;
+				foreach (var element2 in container.VisibleElements) {
+					unowned DockItem? item = (element2 as DockItem);
+					if (item == null)
+						continue;
+					if (item.Position != current_pos)
+						item.Position = current_pos;
+					visible_items.add (item);
+					current_pos++;
+				}
+			}
+		}
+		
+		void update_items ()
+		{
+			Logger.verbose ("DockController.update_items ()");
+			
+			items.clear ();
+			
+			foreach (var element in internal_elements) {
 				unowned DockContainer? container = (element as DockContainer);
 				if (container == null)
 					continue;
@@ -212,10 +254,7 @@ namespace Plank
 					unowned DockItem? item = (element2 as DockItem);
 					if (item == null)
 						continue;
-					if (item.Position != current_pos)
-						item.Position = current_pos;
 					items.add (item);
-					current_pos++;
 				}
 			}
 		}
@@ -225,7 +264,12 @@ namespace Plank
 			if (provider == default_provider)
 				serialize_item_positions ();
 			
+			// Schedule added/removed items for special animations
+			renderer.animate_items (added);
+			renderer.animate_items (removed);
+			
 			update_visible_items ();
+			update_items ();
 			
 			if (prefs.Alignment != Gtk.Align.FILL
 				&& added.size != removed.size) {
@@ -235,6 +279,8 @@ namespace Plank
 				position_manager.update_regions ();
 			}
 			window.update_icon_regions ();
+			
+			items_changed (added, removed);
 		}
 		
 		void handle_item_positions_changed (DockContainer provider, Gee.List<unowned DockElement> moved_items)

@@ -49,7 +49,7 @@ namespace Plank.Items
 		 */
 		public virtual unowned DockItem? item_for_uri (string uri)
 		{
-			foreach (var element in internal_items) {
+			foreach (var element in internal_elements) {
 				unowned DockItem? item = (element as DockItem);
 				if (item != null && item.Launcher == uri)
 					return item;
@@ -63,10 +63,13 @@ namespace Plank.Items
 		 *
 		 * @param uri the URI to add a dock item for
 		 * @param target an existing item where to put this new one at
+		 * @return whether adding the URI was successful
 		 */
-		public virtual void add_item_with_uri (string uri, DockItem? target = null)
+		public virtual bool add_item_with_uri (string uri, DockItem? target = null)
 		{
 			warning ("Not implemented by default");
+			
+			return false;
 		}
 		
 		public override bool can_accept_drop (Gee.ArrayList<string> uris)

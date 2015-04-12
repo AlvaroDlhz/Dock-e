@@ -1,3 +1,398 @@
+2015-04-12  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Prepare 0.9.0 release
+
+2015-04-12  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	coverage-html: Make sure to reference files located in builddir
+
+2015-04-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockwindow: Fix build with gee-1.0
+
+2015-04-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add some hidden menu-items for easier debugging
+
+2015-04-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Update symbols
+
+2015-04-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Make the Preferences menu-item visible in Pantheon too
+
+2015-04-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockwindow: Reverse ordering of menu-items for top-docks
+
+	Ease the access of more important items for this case.
+
+2015-04-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	themes: Refresh "Default" for comment-changes
+
+2015-04-09  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	theme: State the extended influence of ItemMoveTime
+
+2015-04-09  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Update email contacts
+
+2015-04-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	tests: Split startup-test into "dock" binary and run it separately
+
+2015-04-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	positionmanager: Add replacement string if get_monitor_plug_name
+	is null
+
+2015-04-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	m4: Update gcov.m4
+
+2015-04-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Add support for coverage analysis using gcov and lcov
+
+	Based on https://launchpad.net/coverage-tutorial by "Allan LeSage"
+
+2015-04-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-04-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Synchronize resetting buffers and position-manager
+
+	Avoid races on e.g. changing theme. The bargain is a more expensive
+	update for Offset/Alignments changes.
+
+2015-04-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	prefs: Mention "window-dodge" hide-mode
+
+2015-04-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	tests: Check HoverWindow and PreferencesWindow
+
+2015-04-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	tests: Increase DrawingService coverage
+
+2015-04-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	tests: Check Drawing.easing_for_mode
+
+2015-04-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	tests: Increase Color coverage
+
+2015-04-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	color: Fix naming of "set_min_val"
+
+2015-04-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	tests: Increase Dock-/Theme coverage
+
+2015-04-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	tests: Complete DockSurface coverage
+
+2015-04-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	theme/get_theme_list: Returning an array is good enough
+
+2015-04-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	positionmanager/get_monitor_plug_names: Returning an array is
+	good enough
+
+2015-04-06  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	hidemanager: Avoid copying "mask_bits" array
+
+2015-04-06  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	positionmanager: Fix -Wreturn-type
+
+2015-04-06  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	docktheme/draw_item_progress: Restrict progress to <= 1.0
+
+2015-04-06  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	tests: Add more DockTheme tests
+
+2015-04-06  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	tests: Compare lowlevel pixdata to determine equality
+
+2015-04-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	prefs: Save display-plug-name as Monitor which dock should be shown on
+
+2015-04-03  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Refactor dealing with monitor-/size-changes to catch races-conditions
+
+	Remove delayed handling in favor of dropping superfluous triggering.
+	Remember the requested window position in case get_position() can't
+	return the correct values.
+
+2015-04-01  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Update symbols
+
+2015-04-01  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-03-31  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockwindow: Fix behavior of "special" dock-menu
+
+	The dock-menu was instantly hidden on button-release if it got
+	triggered on an empty area on dock.
+
+2015-03-31  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockwindow: Push logic to determine menu-type into show_menu()
+
+2015-03-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	defaultappprovider: Only listen to Wnck-signals if necessary
+
+2015-03-27  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	items: Generally watch for changes of the "Launcher"-file
+
+	This unifies the filemonitor implementations of ApplicationDockItem and
+	FileDockItem and moves it into DockItem.
+
+2015-03-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	drawingservice: Do not break case-sensitivity, fix for r1211
+
+2015-03-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Update symbols
+
+2015-03-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	drawingservice: Add support for loading icons with "resource://"-uris
+
+2015-03-29  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	hidemanager: Refactor internal API
+
+2015-03-29  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-03-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dragmanager: Use Gtk.drag_set_icon_default as fallback
+
+2015-03-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockitem: Make "handle_deleted" private
+
+2015-03-25  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Do not animate item if it got removed with drag'n'drop
+
+2015-03-25  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	element: Add "IsVisible" which *only* controls whether to draw the item
+
+2015-03-25  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	element: Rename IsVisible to IsAttached
+
+	This matches its function better.
+
+2015-03-24  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockwindow: Do not stop motion-events by default
+
+	This fixes fastly-rearranging icon which causes the mouse-cursor
+	leaving
+	the drag-window, so the dockwindow caught and killed the motion-event.
+
+2015-03-24  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dragmanager: Cache "Internal"-surface property
+
+2015-03-23  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-03-23  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Fix background drawing position for panel-mode
+
+	Regression of r1186
+
+2015-03-18  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	abstractmain: Additionally output buildtime versions of glib and gtk+
+
+2015-03-18  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dbus/client: Keep compatiblity with glib 2.32
+
+2015-03-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add DBusManager to provide some useful remotely accessible actions
+
+	Provide "net.launchpad.plank.Items" interface with "Add", "Remove",
+	"GetCount", "GetPersistentApplications" and "GetTransientApplications"
+	methods.
+
+2015-03-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Update symbols
+
+2015-03-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	controller: Call update_items while replacing default_provider
+
+2015-03-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	controller: Add Items property
+
+	Which actually returns a list of all items regardless their visibility.
+
+2015-03-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	controller: Rename property Items to VisibleItems
+
+2015-03-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockcontainer: Rename property Elements to VisibleElements
+
+2015-03-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	item: Rename protected arraylist-fields *_items to *_elements
+
+2015-03-15  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-03-12  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	hidemanager: Add window-dodge hide-mode
+
+2015-03-11  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockwindow: Drop hack for menu-position with gtk+ 3.15+
+
+	Reverts r1158
+
+2015-03-11  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Make "distcheck" work independent from originally passed
+	confflags
+
+2015-03-11  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Draw final internal dock-buffer on window-context at (0,0)
+
+2015-03-11  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	items: It is an ApplicationDockItem, no need to use "as"
+
+2015-02-27  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-02-21  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	items: Avoid removal-delay when unpinning an application
+
+	Remove an AppDockItem if it doesn't represent a running application and
+	doesn't have visible remote-info coming via LauncherEntry.
+
+2015-02-12  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	items: Add boolean return-value to public DockContainer/-Provider
+	methods
+
+	This will indicate the success or failure of the corresponding
+	operation.
+
+2015-02-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	drawing: Make easing_for_mode more robust and document it
+
+2015-02-02  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add hide-delay setting
+
+2015-01-29  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	data: Replace poof.png with newly created poof.svg, Thanks to
+	Daniel Foré
+
+2015-01-29  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	data: Optimize application-default-icon.svg
+
+	scour --enable-viewboxing --enable-id-stripping --create-groups
+	--shorten-ids --enable-id-stripping --enable-comment-stripping
+	--disable-embed-rasters --remove-metadata --strip-xml-prolog -p 9
+
+2015-01-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockwindow: Update according to Gtk.MenuPositionFunc signature fix
+
+2015-01-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	windowcontrol: Try to trap some XErrors caused by Wnck/Cairo
+
+2015-01-27  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Refactor and split up draw_item()
+
+	Add draw_item_shadow() and get_animated_draw_value_for_item()
+	for better
+	separation of drawing and position-calculation.
+
+2015-01-27  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Don't try to draw shadows-layer too early
+
+2015-01-26  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	theme: Increase default ItemMoveTime to 450ms
+
+2015-01-26  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add add/remove animations for dock-items
+
+2015-01-22  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	drawing: Add standard set of easing-functions
+
+2015-01-21  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Redo final drawing to untangle the different layers
+
+	Adds additional drawing operations and therefore slows things down
+	a bit.
+
+2015-01-26  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockitem: Fix warning while building non-HiDPI
+
+2015-01-25  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Back to development
+
 2015-01-25  Rico Tzschichholz  <ricotz@ubuntu.com>
 
 	Prepare 0.8.1 release

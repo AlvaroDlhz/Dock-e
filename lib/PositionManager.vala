@@ -33,6 +33,13 @@ namespace Plank
 			public Gdk.Rectangle draw_region;
 			public Gdk.Rectangle background_region;
 			
+			public double opacity;
+			
+			public double darken;
+			public double lighten;
+			
+			public bool show_indicator;
+			
 			public void move_in (Gtk.PositionType position, double damount)
 			{
 				var amount = (int) damount;
@@ -114,7 +121,7 @@ namespace Plank
 			static_dock_region = Gdk.Rectangle ();
 			draw_values = new Gee.HashMap<DockElement, DockItemDrawValue?> ();			
 			
-			controller.prefs.notify["Monitor"].connect (update_monitor_geo);
+			controller.prefs.notify["Monitor"].connect (prefs_monitor_changed);
 		}
 		
 		/**
@@ -125,12 +132,12 @@ namespace Plank
 		{
 			unowned Gdk.Screen screen = controller.window.get_screen ();
 			
-			screen.monitors_changed.connect (update_monitor_geo);
-			screen.size_changed.connect (update_monitor_geo);
-			screen.composited_changed.connect (composited_changed);
+			screen.monitors_changed.connect (screen_changed);
+			screen.size_changed.connect (screen_changed);
+			screen.composited_changed.connect (screen_composited_changed);
 			
 			// NOTE don't call update_monitor_geo to avoid a double-call of dockwindow.set_size on startup
-			screen.get_monitor_geometry (controller.prefs.get_monitor (), out monitor_geo);
+			screen.get_monitor_geometry (find_monitor_number (screen, controller.prefs.Monitor), out monitor_geo);
 			
 			screen_is_composited = screen.is_composited ();
 		}
@@ -139,27 +146,65 @@ namespace Plank
 		{
 			unowned Gdk.Screen screen = controller.window.get_screen ();
 			
-			screen.monitors_changed.disconnect (update_monitor_geo);
-			screen.size_changed.disconnect (update_monitor_geo);
-			screen.composited_changed.disconnect (composited_changed);
-			controller.prefs.notify["Monitor"].disconnect (update_monitor_geo);
+			screen.monitors_changed.disconnect (screen_changed);
+			screen.size_changed.disconnect (screen_changed);
+			screen.composited_changed.disconnect (screen_composited_changed);
+			controller.prefs.notify["Monitor"].disconnect (prefs_monitor_changed);
 			
 			draw_values.clear ();
 		}
 		
-		void update_monitor_geo ()
+		public static string[] get_monitor_plug_names (Gdk.Screen screen)
 		{
+			int n_monitors = screen.get_n_monitors ();
+			var result = new string[n_monitors];
+			
+			for (int i = 0; i < n_monitors; i++)
+				result[i] = screen.get_monitor_plug_name (i) ?? "PLUG_MONITOR_%i".printf (i);
+			
+			return result;
+		}
+		
+		static int find_monitor_number (Gdk.Screen screen, string plug_name)
+		{
+			int n_monitors = screen.get_n_monitors ();
+			
+			for (int i = 0; i < n_monitors; i++) {
+				var name = screen.get_monitor_plug_name (i) ?? "PLUG_MONITOR_%i".printf (i);
+				if (plug_name == name)
+					return i;
+			}
+			
+			return screen.get_primary_monitor ();
+		}
+		
+		void prefs_monitor_changed ()
+		{
+			screen_changed (controller.window.get_screen ());
+		}
+
+		void screen_changed (Gdk.Screen screen)
+		{
+			var old_monitor_geo = monitor_geo;
+			
+			screen.get_monitor_geometry (find_monitor_number (screen, controller.prefs.Monitor), out monitor_geo);
+			
+			// No need to do anything if nothing has actually changed
+			if (old_monitor_geo.x == monitor_geo.x
+				&& old_monitor_geo.y == monitor_geo.y
+				&& old_monitor_geo.width == monitor_geo.width
+				&& old_monitor_geo.height == monitor_geo.height)
+				return;
+			
 			freeze_notify ();
 			
-			controller.window.get_screen ().get_monitor_geometry (controller.prefs.get_monitor (), out monitor_geo);
 			update_dimensions ();
-			update_dock_position ();
 			update_regions ();
 			
 			thaw_notify ();
 		}
 		
-		void composited_changed (Gdk.Screen screen)
+		void screen_composited_changed (Gdk.Screen screen)
 		{
 			freeze_notify ();
 			
@@ -296,7 +341,6 @@ namespace Plank
 			update_caches (theme);
 			update_max_icon_size (theme);
 			update_dimensions ();
-			update_dock_position ();
 			update_regions ();
 			
 			thaw_notify ();
@@ -370,7 +414,7 @@ namespace Plank
 			unowned DockPreferences prefs = controller.prefs;
 			
 			// Check if the dock is oversized and doesn't fit the targeted screen-edge
-			var item_count = controller.Items.size;
+			var item_count = controller.VisibleItems.size;
 			var width = item_count * (ItemPadding + IconSize) + 2 * HorizPadding + 4 * LineWidth;
 			var max_width = (is_horizontal_dock () ? monitor_geo.width : monitor_geo.height);
 			var step_size = int.max (1, (int) (Math.fabs (width - max_width) / item_count));
@@ -416,7 +460,7 @@ namespace Plank
 			case Gtk.Align.START:
 			case Gtk.Align.END:
 			case Gtk.Align.CENTER:
-				width = controller.Items.size * (ItemPadding + IconSize) + 2 * HorizPadding + 4 * LineWidth;
+				width = controller.VisibleItems.size * (ItemPadding + IconSize) + 2 * HorizPadding + 4 * LineWidth;
 				break;
 			case Gtk.Align.FILL:
 				if (is_horizontal_dock ())
@@ -547,7 +591,7 @@ namespace Plank
 			var old_region = static_dock_region;
 			
 			// width of the items-area of the dock
-			items_width = controller.Items.size * (ItemPadding + IconSize);
+			items_width = controller.VisibleItems.size * (ItemPadding + IconSize);
 			
 			static_dock_region.width = VisibleDockWidth;
 			static_dock_region.height = VisibleDockHeight;
@@ -606,10 +650,13 @@ namespace Plank
 				break;
 			}
 			
+			update_dock_position ();
+			
 			// FIXME Maybe no need to purge all cached values?
 			draw_values.clear ();
 			
-			if (old_region.x != static_dock_region.x
+			if (!screen_is_composited
+				|| old_region.x != static_dock_region.x
 				|| old_region.y != static_dock_region.y
 				|| old_region.width != static_dock_region.width
 				|| old_region.height != static_dock_region.height) {
@@ -642,7 +689,7 @@ namespace Plank
 				var draw_rect = get_item_draw_region (hover_rect);
 				var background_rect = get_item_background_region (hover_rect);
 			
-				draw_value = { hover_rect, draw_rect, background_rect };
+				draw_value = { hover_rect, draw_rect, background_rect, 1.0, 0.0, 0.0, true };
 				draw_values.set (item, draw_value);
 			}
 			
@@ -736,9 +783,10 @@ namespace Plank
 				return get_draw_value_for_item (item).hover_region;
 			
 			unowned DockContainer? container = (element as DockContainer);
-			return_val_if_fail (container != null, Gdk.Rectangle ());
+			if (container == null)
+				return Gdk.Rectangle ();
 			
-			unowned Gee.ArrayList<DockElement> items = container.Elements;
+			unowned Gee.ArrayList<DockElement> items = container.VisibleElements;
 			
 			if (items.size == 0)
 				return { 0 };

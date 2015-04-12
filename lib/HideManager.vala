@@ -40,7 +40,11 @@ namespace Plank
 		/**
 		 * The dock hides if there is an active maximized window.
 		 */
-		DODGE_MAXIMIZED
+		DODGE_MAXIMIZED,
+		/**
+		 * The dock hides if there is any window overlapping it.
+		 */
+		WINDOW_DODGE
 	}
 	
 	/**
@@ -83,12 +87,14 @@ namespace Plank
 		 */
 		public bool Hovered { get; private set; default = false; }
 		
+		uint timer_hide = 0;
 		uint timer_unhide = 0;
 		bool pointer_update = true;
 		
 		uint timer_prefs_changed = 0;
 		
-		bool windows_intersect = false;
+		bool window_intersect = false;
+		bool active_application_intersect = false;
 		bool active_maximized_window_intersect = false;
 		bool dialog_windows_intersect = false;
 		Gdk.Rectangle last_window_rect;
@@ -133,15 +139,15 @@ namespace Plank
 			initialize_barriers_support ();
 #endif
 			
-			window.enter_notify_event.connect (enter_notify_event);
-			window.leave_notify_event.connect (leave_notify_event);
+			window.enter_notify_event.connect (handle_enter_notify_event);
+			window.leave_notify_event.connect (handle_leave_notify_event);
 			
 			wnck_screen.window_opened.connect_after (schedule_update);
 			wnck_screen.window_closed.connect_after (schedule_update);
-			wnck_screen.active_window_changed.connect_after (handle_window_changed);
+			wnck_screen.active_window_changed.connect_after (handle_active_window_changed);
 			wnck_screen.active_workspace_changed.connect_after (handle_workspace_changed);
 			
-			setup_active_window ();
+			setup_active_window (wnck_screen);
 		}
 		
 		~HideManager ()
@@ -152,12 +158,12 @@ namespace Plank
 			
 			controller.prefs.notify.disconnect (prefs_changed);
 			
-			window.enter_notify_event.disconnect (enter_notify_event);
-			window.leave_notify_event.disconnect (leave_notify_event);
+			window.enter_notify_event.disconnect (handle_enter_notify_event);
+			window.leave_notify_event.disconnect (handle_leave_notify_event);
 			
 			wnck_screen.window_opened.disconnect (schedule_update);
 			wnck_screen.window_closed.disconnect (schedule_update);
-			wnck_screen.active_window_changed.disconnect (handle_window_changed);
+			wnck_screen.active_window_changed.disconnect (handle_active_window_changed);
 			wnck_screen.active_workspace_changed.disconnect (handle_workspace_changed);
 			
 			stop_timers ();
@@ -268,7 +274,7 @@ namespace Plank
 				break;
 			
 			case HideType.INTELLIGENT:
-				if (Hovered || !windows_intersect)
+				if (Hovered || !active_application_intersect)
 					show ();
 				else
 					hide ();
@@ -287,6 +293,13 @@ namespace Plank
 				else
 					hide ();
 				break;
+			
+			case HideType.WINDOW_DODGE:
+				if (Hovered || !window_intersect)
+					show ();
+				else
+					hide ();
+				break;
 			}
 			pointer_update = true;
 		}
@@ -298,12 +311,33 @@ namespace Plank
 				timer_unhide = 0;
 			}
 			
-			if (!Hidden)
-				Hidden = true;
+			if (Hidden)
+				return;
+			
+			if (controller.prefs.HideDelay == 0) {
+				if (!Hidden)
+					Hidden = true;
+				return;
+			}
+			
+			if (timer_hide > 0)
+				return;
+			
+			timer_hide = Gdk.threads_add_timeout (controller.prefs.HideDelay, () => {
+				if (!Hidden)
+					Hidden = true;
+				timer_hide = 0;
+				return false;
+			});
 		}
 
 		void show ()
 		{
+			if (timer_hide > 0) {
+				GLib.Source.remove (timer_hide);
+				timer_hide = 0;
+			}
+			
 			if (!Hidden)
 				return;
 			
@@ -324,7 +358,8 @@ namespace Plank
 			});
 		}
 		
-		bool enter_notify_event (Gdk.EventCrossing event)
+		[CCode (instance_pos = -1)]
+		bool handle_enter_notify_event (Gtk.Widget widget, Gdk.EventCrossing event)
 		{
 			if (event.detail == Gdk.NotifyType.INFERIOR)
 				return Hidden;
@@ -348,7 +383,8 @@ namespace Plank
 			return Hidden;
 		}
 		
-		bool leave_notify_event (Gdk.EventCrossing event)
+		[CCode (instance_pos = -1)]
+		bool handle_leave_notify_event (Gtk.Widget widget, Gdk.EventCrossing event)
 		{
 			if (event.detail == Gdk.NotifyType.INFERIOR)
 				return Gdk.EVENT_PROPAGATE;
@@ -382,12 +418,14 @@ namespace Plank
 			
 			var intersect = false;
 			var dialog_intersect = false;
+			var active_intersect = false;
 			var active_maximized_intersect = false;
 			unowned Wnck.Screen screen = Wnck.Screen.get_default ();
 			unowned Wnck.Window? active_window = screen.get_active_window ();
 			unowned Wnck.Workspace? active_workspace = screen.get_active_workspace ();
 			
-			if (active_window != null && active_workspace != null)
+			if (active_window != null && active_workspace != null) {
+				var active_pid = active_window.get_pid ();
 				foreach (var w in screen.get_windows ()) {
 					if (w.is_minimized ())
 						continue;
@@ -398,11 +436,16 @@ namespace Plank
 					if (!w.is_visible_on_workspace (active_workspace))
 						continue;
 					var pid = w.get_pid ();
-					if (pid == plank_pid || pid != active_window.get_pid ())
+					if (pid == plank_pid)
 						continue;
 					
 					if (window_geometry (w).intersect (dock_rect, null)) {
 						intersect = true;
+						
+						if (pid != active_pid)
+							continue;
+						
+						active_intersect = true;
 						
 						active_maximized_intersect = active_maximized_intersect || (active_window == w
 							&& (w.is_maximized () || w.is_maximized_vertically () || w.is_maximized_horizontally ()));
@@ -413,9 +456,11 @@ namespace Plank
 							break;
 					}
 				}
+			}
 			
-			windows_intersect = intersect;
+			window_intersect = intersect;
 			dialog_windows_intersect = dialog_intersect;
+			active_application_intersect = active_intersect;
 			active_maximized_window_intersect = active_maximized_intersect;
 			
 			pointer_update = false;
@@ -434,24 +479,26 @@ namespace Plank
 			});
 		}
 		
-		void handle_workspace_changed (Wnck.Workspace? previous)
+		[CCode (instance_pos = -1)]
+		void handle_workspace_changed (Wnck.Screen screen, Wnck.Workspace? previous)
 		{
 			schedule_update ();
 		}
 		
-		void handle_window_changed (Wnck.Window? previous)
+		[CCode (instance_pos = -1)]
+		void handle_active_window_changed (Wnck.Screen screen, Wnck.Window? previous)
 		{
 			if (previous != null) {
 				previous.geometry_changed.disconnect (handle_geometry_changed);
 				previous.state_changed.disconnect (handle_state_changed);
 			}
 			
-			setup_active_window ();
+			setup_active_window (screen);
 		}
 		
-		void setup_active_window ()
+		void setup_active_window (Wnck.Screen screen)
 		{
-			var active_window = Wnck.Screen.get_default ().get_active_window ();
+			var active_window = screen.get_active_window ();
 			
 			if (active_window != null) {
 				last_window_rect = window_geometry (active_window);
@@ -462,7 +509,8 @@ namespace Plank
 			schedule_update ();
 		}
 		
-		void handle_state_changed (Wnck.WindowState changed_mask, Wnck.WindowState new_state)
+		[CCode (instance_pos = -1)]
+		void handle_state_changed (Wnck.Window window, Wnck.WindowState changed_mask, Wnck.WindowState new_state)
 		{
 			if ((changed_mask & Wnck.WindowState.MINIMIZED) == 0)
 				return;
@@ -470,11 +518,10 @@ namespace Plank
 			schedule_update ();
 		}
 		
-		void handle_geometry_changed (Wnck.Window? w)
+		[CCode (instance_pos = -1)]
+		void handle_geometry_changed (Wnck.Window window)
 		{
-			return_if_fail (w != null);
-			
-			var geo = window_geometry (w);
+			var geo = window_geometry (window);
 			if (geo == last_window_rect)
 				return;
 			
@@ -490,10 +537,10 @@ namespace Plank
 			});
 		}
 		
-		Gdk.Rectangle window_geometry (Wnck.Window w)
+		static Gdk.Rectangle window_geometry (Wnck.Window window)
 		{
 			var win_rect = Gdk.Rectangle ();
-			w.get_geometry (out win_rect.x, out win_rect.y, out win_rect.width, out win_rect.height);
+			window.get_geometry (out win_rect.x, out win_rect.y, out win_rect.width, out win_rect.height);
 			return win_rect;
 		}
 		
@@ -512,6 +559,11 @@ namespace Plank
 			if (timer_prefs_changed > 0) {
 				GLib.Source.remove (timer_prefs_changed);
 				timer_prefs_changed = 0;
+			}
+			
+			if (timer_hide > 0) {
+				GLib.Source.remove (timer_hide);
+				timer_hide = 0;
 			}
 			
 			if (timer_unhide > 0) {
@@ -549,7 +601,7 @@ namespace Plank
 		/**
 		 * Event filter method needed to fetch X.Events
 		 */
-		[CCode (instance_pos = 2.9)]
+		[CCode (instance_pos = -1)]
 		Gdk.FilterReturn xevent_filter (Gdk.XEvent gdk_xevent, Gdk.Event gdk_event)
 		{
 			X.Event* xevent = (X.Event*) gdk_xevent;
@@ -659,7 +711,7 @@ namespace Plank
 			
 			// Enable barrier events
 			uchar[] mask_bits = new uchar[XInput.mask_length (XInput.EventType.LASTEVENT)];
-			XInput.EventMask mask = { XInput.ALL_MASTER_DEVICES, (int) (sizeof (uchar) * mask_bits.length), mask_bits };
+			XInput.EventMask mask = { XInput.ALL_MASTER_DEVICES, (int) (sizeof (uchar) * mask_bits.length), (owned) mask_bits };
 			XInput.set_mask (mask.mask, XInput.EventType.BARRIER_HIT);
 			XInput.set_mask (mask.mask, XInput.EventType.BARRIER_LEAVE);
 			XInput.select_events (display, root_xwindow, &mask, 1);

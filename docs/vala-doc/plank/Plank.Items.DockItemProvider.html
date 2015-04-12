@@ -33,9 +33,9 @@
           <div class="headline">
             <div class="text">All known sub-classes:</div>
             <div class="toggle">
-              <img onclick="toggle_box  (this, 'box-content-56')" src="coll_open.png">&nbsp;</div>
+              <img onclick="toggle_box  (this, 'box-content-58')" src="coll_open.png">&nbsp;</div>
             </div>
-            <div class="content" id="box-content-56">
+            <div class="content" id="box-content-58">
               <div class="column">
                 <ul class="navi_inline">
                   <li class="class"><a href="Plank.Items.ApplicationDockItemProvider.html">ApplicationDockItemProvider</a></li>
@@ -75,7 +75,7 @@
               </span>
               <div class="leaf_brief_description"><span class="brief_description">Get the dock item for the given URI if it exists or null.</span>
               </div></li>
-            <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Plank.Items.DockItemProvider.add_item_with_uri.html" class="virtual_method">add_item_with_uri</a></b> (<span class="main_basic_type"><span class="class">string</span></span> uri, <span class="main_type"><a href="Plank.Items.DockItem.html" class="class">DockItem</a></span>? target = <span class="main_optional_parameter">null</span>)
+            <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Plank.Items.DockItemProvider.add_item_with_uri.html" class="virtual_method">add_item_with_uri</a></b> (<span class="main_basic_type"><span class="class">string</span></span> uri, <span class="main_type"><a href="Plank.Items.DockItem.html" class="class">DockItem</a></span>? target = <span class="main_optional_parameter">null</span>)
               </span>
               <div class="leaf_brief_description"><span class="brief_description">Adds a dock item with the given URI to the collection.</span>
               </div></li>
@@ -109,22 +109,23 @@
             <div class="headline">
               <div class="text">All known members inherited from class Plank.Items.DockContainer</div>
               <div class="toggle">
-                <img onclick="toggle_box  (this, 'box-content-57')" src="coll_open.png">&nbsp;</div>
+                <img onclick="toggle_box  (this, 'box-content-59')" src="coll_open.png">&nbsp;</div>
               </div>
-              <div class="content" id="box-content-57">
+              <div class="content" id="box-content-59">
                 <div class="column">
                   <ul class="navi_inline">
+                    <li class="property"><a href="Plank.Items.DockContainer.VisibleElements.html">VisibleElements</a></li>
                     <li class="property"><a href="Plank.Items.DockContainer.Elements.html">Elements</a></li>
                     <li class="static_method"><a href="Plank.Items.DockContainer.move_item.html">move_item</a></li>
                     <li class="virtual_method"><a href="Plank.Items.DockContainer.prepare.html">prepare</a></li>
                     <li class="method"><a href="Plank.Items.DockContainer.add_item.html">add_item</a></li>
                     <li class="method"><a href="Plank.Items.DockContainer.add_items.html">add_items</a></li>
                     <li class="method"><a href="Plank.Items.DockContainer.remove_item.html">remove_item</a></li>
-                    <li class="virtual_method"><a href="Plank.Items.DockContainer.update_visible_items.html">update_visible_items</a></li>
                   </ul>
                 </div>
                 <div class="column">
                   <ul class="navi_inline">
+                    <li class="virtual_method"><a href="Plank.Items.DockContainer.update_visible_items.html">update_visible_items</a></li>
                     <li class="virtual_method"><a href="Plank.Items.DockContainer.move_item_to.html">move_item_to</a></li>
                     <li class="virtual_method"><a href="Plank.Items.DockContainer.reset_buffers.html">reset_buffers</a></li>
                     <li class="virtual_method"><a href="Plank.Items.DockContainer.add_item_without_signaling.html">add_item_without_signaling</a></li>
@@ -132,17 +133,17 @@
                     <li class="virtual_method"><a href="Plank.Items.DockContainer.remove_item_without_signaling.html">remove_item_without_signaling
                       </a></li>
                     <li class="abstract_method"><a href="Plank.Items.DockContainer.connect_element.html">connect_element</a></li>
-                    <li class="abstract_method"><a href="Plank.Items.DockContainer.disconnect_element.html">disconnect_element</a></li>
                   </ul>
                 </div>
                 <div class="column">
                   <ul class="navi_inline">
+                    <li class="abstract_method"><a href="Plank.Items.DockContainer.disconnect_element.html">disconnect_element</a></li>
                     <li class="signal"><a href="Plank.Items.DockContainer.items_changed.html">items_changed</a></li>
                     <li class="signal"><a href="Plank.Items.DockContainer.item_state_changed.html">item_state_changed</a></li>
                     <li class="signal"><a href="Plank.Items.DockContainer.item_positions_changed.html">item_positions_changed</a></li>
                     <li class="field"><a href="Plank.Items.DockContainer.placeholder_item.html">placeholder_item</a></li>
-                    <li class="field"><a href="Plank.Items.DockContainer.visible_items.html">visible_items</a></li>
-                    <li class="field"><a href="Plank.Items.DockContainer.internal_items.html">internal_items</a></li>
+                    <li class="field"><a href="Plank.Items.DockContainer.visible_elements.html">visible_elements</a></li>
+                    <li class="field"><a href="Plank.Items.DockContainer.internal_elements.html">internal_elements</a></li>
                   </ul>
                 </div>
               </div>
@@ -151,13 +152,14 @@
               <div class="headline">
                 <div class="text">All known members inherited from class Plank.Items.DockElement</div>
                 <div class="toggle">
-                  <img onclick="toggle_box  (this, 'box-content-58')" src="coll_open.png">&nbsp;</div>
+                  <img onclick="toggle_box  (this, 'box-content-60')" src="coll_open.png">&nbsp;</div>
                 </div>
-                <div class="content" id="box-content-58">
+                <div class="content" id="box-content-60">
                   <div class="column">
                     <ul class="navi_inline">
                       <li class="property"><a href="Plank.Items.DockElement.Container.html">Container</a></li>
                       <li class="property"><a href="Plank.Items.DockElement.Text.html">Text</a></li>
+                      <li class="property"><a href="Plank.Items.DockElement.IsAttached.html">IsAttached</a></li>
                       <li class="property"><a href="Plank.Items.DockElement.IsVisible.html">IsVisible</a></li>
                       <li class="property"><a href="Plank.Items.DockElement.Button.html">Button</a></li>
                       <li class="property"><a href="Plank.Items.DockElement.ClickedAnimation.html">ClickedAnimation</a></li>
@@ -166,11 +168,11 @@
                       <li class="property"><a href="Plank.Items.DockElement.AddTime.html">AddTime</a></li>
                       <li class="property"><a href="Plank.Items.DockElement.RemoveTime.html">RemoveTime</a></li>
                       <li class="property"><a href="Plank.Items.DockElement.LastClicked.html">LastClicked</a></li>
-                      <li class="property"><a href="Plank.Items.DockElement.LastHovered.html">LastHovered</a></li>
                     </ul>
                   </div>
                   <div class="column">
                     <ul class="navi_inline">
+                      <li class="property"><a href="Plank.Items.DockElement.LastHovered.html">LastHovered</a></li>
                       <li class="property"><a href="Plank.Items.DockElement.LastScrolled.html">LastScrolled</a></li>
                       <li class="property"><a href="Plank.Items.DockElement.LastUrgent.html">LastUrgent</a></li>
                       <li class="property"><a href="Plank.Items.DockElement.LastActive.html">LastActive</a></li>
@@ -182,11 +184,11 @@
                       <li class="virtual_method"><a href="Plank.Items.DockElement.on_clicked.html">on_clicked</a></li>
                       <li class="method"><a href="Plank.Items.DockElement.hovered.html">hovered</a></li>
                       <li class="virtual_method"><a href="Plank.Items.DockElement.on_hovered.html">on_hovered</a></li>
-                      <li class="method"><a href="Plank.Items.DockElement.scrolled.html">scrolled</a></li>
                     </ul>
                   </div>
                   <div class="column">
                     <ul class="navi_inline">
+                      <li class="method"><a href="Plank.Items.DockElement.scrolled.html">scrolled</a></li>
                       <li class="virtual_method"><a href="Plank.Items.DockElement.on_scrolled.html">on_scrolled</a></li>
                       <li class="method"><a href="Plank.Items.DockElement.get_dock.html">get_dock</a></li>
                       <li class="virtual_method"><a href="Plank.Items.DockElement.get_menu_items.html">get_menu_items</a></li>
@@ -205,9 +207,9 @@
                 <div class="headline">
                   <div class="text">All known members inherited from class GLib.Object</div>
                   <div class="toggle">
-                    <img onclick="toggle_box  (this, 'box-content-59')" src="coll_open.png">&nbsp;</div>
+                    <img onclick="toggle_box  (this, 'box-content-61')" src="coll_open.png">&nbsp;</div>
                   </div>
-                  <div class="content" id="box-content-59">
+                  <div class="content" id="box-content-61">
                     <div class="column">
                       <ul class="navi_inline">
                         <li class="static_method">@new</li>

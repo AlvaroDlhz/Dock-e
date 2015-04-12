@@ -92,13 +92,13 @@ namespace Plank.Tests
 	
 	void controller_items_match (DockController controller)
 	{
-		var controller_items = controller.Items;
+		var controller_items = controller.VisibleItems;
 		var items = new Gee.ArrayList<unowned DockItem> ();
 		
-		foreach (var element in controller.Elements) {
+		foreach (var element in controller.VisibleElements) {
 			unowned DockContainer? container = (element as DockContainer);
 			if (container != null)
-				items.add_all (container.Elements);
+				items.add_all (container.VisibleElements);
 		}
 		
 		assert (items.size == controller_items.size);

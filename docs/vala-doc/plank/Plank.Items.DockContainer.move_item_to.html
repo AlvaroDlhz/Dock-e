@@ -13,7 +13,7 @@
         <h1 class="main_title">move_item_to</h1>
         <hr class="main_hr"/>
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><span class="virtual_method">move_item_to</span></b> (<span class="main_type"><a href="Plank.Items.DockElement.html" class="abstract_class">DockElement</a></span> move, <span class="main_type"><a href="Plank.Items.DockElement.html" class="abstract_class">DockElement</a></span> target)
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><span class="virtual_method">move_item_to</span></b> (<span class="main_type"><a href="Plank.Items.DockElement.html" class="abstract_class">DockElement</a></span> move, <span class="main_type"><a href="Plank.Items.DockElement.html" class="abstract_class">DockElement</a></span> target)
         </div>
         <div class="description">
           <p>Move an item to the position of another item. This shifts all items which are between these two items.</p>
@@ -29,6 +29,14 @@
               <td class="main_parameter_table_name">target</td>
               <td>
                 <p>the item of the new position </p>
+              </td>
+            </tr>
+          </table>
+          <h2 class="main_title">Returns:</h2>
+          <table class="main_parameter_table">
+            <tr>
+              <td>
+                <p>whether moving the item was successful </p>
               </td>
             </tr>
           </table>
