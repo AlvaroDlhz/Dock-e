@@ -60,7 +60,11 @@
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Plank.DockPreferences.Monitor.html" class="property">Monitor</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">uint</span></span> <b><a href="Plank.DockPreferences.HideDelay.html" class="property">HideDelay</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description">
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.DockPreferences.Monitor.html" class="property">Monitor</a></b> { <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
             </span>
             <div class="leaf_brief_description">
             </div></li>
@@ -127,10 +131,6 @@
             <div class="leaf_brief_description"><span class="brief_description">Resets all properties to their default values. Called from construct 
                 and before loading from the backing file.</span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int</span></span> <b><a href="Plank.DockPreferences.get_monitor.html" class="method">get_monitor</a></b> ()
-            </span>
-            <div class="leaf_brief_description"><span class="brief_description">Get the actual monitor to place the dock on</span>
-            </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Plank.DockPreferences.increase_icon_size.html" class="method">increase_icon_size</a></b> ()
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Increases the IconSize, if it is not already at its max.</span>
@@ -154,26 +154,27 @@
           <div class="headline">
             <div class="text">All known members inherited from class Plank.Services.Preferences</div>
             <div class="toggle">
-              <img onclick="toggle_box  (this, 'box-content-3')" src="coll_open.png">&nbsp;</div>
+              <img onclick="toggle_box  (this, 'box-content-4')" src="coll_open.png">&nbsp;</div>
             </div>
-            <div class="content" id="box-content-3">
+            <div class="content" id="box-content-4">
               <div class="column">
                 <ul class="navi_inline">
                   <li class="virtual_method"><a href="Plank.Services.Preferences.verify.html">verify</a></li>
                   <li class="abstract_method"><a href="Plank.Services.Preferences.reset_properties.html">reset_properties</a></li>
                   <li class="method"><a href="Plank.Services.Preferences.init_from_file.html">init_from_file</a></li>
+                  <li class="method"><a href="Plank.Services.Preferences.init_from_filename.html">init_from_filename</a></li>
                 </ul>
               </div>
               <div class="column">
                 <ul class="navi_inline">
-                  <li class="method"><a href="Plank.Services.Preferences.init_from_filename.html">init_from_filename</a></li>
                   <li class="method"><a href="Plank.Services.Preferences.delay.html">delay</a></li>
                   <li class="method"><a href="Plank.Services.Preferences.apply.html">apply</a></li>
+                  <li class="method"><a href="Plank.Services.Preferences.get_filename.html">get_filename</a></li>
                 </ul>
               </div>
               <div class="column">
                 <ul class="navi_inline">
-                  <li class="method"><a href="Plank.Services.Preferences.get_filename.html">get_filename</a></li>
+                  <li class="method"><a href="Plank.Services.Preferences.get_backing_file.html">get_backing_file</a></li>
                   <li class="method"><a href="Plank.Services.Preferences.@delete.html">@delete</a></li>
                   <li class="signal"><a href="Plank.Services.Preferences.deleted.html">deleted</a></li>
                 </ul>
@@ -184,9 +185,9 @@
             <div class="headline">
               <div class="text">All known members inherited from class GLib.Object</div>
               <div class="toggle">
-                <img onclick="toggle_box  (this, 'box-content-4')" src="coll_open.png">&nbsp;</div>
+                <img onclick="toggle_box  (this, 'box-content-5')" src="coll_open.png">&nbsp;</div>
               </div>
-              <div class="content" id="box-content-4">
+              <div class="content" id="box-content-5">
                 <div class="column">
                   <ul class="navi_inline">
                     <li class="static_method">@new</li>

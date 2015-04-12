@@ -79,14 +79,15 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(top_srcdir)/Makefile.common $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(top_srcdir)/build-aux/depcomp
-check_PROGRAMS = tests$(EXEEXT)
-@HAVE_HEADLESS_TESTS_TRUE@am__append_1 = $(XVFB_RUN) --server-args="-screen 0 1280x1024x24" $(DBUS_LAUNCH)
+check_PROGRAMS = tests$(EXEEXT) dock$(EXEEXT)
+@HAVE_HEADLESS_TESTS_TRUE@am__append_1 = $(XVFB_RUN) --auto-servernum --server-args="-screen 0 1280x1024x24" $(DBUS_LAUNCH)
 subdir = tests
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/intltool.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/gcov.m4 \
+	$(top_srcdir)/m4/intltool.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -94,19 +95,30 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__objects_1 =
-am__objects_2 = tests-Controller.$(OBJEXT) tests-Drawing.$(OBJEXT) \
-	tests-Items.$(OBJEXT) tests-Preferences.$(OBJEXT) \
-	tests-Widgets.$(OBJEXT) tests-Main.$(OBJEXT) $(am__objects_1)
-nodist_tests_OBJECTS = $(am__objects_2) $(am__objects_1)
-tests_OBJECTS = $(nodist_tests_OBJECTS)
+am__objects_2 = dock-Dock.$(OBJEXT) $(am__objects_1)
+nodist_dock_OBJECTS = $(am__objects_2) $(am__objects_1)
+dock_OBJECTS = $(nodist_dock_OBJECTS)
 am__DEPENDENCIES_1 =
-tests_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(top_builddir)/lib/libplank.la \
 	$(top_builddir)/lib/libplank-internal.la $(am__DEPENDENCIES_1)
+dock_DEPENDENCIES = $(am__DEPENDENCIES_2)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+dock_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(dock_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+am__objects_3 = tests-Controller.$(OBJEXT) tests-Drawing.$(OBJEXT) \
+	tests-Items.$(OBJEXT) tests-Preferences.$(OBJEXT) \
+	tests-Widgets.$(OBJEXT) tests-Main.$(OBJEXT) \
+	tests-TestHelper.$(OBJEXT) $(am__objects_1)
+nodist_tests_OBJECTS = $(am__objects_3) $(am__objects_1)
+tests_OBJECTS = $(nodist_tests_OBJECTS)
+tests_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(top_builddir)/lib/libplank.la \
+	$(top_builddir)/lib/libplank-internal.la $(am__DEPENDENCIES_1)
 tests_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(tests_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
@@ -144,7 +156,7 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(nodist_tests_SOURCES)
+SOURCES = $(nodist_dock_SOURCES) $(nodist_tests_SOURCES)
 DIST_SOURCES =
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -186,10 +198,12 @@ BAMF_LIBS = @BAMF_LIBS@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+COVERAGE_CFLAGS = @COVERAGE_CFLAGS@
+COVERAGE_LDFLAGS = @COVERAGE_LDFLAGS@
+COVERAGE_VALAFLAGS = @COVERAGE_VALAFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
-DATADIRNAME = @DATADIRNAME@
 DBUSMENU_CFLAGS = @DBUSMENU_CFLAGS@
 DBUSMENU_LIBS = @DBUSMENU_LIBS@
 DBUS_LAUNCH = @DBUS_LAUNCH@
@@ -204,8 +218,12 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+GCOVR = @GCOVR@
 GEE_DEPEND = @GEE_DEPEND@
+GENHTML = @GENHTML@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
+GLIB_2_34_CFLAGS = @GLIB_2_34_CFLAGS@
+GLIB_2_34_LIBS = @GLIB_2_34_LIBS@
 GLIB_COMPILE_RESOURCES = @GLIB_COMPILE_RESOURCES@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
@@ -226,6 +244,7 @@ INTLTOOL_V_MERGE = @INTLTOOL_V_MERGE@
 INTLTOOL_V_MERGE_OPTIONS = @INTLTOOL_V_MERGE_OPTIONS@
 INTLTOOL__v_MERGE_ = @INTLTOOL__v_MERGE_@
 INTLTOOL__v_MERGE_0 = @INTLTOOL__v_MERGE_0@
+LCOV = @LCOV@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBM = @LIBM@
@@ -275,6 +294,7 @@ RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+SHTOOL = @SHTOOL@
 STRIP = @STRIP@
 USE_NLS = @USE_NLS@
 VALAC = @VALAC@
@@ -352,7 +372,8 @@ AM_CPPFLAGS = \
 	-DPKGLIBDIR=\"$(pkglibdir)\" \
 	$(NULL)
 
-tests_VALAFLAGS = \
+AM_VALAFLAGS = \
+	$(COVERAGE_VALAFLAGS) \
 	$(PLANK_CORE_VALAFLAGS) \
 	$(top_builddir)/lib/plank.vapi \
 	$(top_builddir)/lib/plank-internal.vapi \
@@ -362,8 +383,9 @@ tests_VALAFLAGS = \
 	-C \
 	$(NULL)
 
-BUILT_SOURCES = tests_vala.stamp
+BUILT_SOURCES = tests_vala.stamp dock_vala.stamp
 tests_CFLAGS = \
+	$(COVERAGE_CFLAGS) \
 	-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
 	$(PLANK_CORE_CFLAGS) \
 	-include config.h \
@@ -374,6 +396,7 @@ tests_CFLAGS = \
 	$(NULL)
 
 tests_LDADD = \
+	$(COVERAGE_LDFLAGS) \
 	$(PLANK_CORE_LIBS) \
 	$(top_builddir)/lib/libplank.la \
 	$(top_builddir)/lib/libplank-internal.la \
@@ -386,6 +409,7 @@ tests_VALASOURCES = \
 	Preferences.vala \
 	Widgets.vala \
 	Main.vala \
+	TestHelper.vala \
 	$(NULL)
 
 nodist_tests_SOURCES = \
@@ -393,11 +417,24 @@ nodist_tests_SOURCES = \
 	$(tests_VALASOURCES:.vala=.c) \
 	$(NULL)
 
+dock_CFLAGS = $(tests_CFLAGS)
+dock_LDADD = $(tests_LDADD)
+dock_VALASOURCES = \
+	Dock.vala \
+	$(NULL)
+
+nodist_dock_SOURCES = \
+	dock_vala.stamp \
+	$(dock_VALASOURCES:.vala=.c) \
+	$(NULL)
+
 CLEANFILES = \
+	$(nodist_dock_SOURCES) \
 	$(nodist_tests_SOURCES) \
 	$(NULL)
 
 EXTRA_DIST = \
+	$(dock_VALASOURCES) \
 	$(tests_VALASOURCES) \
 	test-config.h \
 	test-config.vapi \
@@ -451,6 +488,10 @@ clean-checkPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
+dock$(EXEEXT): $(dock_OBJECTS) $(dock_DEPENDENCIES) $(EXTRA_dock_DEPENDENCIES) 
+	@rm -f dock$(EXEEXT)
+	$(AM_V_CCLD)$(dock_LINK) $(dock_OBJECTS) $(dock_LDADD) $(LIBS)
+
 tests$(EXEEXT): $(tests_OBJECTS) $(tests_DEPENDENCIES) $(EXTRA_tests_DEPENDENCIES) 
 	@rm -f tests$(EXEEXT)
 	$(AM_V_CCLD)$(tests_LINK) $(tests_OBJECTS) $(tests_LDADD) $(LIBS)
@@ -461,11 +502,13 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dock-Dock.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Controller.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Drawing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Items.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Preferences.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-TestHelper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Widgets.Po@am__quote@
 
 .c.o:
@@ -491,6 +534,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+dock-Dock.o: Dock.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dock_CFLAGS) $(CFLAGS) -MT dock-Dock.o -MD -MP -MF $(DEPDIR)/dock-Dock.Tpo -c -o dock-Dock.o `test -f 'Dock.c' || echo '$(srcdir)/'`Dock.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/dock-Dock.Tpo $(DEPDIR)/dock-Dock.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Dock.c' object='dock-Dock.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dock_CFLAGS) $(CFLAGS) -c -o dock-Dock.o `test -f 'Dock.c' || echo '$(srcdir)/'`Dock.c
+
+dock-Dock.obj: Dock.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dock_CFLAGS) $(CFLAGS) -MT dock-Dock.obj -MD -MP -MF $(DEPDIR)/dock-Dock.Tpo -c -o dock-Dock.obj `if test -f 'Dock.c'; then $(CYGPATH_W) 'Dock.c'; else $(CYGPATH_W) '$(srcdir)/Dock.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/dock-Dock.Tpo $(DEPDIR)/dock-Dock.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Dock.c' object='dock-Dock.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dock_CFLAGS) $(CFLAGS) -c -o dock-Dock.obj `if test -f 'Dock.c'; then $(CYGPATH_W) 'Dock.c'; else $(CYGPATH_W) '$(srcdir)/Dock.c'; fi`
 
 tests-Controller.o: Controller.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-Controller.o -MD -MP -MF $(DEPDIR)/tests-Controller.Tpo -c -o tests-Controller.o `test -f 'Controller.c' || echo '$(srcdir)/'`Controller.c
@@ -575,6 +632,20 @@ tests-Main.obj: Main.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Main.c' object='tests-Main.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-Main.obj `if test -f 'Main.c'; then $(CYGPATH_W) 'Main.c'; else $(CYGPATH_W) '$(srcdir)/Main.c'; fi`
+
+tests-TestHelper.o: TestHelper.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-TestHelper.o -MD -MP -MF $(DEPDIR)/tests-TestHelper.Tpo -c -o tests-TestHelper.o `test -f 'TestHelper.c' || echo '$(srcdir)/'`TestHelper.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-TestHelper.Tpo $(DEPDIR)/tests-TestHelper.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='TestHelper.c' object='tests-TestHelper.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-TestHelper.o `test -f 'TestHelper.c' || echo '$(srcdir)/'`TestHelper.c
+
+tests-TestHelper.obj: TestHelper.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-TestHelper.obj -MD -MP -MF $(DEPDIR)/tests-TestHelper.Tpo -c -o tests-TestHelper.obj `if test -f 'TestHelper.c'; then $(CYGPATH_W) 'TestHelper.c'; else $(CYGPATH_W) '$(srcdir)/TestHelper.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-TestHelper.Tpo $(DEPDIR)/tests-TestHelper.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='TestHelper.c' object='tests-TestHelper.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-TestHelper.obj `if test -f 'TestHelper.c'; then $(CYGPATH_W) 'TestHelper.c'; else $(CYGPATH_W) '$(srcdir)/TestHelper.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -794,13 +865,19 @@ uninstall-am:
 
 tests_vala.stamp: $(tests_VALASOURCES) $(top_builddir)/lib/plank.vapi $(top_builddir)/lib/plank-internal.vapi Makefile
 	$(AM_V_VALA)$(VALAC) \
-		$(tests_VALAFLAGS) \
+		$(AM_VALAFLAGS) \
 		$(filter %.vala %.c,$^)
 	$(AM_V_at)touch $@
 
-check-local:
-	rm -rf $(abs_builddir)/home $(builddir)/test-report.xml; \
+dock_vala.stamp: $(dock_VALASOURCES) $(top_builddir)/lib/plank.vapi $(top_builddir)/lib/plank-internal.vapi Makefile
+	$(AM_V_VALA)$(VALAC) \
+		$(AM_VALAFLAGS) \
+		$(filter %.vala %.c,$^)
+	$(AM_V_at)touch $@
+
+check-local: clean-local
 	$(TESTS_ENVIRONMENT) gtester --verbose --keep-going -o=$(builddir)/test-report.xml $(builddir)/tests
+	$(TESTS_ENVIRONMENT) $(builddir)/dock
 
 clean-local:
 	rm -rf $(abs_builddir)/home $(builddir)/test-report.xml

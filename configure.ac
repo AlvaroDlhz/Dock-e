@@ -2,8 +2,8 @@
 m4_define([plank_released], [1])
 
 m4_define([plank_major_version], [0])
-m4_define([plank_minor_version], [8])
-m4_define([plank_micro_version], [1])
+m4_define([plank_minor_version], [9])
+m4_define([plank_micro_version], [0])
 m4_define([plank_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -129,7 +129,6 @@ PLANK_CORE_VALA_PKGS="--pkg gio-unix-2.0 \
                       --pkg posix \
                       --pkg x11"
 
-VALAFLAGS="--target-glib=2.32"
 VALAFLAGS_CORE="--thread"
 
 # -----------------------------------------------------------
@@ -147,6 +146,19 @@ AC_PATH_PROG([XMLLINT],[xmllint],[])
 if test -z "$XMLLINT"; then
   AC_MSG_ERROR([xmllint not found])
 fi
+
+
+# -----------------------------------------------------------
+# Dermine avaiable GLib version and adjust vala's
+#   target-glib flag accoringly
+# -----------------------------------------------------------
+
+VALAFLAGS="--target-glib=2.32"
+
+PKG_CHECK_MODULES(GLIB_2_34,
+	[gobject-2.0 >= 2.34 glib-2.0 >= 2.34 gio-2.0 >= 2.34],	[VALAFLAGS="--target-glib=2.34"], []
+)
+
 
 # -----------------------------------------------------------
 # Optional Dependencies
@@ -271,6 +283,18 @@ fi
 # Run checks and add build-flags to e.g. differenciate between Linux and BSD
 AC_CHECK_HEADERS([sys/prctl.h], [VALAFLAGS="$VALAFLAGS --define HAVE_SYS_PRCTL_H"])
 
+# Check to enable coverage
+AC_TDD_GCOV
+AM_CONDITIONAL([HAVE_GCOV], [test "x$ac_cv_check_gcov" = "xyes"])
+AM_CONDITIONAL([HAVE_LCOV], [test "x$ac_cv_check_lcov" = "xyes"])
+AM_CONDITIONAL([HAVE_GCOVR], [test "x$ac_cv_check_gcovr" = "xyes"])
+if test "x$ac_cv_check_gcov" = "xyes" ; then
+    COVERAGE_VALAFLAGS="-g"
+fi
+AC_SUBST(COVERAGE_VALAFLAGS)
+AC_SUBST(COVERAGE_CFLAGS)
+AC_SUBST(COVERAGE_LDFLAGS)
+
 
 PLANK_CORE_VALAFLAGS="$VALAFLAGS_CORE $VALAFLAGS $PLANK_CORE_VALA_PKGS"
 AC_SUBST(PLANK_CORE_VALAFLAGS)
@@ -356,6 +380,7 @@ src/Makefile
 docs/Makefile
 po/Makefile.in
 tests/Makefile
+examples/Makefile
 vapi/Makefile
 ])
 
@@ -377,5 +402,6 @@ ${PACKAGE} ${VERSION}
     Apport support..............:  ${enable_apport}
 
     Headless Tests..............:  ${enable_headless_tests}
+    Coverage Reporting..........:  ${use_gcov}
     Documentation...............:  ${have_valadoc}
 "

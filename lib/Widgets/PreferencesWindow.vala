@@ -30,14 +30,16 @@ namespace Plank.Widgets
 		
 		Gtk.ComboBoxText cb_theme;
 		Gtk.ComboBoxText cb_hidemode;
+		Gtk.ComboBoxText cb_display_plug;
 		Gtk.ComboBoxText cb_position;
 		Gtk.ComboBoxText cb_alignment;
 		Gtk.ComboBoxText cb_items_alignment;
 		
-		Gtk.SpinButton sp_monitor;
+		Gtk.SpinButton sp_hide_delay;
 		Gtk.SpinButton sp_unhide_delay;
 		Gtk.Scale s_offset;
 		
+		Gtk.Adjustment adj_hide_delay;
 		Gtk.Adjustment adj_unhide_delay;
 		Gtk.Adjustment adj_iconsize;
 		Gtk.Adjustment adj_offset;
@@ -83,9 +85,11 @@ namespace Plank.Widgets
 				
 				cb_theme = builder.get_object ("cb_theme") as Gtk.ComboBoxText;
 				cb_hidemode = builder.get_object ("cb_hidemode") as Gtk.ComboBoxText;
+				cb_display_plug = builder.get_object ("cb_display_plug") as Gtk.ComboBoxText;
 				cb_position = builder.get_object ("cb_position") as Gtk.ComboBoxText;
-				sp_monitor = builder.get_object ("sp_monitor") as Gtk.SpinButton;
+				sp_hide_delay = builder.get_object ("sp_hide_delay") as Gtk.SpinButton;
 				sp_unhide_delay = builder.get_object ("sp_unhide_delay") as Gtk.SpinButton;
+				adj_hide_delay = builder.get_object ("adj_hide_delay") as Gtk.Adjustment;
 				adj_unhide_delay = builder.get_object ("adj_unhide_delay") as Gtk.Adjustment;
 				adj_iconsize = builder.get_object ("adj_iconsize") as Gtk.Adjustment;
 				adj_offset = builder.get_object ("adj_offset") as Gtk.Adjustment;
@@ -136,7 +140,12 @@ namespace Plank.Widgets
 				sw_lock_items.set_active (prefs.LockItems);
 				break;
 			case "Monitor":
-				sp_monitor.value = prefs.Monitor;
+				var pos = 0;
+				foreach (unowned string plug_name in Plank.PositionManager.get_monitor_plug_names (get_screen ())) {
+					if (plug_name == prefs.Monitor)
+						cb_display_plug.set_active (pos);
+					pos++;
+				}
 				break;
 			case "Offset":
 				adj_offset.value = prefs.Offset;
@@ -152,11 +161,14 @@ namespace Plank.Widgets
 				break;
 			case "Theme":
 				var pos = 0;
-				foreach (var theme in Plank.Drawing.Theme.get_theme_list ()) {
+				foreach (unowned string theme in Plank.Drawing.Theme.get_theme_list ()) {
 					if (theme == prefs.Theme)
 						cb_theme.set_active (pos);
 					pos++;
 				}
+				break;
+			case "HideDelay":
+				adj_hide_delay.value = prefs.HideDelay;
 				break;
 			case "UnhideDelay":
 				adj_unhide_delay.value = prefs.UnhideDelay;
@@ -203,22 +215,26 @@ namespace Plank.Widgets
 			if (((Gtk.Switch) widget).get_active ()) {
 				prefs.HideMode = HideType.INTELLIGENT;
 				cb_hidemode.sensitive = true;
+				sp_hide_delay.sensitive = true;
 				sp_unhide_delay.sensitive = true;
+				sw_pressure_reveal.sensitive = true;
 			} else {
 				prefs.HideMode = HideType.NONE;
 				cb_hidemode.sensitive = false;
+				sp_hide_delay.sensitive = false;
 				sp_unhide_delay.sensitive = false;
+				sw_pressure_reveal.sensitive = false;
 			}
 		}
 		
 		void primary_display_toggled (GLib.Object widget, ParamSpec param)
 		{
 			if (((Gtk.Switch) widget).get_active ()) {
-				prefs.Monitor = -1;
-				sp_monitor.sensitive = false;
+				prefs.Monitor = "";
+				cb_display_plug.sensitive = false;
 			} else {
-				prefs.Monitor = 0;
-				sp_monitor.sensitive = true;
+				prefs.Monitor = cb_display_plug.get_active_text ();
+				cb_display_plug.sensitive = true;
 			}
 		}
 		
@@ -257,14 +273,19 @@ namespace Plank.Widgets
 			prefs.Offset = (int) adj.value;
 		}
 		
+		void hide_delay_changed (Gtk.Adjustment adj)
+		{
+			prefs.HideDelay = (int) adj.value;
+		}
+		
 		void unhide_delay_changed (Gtk.Adjustment adj)
 		{
 			prefs.UnhideDelay = (int) adj.value;
 		}
 		
-		void monitor_changed (Gtk.SpinButton widget)
+		void monitor_changed (Gtk.ComboBox widget)
 		{
-			prefs.Monitor = widget.get_value_as_int ();
+			prefs.Monitor = ((Gtk.ComboBoxText) widget).get_active_text ();
 		}
 		
 		void connect_signals ()
@@ -274,8 +295,9 @@ namespace Plank.Widgets
 			cb_theme.changed.connect (cb_theme_changed);
 			cb_hidemode.changed.connect (cb_hidemode_changed);
 			cb_position.changed.connect (cb_position_changed);
+			adj_hide_delay.value_changed.connect (hide_delay_changed);
 			adj_unhide_delay.value_changed.connect (unhide_delay_changed);
-			sp_monitor.value_changed.connect (monitor_changed);
+			cb_display_plug.changed.connect (monitor_changed);
 			adj_iconsize.value_changed.connect (iconsize_changed);
 			adj_offset.value_changed.connect (offset_changed);
 			sw_hide.notify["active"].connect (hide_toggled);
@@ -292,7 +314,7 @@ namespace Plank.Widgets
 		void init_dock_tab ()
 		{
 			var pos = 0;
-			foreach (var theme in Plank.Drawing.Theme.get_theme_list ()) {
+			foreach (unowned string theme in Plank.Drawing.Theme.get_theme_list ()) {
 				cb_theme.append ("%i".printf (pos), theme);
 				if (theme == prefs.Theme)
 					cb_theme.set_active (pos);
@@ -302,20 +324,28 @@ namespace Plank.Widgets
 			cb_hidemode.active_id = ((int) prefs.HideMode).to_string ();
 			cb_hidemode.sensitive = (prefs.HideMode != HideType.NONE);
 			cb_position.active_id = ((int) prefs.Position).to_string ();
+			adj_hide_delay.value = prefs.HideDelay;
 			adj_unhide_delay.value = prefs.UnhideDelay;
 
-			sp_monitor.set_range (-1, Gdk.Screen.get_default ().get_n_monitors () - 1);
-			//sp_monitor.adjustment = new Gtk.Adjustment (prefs.Monitor, -1, Gdk.Screen.get_default ().get_n_monitors () - 1, 1, 1, 0);
-			sp_monitor.adjustment = new Gtk.Adjustment (prefs.Monitor, -1, 9, 1, 1, 0);
-			sp_monitor.value = prefs.Monitor;
-			sp_monitor.sensitive = (prefs.Monitor > -1);
+			pos = 0;
+			foreach (unowned string plug_name in Plank.PositionManager.get_monitor_plug_names (get_screen ())) {
+				cb_display_plug.append ("%i".printf (pos), plug_name);
+				if (plug_name == prefs.Monitor)
+					cb_display_plug.set_active (pos);
+				pos++;
+			}
+			if (prefs.Monitor == "")
+				cb_display_plug.set_active (0);
+			cb_display_plug.sensitive = (prefs.Monitor != "");
+			
+			sp_hide_delay.sensitive = (prefs.HideMode != HideType.NONE);
 			sp_unhide_delay.sensitive = (prefs.HideMode != HideType.NONE);
 			
 			adj_iconsize.value = prefs.IconSize;
 			adj_offset.value = prefs.Offset;
 			s_offset.sensitive = (prefs.Alignment == Gtk.Align.CENTER);
 			sw_hide.set_active (prefs.HideMode != HideType.NONE);
-			sw_primary_display.set_active (prefs.Monitor == -1);
+			sw_primary_display.set_active (prefs.Monitor == "");
 			sw_workspace_only.set_active (prefs.CurrentWorkspaceOnly);
 			sw_show_unpinned.set_active (!prefs.PinnedOnly);
 			sw_lock_items.set_active (prefs.LockItems);

@@ -4,11 +4,6 @@ BUILT_SOURCES = \
 	plank_vala_doc.stamp \
 	$(NULL)
 
-EXTRA_DIST = \
-	$(BUILT_SOURCES) \
-	vala-doc/* \
-	$(NULL)
-
 common_doc_files = \
 	*.css \
 	*.devhelp2 \
@@ -22,6 +17,7 @@ doc_DATA = \
 	$(NULL)
 
 plank_doc_files = \
+	$(top_srcdir)/lib/DBusManager.vala \
 	$(top_srcdir)/lib/DockController.vala \
 	$(top_srcdir)/lib/DockPreferences.vala \
 	$(top_srcdir)/lib/DockRenderer.vala \
@@ -29,11 +25,14 @@ plank_doc_files = \
 	$(top_srcdir)/lib/HideManager.vala \
 	$(top_srcdir)/lib/PositionManager.vala \
 	$(top_builddir)/lib/Version.vala \
+	$(top_srcdir)/lib/DBus/Client.vala \
+	$(top_srcdir)/lib/DBus/Interfaces.vala \
 	$(top_srcdir)/lib/Drawing/AnimatedRenderer.vala \
 	$(top_srcdir)/lib/Drawing/Color.vala \
 	$(top_srcdir)/lib/Drawing/DrawingService.vala \
 	$(top_srcdir)/lib/Drawing/DockSurface.vala \
 	$(top_srcdir)/lib/Drawing/DockTheme.vala \
+	$(top_srcdir)/lib/Drawing/Easing.vala \
 	$(top_srcdir)/lib/Drawing/Theme.vala \
 	$(top_srcdir)/lib/Factories/AbstractMain.vala \
 	$(top_srcdir)/lib/Factories/Factory.vala \
@@ -76,6 +75,8 @@ valadoc_flags_plank = \
 	--vapidir=$(top_srcdir)/vapi \
 	$(NULL)
 
+if HAVE_VALADOC
+
 cdocs: plank_c_doc.stamp
 plank_c_doc.stamp: $(plank_doc_files) $(top_builddir)/lib/plank-internal.vapi Makefile
 	$(AM_V_GEN)$(VALADOC) \
@@ -104,11 +105,18 @@ plank_web_doc.stamp: $(plank_doc_files) $(top_builddir)/lib/plank-internal.vapi 
 		$(filter %.vala,$^)
 	$(AM_V_at)touch $@
 
+EXTRA_DIST = \
+	$(BUILT_SOURCES) \
+	vala-doc/* \
+	$(NULL)
+
 DISTCLEANFILES = \
 	plank_c_doc.stamp \
 	plank_vala_doc.stamp \
 	plank_web_doc.stamp \
 	$(NULL)
+
+endif
 
 distclean-local: distclean-docs
 distclean-docs:

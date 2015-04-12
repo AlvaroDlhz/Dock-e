@@ -7,23 +7,23 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plank\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2015-01-21 12:36+0000\n"
-"PO-Revision-Date: 2015-01-12 12:54+0000\n"
-"Last-Translator: Rico Tzschichholz <Unknown>\n"
+"POT-Creation-Date: 2015-03-18 11:27+0000\n"
+"PO-Revision-Date: 2015-03-22 12:12+0000\n"
+"Last-Translator: Artem Anufrij <Unknown>\n"
 "Language-Team: Russian <ru@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2015-01-22 05:50+0000\n"
-"X-Generator: Launchpad (build 17306)\n"
+"X-Launchpad-Export-Date: 2015-03-23 05:17+0000\n"
+"X-Generator: Launchpad (build 17405)\n"
 
 #: ../data/plank.appdata.xml.in.h:1
 msgid ""
 "Plank is meant to be the simplest dock on the planet. The goal is to provide "
 "just what a dock needs and absolutely nothing more."
 msgstr ""
-"Plunk разрабатывается, как самый простой док-бар на планете. Цель состоит в "
-"том, чтобы в доке было только то, что действительно нужно и ничего больше."
+"Plank - это самая проста док-панель в мире. Цель - просто панель и ничего "
+"лишнего."
 
 #: ../data/plank.appdata.xml.in.h:2
 msgid ""
@@ -34,10 +34,11 @@ msgid ""
 "painters, settings dialogs, etc."
 msgstr ""
 "Однако, это библиотека, которая может быть расширена для создания других док-"
-"баров с более продвинутыми функциями. Таким образом, Plunk является основной "
-"технологией Docky (начиная с версии 3.0.0) и призван обеспечить все основные "
-"функции, в то время как Docky расширяет его, чтобы добавить фантастические "
-"вещи."
+"панелей с более продвинутыми функциями. Таким образом, Plank является "
+"основной технологией Docky (начиная с версии 3.0.0) и призван обеспечить все "
+"основные функции, в то время как Docky расширяет его, чтобы добавить такие "
+"фантастические вещи, как доклеты, окраска тем оформления, диалоги настроек и "
+"прочее."
 
 #: ../data/plank.desktop.in.h:1
 msgid "Plank. Stupidly simple."
@@ -49,7 +50,7 @@ msgstr "Тема:"
 
 #: ../data/ui/preferences.ui.h:2
 msgid "Position:"
-msgstr "Расположение:"
+msgstr "Позиция:"
 
 #: ../data/ui/preferences.ui.h:3
 msgid "Left"
@@ -69,7 +70,7 @@ msgstr "Снизу"
 
 #: ../data/ui/preferences.ui.h:7
 msgid "Alignment:"
-msgstr "Расположение:"
+msgstr "Выравнивание:"
 
 #: ../data/ui/preferences.ui.h:8
 msgid "Fill"
@@ -77,11 +78,11 @@ msgstr "Растянуть"
 
 #: ../data/ui/preferences.ui.h:9
 msgid "Start"
-msgstr ""
+msgstr "Вначале"
 
 #: ../data/ui/preferences.ui.h:10
 msgid "End"
-msgstr ""
+msgstr "В конце"
 
 #: ../data/ui/preferences.ui.h:11
 msgid "Center"
@@ -93,7 +94,7 @@ msgstr "На главном экране:"
 
 #: ../data/ui/preferences.ui.h:13
 msgid "Offset in percent from the center of the screen-edge"
-msgstr "Смещение в процентах от центра края экрана"
+msgstr "Смещение от центра края экрана в процентах"
 
 #: ../data/ui/preferences.ui.h:14
 msgid "Icon Alignment:"
@@ -101,57 +102,73 @@ msgstr "Расположение иконок:"
 
 #: ../data/ui/preferences.ui.h:15
 msgid "Icon Size:"
-msgstr "Размер иконки:"
+msgstr "Размер иконок:"
 
 #: ../data/ui/preferences.ui.h:16
 msgid "Appearance"
 msgstr "Оформление"
 
 #: ../data/ui/preferences.ui.h:17
-msgid "Show Unpinned:"
-msgstr "Показать незакрепленные:"
+msgid "Intellihide"
+msgstr "Интеллектуальное скрытие"
 
 #: ../data/ui/preferences.ui.h:18
-msgid "Restrict to Workspace:"
-msgstr ""
+msgid "Autohide"
+msgstr "Автоматическое скрытие"
 
 #: ../data/ui/preferences.ui.h:19
-msgid "Lock Icons:"
-msgstr "Блокировка иконок:"
+msgid "Dodge maximized window"
+msgstr "Скрывать при полноэкранных окнах"
 
 #: ../data/ui/preferences.ui.h:20
-msgid "Automatic Pinning:"
-msgstr "Автоматически прикреплять:"
+msgid "Window Dodge"
+msgstr "Прятаться за окна"
 
 #: ../data/ui/preferences.ui.h:21
-msgid "Intellihide"
-msgstr ""
+msgid "Hide Dock"
+msgstr "Скрытие панель"
 
 #: ../data/ui/preferences.ui.h:22
-msgid "Autohide"
-msgstr "Автоматически скрывать"
+msgid "Hide Delay:"
+msgstr "Задержка скрытия:"
 
 #: ../data/ui/preferences.ui.h:23
-msgid "Dodge maximized window"
-msgstr ""
+msgid "Delay in ms before hiding the dock"
+msgstr "Задержка скрытия панели в миллисекундах"
 
 #: ../data/ui/preferences.ui.h:24
-msgid "Delay in ms before showing the dock"
-msgstr "Задержка в мс, прежде чем показывать Dock"
+msgid "Unhide Delay:"
+msgstr "Задержка раскрытия:"
 
 #: ../data/ui/preferences.ui.h:25
-msgid "Pressure Reveal:"
-msgstr ""
+msgid "Delay in ms before showing the dock"
+msgstr "Задержка раскрытия панели в миллисекундах"
 
 #: ../data/ui/preferences.ui.h:26
+msgid "Pressure Reveal:"
+msgstr "Отображать запущенные:"
+
+#: ../data/ui/preferences.ui.h:27
 msgid "Item Management"
 msgstr "Управление иконок"
 
-#: ../data/ui/preferences.ui.h:27
-msgid "Hide Dock"
-msgstr "Скрыть Dock"
-
 #: ../data/ui/preferences.ui.h:28
+msgid "Show Unpinned:"
+msgstr "Показать незакрепленные:"
+
+#: ../data/ui/preferences.ui.h:29
+msgid "Restrict to Workspace:"
+msgstr "Ограничить рабочим столом:"
+
+#: ../data/ui/preferences.ui.h:30
+msgid "Lock Icons:"
+msgstr "Блокировка иконок:"
+
+#: ../data/ui/preferences.ui.h:31
+msgid "Automatic Pinning:"
+msgstr "Автоматически прикреплять:"
+
+#: ../data/ui/preferences.ui.h:32
 msgid "Behaviour"
 msgstr "Поведение"
 
@@ -190,9 +207,9 @@ msgstr "Получить помощь в сети..."
 
 #: ../lib/Items/PlankDockItem.vala:82
 msgid "_Translate This Application..."
-msgstr "Перевести это приложение..."
+msgstr "_Перевести это приложение..."
 
-#: ../lib/Widgets/PreferencesWindow.vala:62
-#: ../lib/Widgets/PreferencesWindow.vala:72
+#: ../lib/Widgets/PreferencesWindow.vala:64
+#: ../lib/Widgets/PreferencesWindow.vala:74
 msgid "Preferences"
 msgstr "Параметры"

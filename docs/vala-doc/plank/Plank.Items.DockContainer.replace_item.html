@@ -13,7 +13,7 @@
         <h1 class="main_title">replace_item</h1>
         <hr class="main_hr"/>
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><span class="virtual_method">replace_item</span></b> (<span class="main_type"><a href="Plank.Items.DockElement.html" class="abstract_class">DockElement</a></span> new_item, <span class="main_type"><a href="Plank.Items.DockElement.html" class="abstract_class">DockElement</a></span> old_item)
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><span class="virtual_method">replace_item</span></b> (<span class="main_type"><a href="Plank.Items.DockElement.html" class="abstract_class">DockElement</a></span> new_item, <span class="main_type"><a href="Plank.Items.DockElement.html" class="abstract_class">DockElement</a></span> old_item)
         </div>
         <div class="description">
           <p>Replace an item with another item.</p>
@@ -29,6 +29,14 @@
               <td class="main_parameter_table_name">old_item</td>
               <td>
                 <p>the item to be replaced </p>
+              </td>
+            </tr>
+          </table>
+          <h2 class="main_title">Returns:</h2>
+          <table class="main_parameter_table">
+            <tr>
+              <td>
+                <p>whether replacing the item was successful </p>
               </td>
             </tr>
           </table>
