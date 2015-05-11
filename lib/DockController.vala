@@ -1,12 +1,14 @@
 //
 //  Copyright (C) 2011 Robert Dyer
 //
-//  This program is free software: you can redistribute it and/or modify
+//  This file is part of Plank.
+//
+//  Plank is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
 //
-//  This program is distributed in the hope that it will be useful,
+//  Plank is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
@@ -32,7 +34,7 @@ namespace Plank
 	public class DockController : DockContainer
 	{
 		public File config_folder { get; construct; }
-		public File launchers_folder { get; construct; }
+		public File launchers_folder { get; private set; }
 		
 		public DockPreferences prefs { get; construct; }
 		

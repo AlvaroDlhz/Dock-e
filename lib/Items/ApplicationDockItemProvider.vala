@@ -1,12 +1,14 @@
 //
 //  Copyright (C) 2011-2013 Robert Dyer, Rico Tzschichholz
 //
-//  This program is free software: you can redistribute it and/or modify
+//  This file is part of Plank.
+//
+//  Plank is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
 //
-//  This program is distributed in the hope that it will be useful,
+//  Plank is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
@@ -64,7 +66,7 @@ namespace Plank.Items
 			Matcher.get_default ().application_opened.connect (app_opened);
 			
 			try {
-				items_monitor = LaunchersDir.monitor (0);
+				items_monitor = LaunchersDir.monitor_directory (0);
 				items_monitor.changed.connect (handle_items_dir_changed);
 			} catch (Error e) {
 				critical ("Unable to watch the launchers directory. (%s)", e.message);

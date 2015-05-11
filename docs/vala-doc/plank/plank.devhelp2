@@ -470,9 +470,7 @@
     <keyword type="function" name="Plank.Items.DockContainer.update_visible_items" link="Plank.Items.DockContainer.update_visible_items.html"/>
     <keyword type="function" name="Plank.Items.DockContainer.move_item_to" link="Plank.Items.DockContainer.move_item_to.html"/>
     <keyword type="function" name="Plank.Items.DockContainer.reset_buffers" link="Plank.Items.DockContainer.reset_buffers.html"/>
-    <keyword type="function" name="Plank.Items.DockContainer.add_item_without_signaling" link="Plank.Items.DockContainer.add_item_without_signaling.html"/>
     <keyword type="function" name="Plank.Items.DockContainer.replace_item" link="Plank.Items.DockContainer.replace_item.html"/>
-    <keyword type="function" name="Plank.Items.DockContainer.remove_item_without_signaling" link="Plank.Items.DockContainer.remove_item_without_signaling.html"/>
     <keyword type="function" name="Plank.Items.DockContainer.connect_element" link="Plank.Items.DockContainer.connect_element.html"/>
     <keyword type="function" name="Plank.Items.DockContainer.disconnect_element" link="Plank.Items.DockContainer.disconnect_element.html"/>
     <keyword type="function" name="Plank.Items.DockContainer.DockContainer" link="Plank.Items.DockContainer.DockContainer.html"/>

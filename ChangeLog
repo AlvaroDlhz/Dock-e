@@ -1,3 +1,100 @@
+2015-05-02  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Prepare 0.9.1 release
+
+2015-05-01  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockitem: Start icon-file-monitor as soon as possible if needed
+
+2015-05-01  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockelement: Use Gdk.BUTTON_* constants
+
+2015-04-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Fix typos in documentation
+
+2015-04-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dragmanager: Tweak internal callbacks
+
+2015-04-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Split-out item_animation_needed()
+
+2015-04-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Don't add-animate an item if its container got added later
+
+	E.g. this avoids animating *all* items on startup.
+
+2015-04-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockcontainer: Synchronize Add-/RemoveTime with existing child-items
+
+2015-04-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	defaultprovider: Use add_items instead of add_item_without_signaling
+
+2015-04-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	docksurface: Cache "Context" property
+
+2015-04-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Use Cairo.Operator.CLEAR instead of
+	Cairo.Operator.SOURCE/set_source_rgba
+
+2015-04-27  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add LGPL v2.1 for "TitledSeparatorMenuItem.vala"
+
+2015-04-27  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	The 'This file is part of Plank' commit
+
+	Add references to 'Plank' in copyright-headers where possible.
+
+2015-04-27  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-04-24  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Explictly request/specify the FileMonitor-type which is needed
+
+2015-04-24  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	controller: launchers_folder is not a public/construct property
+
+2015-04-21  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Make sure to unhide the dock on login when there are
+	no windows
+
+	After transparently filling window on start-up make sure to force a
+	redraw and a following unhide animation.
+
+2015-04-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-04-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	HACKING: Mention ppa:docky-core/stable containing release builds
+
+2015-04-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	vapi: Add libbamf3.deps
+
+2015-04-19  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	src: Initialize i18n as suggested
+
+2015-04-12  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Back to development
+
 2015-04-12  Rico Tzschichholz  <ricotz@ubuntu.com>
 
 	Prepare 0.9.0 release

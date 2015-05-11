@@ -1,12 +1,14 @@
 //
 //  Copyright (C) 2011-2012 Robert Dyer, Rico Tzschichholz
 //
-//  This program is free software: you can redistribute it and/or modify
+//  This file is part of Plank.
+//
+//  Plank is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
 //
-//  This program is distributed in the hope that it will be useful,
+//  Plank is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
@@ -98,11 +100,12 @@ namespace Plank.Drawing
 		 */
 		public void clear ()
 		{
-			Context.save ();
-			Context.set_source_rgba (0, 0, 0, 0);
-			Context.set_operator (Cairo.Operator.SOURCE);
-			Context.paint ();
-			Context.restore ();
+			unowned Cairo.Context cr = Context;
+			
+			cr.save ();
+			cr.set_operator (Cairo.Operator.CLEAR);
+			cr.paint ();
+			cr.restore ();
 		}
 		
 		/**
@@ -328,11 +331,12 @@ namespace Plank.Drawing
 			
 			original.mark_dirty ();
 			
-			Context.save ();
-			Context.set_operator (Cairo.Operator.SOURCE);
-			Context.set_source_surface (original, 0, 0);
-			Context.paint ();
-			Context.restore ();
+			unowned Cairo.Context target_cr = Context;
+			target_cr.save ();
+			target_cr.set_operator (Cairo.Operator.SOURCE);
+			target_cr.set_source_surface (original, 0, 0);
+			target_cr.paint ();
+			target_cr.restore ();
 		}
 		
 		const int AlphaPrecision = 16;
@@ -380,11 +384,12 @@ namespace Plank.Drawing
 			
 			original.mark_dirty ();
 			
-			Context.save ();
-			Context.set_operator (Cairo.Operator.SOURCE);
-			Context.set_source_surface (original, 0, 0);
-			Context.paint ();
-			Context.restore ();
+			unowned Cairo.Context target_cr = Context;
+			target_cr.save ();
+			target_cr.set_operator (Cairo.Operator.SOURCE);
+			target_cr.set_source_surface (original, 0, 0);
+			target_cr.paint ();
+			target_cr.restore ();
 		}
 		
 		void exponential_blur_columns (uint8* pixels, int width, int height, int startCol, int endCol, int startY, int endY, int alpha)
@@ -525,11 +530,12 @@ namespace Plank.Drawing
 			
 			original.mark_dirty ();
 			
-			Context.save ();
-			Context.set_operator (Cairo.Operator.SOURCE);
-			Context.set_source_surface (original, 0, 0);
-			Context.paint ();
-			Context.restore ();
+			unowned Cairo.Context target_cr = Context;
+			target_cr.save ();
+			target_cr.set_operator (Cairo.Operator.SOURCE);
+			target_cr.set_source_surface (original, 0, 0);
+			target_cr.paint ();
+			target_cr.restore ();
 		}
 
 		void gaussian_blur_horizontal (double* src, double* dest, double* kernel, int gaussWidth, int width, int height, int startRow, int endRow, int[,] shift)

@@ -1,12 +1,14 @@
 //
 //  Copyright (C) 2013 Rico Tzschichholz
 //
-//  This program is free software: you can redistribute it and/or modify
+//  This file is part of Plank.
+//
+//  Plank is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
 //
-//  This program is distributed in the hope that it will be useful,
+//  Plank is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
@@ -86,6 +88,8 @@ namespace Plank.Items
 			// Make sure internal window-list of Wnck is most up to date
 			Wnck.Screen.get_default ().force_update ();
 			
+			var transient_items = new Gee.ArrayList<DockElement> ();
+			
 			// Match running applications to their available dock-items
 			foreach (var app in Matcher.get_default ().active_launchers ()) {
 				var found = item_for_application (app);
@@ -97,12 +101,10 @@ namespace Plank.Items
 				if (!app.is_user_visible () || WindowControl.get_num_windows (app) <= 0)
 					continue;
 				
-				var new_item = new TransientDockItem.with_application (app);
-				
-				add_item_without_signaling (new_item);
+				transient_items.add (new TransientDockItem.with_application (app));
 			}
 			
-			update_visible_items ();
+			add_items (transient_items);
 			
 			var favs = new Gee.ArrayList<string> ();
 			
