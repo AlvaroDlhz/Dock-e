@@ -1,12 +1,14 @@
 //
 //  Copyright (C) 2011-2012 Robert Dyer, Rico Tzschichholz
 //
-//  This program is free software: you can redistribute it and/or modify
+//  This file is part of Plank.
+//
+//  Plank is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
 //
-//  This program is distributed in the hope that it will be useful,
+//  Plank is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
@@ -23,6 +25,11 @@ namespace Plank
 	{
 		public static int main (string[] args)
 		{
+			Intl.setlocale (LocaleCategory.ALL, "");
+			Intl.bindtextdomain (Build.GETTEXT_PACKAGE, Build.DATADIR + "/locale");
+			Intl.bind_textdomain_codeset (Build.GETTEXT_PACKAGE, "UTF-8");
+			Intl.textdomain (Build.GETTEXT_PACKAGE);
+			
 			var application = new PlankMain ();
 			Factory.init (application, new ItemFactory ());
 			return application.run (args);

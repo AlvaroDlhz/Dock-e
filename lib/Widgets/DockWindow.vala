@@ -1,12 +1,14 @@
 //
 //  Copyright (C) 2011-2012 Robert Dyer, Michal Hruby, Rico Tzschichholz
 //
-//  This program is free software: you can redistribute it and/or modify
+//  This file is part of Plank.
+//
+//  Plank is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
 //
-//  This program is distributed in the hope that it will be useful,
+//  Plank is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
@@ -292,13 +294,12 @@ namespace Plank.Widgets
 				debug ("dock window loaded");
 				dock_is_starting = false;
 				
-				// slide the dock in, if it shouldnt start hidden
-				Gdk.threads_add_timeout (400, () => {
-					controller.hide_manager.update_hovered ();
-					return false;
-				});
-				
 				set_input_mask ();
+				
+				// FIXME make sure to trigger a subsequent redraw
+				// https://bugs.launchpad.net/plank/+bug/1256626
+				controller.renderer.animated_draw ();
+				
 				return base.draw (cr);
 			}
 			

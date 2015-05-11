@@ -1,12 +1,14 @@
 //
 //  Copyright (C) 2011-2012 Robert Dyer, Rico Tzschichholz
 //
-//  This program is free software: you can redistribute it and/or modify
+//  This file is part of Plank.
+//
+//  Plank is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
 //
-//  This program is distributed in the hope that it will be useful,
+//  Plank is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
@@ -143,6 +145,7 @@ namespace Plank
 				enable_drag_from (window);
 		}
 		
+		[CCode (instance_pos = -1)]
 		void drag_data_get (Gtk.Widget w, Gdk.DragContext context, Gtk.SelectionData selection_data, uint info, uint time_)
 		{
 			if (InternalDragActive && DragItem != null) {
@@ -202,6 +205,7 @@ namespace Plank
 			Gtk.drag_set_icon_surface (context, surface);
 		}
 		
+		[CCode (instance_pos = -1)]
 		void drag_begin (Gtk.Widget w, Gdk.DragContext context)
 		{
 			unowned DockWindow window = controller.window;
@@ -228,6 +232,7 @@ namespace Plank
 			set_drag_icon (context, DragItem, 0.8);
 		}
 
+		[CCode (instance_pos = -1)]
 		void drag_data_received (Gtk.Widget w, Gdk.DragContext context, int x, int y, Gtk.SelectionData selection_data, uint info, uint time_)
 		{
 			if (drag_data_requested) {
@@ -259,6 +264,7 @@ namespace Plank
 			Gdk.drag_status (context, Gdk.DragAction.COPY, time_);
 		}
 
+		[CCode (instance_pos = -1)]
 		bool drag_drop (Gtk.Widget w, Gdk.DragContext context, int x, int y, uint time_)
 		{
 			Gtk.drag_finish (context, true, false, time_);
@@ -284,6 +290,7 @@ namespace Plank
 			return true;
 		}
 		
+		[CCode (instance_pos = -1)]
 		void drag_end (Gtk.Widget w, Gdk.DragContext context)
 		{
 			unowned HideManager hide_manager = controller.hide_manager;
@@ -339,6 +346,7 @@ namespace Plank
 			hide_manager.update_hovered ();
 		}
 
+		[CCode (instance_pos = -1)]
 		void drag_leave (Gtk.Widget w, Gdk.DragContext context, uint time_)
 		{
 			if (drag_hover_timer > 0) {
@@ -381,6 +389,7 @@ namespace Plank
 			}
 		}
 		
+		[CCode (instance_pos = -1)]
 		bool drag_failed (Gtk.Widget w, Gdk.DragContext context, Gtk.DragResult result)
 		{
 			drag_canceled = result == Gtk.DragResult.USER_CANCELLED;
@@ -388,6 +397,7 @@ namespace Plank
 			return !drag_canceled;
 		}
 
+		[CCode (instance_pos = -1)]
 		bool drag_motion (Gtk.Widget w, Gdk.DragContext context, int x, int y, uint time_)
 		{
 			if (RepositionMode)

@@ -2,12 +2,14 @@
 //  Copyright (C) 2011-2013 Robert Dyer, Rico Tzschichholz
 //                2014 Rico Tzschichholz
 //
-//  This program is free software: you can redistribute it and/or modify
+//  This file is part of Plank.
+//
+//  Plank is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
 //
-//  This program is distributed in the hope that it will be useful,
+//  Plank is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
@@ -131,9 +133,6 @@ namespace Plank.Items
 				return false;
 			}
 			
-			unowned DockContainer? container = (item as DockContainer);
-			if (container != null)
-				container.prepare ();
 			add_item_without_signaling (item);
 			
 			if (target != null && target != placeholder_item)
@@ -167,9 +166,6 @@ namespace Plank.Items
 					continue;
 				}
 				
-				unowned DockContainer? container = (item as DockContainer);
-				if (container != null)
-					container.prepare ();
 				add_item_without_signaling (item);
 			}
 			
@@ -273,12 +269,21 @@ namespace Plank.Items
 				item.reset_buffers ();
 		}
 		
-		protected virtual void add_item_without_signaling (DockElement item)
+		void add_item_without_signaling (DockElement item)
 		{
+			var add_time = GLib.get_monotonic_time ();
+
+			unowned DockContainer? container = (item as DockContainer);
+			if (container != null) {
+				container.prepare ();
+				foreach (var element in container.Elements)
+					element.AddTime = add_time;
+			}
+			
 			internal_elements.add (item);
 			
 			item.Container = this;
-			item.AddTime = GLib.get_monotonic_time ();
+			item.AddTime = add_time;
 			connect_element (item);
 		}
 		
@@ -329,9 +334,16 @@ namespace Plank.Items
 			return true;
 		}
 		
-		protected virtual void remove_item_without_signaling (DockElement item)
+		void remove_item_without_signaling (DockElement item)
 		{
-			item.RemoveTime = GLib.get_monotonic_time ();
+			var remove_time = GLib.get_monotonic_time ();
+			
+			unowned DockContainer? container = (item as DockContainer);
+			if (container != null)
+				foreach (var element in container.Elements)
+					element.RemoveTime = remove_time;
+			
+			item.RemoveTime = remove_time;
 			disconnect_element (item);
 			
 			internal_elements.remove (item);

@@ -1,12 +1,14 @@
 //
 //  Copyright (C) 2011-2012 Robert Dyer, Rico Tzschichholz
 //
-//  This program is free software: you can redistribute it and/or modify
+//  This file is part of Plank.
+//
+//  Plank is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
 //
-//  This program is distributed in the hope that it will be useful,
+//  Plank is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
@@ -286,8 +288,7 @@ namespace Plank
 			if (no_full_draw_needed && hide_progress == 1.0 && opacity == 1.0) {
 				// we still need to clear out the previous output
 				cr.save ();
-				cr.set_source_rgba (0, 0, 0, 0);
-				cr.set_operator (Cairo.Operator.SOURCE);
+				cr.set_operator (Cairo.Operator.CLEAR);
 				cr.paint ();
 				cr.restore ();
 				
@@ -498,7 +499,20 @@ namespace Plank
 			message ("render time - %f ms", diff);
 #endif
 			
-			is_first_frame = false;
+			if (is_first_frame) {
+				Idle.add (() => {
+					// slide the dock in, if it shouldnt start hidden
+					controller.hide_manager.update_hovered ();
+					
+					// FIXME there must be a sane way
+					// https://bugs.launchpad.net/plank/+bug/1256626
+					last_hide = GLib.get_monotonic_time ();
+					hidden_changed ();
+					return false;
+				});
+				
+				is_first_frame = false;
+			}
 		}
 		
 		void draw_dock_background (Cairo.Context cr, Gdk.Rectangle background_rect)
@@ -531,7 +545,7 @@ namespace Plank
 			// get item's draw-value
 			var draw_value = position_manager.get_draw_value_for_item (item);
 			
-			// check for and calulate click-animatation
+			// check for and calculate click-animation
 			var max_click_time = item.ClickedAnimation == Animation.BOUNCE ? theme.LaunchBounceTime : theme.ClickTime;
 			max_click_time *= 1000;
 			var click_time = frame_time - item.LastClicked;
@@ -557,7 +571,7 @@ namespace Plank
 				}
 			}
 			
-			// check for and calulate scroll-animatation
+			// check for and calculate scroll-animation
 			var max_scroll_time = 300 * 1000;
 			var scroll_time = frame_time - item.LastScrolled;
 			if (scroll_time < max_scroll_time) {
@@ -576,7 +590,7 @@ namespace Plank
 				}
 			}
 			
-			// check for and calulate hover-animatation
+			// check for and calculate hover-animation
 			var max_hover_time = 150 * 1000;
 			var hover_time = frame_time - item.LastHovered;
 			if (hover_time < max_hover_time) {
@@ -638,7 +652,9 @@ namespace Plank
 			}
 			
 			// animate addition/removal
-			if (screen_is_composited && item.AddTime > item.RemoveTime) {
+			unowned DockContainer? container = item.Container;
+			var allow_animation = (screen_is_composited && (container == null || container.AddTime < item.AddTime));
+			if (allow_animation && item.AddTime > item.RemoveTime) {
 				var move_duration = theme.ItemMoveTime * 1000;
 				var move_time = frame_time - item.AddTime;
 				if (move_time < move_duration) {
@@ -648,7 +664,7 @@ namespace Plank
 					draw_value.move_in (position, -change);
 					draw_value.show_indicator = false;
 				}
-			} else if (screen_is_composited && item.RemoveTime > 0) {
+			} else if (allow_animation && item.RemoveTime > 0) {
 				var move_duration = theme.ItemMoveTime * 1000;
 				var move_time = frame_time - item.RemoveTime;
 				if (move_time < move_duration) {
@@ -973,28 +989,35 @@ namespace Plank
 			if (transient_items.size > 0)
 				return true;
 			
-			foreach (var item in controller.VisibleItems) {
-				if (item.ClickedAnimation != Animation.NONE
-					&& render_time - item.LastClicked <= (item.ClickedAnimation == Animation.BOUNCE ? theme.LaunchBounceTime : theme.ClickTime) * 1000)
+			foreach (var item in controller.VisibleItems)
+				if (item_animation_needed (item, render_time))
 					return true;
-				if (item.HoveredAnimation != Animation.NONE
-					&& render_time - item.LastHovered <= 150 * 1000)
-					return true;
-				if (item.ScrolledAnimation != Animation.NONE
-					&& render_time - item.LastScrolled <= 300 * 1000)
-					return true;
-				if (render_time - item.LastActive <= theme.ActiveTime * 1000)
-					return true;
-				if (render_time - item.LastUrgent <= (hide_progress == 1.0 ? theme.GlowTime : theme.UrgentBounceTime) * 1000)
-					return true;
-				if (render_time - item.LastMove <= theme.ItemMoveTime * 1000)
-					return true;
-				if (render_time - item.AddTime <= theme.ItemMoveTime * 1000)
-					return true;
-				if (render_time - item.RemoveTime <= theme.ItemMoveTime * 1000)
-					return true;
-			}
-				
+			
+			return false;
+		}
+
+		inline bool item_animation_needed (DockItem item, int64 render_time)
+		{
+			if (item.ClickedAnimation != Animation.NONE
+				&& render_time - item.LastClicked <= (item.ClickedAnimation == Animation.BOUNCE ? theme.LaunchBounceTime : theme.ClickTime) * 1000)
+				return true;
+			if (item.HoveredAnimation != Animation.NONE
+				&& render_time - item.LastHovered <= 150 * 1000)
+				return true;
+			if (item.ScrolledAnimation != Animation.NONE
+				&& render_time - item.LastScrolled <= 300 * 1000)
+				return true;
+			if (render_time - item.LastActive <= theme.ActiveTime * 1000)
+				return true;
+			if (render_time - item.LastUrgent <= (hide_progress == 1.0 ? theme.GlowTime : theme.UrgentBounceTime) * 1000)
+				return true;
+			if (render_time - item.LastMove <= theme.ItemMoveTime * 1000)
+				return true;
+			if (render_time - item.AddTime <= theme.ItemMoveTime * 1000)
+				return true;
+			if (render_time - item.RemoveTime <= theme.ItemMoveTime * 1000)
+				return true;
+			
 			return false;
 		}
 	}

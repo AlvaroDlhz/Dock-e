@@ -1,12 +1,14 @@
 //
 //  Copyright (C) 2011 Robert Dyer, Rico Tzschichholz
 //
-//  This program is free software: you can redistribute it and/or modify
+//  This file is part of Plank.
+//
+//  Plank is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
 //
-//  This program is distributed in the hope that it will be useful,
+//  Plank is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
@@ -100,7 +102,7 @@ namespace Plank.Items
 				Button = PopupButton.RIGHT | PopupButton.LEFT;
 				
 				try {
-					dir_monitor = OwnedFile.monitor (0);
+					dir_monitor = OwnedFile.monitor_directory (0);
 					dir_monitor.changed.connect (handle_dir_changed);
 				} catch {
 					critical ("Unable to watch the stack directory '%s'.", OwnedFile.get_path () ?? "");

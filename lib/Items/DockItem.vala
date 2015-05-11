@@ -1,12 +1,14 @@
 //
 //  Copyright (C) 2011-2012 Robert Dyer, Rico Tzschichholz
 //
-//  This program is free software: you can redistribute it and/or modify
+//  This file is part of Plank.
+//
+//  Plank is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
 //
-//  This program is distributed in the hope that it will be useful,
+//  Plank is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
@@ -208,6 +210,8 @@ namespace Plank.Items
 			notify["ProgressVisible"].connect (reset_foreground_buffer);
 			
 			launcher_file_monitor_start ();
+			if (ForcePixbuf == null)
+				icon_file_monitor_start ();
 		}
 		
 		~DockItem ()
@@ -321,7 +325,7 @@ namespace Plank.Items
 				return;
 			
 			try {
-				icon_file_monitor = icon_file.monitor (0);
+				icon_file_monitor = icon_file.monitor_file (0);
 				icon_file_monitor.changed.connect (reset_icon_buffer);
 			} catch (Error e) {
 				critical ("Unable to watch the icon file '%s'", icon_file.get_path () ?? "");
@@ -390,7 +394,7 @@ namespace Plank.Items
 			try {
 				var launcher_file = File.new_for_uri (launcher);
 				launcher_exists = launcher_file.query_exists ();
-				launcher_file_monitor = launcher_file.monitor (FileMonitorFlags.SEND_MOVED);
+				launcher_file_monitor = launcher_file.monitor_file (FileMonitorFlags.SEND_MOVED);
 				launcher_file_monitor.changed.connect (launcher_file_changed);
 			} catch {
 				warning ("Unable to watch the launcher file '%s'", launcher);
