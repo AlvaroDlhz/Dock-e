@@ -1,3 +1,525 @@
+2015-09-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Prepare 0.10.0 release
+
+2015-09-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	positionmanager: Demote criticals of get_draw_value_for_item()
+	to debug/warning
+
+2015-09-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	itemfactory: Avoid a string-copying
+
+2015-09-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-09-03  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockcontainer: Optimize prepend()
+
+2015-09-03  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockcontroller: Clean out old default-provider after replacing it
+
+2015-09-03  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockrenderer: Guard against empty dock (which ideally won't happen)
+
+2015-09-03  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockcontainer: Add remove_all()
+
+2015-08-24  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	itemfactory: Make get_launcher_from_dockitem() a bit more safer/verbose
+
+2015-08-23  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Clean bamf/gtk+ version check
+
+2015-08-23  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockrenderer: Avoid usage of Cairo.SurfaceType.COGL
+
+2015-08-23  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dbusmanager: Fix naming of fields which are holding handler/timer-ids
+
+2015-08-23  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Cast some callbacks to avoid the creation of wrappers
+
+2015-08-23  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Require cairo >= 1.10
+
+2015-08-23  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Cast some callbacks to avoid the creation of wrappers
+
+2015-08-22  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-08-21  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockrenderer: Adjust shadow-size if window-scale-factor > 1 aka HiDPI
+
+2015-08-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockwindow: Make using -Werror=unused-result pass
+
+2015-08-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockelement: Make using -Werror=pointer-to-int-cast pass
+
+2015-08-19  Lucas Baudin  <xapantu@gmail.com>
+
+	hidemanager: Ignore pressure-reveal for 'absolute' input-devices
+
+2015-08-17  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	positionmanager: Fix background-size calculation with enabled icon-zoom
+
+	We need to take the zoomed icon-size into account to properly
+	adjust the
+	horizontal padding for the background-sizing while differentiating
+	between first and last item.
+
+2015-08-14  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockrenderer: Output the Cairo.SurfaceType used by Gtk+
+
+2015-08-13  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	hidemanager: Reinstate "handling of send_event" to avoid confusion
+	with menu
+
+	Regression of r1353
+
+2015-08-13  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	hidemanager: Don't use actual cursor coords of leave-notify-event
+
+	If we received a leave-notify-event then don't be silly and make sure
+	update_hovered_with_coords() will set Hovered to false by passing
+	(-1, -1).
+
+2015-08-12  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-07-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	positionmanager: Make item's background-region always cover dock's
+	background from bottom up
+
+2015-07-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Revert "dockrenderer: Use animated_draw() and don't listen to
+	HoveredItem changes"
+
+2015-07-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockrenderer: Do not forcefully unhide the dock if it already is
+
+	If we do it will cause the dock to hide and unhide again on startup.
+
+2015-07-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockrenderer: Use animated_draw() and don't listen to HoveredItem
+	changes
+
+2015-07-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Commonize naming of fields which are holding handler/timer-ids
+
+	Adjust some explictly typed assignments too.
+
+2015-07-29  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockcontainer: Update element's RemoveTime on add/replace accordingly
+
+2015-07-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	surfacecache: Fix build with gee-1.0
+
+2015-07-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockwindow: Reinstate "handling of send_event" to fix broken
+	internal DnD
+
+	Regression of r1353
+
+2015-07-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	ui: Fix "Icon Zoom" label spanning
+
+2015-07-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-07-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	hidemanager: Rework enter/leave-event handling to determine "Hovered"
+
+	This removes handling of send_event and use "Disabled" for visible
+	menu.
+
+2015-07-25  Kay van der Zander	<kay20@hotmail.com>
+
+	gmock: Add tests for Color
+
+2015-07-25  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	tests: Add google-mock support
+
+2015-07-25  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	appdockitem: Always indicate running application despite its
+	window-count
+
+2015-07-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Replace non-constant string-concatenation with string.printf()
+
+2015-07-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Make sure to bind "plank" textdomain for library users
+
+2015-07-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-07-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	surfacecache: Add missing mutex-unlock
+
+2015-07-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translation template
+
+2015-07-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Update symbols
+
+2015-07-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add ability to cache multiple sizes of drawn items
+
+2015-07-02  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add optional zoom animation when hovering dock-items
+
+2015-06-27  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add icon-zoom preferences and expose gui-settings
+
+2015-07-15  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Make sure to enable maintainer-mode by default
+
+2015-07-12  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	ui: Tweak minimum gtk+ version for conditional 3.4 support
+
+2015-07-12  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-07-12  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	prefswindow: Allow closing the window using "Escape"
+
+2015-06-14  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Drop dependency on gnome-common
+
+2015-07-12  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	prefswindow: Use Gtk.Stack if available
+
+2015-07-09  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	hidemanager: Add dodge-active hide-mode
+
+2015-07-09  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	color: Clarify documention of set_min/max_* methods
+
+2015-07-09  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	color: Avoid double setting of out-vars in hsv_to_rgb
+
+2015-07-06  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Update symbols
+
+2015-07-03  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockrenderer: Guard duration-calculations which are used for animations
+
+2015-06-27  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-06-27  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	animatedrenderer: Always initialize frame if a redraw is scheduled
+
+2015-06-17  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-06-11  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add RTL support and enable it depending on the locale setting
+
+	Reverse items placement.
+	Mirror position for vertical docks.
+	Invert alignments for horizonzal docks.
+	Mirror badge and progress-bar.
+
+2015-06-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Revert "items: Use threaded icon-drawing for all items"
+
+	Too unstable for being usable!
+
+2015-06-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	animatedrenderer: Use Gdk.FrameClock to determine frame-time
+
+	Conditionally use Gdk.FrameClock if Gtk+ >= 3.8 is available
+
+2015-06-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Move frame-time handling into AnimatedRenderer
+
+	Make AnimatedRenderer-class responsible to perform and schedule
+	redraws.
+
+2015-06-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	drawingservice: Make icon_theme creation thread-safe
+
+2015-06-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockitem: Schedule icon-theme-changed callback "as late as possible"
+
+2015-06-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Schedule unhide-on-start callback "as late as possible"
+
+2015-06-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	src: Use more reasonable class-name and namespace-structure
+
+2015-06-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-06-09  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	drawingservice: Use string-array directly and don't copy to
+	Gee.ArrayList
+
+2015-06-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Fix make distcheck
+
+2015-06-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	filedockitem: Drop unused code
+
+2015-06-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	worker: Make ThreadPool non-exclusive and use GLib.get_num_processors()
+
+2015-06-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	logger: Partial rewrite, with strip down to the "nearly" bare minimum
+
+2015-06-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockitem: Add the "surface == null" surface-status
+
+2015-06-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Avoid some superfluous string-copying
+
+2015-06-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	drawing: Use Gtk.IconTheme in a thread-safe way
+
+2015-06-05  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockitem: Rework threaded-drawing of internal surface
+
+2015-06-05  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	worker: Schedule async-callback with priority HIGH_IDLE
+
+2015-06-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Fix docs build
+
+2015-06-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Update symbols
+
+2015-06-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	abstractmain: Bail early if this is not running in a X11 session
+
+2015-06-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	abstractmain: Force "deep" initializtion of Gtk.IconTheme early
+
+2015-06-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	items: Use threaded icon-drawing for all item and add draw_icon_fast()
+
+	Makes use of Worker.add_task_with_result().
+
+	Prevent foreground and background drawing until the final icon is done.
+
+	draw_icon_fast() will be used before the real icon is ready.
+	It allows items to draw a specific shape for a smoother transitions
+	between placeholder and final icon.
+
+2015-06-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	worker: Add asynchronous add_task_with_result()
+
+2015-06-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dragmanager: Update drag-icon if the drag-item's icon got changed
+
+2015-06-03  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	filedockitem: Use Worker to load and draw file-icons for pinned folders
+
+2015-06-03  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	services: Add ThreadPool-based Worker to run tasks without blocking GUI
+
+2015-06-03  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-05-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Fix autoconf warning about ignoring --datarootdir
+
+2015-05-27  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	theme: Small clean up of draw_background()
+
+2015-05-26  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-05-26  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	positionmanager: Use Gdk.Rectangle.union()
+
+	This additionally catches the case where first_rect is actually located
+	on the "right" of last_rect.
+
+2015-05-26  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Simplify initialization of some structs
+
+	"var f = Foo ()" will cause a superfluous memset.
+	"Foo f = {0}" will additionally set the first field (if it is
+	an integer)
+	and doesn't translate to C-equivalent.
+
+2015-05-25  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	preferences: GLib.File.replace() is creating non-existing files already
+
+2015-05-25  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	controller: No need to specialize default-provider as
+	AppDockItemProvider
+
+2015-05-18  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockitem: Use dedicated callback to handle icon-file-changes
+
+2015-05-17  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	items: Make DockItem abstract
+
+2015-05-17  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	logger: Adjust LogLevel-naming, ERROR -> CRITICAL and FATAL -> ERROR
+
+2015-05-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	docksurface: Cache kernel[k] in gaussian_blur_*
+
+2015-05-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	drawing: Small optimization in ar_scale()
+
+2015-05-13  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	renderer: Make hide-animation non-linear and default to 250ms
+
+2015-05-09  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	items: Pass-through the event_time of click/scroll events if available
+
+	This will result in passing proper timestamps to Wnck-based calls.
+
+2015-05-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Automatically remove invalid items and their corresponding
+	dockitem-file
+
+	Additionally to the validity check of dockitem-files invalid one
+	will be
+	deleted. On runtime indicate broken-items and remove them after
+	3 seconds
+	without further actions needed.
+
+2015-05-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	items: Refactor public API to reflect its generality
+
+2015-05-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Make "Item for Dock" really special and add setting to show/hide it
+
+2015-05-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Allow DockItems to be added to the DockController directly
+
+2015-05-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockcontainer: Add prepend_item()
+
+2015-05-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	items: Collect item-related enums in their own source-file
+
+2015-05-06  Daniel Foré  <daniel@elementary.io>
+
+	data: New and more detailed poof animation with 8 frames
+
+2015-05-06  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	poofwindow: Retrieve size and frame-count from given animation-file
+
+2015-05-02  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Back to development
+
 2015-05-02  Rico Tzschichholz  <ricotz@ubuntu.com>
 
 	Prepare 0.9.1 release

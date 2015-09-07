@@ -44,11 +44,12 @@ namespace Plank
 		public DockRenderer renderer { get; protected set; }
 		public DockWindow window { get; protected set; }
 		
-		public ApplicationDockItemProvider? default_provider { get; private set; }
+		public DockItemProvider? default_provider { get; private set; }
 		
 		DBusManager dbus_manager;
 		Gee.ArrayList<unowned DockItem> visible_items;
 		Gee.ArrayList<unowned DockItem> items;
+		DockItem? dock_itself_item;
 		
 		/**
 		 * List of all items on this dock
@@ -93,6 +94,8 @@ namespace Plank
 			visible_items = new Gee.ArrayList<unowned DockItem> ();
 			
 			prefs.notify["PinnedOnly"].connect (update_default_provider);
+			prefs.notify["Position"].connect (update_visible_elements);
+			prefs.notify["ShowDockItem"].connect (update_show_dock_item);
 			
 			dbus_manager = new DBusManager (this);
 			
@@ -106,6 +109,12 @@ namespace Plank
 		~DockController ()
 		{
 			prefs.notify["PinnedOnly"].disconnect (update_default_provider);
+			prefs.notify["Position"].disconnect (update_visible_elements);
+			prefs.notify["ShowDockItem"].disconnect (update_show_dock_item);
+			
+			positions_changed.disconnect (handle_positions_changed);
+			states_changed.disconnect (handle_states_changed);
+			elements_changed.disconnect (handle_elements_changed);
 			
 			items.clear ();
 			visible_items.clear ();
@@ -121,7 +130,14 @@ namespace Plank
 			if (internal_elements.size <= 0)
 				add_default_provider ();
 			
+			update_show_dock_item ();
 			update_items ();
+			
+			AddTime = GLib.get_monotonic_time ();
+			
+			positions_changed.connect (handle_positions_changed);
+			states_changed.connect (handle_states_changed);
+			elements_changed.connect (handle_elements_changed);
 			
 			position_manager.initialize ();
 			drag_manager.initialize ();
@@ -143,12 +159,12 @@ namespace Plank
 			Logger.verbose ("DockController.add_default_provider ()");
 			default_provider = create_default_provider ();
 			
-			add_item (default_provider);
+			add (default_provider);
 		}
 		
-		ApplicationDockItemProvider create_default_provider ()
+		DockItemProvider create_default_provider ()
 		{
-			ApplicationDockItemProvider provider;
+			DockItemProvider provider;
 			
 			// If we made the default-launcher-directory,
 			// assume a first run and pre-populate with launchers
@@ -163,7 +179,7 @@ namespace Plank
 			else
 				provider = new DefaultApplicationDockItemProvider (prefs, launchers_folder);
 			
-			provider.add_items (Factory.item_factory.load_items (launchers_folder, prefs.DockItems));
+			provider.add_all (Factory.item_factory.load_items (launchers_folder, prefs.DockItems));
 			
 			return provider;
 		}
@@ -177,7 +193,8 @@ namespace Plank
 			var old_default_provider = default_provider;
 			default_provider = create_default_provider ();
 			default_provider.prepare ();
-			replace_item (default_provider, old_default_provider);
+			replace (default_provider, old_default_provider);
+			old_default_provider.remove_all ();
 			
 			update_items ();
 			
@@ -187,15 +204,29 @@ namespace Plank
 			window.update_icon_regions ();
 		}
 		
+		void update_show_dock_item ()
+		{
+			if (prefs.ShowDockItem) {
+				if (dock_itself_item == null)
+					dock_itself_item = Factory.item_factory.get_item_for_dock ();
+				if (!internal_elements.contains (dock_itself_item))
+					prepend (dock_itself_item);
+			} else if (dock_itself_item != null) {
+				if (internal_elements.contains (dock_itself_item))
+					remove (dock_itself_item);
+				dock_itself_item = null;
+			}
+		}
+		
 		protected override void connect_element (DockElement element)
 		{
 			unowned DockItemProvider? provider = (element as DockItemProvider);
 			if (provider == null)
 				return;
 			
-			provider.item_positions_changed.connect (handle_item_positions_changed);
-			provider.item_state_changed.connect (handle_item_state_changed);
-			provider.items_changed.connect (handle_items_changed);
+			provider.positions_changed.connect (handle_positions_changed);
+			provider.states_changed.connect (handle_states_changed);
+			provider.elements_changed.connect (handle_elements_changed);
 			
 			unowned ApplicationDockItemProvider? app_provider = (provider as ApplicationDockItemProvider);
 			if (app_provider != null)
@@ -208,38 +239,69 @@ namespace Plank
 			if (provider == null)
 				return;
 			
-			provider.item_positions_changed.disconnect (handle_item_positions_changed);
-			provider.item_state_changed.disconnect (handle_item_state_changed);
-			provider.items_changed.disconnect (handle_items_changed);
+			provider.positions_changed.disconnect (handle_positions_changed);
+			provider.states_changed.disconnect (handle_states_changed);
+			provider.elements_changed.disconnect (handle_elements_changed);
 			
 			unowned ApplicationDockItemProvider? app_provider = (provider as ApplicationDockItemProvider);
 			if (app_provider != null)
 				app_provider.item_window_added.disconnect (window.update_icon_region);
 		}
 		
-		protected override void update_visible_items ()
+		protected override void update_visible_elements ()
 		{
-			base.update_visible_items ();
+			base.update_visible_elements ();
 			
 			Logger.verbose ("DockController.update_visible_items ()");
 			
 			visible_items.clear ();
 			
-			var current_pos = 0;
-			foreach (var element in visible_elements) {
-				unowned DockContainer? container = (element as DockContainer);
-				if (container == null)
-					continue;
-				foreach (var element2 in container.VisibleElements) {
-					unowned DockItem? item = (element2 as DockItem);
-					if (item == null)
-						continue;
-					if (item.Position != current_pos)
-						item.Position = current_pos;
-					visible_items.add (item);
-					current_pos++;
-				}
+			var current_position = 0;
+			update_visible_items_recursive (this, ref current_position);
+		}
+		
+		void update_visible_items_recursive (DockContainer container, ref int current_position)
+		{
+#if HAVE_GEE_0_8
+			var iterator = container.VisibleElements.bidir_list_iterator ();
+#else
+			var iterator = container.VisibleElements.list_iterator ();
+#endif
+			// Reverse dock-item-order for RTL environments if dock is placed horizontally
+			if (Gtk.Widget.get_default_direction () == Gtk.TextDirection.RTL && prefs.is_horizontal_dock ()) {
+				iterator.last ();
+				do {
+					update_visible_items_add_from_iterator (iterator, ref current_position);
+				} while (iterator.previous ());
+			} else {
+				iterator.first ();
+				do {
+					update_visible_items_add_from_iterator (iterator, ref current_position);
+				} while (iterator.next ());
 			}
+		}
+		
+		inline void update_visible_items_add_from_iterator (Gee.Iterator<DockElement> iterator, ref int current_position)
+		{
+			DockElement? element = iterator.get ();
+			unowned DockItem? item = null;
+			unowned DockContainer? container = null;
+			
+			container = (element as DockContainer);
+			if (container != null) {
+				update_visible_items_recursive (container, ref current_position);
+				return;
+			}
+
+			item = (element as DockItem);
+			if (item == null)
+				return;
+			
+			if (item.Position != current_position)
+				item.Position = current_position;
+			current_position++;
+			
+			visible_items.add (item);
 		}
 		
 		void update_items ()
@@ -248,12 +310,22 @@ namespace Plank
 			
 			items.clear ();
 			
+			unowned DockItem? item = null;
+			unowned DockContainer? container = null;
+			
 			foreach (var element in internal_elements) {
-				unowned DockContainer? container = (element as DockContainer);
+				item = (element as DockItem);
+				if (item != null) {
+					items.add (item);
+					continue;
+				}
+				
+				container = (element as DockContainer);
 				if (container == null)
 					continue;
+				
 				foreach (var element2 in container.Elements) {
-					unowned DockItem? item = (element2 as DockItem);
+					item = (element2 as DockItem);
 					if (item == null)
 						continue;
 					items.add (item);
@@ -261,39 +333,35 @@ namespace Plank
 			}
 		}
 		
-		void handle_items_changed (DockContainer provider, Gee.List<DockElement> added, Gee.List<DockElement> removed)
+		void handle_elements_changed (DockContainer container, Gee.List<DockElement> added, Gee.List<DockElement> removed)
 		{
-			if (provider == default_provider)
+			if (container == default_provider)
 				serialize_item_positions ();
 			
 			// Schedule added/removed items for special animations
 			renderer.animate_items (added);
 			renderer.animate_items (removed);
 			
-			update_visible_items ();
+			update_visible_elements ();
 			update_items ();
 			
 			if (prefs.Alignment != Gtk.Align.FILL
 				&& added.size != removed.size) {
 				position_manager.update (renderer.theme);
 			} else {
-				position_manager.reset_item_caches ();
 				position_manager.update_regions ();
 			}
 			window.update_icon_regions ();
-			
-			items_changed (added, removed);
 		}
 		
-		void handle_item_positions_changed (DockContainer provider, Gee.List<unowned DockElement> moved_items)
+		void handle_positions_changed (DockContainer container, Gee.List<unowned DockElement> moved_items)
 		{
-			if (provider == default_provider)
+			if (container == default_provider)
 				serialize_item_positions ();
 			
-			update_visible_items ();
+			update_visible_elements ();
 			
 			foreach (unowned DockElement item in moved_items) {
-				position_manager.reset_item_cache (item);
 				unowned ApplicationDockItem? app_item = (item as ApplicationDockItem);
 				if (app_item != null)
 					window.update_icon_region (app_item);
@@ -301,17 +369,18 @@ namespace Plank
 			renderer.animated_draw ();
 		}
 		
-		void handle_item_state_changed (DockContainer provider)
+		void handle_states_changed (DockContainer container)
 		{
 			renderer.animated_draw ();
 		}
 		
 		void serialize_item_positions ()
 		{
-			if (default_provider == null)
+			unowned ApplicationDockItemProvider? provider = (default_provider as ApplicationDockItemProvider);
+			if (provider == null)
 				return;
 			
-			var item_list = default_provider.get_item_list_string ();
+			var item_list = provider.get_item_list_string ();
 			
 			if (prefs.DockItems != item_list)
 				prefs.DockItems = item_list;

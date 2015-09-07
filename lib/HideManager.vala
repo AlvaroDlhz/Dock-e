@@ -46,7 +46,11 @@ namespace Plank
 		/**
 		 * The dock hides if there is any window overlapping it.
 		 */
-		WINDOW_DODGE
+		WINDOW_DODGE,
+		/**
+		 * The dock hides if there is the active window overlapping it.
+		 */
+		DODGE_ACTIVE,
 	}
 	
 	/**
@@ -57,12 +61,12 @@ namespace Plank
 		// a delay between window changes and updating our data
 		// this allows window animations to occur, which might change
 		// the results of our update
-		const uint UPDATE_TIMEOUT = 200;
+		const uint UPDATE_TIMEOUT = 200U;
 		
 #if HAVE_BARRIERS
 		// FIXME Use an IconSize-based value?
 		const double PRESSURE_THRESHOLD = 60.0;
-		const int PRESSURE_TIMEOUT = 1000;
+		const uint PRESSURE_TIMEOUT = 1000U;
 #endif
 		
 		static int plank_pid;
@@ -89,26 +93,25 @@ namespace Plank
 		 */
 		public bool Hovered { get; private set; default = false; }
 		
-		uint timer_hide = 0;
-		uint timer_unhide = 0;
+		uint hide_timer_id = 0U;
+		uint unhide_timer_id = 0U;
+		uint prefs_changed_timer_id = 0U;
+		uint geometry_timer_id = 0U;
+		uint window_changed_timer_id = 0U;
+		
 		bool pointer_update = true;
-		
-		uint timer_prefs_changed = 0;
-		
 		bool window_intersect = false;
+		bool active_window_intersect = false;
 		bool active_application_intersect = false;
 		bool active_maximized_window_intersect = false;
 		bool dialog_windows_intersect = false;
 		Gdk.Rectangle last_window_rect;
 		
-		uint timer_geo = 0;
-		uint timer_window_changed = 0;
-		
 #if HAVE_BARRIERS
 		XFixes.PointerBarrier barrier = 0;
 		int opcode = 0;
 		double pressure = 0.0;
-		uint pressure_timer = 0;
+		uint pressure_timer_id = 0U;
 		bool barriers_supported = false;
 #endif
 		
@@ -189,11 +192,6 @@ namespace Plank
 		{
 			unowned PositionManager position_manager = controller.position_manager;
 			unowned DockWindow window = controller.window;
-			unowned DragManager drag_manager = controller.drag_manager;
-			
-			freeze_notify ();
-			
-			bool update_needed = false;
 			
 			// get current mouse pointer location
 			int x, y;
@@ -203,11 +201,30 @@ namespace Plank
 			
 			// get window location
 			var win_rect = position_manager.get_dock_window_region ();
+			x -= win_rect.x;
+			y -= win_rect.y;
+			
+			update_hovered_with_coords (x, y);
+		}
+		
+		/**
+		 * Checks to see if the dock is being hovered by the mouse cursor.
+		 *
+		 * @param x the x coordinate of the pointer relative to the dock window
+		 * @param y the y coordinate of the pointer relative to the dock window
+		 */
+		public void update_hovered_with_coords (int x, int y)
+		{
+			unowned PositionManager position_manager = controller.position_manager;
+			unowned DockWindow window = controller.window;
+			unowned DragManager drag_manager = controller.drag_manager;
+			
+			freeze_notify ();
+			
+			bool update_needed = false;
 			
 			// compute rect of the window
 			var dock_rect = position_manager.get_cursor_region ();
-			dock_rect.x += win_rect.x;
-			dock_rect.y += win_rect.y;
 			
 			// use the dock rect and cursor location to determine if dock is hovered
 			var hovered = (x >= dock_rect.x && x < dock_rect.x + dock_rect.width
@@ -218,8 +235,8 @@ namespace Plank
 				update_needed = true;
 			}
 			
-			// disable hiding if drags are active
-			var disabled = (drag_manager.InternalDragActive || drag_manager.ExternalDragActive);
+			// disable hiding if menu is visible or drags are active
+			var disabled = (window.menu_is_visible () || drag_manager.InternalDragActive || drag_manager.ExternalDragActive);
 			if (Disabled != disabled) {
 				Disabled = disabled;
 				update_needed = true;
@@ -236,17 +253,17 @@ namespace Plank
 			switch (prop.name) {
 			case "HideMode":
 			case "Position":
-				if (timer_prefs_changed > 0) {
-					GLib.Source.remove (timer_prefs_changed);
-					timer_prefs_changed = 0;
+				if (prefs_changed_timer_id > 0U) {
+					GLib.Source.remove (prefs_changed_timer_id);
+					prefs_changed_timer_id = 0U;
 				}
 				
-				timer_prefs_changed = Gdk.threads_add_timeout (UPDATE_TIMEOUT, () => {
+				prefs_changed_timer_id = Gdk.threads_add_timeout (UPDATE_TIMEOUT, () => {
 					update_window_intersect ();
 #if HAVE_BARRIERS
 					update_barrier ();
 #endif
-					timer_prefs_changed = 0;
+					prefs_changed_timer_id = 0U;
 					return false;
 				});
 				break;
@@ -302,60 +319,67 @@ namespace Plank
 				else
 					hide ();
 				break;
+			
+			case HideType.DODGE_ACTIVE:
+				if (Hovered || !active_window_intersect)
+					show ();
+				else
+					hide ();
+				break;
 			}
 			pointer_update = true;
 		}
 		
 		void hide ()
 		{
-			if (timer_unhide > 0) {
-				GLib.Source.remove (timer_unhide);
-				timer_unhide = 0;
+			if (unhide_timer_id > 0U) {
+				GLib.Source.remove (unhide_timer_id);
+				unhide_timer_id = 0U;
 			}
 			
 			if (Hidden)
 				return;
 			
-			if (controller.prefs.HideDelay == 0) {
+			if (controller.prefs.HideDelay == 0U) {
 				if (!Hidden)
 					Hidden = true;
 				return;
 			}
 			
-			if (timer_hide > 0)
+			if (hide_timer_id > 0U)
 				return;
 			
-			timer_hide = Gdk.threads_add_timeout (controller.prefs.HideDelay, () => {
+			hide_timer_id = Gdk.threads_add_timeout (controller.prefs.HideDelay, () => {
 				if (!Hidden)
 					Hidden = true;
-				timer_hide = 0;
+				hide_timer_id = 0U;
 				return false;
 			});
 		}
 
 		void show ()
 		{
-			if (timer_hide > 0) {
-				GLib.Source.remove (timer_hide);
-				timer_hide = 0;
+			if (hide_timer_id > 0U) {
+				GLib.Source.remove (hide_timer_id);
+				hide_timer_id = 0U;
 			}
 			
 			if (!Hidden)
 				return;
 			
-			if (!pointer_update || controller.prefs.UnhideDelay == 0) {
+			if (!pointer_update || controller.prefs.UnhideDelay == 0U) {
 				if (Hidden)
 					Hidden = false;
 				return;
 			}
 			
-			if (timer_unhide > 0)
+			if (unhide_timer_id > 0U)
 				return;
 			
-			timer_unhide = Gdk.threads_add_timeout (controller.prefs.UnhideDelay, () => {
+			unhide_timer_id = Gdk.threads_add_timeout (controller.prefs.UnhideDelay, () => {
 				if (Hidden)
 					Hidden = false;
-				timer_unhide = 0;
+				unhide_timer_id = 0U;
 				return false;
 			});
 		}
@@ -367,20 +391,14 @@ namespace Plank
 				return Hidden;
 			
 #if HAVE_BARRIERS
-			if (Hidden && barriers_supported && controller.prefs.PressureReveal)
+			if (Hidden && barriers_supported
+				&& controller.prefs.PressureReveal
+				&& device_supports_pressure (event.get_source_device ()))
 				return Hidden;
 #endif
 			
-			if ((bool) event.send_event) {
-				if (!Hovered) {
-					freeze_notify ();
-					Hovered = true;
-					update_hidden ();
-					thaw_notify ();
-				}
-			} else {
-				update_hovered ();
-			}
+			if (!Hovered)
+				update_hovered_with_coords ((int) event.x, (int) event.y);
 			
 			return Hidden;
 		}
@@ -395,10 +413,15 @@ namespace Plank
 			if ((bool) event.send_event)
 				return Gdk.EVENT_PROPAGATE;
 			
-			if (Hovered && !controller.window.menu_is_visible ())
-				update_hovered ();
+			if (Hovered)
+				update_hovered_with_coords (-1, -1);
 			
 			return Gdk.EVENT_PROPAGATE;
+		}
+		
+		inline bool device_supports_pressure (Gdk.Device device)
+		{
+			return (device.input_source == Gdk.InputSource.MOUSE);
 		}
 		
 		//
@@ -421,6 +444,7 @@ namespace Plank
 			var intersect = false;
 			var dialog_intersect = false;
 			var active_intersect = false;
+			var new_active_window_intersect = false;
 			var active_maximized_intersect = false;
 			unowned Wnck.Screen screen = Wnck.Screen.get_default ();
 			unowned Wnck.Window? active_window = screen.get_active_window ();
@@ -449,6 +473,8 @@ namespace Plank
 						
 						active_intersect = true;
 						
+						new_active_window_intersect = new_active_window_intersect || (active_window == w);
+						
 						active_maximized_intersect = active_maximized_intersect || (active_window == w
 							&& (w.is_maximized () || w.is_maximized_vertically () || w.is_maximized_horizontally ()));
 						
@@ -463,6 +489,7 @@ namespace Plank
 			window_intersect = intersect;
 			dialog_windows_intersect = dialog_intersect;
 			active_application_intersect = active_intersect;
+			active_window_intersect = new_active_window_intersect;
 			active_maximized_window_intersect = active_maximized_intersect;
 			
 			pointer_update = false;
@@ -471,12 +498,12 @@ namespace Plank
 		
 		void schedule_update ()
 		{
-			if (timer_window_changed > 0)
+			if (window_changed_timer_id > 0U)
 				return;
 			
-			timer_window_changed = Gdk.threads_add_timeout (UPDATE_TIMEOUT, () => {
+			window_changed_timer_id = Gdk.threads_add_timeout (UPDATE_TIMEOUT, () => {
 				update_window_intersect ();
-				timer_window_changed = 0;
+				window_changed_timer_id = 0U;
 				return false;
 			});
 		}
@@ -529,48 +556,48 @@ namespace Plank
 			
 			last_window_rect = geo;
 			
-			if (timer_geo > 0)
+			if (geometry_timer_id > 0U)
 				return;
 			
-			timer_geo = Gdk.threads_add_timeout (UPDATE_TIMEOUT, () => {
+			geometry_timer_id = Gdk.threads_add_timeout (UPDATE_TIMEOUT, () => {
 				update_window_intersect ();
-				timer_geo = 0;
+				geometry_timer_id = 0U;
 				return false;
 			});
 		}
 		
 		static Gdk.Rectangle window_geometry (Wnck.Window window)
 		{
-			var win_rect = Gdk.Rectangle ();
+			Gdk.Rectangle win_rect = {};
 			window.get_geometry (out win_rect.x, out win_rect.y, out win_rect.width, out win_rect.height);
 			return win_rect;
 		}
 		
 		void stop_timers ()
 		{
-			if (timer_geo > 0) {
-				GLib.Source.remove (timer_geo);
-				timer_geo = 0;
+			if (geometry_timer_id > 0U) {
+				GLib.Source.remove (geometry_timer_id);
+				geometry_timer_id = 0U;
 			}
 			
-			if (timer_window_changed > 0) {
-				GLib.Source.remove (timer_window_changed);
-				timer_window_changed = 0;
+			if (window_changed_timer_id > 0U) {
+				GLib.Source.remove (window_changed_timer_id);
+				window_changed_timer_id = 0U;
 			}
 			
-			if (timer_prefs_changed > 0) {
-				GLib.Source.remove (timer_prefs_changed);
-				timer_prefs_changed = 0;
+			if (prefs_changed_timer_id > 0U) {
+				GLib.Source.remove (prefs_changed_timer_id);
+				prefs_changed_timer_id = 0U;
 			}
 			
-			if (timer_hide > 0) {
-				GLib.Source.remove (timer_hide);
-				timer_hide = 0;
+			if (hide_timer_id > 0U) {
+				GLib.Source.remove (hide_timer_id);
+				hide_timer_id = 0U;
 			}
 			
-			if (timer_unhide > 0) {
-				GLib.Source.remove (timer_unhide);
-				timer_unhide = 0;
+			if (unhide_timer_id > 0U) {
+				GLib.Source.remove (unhide_timer_id);
+				unhide_timer_id = 0U;
 			}
 		}
 		
@@ -649,11 +676,11 @@ namespace Plank
 				}
 				
 				if (pressure >= PRESSURE_THRESHOLD) {
-					pressure = 0;
+					pressure = 0.0;
 					
-					if (pressure_timer > 0) {
-						GLib.Source.remove (pressure_timer);
-						pressure_timer = 0;
+					if (pressure_timer_id > 0U) {
+						GLib.Source.remove (pressure_timer_id);
+						pressure_timer_id = 0U;
 					}
 					
 					Logger.verbose ("HideManager (pressure-threshold reached > unhide (%f))", PRESSURE_THRESHOLD);
@@ -669,10 +696,10 @@ namespace Plank
 				}
 				break;
 			case XInput.EventType.BARRIER_LEAVE:
-				if (pressure_timer == 0)
-					pressure_timer = Gdk.threads_add_timeout (PRESSURE_TIMEOUT, () => {
-						pressure = 0;
-						pressure_timer = 0;
+				if (pressure_timer_id == 0U)
+					pressure_timer_id = Gdk.threads_add_timeout (PRESSURE_TIMEOUT, () => {
+						pressure = 0.0;
+						pressure_timer_id = 0U;
 						return false;
 					});
 				break;

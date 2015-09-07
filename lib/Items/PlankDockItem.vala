@@ -26,22 +26,21 @@ namespace Plank.Items
 	/**
 	 * A dock item for the dock itself.  Has things like about, help, quit etc.
 	 */
-	public class PlankDockItem : ApplicationDockItem
+	public class PlankDockItem : DockItem
 	{
-		/**
-		 * {@inheritDoc}
-		 */
-		public PlankDockItem.with_dockitem_file (GLib.File file)
+		static PlankDockItem? instance;
+		
+		public static unowned PlankDockItem get_instance ()
 		{
-			GLib.Object (Prefs: new DockItemPreferences.with_file (file));
+			if (instance == null)
+				instance = new PlankDockItem ();
+			
+			return instance;
 		}
 		
-		/**
-		 * {@inheritDoc}
-		 */
-		public PlankDockItem.with_dockitem_filename (string filename)
+		PlankDockItem ()
 		{
-			GLib.Object (Prefs: new DockItemPreferences.with_filename (filename));
+			GLib.Object (Prefs: new DockItemPreferences (), Text: "Plank", Icon: "plank");
 		}
 		
 		construct
@@ -53,7 +52,15 @@ namespace Plank.Items
 		/**
 		 * {@inheritDoc}
 		 */
-		protected override Animation on_clicked (PopupButton button, Gdk.ModifierType mod)
+		public override bool can_be_removed ()
+		{
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		protected override Animation on_clicked (PopupButton button, Gdk.ModifierType mod, uint32 event_time)
 		{
 			Application.get_default ().activate_action ("about", null);
 			
@@ -64,16 +71,6 @@ namespace Plank.Items
 		 * {@inheritDoc}
 		 */
 		public override Gee.ArrayList<Gtk.MenuItem> get_menu_items ()
-		{
-			return get_plank_menu_items ();
-		}
-		
-		/**
-		 * Returns a list of {@link Gtk.MenuItem}s to display in the popup menu for this item
-		 *
-		 * @return the {@link Gtk.MenuItem}s to display
-		 */
-		public static Gee.ArrayList<Gtk.MenuItem> get_plank_menu_items ()
 		{
 			var items = new Gee.ArrayList<Gtk.MenuItem> ();
 			

@@ -79,6 +79,7 @@ libplank_la_VALASOURCES = \
 	Drawing/DockSurface.vala \
 	Drawing/DockTheme.vala \
 	Drawing/Easing.vala \
+	Drawing/SurfaceCache.vala \
 	Drawing/Theme.vala \
 	Factories/AbstractMain.vala \
 	Factories/Factory.vala \
@@ -91,6 +92,7 @@ libplank_la_VALASOURCES = \
 	Items/DockItemProvider.vala \
 	Items/DockItemPreferences.vala \
 	Items/DockElement.vala \
+	Items/Enums.vala \
 	Items/FileDockItem.vala \
 	Items/PlaceholderDockItem.vala \
 	Items/PlankDockItem.vala \
@@ -99,6 +101,7 @@ libplank_la_VALASOURCES = \
 	Services/Paths.vala \
 	Services/Preferences.vala \
 	Services/System.vala \
+	Services/Worker.vala \
 	Widgets/CompositedWindow.vala \
 	Widgets/DockWindow.vala \
 	Widgets/HoverWindow.vala \
@@ -156,6 +159,10 @@ libplank_internal_la_LIBADD = \
 libplank_internal_la_VALASOURCES = \
 	Services/Matcher.vala \
 	Services/WindowControl.vala \
+	$(NULL)
+
+libplank_internal_la_SOURCES = \
+	glib-compat.c \
 	$(NULL)
 
 nodist_libplank_internal_la_SOURCES = \

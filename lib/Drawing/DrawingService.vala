@@ -34,8 +34,23 @@ namespace Plank.Drawing
 		const double WEIGHT_THRESHOLD = 1.0;
 		const uint8 ALPHA_THRESHOLD = 24;
 		
+		static Mutex icon_theme_mutex;
+		static Gtk.IconTheme icon_theme;
+		
 		DrawingService ()
 		{
+		}
+		
+		public static unowned Gtk.IconTheme get_icon_theme ()
+		{
+			icon_theme_mutex.lock ();
+			
+			if (icon_theme == null)
+				icon_theme = Gtk.IconTheme.get_for_screen (Gdk.Screen.get_default ());
+			
+			icon_theme_mutex.unlock ();
+			
+			return icon_theme;
 		}
 		
 		/**
@@ -108,15 +123,12 @@ namespace Plank.Drawing
 		 */
 		public static Gdk.Pixbuf load_icon (string names, int width, int height)
 		{
-			var all_names = new Gee.ArrayList<string> ();
-			
-			foreach (unowned string s in names.split (";;"))
-				all_names.add (s);
-			all_names.add (DEFAULT_ICON);
-			
 			Gdk.Pixbuf? pbuf = null;
 			
-			foreach (var name in all_names) {
+			var all_names = names.split (";;");
+			all_names += DEFAULT_ICON;
+			
+			foreach (unowned string name in all_names) {
 				var file = try_get_icon_file (name);
 				if (file != null) {
 					pbuf = load_pixbuf_from_file (file, width, height);
@@ -128,7 +140,7 @@ namespace Plank.Drawing
 				if (pbuf != null)
 					break;
 				
-				if (name != all_names.last ())
+				if (name != DEFAULT_ICON)
 					message ("Could not find icon '%s'", name);
 			}
 			
@@ -206,7 +218,9 @@ namespace Plank.Drawing
 		static Gdk.Pixbuf? load_pixbuf (string icon, int size)
 		{
 			Gdk.Pixbuf? pbuf = null;
-			unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_default ();
+			unowned Gtk.IconTheme icon_theme = get_icon_theme ();
+			
+			icon_theme_mutex.lock ();
 			
 			try {
 				pbuf = icon_theme.load_icon (icon, size, 0);
@@ -218,6 +232,8 @@ namespace Plank.Drawing
 					pbuf = icon_theme.load_icon (parts [0], size, 0);
 				}
 			} catch { }
+			
+			icon_theme_mutex.unlock ();
 			
 			return pbuf;
 		}
@@ -234,15 +250,12 @@ namespace Plank.Drawing
 		 */
 		public static Cairo.Surface? load_icon_for_scale (string names, int width, int height, int scale)
 		{
-			var all_names = new Gee.ArrayList<string> ();
-			
-			foreach (unowned string s in names.split (";;"))
-				all_names.add (s);
-			all_names.add (DEFAULT_ICON);
-			
 			Cairo.Surface? surface = null;
 			
-			foreach (var name in all_names) {
+			var all_names = names.split (";;");
+			all_names += DEFAULT_ICON;
+			
+			foreach (unowned string name in all_names) {
 				var file = try_get_icon_file (name);
 				if (file != null) {
 					var pbuf = load_pixbuf_from_file (file, width, height);
@@ -260,7 +273,7 @@ namespace Plank.Drawing
 				if (surface != null)
 					break;
 				
-				if (name != all_names.last ())
+				if (name != DEFAULT_ICON)
 					message ("Could not find icon '%s'", name);
 			}
 			
@@ -295,7 +308,9 @@ namespace Plank.Drawing
 		{
 			Cairo.Surface? surface = null;
 			Gtk.IconInfo? info = null;
-			unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_default ();
+			unowned Gtk.IconTheme icon_theme = get_icon_theme ();
+			
+			icon_theme_mutex.lock ();
 			
 			try {
 				info = icon_theme.lookup_icon_for_scale (icon, size, scale, Gtk.IconLookupFlags.FORCE_SIZE);
@@ -312,6 +327,8 @@ namespace Plank.Drawing
 				}
 			} catch { }
 			
+			icon_theme_mutex.unlock ();
+			
 			return surface;
 		}
 #endif
@@ -326,15 +343,18 @@ namespace Plank.Drawing
 		 */
 		public static Gdk.Pixbuf ar_scale (Gdk.Pixbuf source, int width, int height)
 		{
-			var xScale = (double) width / (double) source.width;
-			var yScale = (double) height / (double) source.height;
-			var scale = double.min (xScale, yScale);
+			var source_width = (double) source.width;
+			var source_height = (double) source.height;
+			
+			var x_scale = width / source_width;
+			var y_scale = height / source_height;
+			var scale = double.min (x_scale, y_scale);
 			
 			if (scale == 1)
 				return source;
 			
-			var scaled_width = int.max (1, (int) (source.width * scale));
-			var scaled_height = int.max (1, (int) (source.height * scale));
+			var scaled_width = int.max (1, (int) (source_width * scale));
+			var scaled_height = int.max (1, (int) (source_height * scale));
 			
 			return source.scale_simple (scaled_width, scaled_height, Gdk.InterpType.HYPER);
 		}

@@ -130,7 +130,7 @@ namespace Plank.Items
 				return true;
 			
 			var default_icons = DEFAULT_ICONS.split (";;");
-			foreach (string icon in Icon.split (";;"))
+			foreach (unowned string icon in Icon.split (";;"))
 				if (icon in default_icons)
 					return true;
 			
@@ -140,23 +140,16 @@ namespace Plank.Items
 		/**
 		 * {@inheritDoc}
 		 */
-		protected override void draw_icon (DockSurface surface)
+		protected override void draw_icon_fast (DockSurface surface)
 		{
-			if (!is_valid () || !has_default_icon_match ()) {
-				base.draw_icon (surface);
-				return;
-			}
-			
-			double x_scale = 1.0, y_scale = 1.0;
-#if HAVE_HIDPI
-			cairo_surface_get_device_scale (surface.Internal, out x_scale, out y_scale);
-#endif
-			
 			unowned Cairo.Context cr = surface.Context;
 			var width = surface.Width;
 			var height = surface.Height;
 			var radius = 3 + 6 * height / (128 - 48);
-			
+			double x_scale = 1.0, y_scale = 1.0;
+#if HAVE_HIDPI
+			cairo_surface_get_device_scale (surface.Internal, out x_scale, out y_scale);
+#endif
 			var line_width_half = 0.5 * (int) double.max (x_scale, y_scale);
 			
 			cr.move_to (radius, line_width_half);
@@ -176,6 +169,24 @@ namespace Plank.Items
 			
 			cr.set_source (rg);
 			cr.fill ();
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		protected override void draw_icon (DockSurface surface)
+		{
+			if (!is_valid () || !has_default_icon_match ()) {
+				base.draw_icon (surface);
+				return;
+			}
+			
+			unowned Cairo.Context cr = surface.Context;
+			var width = surface.Width;
+			var height = surface.Height;
+			var radius = 3 + 6 * height / (128 - 48);
+			
+			draw_icon_fast (surface);
 			
 #if HAVE_GEE_0_8
 			var icons = new Gee.HashMap<string, string> ();
@@ -194,8 +205,9 @@ namespace Plank.Items
 					text = file.get_basename () ?? "";
 				}
 				
-				icons.set (text + uri, icon);
-				keys.add (text + uri);
+				var key = "%s%s".printf (text, uri);
+				icons.set (key, icon);
+				keys.add (key);
 			}
 			
 			var pos = 0;
@@ -236,7 +248,7 @@ namespace Plank.Items
 		/**
 		 * {@inheritDoc}
 		 */
-		protected override Animation on_clicked (PopupButton button, Gdk.ModifierType mod)
+		protected override Animation on_clicked (PopupButton button, Gdk.ModifierType mod, uint32 event_time)
 		{
 			if (button == PopupButton.MIDDLE) {
 				launch ();
@@ -297,8 +309,9 @@ namespace Plank.Items
 					});
 				}
 				
-				menu_items.set (text + uri, item);
-				keys.add (text + uri);
+				var key = "%s%s".printf (text, uri);
+				menu_items.set (key, item);
+				keys.add (key);
 			}
 			
 #if HAVE_GEE_0_8

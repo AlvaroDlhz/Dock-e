@@ -17,6 +17,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using Plank.Factories;
 using Plank.Items;
 using Plank.Services;
 using Plank.Services.Windows;
@@ -28,8 +29,8 @@ namespace Plank.Widgets
 	 */
 	public class DockWindow : CompositedWindow
 	{
-		const uint LONG_PRESS_TIME = 750;
-		const uint HOVER_DELAY_TIME = 200;
+		const uint LONG_PRESS_TIME = 750U;
+		const uint HOVER_DELAY_TIME = 200U;
 		
 		/**
 		 * The controller for this dock.
@@ -63,14 +64,12 @@ namespace Plank.Widgets
 		 */
 		HoverWindow hover;
 		
-		uint hover_reposition_timer = 0;
+		uint hover_reposition_timer_id = 0U;
 		
-		uint long_press_timer = 0;
+		uint long_press_timer_id = 0U;
 		bool long_press_active = false;
-		uint long_press_button = 0;
+		uint long_press_button = 0U;
 
-		bool dock_is_starting = true;
-		
 		Gdk.Rectangle input_rect;
 		int requested_x;
 		int requested_y;		
@@ -113,9 +112,9 @@ namespace Plank.Widgets
 			
 			controller.prefs.notify["HideMode"].disconnect (set_struts);
 			
-			if (hover_reposition_timer > 0) {
-				GLib.Source.remove (hover_reposition_timer);
-				hover_reposition_timer = 0;
+			if (hover_reposition_timer_id > 0U) {
+				GLib.Source.remove (hover_reposition_timer_id);
+				hover_reposition_timer_id = 0U;
 			}
 		}
 		
@@ -151,11 +150,11 @@ namespace Plank.Widgets
 			
 			long_press_active = false;
 			long_press_button = event.button;
-			if (long_press_timer > 0)
-				Source.remove (long_press_timer);
-			long_press_timer = Gdk.threads_add_timeout (LONG_PRESS_TIME, () => {
+			if (long_press_timer_id > 0U)
+				Source.remove (long_press_timer_id);
+			long_press_timer_id = Gdk.threads_add_timeout (LONG_PRESS_TIME, () => {
 				long_press_active = true;
-				long_press_timer = 0;
+				long_press_timer_id = 0U;
 				return false;
 			});
 			
@@ -171,9 +170,9 @@ namespace Plank.Widgets
 			if (controller.hide_manager.Hidden)
 				return Gdk.EVENT_STOP;
 			
-			if (long_press_timer > 0) {
-				Source.remove (long_press_timer);
-				long_press_timer = 0;
+			if (long_press_timer_id > 0U) {
+				Source.remove (long_press_timer_id);
+				long_press_timer_id = 0U;
 			}
 			
 			if (long_press_active && long_press_button == event.button) {
@@ -191,7 +190,7 @@ namespace Plank.Widgets
 			
 			// Make sure the HoveredItem is still the same since button-pressed
 			if (ClickedItem != null && HoveredItem == ClickedItem && !menu_is_visible ())
-				HoveredItem.clicked (PopupButton.from_event_button (event), event.state);
+				HoveredItem.clicked (PopupButton.from_event_button (event), event.state, event.time);
 			
 			ClickedItem = null;
 			
@@ -203,6 +202,7 @@ namespace Plank.Widgets
 		 */
 		public override bool enter_notify_event (Gdk.EventCrossing event)
 		{
+			controller.renderer.update_local_cursor ((int) event.x, (int) event.y);
 			update_hovered ((int) event.x, (int) event.y);
 			
 			return Gdk.EVENT_STOP;
@@ -235,6 +235,7 @@ namespace Plank.Widgets
 			if (menu_is_visible ())
 				return Gdk.EVENT_STOP;
 			
+			controller.renderer.update_local_cursor ((int) event.x, (int) event.y);
 			update_hovered ((int) event.x, (int) event.y);
 			
 			return Gdk.EVENT_PROPAGATE;
@@ -246,9 +247,9 @@ namespace Plank.Widgets
 		public override void drag_begin (Gdk.DragContext context)
 		{
 			long_press_active = false;
-			if (long_press_timer > 0) {
-				Source.remove (long_press_timer);
-				long_press_timer = 0;
+			if (long_press_timer_id > 0U) {
+				Source.remove (long_press_timer_id);
+				long_press_timer_id = 0U;
 			}
 		}
 
@@ -278,7 +279,7 @@ namespace Plank.Widgets
 			}
 			
 			if (HoveredItem != null) {
-				HoveredItem.scrolled (event.direction, event.state);
+				HoveredItem.scrolled (event.direction, event.state, event.time);
 				controller.renderer.animated_draw ();
 			}
 			
@@ -290,20 +291,6 @@ namespace Plank.Widgets
 		 */
 		public override bool draw (Cairo.Context cr)
 		{
-			if (dock_is_starting) {
-				debug ("dock window loaded");
-				dock_is_starting = false;
-				
-				set_input_mask ();
-				
-				// FIXME make sure to trigger a subsequent redraw
-				// https://bugs.launchpad.net/plank/+bug/1256626
-				controller.renderer.animated_draw ();
-				
-				return base.draw (cr);
-			}
-			
-			controller.renderer.draw_dock (cr);
 			set_input_mask ();
 			
 			return Gdk.EVENT_STOP;
@@ -351,9 +338,9 @@ namespace Plank.Widgets
 			HoveredItem = item;
 			
 			// if HoveredItem changed always stop scheduled popup and hide the tooltip
-			if (hover_reposition_timer > 0) {
-				Source.remove (hover_reposition_timer);
-				hover_reposition_timer = 0;
+			if (hover_reposition_timer_id > 0U) {
+				Source.remove (hover_reposition_timer_id);
+				hover_reposition_timer_id = 0U;
 			}
 			
 			hover.hide ();
@@ -362,9 +349,9 @@ namespace Plank.Widgets
 				return;
 			
 			// don't be that demanding this delay is still fast enough
-			hover_reposition_timer = Gdk.threads_add_timeout (HOVER_DELAY_TIME, () => {
+			hover_reposition_timer_id = Gdk.threads_add_timeout (HOVER_DELAY_TIME, () => {
 				if (HoveredItem == null) {
-					hover_reposition_timer = 0;
+					hover_reposition_timer_id = 0U;
 					return false;
 				}
 				
@@ -373,7 +360,7 @@ namespace Plank.Widgets
 					&& controller.renderer.hide_progress > 0.0)
 					return true;
 				
-				hover_reposition_timer = 0;
+				hover_reposition_timer_id = 0U;
 				
 				int x, y;
 				hover.set_text (HoveredItem.Text);
@@ -409,7 +396,7 @@ namespace Plank.Widgets
 			
 			// check if there already was a hovered-item and if it is still hovered to speed up things
 			if (HoveredItem != null) {
-				rect = position_manager.get_item_hover_region (HoveredItem);
+				rect = position_manager.get_hover_region_for_element (HoveredItem);
 				if (y >= rect.y && y < rect.y + rect.height && x >= rect.x && x < rect.x + rect.width)
 					// Do not allow the hovered-item to be the drag-item
 					if (drag_item == HoveredItem) {
@@ -430,29 +417,46 @@ namespace Plank.Widgets
 			}
 			
 			bool found_hovered_provider = false;
+			unowned DockItem? item = null;
+			unowned DockItemProvider? provider = null;
 			
 			foreach (var element in controller.VisibleElements) {
-				unowned DockItemProvider? provider = (element as DockItemProvider);
-				if (provider == null)
-					continue;
-				
-				rect = position_manager.get_item_hover_region (provider);
-				if (y < rect.y || y >= rect.y + rect.height || x < rect.x || x >= rect.x + rect.width)
-					continue;
-				
-				set_hovered_provider (provider);
-				found_hovered_provider = true;
-				
-				foreach (var item in provider.VisibleElements) {
-					rect = position_manager.get_item_hover_region (item);
+				item = (element as DockItem);
+				if (item != null) {
+					rect = position_manager.get_hover_region_for_element (item);
 					if (y < rect.y || y >= rect.y + rect.height || x < rect.x || x >= rect.x + rect.width)
 						continue;
 					
 					// Do not allow the hovered-item to be the drag-item
 					if (drag_item == item)
 						break;
-				
+					
+					set_hovered_provider (null);
 					set_hovered (item as DockItem);
+					return true;
+				}
+				
+				provider = (element as DockItemProvider);
+				if (provider == null)
+					continue;
+				
+				rect = position_manager.get_hover_region_for_element (provider);
+				if (y < rect.y || y >= rect.y + rect.height || x < rect.x || x >= rect.x + rect.width)
+					continue;
+				
+				set_hovered_provider (provider);
+				found_hovered_provider = true;
+				
+				foreach (var element2 in provider.VisibleElements) {
+					rect = position_manager.get_hover_region_for_element (element2);
+					if (y < rect.y || y >= rect.y + rect.height || x < rect.x || x >= rect.x + rect.width)
+						continue;
+					
+					// Do not allow the hovered-item to be the drag-item
+					if (drag_item == element2)
+						break;
+				
+					set_hovered (element2 as DockItem);
 					return true;
 				}
 			}
@@ -578,18 +582,18 @@ namespace Plank.Widgets
 			
 			if ((button & PopupButton.RIGHT) != 0
 				&& (item == null || (event.state & Gdk.ModifierType.CONTROL_MASK) != 0)) {
-				menu_items = PlankDockItem.get_plank_menu_items ();
+				menu_items = Factory.item_factory.get_item_for_dock ().get_menu_items ();
 				if ((event.state & Gdk.ModifierType.MOD1_MASK) != 0
 					&& (event.state & Gdk.ModifierType.SHIFT_MASK) != 0)
 					menu_items.add_all (get_dock_debug_menu_items (controller));
 				set_hovered_provider (null);
 				set_hovered (null);
-			} else if (item != null && (item.Button & button) != 0) {
+			} else if (item != null && item.is_valid () && (item.Button & button) != 0) {
 				menu_items = item.get_menu_items ();
 				if ((event.state & Gdk.ModifierType.MOD1_MASK) != 0
 					&& (event.state & Gdk.ModifierType.SHIFT_MASK) != 0)
 					menu_items.add_all (get_item_debug_menu_items (item));
-				position_func = position_menu;
+				position_func = (Gtk.MenuPositionFunc) position_menu;
 			}
 			
 			if (menu_items == null || menu_items.size == 0)
@@ -772,7 +776,8 @@ namespace Plank.Widgets
 			                      32, X.PropMode.Replace, (uchar[]) struts, struts.length);
 			display.change_property (xid, display.intern_atom ("_NET_WM_STRUT", false), X.XA_CARDINAL,
 			                      32, X.PropMode.Replace, (uchar[]) first_struts, first_struts.length);
-			gdk_display.error_trap_pop ();
+			if (gdk_display.error_trap_pop () != X.Success)
+				critical ("Error while setting struts");
 		}
 	}
 }

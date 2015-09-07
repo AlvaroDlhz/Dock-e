@@ -13,7 +13,7 @@
         <h1 class="main_title">get_background_surface</h1>
         <hr class="main_hr"/>
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span>? <b><span class="method">get_background_surface</span></b> (<span class="main_type"><a href="Plank.Items.DrawItemFunc.html" class="delegate">DrawItemFunc</a></span>? draw_func = <span class="main_optional_parameter">null</span>)
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span>? <b><span class="method">get_background_surface</span></b> (<span class="main_basic_type"><span class="struct">int</span></span> width, <span class="main_basic_type"><span class="struct">int</span></span> height, <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span> model, <span class="main_type"><a href="Plank.Drawing.DrawDataFunc.html" class="delegate">DrawDataFunc</a></span>&lt;<span class="main_type"><a href="Plank.Items.DockItem.html" class="abstract_class">DockItem</a></span>&gt;? draw_data_func)
         </div>
         <div class="description">
           <p>Returns the background surface for this item.</p>
@@ -23,7 +23,7 @@
           <h2 class="main_title">Parameters:</h2>
           <table class="main_parameter_table">
             <tr>
-              <td class="main_parameter_table_name">draw_func</td>
+              <td class="main_parameter_table_name">draw_data_func</td>
               <td>
                 <p>function which creates/changes the background surface </p>
               </td>

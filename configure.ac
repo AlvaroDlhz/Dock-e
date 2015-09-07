@@ -2,8 +2,8 @@
 m4_define([plank_released], [1])
 
 m4_define([plank_major_version], [0])
-m4_define([plank_minor_version], [9])
-m4_define([plank_micro_version], [1])
+m4_define([plank_minor_version], [10])
+m4_define([plank_micro_version], [0])
 m4_define([plank_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -49,11 +49,15 @@ AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_SRCDIR([configure.ac])
 AM_INIT_AUTOMAKE([1.11 tar-ustar dist-xz no-dist-gzip -Wno-portability subdir-objects])
 
-AM_MAINTAINER_MODE
+AM_MAINTAINER_MODE([enable])
 
 AC_PROG_CC
 AM_PROG_CC_C_O
+AC_PROG_CXX
+AC_PROG_CXX_C_O
 AC_PROG_INSTALL
+
+LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
 PKG_PROG_PKG_CONFIG([0.21])
 
@@ -106,6 +110,7 @@ GTK_MIN_VERSION=3.4.0
 GLIB_MIN_VERSION=2.32.0
 GDK_PIXBUF_MIN_VERSION=2.26.0
 BAMF_MIN_VERSION=0.2.92
+CAIRO_MIN_VERSION=1.10
 
 PLANK_CORE_PKGS="gobject-2.0 >= $GLIB_MIN_VERSION \
                  glib-2.0 >= $GLIB_MIN_VERSION \
@@ -115,6 +120,7 @@ PLANK_CORE_PKGS="gobject-2.0 >= $GLIB_MIN_VERSION \
                  gtk+-3.0 >= $GTK_MIN_VERSION \
                  gdk-x11-3.0 >= $GTK_MIN_VERSION \
                  gdk-pixbuf-2.0 >= $GDK_PIXBUF_MIN_VERSION \
+                 cairo >= $CAIRO_MIN_VERSION \
                  libbamf3 >= $BAMF_MIN_VERSION \
                  libwnck-3.0 \
                  x11"
@@ -124,6 +130,7 @@ PLANK_CORE_VALA_PKGS="--pkg gio-unix-2.0 \
                       --pkg gtk+-3.0 \
                       --pkg gdk-x11-3.0 \
                       --pkg gdk-pixbuf-2.0 \
+                      --pkg cairo \
                       --pkg libbamf3 \
                       --pkg libwnck-3.0 \
                       --pkg posix \
@@ -165,17 +172,23 @@ PKG_CHECK_MODULES(GLIB_2_34,
 # -----------------------------------------------------------
 
 # Check for HiDPI support of Gtk+ and Cairo
-GTK_MIN_VERSION=3.10.0
-CAIRO_MIN_VERSION=1.13
-HIDPI_PKGS="gtk+-3.0 >= $GTK_MIN_VERSION cairo >= $CAIRO_MIN_VERSION"
+HIDPI_PKGS="gtk+-3.0 >= 3.10.0 cairo >= 1.13"
 PKG_CHECK_MODULES(HIDPI, $HIDPI_PKGS, [enable_hidpi=yes], [enable_hidpi=no])
 if test "x$enable_hidpi" = "xyes" ; then
     VALAFLAGS="$VALAFLAGS --define HAVE_HIDPI"
 fi
 AM_CONDITIONAL([HAVE_HIDPI], [test "x$enable_hidpi" = "xyes"])
 
+# Check for FrameClock support of Gtk+
+GTK_PKGS="gtk+-3.0 >= 3.8"
+PKG_CHECK_MODULES(FRAMECLOCK, $GTK_PKGS, [enable_gtk38=yes], [enable_gtk38=no])
+if test "x$enable_gtk38" = "xyes" ; then
+    VALAFLAGS="$VALAFLAGS --define HAVE_GTK_3_8"
+fi
+AM_CONDITIONAL([HAVE_GTK_3_8], [test "x$enable_gtk38" = "xyes"])
+
 # Check for CSD support of Gtk+
-GTK_PKGS="gtk+-3.0 >= $GTK_MIN_VERSION"
+GTK_PKGS="gtk+-3.0 >= 3.10.0"
 PKG_CHECK_MODULES(GTK, $GTK_PKGS, [enable_gtk310=yes], [enable_gtk310=no])
 if test "x$enable_gtk310" = "xyes" ; then
     VALAFLAGS="$VALAFLAGS --define HAVE_GTK_3_10"
@@ -183,8 +196,7 @@ fi
 AM_CONDITIONAL([HAVE_GTK_3_10], [test "x$enable_gtk310" = "xyes"])
 
 # Check for newer BAMF
-BAMF_MIN_VERSION=0.4.0
-BAMF_PKGS="libbamf3 >= $BAMF_MIN_VERSION"
+BAMF_PKGS="libbamf3 >= 0.4.0"
 PKG_CHECK_MODULES(BAMF, $BAMF_PKGS, [enable_bamf_0_4=yes], [enable_bamf_0_4=no])
 if test "x$enable_bamf_0_4" = "xyes" ; then
     VALAFLAGS="$VALAFLAGS --define HAVE_BAMF_0_4"
@@ -295,6 +307,9 @@ AC_SUBST(COVERAGE_VALAFLAGS)
 AC_SUBST(COVERAGE_CFLAGS)
 AC_SUBST(COVERAGE_LDFLAGS)
 
+# Check to enable gmock and gtest
+AC_GMOCK
+
 
 PLANK_CORE_VALAFLAGS="$VALAFLAGS_CORE $VALAFLAGS $PLANK_CORE_VALA_PKGS"
 AC_SUBST(PLANK_CORE_VALAFLAGS)
@@ -402,6 +417,7 @@ ${PACKAGE} ${VERSION}
     Apport support..............:  ${enable_apport}
 
     Headless Tests..............:  ${enable_headless_tests}
+    Google-Mock Tests...........:  ${use_gmock}
     Coverage Reporting..........:  ${use_gcov}
     Documentation...............:  ${have_valadoc}
 "
