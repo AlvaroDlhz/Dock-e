@@ -30,6 +30,8 @@
               class for a <span class="class">Cairo.Surface</span>. It encapsulates a surface/context and provides utility methods.</span></li>
           <li class="class"><a href="Plank.Drawing.DockTheme.html">DockTheme</a> - <span class="brief_description">A themed renderer for dock windows.
             </span></li>
+          <li class="class"><a href="Plank.Drawing.SurfaceCache.html">SurfaceCache</a> - <span class="brief_description">Cache multiple sizes of the 
+              assumed same image</span></li>
           <li class="abstract_class"><a href="Plank.Drawing.Theme.html">Theme</a> - <span class="brief_description">A themed renderer for windows.
             </span></li>
         </ul>
@@ -42,6 +44,19 @@
         <ul class="navi_inline">
           <li class="enum"><a href="Plank.Drawing.AnimationMode.html">AnimationMode</a> - <span class="brief_description">The available animation 
               modes</span></li>
+          <li class="enum"><a href="Plank.Drawing.SurfaceCacheFlags.html">SurfaceCacheFlags</a> - <span class="brief_description">Controls some 
+              internal behaviors of a <a href="Plank.Drawing.SurfaceCache.html" class="class">Plank.Drawing.SurfaceCache</a></span></li>
+        </ul>
+        <h3 class="main_title">Delegates:</h3>
+        <ul class="navi_inline">
+          <li class="delegate"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">delegate</span> <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span>? <b><a href="Plank.Drawing.DrawFunc.html" class="delegate">DrawFunc</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> width, <span class="main_basic_type"><span class="struct">int</span></span> height, <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span> model, <span class="main_type"><a href="Plank.Drawing.DrawDataFunc.html" class="delegate">DrawDataFunc</a></span>&lt;<span class="main_type"><span>G</span></span>&gt;? draw_data_func)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Creates a new surface based on the given information</span>
+            </div></li>
+          <li class="delegate"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">delegate</span> <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span>? <b><a href="Plank.Drawing.DrawDataFunc.html" class="delegate">DrawDataFunc</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> width, <span class="main_basic_type"><span class="struct">int</span></span> height, <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span> model, <span class="main_type"><span>G</span></span> data)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Creates a new surface using the given element and information</span>
+            </div></li>
         </ul>
         <h3 class="main_title">Methods:</h3>
         <ul class="navi_inline">

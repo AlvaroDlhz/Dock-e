@@ -13,7 +13,7 @@
         <h1 class="main_title">on_clicked</h1>
         <hr class="main_hr"/>
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_type"><a href="Plank.Items.Animation.html" class="enum">Animation</a></span> <b><span class="virtual_method">on_clicked</span></b> (<span class="main_type"><a href="Plank.Items.PopupButton.html" class="enum">PopupButton</a></span> button, <span class="main_type"><span class="enum">ModifierType</span></span> mod)
+        <div class="main_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_type"><a href="Plank.Items.Animation.html" class="enum">Animation</a></span> <b><span class="virtual_method">on_clicked</span></b> (<span class="main_type"><a href="Plank.Items.PopupButton.html" class="enum">PopupButton</a></span> button, <span class="main_type"><span class="enum">ModifierType</span></span> mod, <span class="main_basic_type"><span class="struct">uint32</span></span> event_time)
         </div>
         <div class="description">
           <p>Called when an item is clicked on.</p>
@@ -29,6 +29,12 @@
               <td class="main_parameter_table_name">mod</td>
               <td>
                 <p>the modifiers </p>
+              </td>
+            </tr>
+            <tr>
+              <td class="main_parameter_table_name">event_time</td>
+              <td>
+                <p>the timestamp of the event triggering this action </p>
               </td>
             </tr>
           </table>

@@ -176,6 +176,9 @@ namespace Plank.Factories
 #endif
 			Environment.set_prgname (exec_name);
 			
+			Intl.bindtextdomain (Build.GETTEXT_PACKAGE, Build.DATADIR + "/locale");
+			Intl.bind_textdomain_codeset (Build.GETTEXT_PACKAGE, "UTF-8");
+			
 			var context = new OptionContext (null);
 			context.add_main_entries (options, exec_name);
 			context.add_group (Gtk.get_option_group (false));
@@ -203,7 +206,7 @@ namespace Plank.Factories
 			
 			dock_name = NAME;
 			
-			application_id = app_dbus + "." + dock_name;
+			application_id = "%s.%s".printf (app_dbus, dock_name);
 			
 			try {
 				register ();
@@ -251,6 +254,9 @@ namespace Plank.Factories
 			message ("Wnck version: %d.%d.%d", Wnck.Version.MAJOR_VERSION, Wnck.Version.MINOR_VERSION, Wnck.Version.MICRO_VERSION);
 			message ("Cairo version: %s", Cairo.version_string ());
 			message ("Pango version: %s", Pango.version_string ());
+#if HAVE_GTK_3_8
+			message ("+ Gtk+ FrameClock usage enabled");
+#endif
 #if HAVE_GTK_3_10
 			message ("+ Gtk+ CSD support enabled");
 #endif
@@ -263,6 +269,15 @@ namespace Plank.Factories
 #if HAVE_BARRIERS
 			message ("+ XInput Barriers support enabled");
 #endif
+			if (Gtk.Widget.get_default_direction () == Gtk.TextDirection.RTL)
+				message ("+ RTL support enabled");
+			
+			// Make sure we are not doing silly things like trying to run in a wayland-session!
+			if (!(Gdk.Screen.get_default () is Gdk.X11.Screen)) {
+				critical ("Only X11 environments are supported.");
+				quit ();
+				return;
+			}
 			
 			Paths.initialize (exec_name, build_pkg_data_dir);
 			WindowControl.initialize ();
@@ -354,10 +369,10 @@ namespace Plank.Factories
 			about_dlg.set_transient_for (controller.window);
 			
 			about_dlg.set_program_name (exec_name);
-			about_dlg.set_version (build_version + "\n" + build_version_info);
+			about_dlg.set_version ("%s\n%s".printf (build_version, build_version_info));
 			about_dlg.set_logo_icon_name (app_icon);
 			
-			about_dlg.set_comments (program_name + ". " + build_release_name);
+			about_dlg.set_comments ("%s. %s".printf (program_name, build_release_name));
 			about_dlg.set_copyright ("Copyright © %s %s Developers".printf (app_copyright, program_name));
 			about_dlg.set_website (main_url);
 			about_dlg.set_website_label ("Website");

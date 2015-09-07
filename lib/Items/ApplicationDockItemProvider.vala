@@ -29,7 +29,7 @@ namespace Plank.Items
 	public class ApplicationDockItemProvider : DockItemProvider
 	{
 		static DBusConnection connection = null;
-		static uint unity_bus_id = 0;
+		static uint unity_bus_id = 0U;
 		
 		public signal void item_window_added (ApplicationDockItem item);
 		
@@ -41,8 +41,8 @@ namespace Plank.Items
 		bool delay_items_monitor_handle = false;
 		Gee.ArrayList<GLib.File> queued_files;
 		
-		uint launcher_entry_dbus_signal_id = 0;
-		uint dbus_name_owner_changed_signal_id = 0;
+		uint launcher_entry_dbus_signal_id = 0U;
+		uint dbus_name_owner_changed_signal_id = 0U;
 		
 		/**
 		 * Creates a new container for dock items.
@@ -78,9 +78,9 @@ namespace Plank.Items
 				debug ("Unity: Initalizing LauncherEntry support");
 				
 				launcher_entry_dbus_signal_id = connection.signal_subscribe (null, "com.canonical.Unity.LauncherEntry",
-					null, null, null, DBusSignalFlags.NONE, handle_entry_signal);
+					null, null, null, DBusSignalFlags.NONE, (DBusSignalCallback) handle_entry_signal);
 				dbus_name_owner_changed_signal_id = connection.signal_subscribe ("org.freedesktop.DBus", "org.freedesktop.DBus",
-					"NameOwnerChanged", "/org/freedesktop/DBus", null, DBusSignalFlags.NONE, handle_name_owner_changed);
+					"NameOwnerChanged", "/org/freedesktop/DBus", null, DBusSignalFlags.NONE, (DBusSignalCallback) handle_name_owner_changed);
 			}
 		}
 		
@@ -96,13 +96,13 @@ namespace Plank.Items
 				items_monitor = null;
 			}
 			
-			if (unity_bus_id > 0)
+			if (unity_bus_id > 0U)
 				Bus.unown_name (unity_bus_id);
 			
 			if (connection != null) {
-				if (launcher_entry_dbus_signal_id > 0)
+				if (launcher_entry_dbus_signal_id > 0U)
 					connection.signal_unsubscribe (launcher_entry_dbus_signal_id);
-				if (dbus_name_owner_changed_signal_id > 0)
+				if (dbus_name_owner_changed_signal_id > 0U)
 					connection.signal_unsubscribe (dbus_name_owner_changed_signal_id);
 			}
 		}
@@ -126,10 +126,11 @@ namespace Plank.Items
 				return;
 			}
 			
-			if (unity_bus_id == 0) {
+			if (unity_bus_id == 0U) {
 				// Acquire Unity bus-name to activate libunity clients since normally there shouldn't be a running Unity
 				unity_bus_id = Bus.own_name (BusType.SESSION, "com.canonical.Unity", BusNameOwnerFlags.ALLOW_REPLACEMENT,
-					handle_bus_acquired, handle_name_acquired, handle_name_lost);
+					(BusAcquiredCallback) handle_bus_acquired, (BusNameAcquiredCallback) handle_name_acquired,
+					(BusNameLostCallback) handle_name_lost);
 			}
 		}
 		
@@ -138,9 +139,9 @@ namespace Plank.Items
 		 */
 		public static void release_unity_dbus ()
 		{
-			if (unity_bus_id > 0) {
+			if (unity_bus_id > 0U) {
 				Bus.unown_name (unity_bus_id);
-				unity_bus_id = 0;
+				unity_bus_id = 0U;
 			}
 			
 			if (connection != null) {
@@ -253,7 +254,7 @@ namespace Plank.Items
 				return false;
 			}
 			
-			add_item (item, target);
+			add (item, target);
 			
 			resume_items_monitor ();
 			
@@ -280,15 +281,23 @@ namespace Plank.Items
 		 */
 		public string get_item_list_string ()
 		{
-			var item_list = "";
+			string? item_list = null;
 			foreach (var element in internal_elements) {
 				unowned DockItem? item = (element as DockItem);
-				if (item != null && !(item is TransientDockItem) && item.DockItemFilename.length > 0) {
-					if (item_list.length > 0)
-						item_list += ";;";
-					item_list += item.DockItemFilename;
+				if (item == null || (item is TransientDockItem))
+					continue;
+				
+				var dock_item_filename = item.DockItemFilename;
+				if (dock_item_filename.length > 0) {
+					if (item_list != null)
+						item_list = "%s;;%s".printf (item_list, dock_item_filename);
+					else
+						item_list = (owned) dock_item_filename;
 				}
 			}
+			
+			if (item_list == null)
+				return "";
 			
 			return item_list;
 		}
@@ -342,13 +351,16 @@ namespace Plank.Items
 					continue;
 				
 				unowned DockItem? dupe;
-				if ((dupe = item_for_uri (item.Launcher)) != null)
-					warning ("The launcher '%s' in dock item '%s' is already managed by dock item '%s'",
-						item.Launcher, file.get_path (), dupe.DockItemFilename);
-				else if (!item.is_valid ())
-					warning ("The launcher '%s' in dock item '%s' does not exist", item.Launcher, file.get_path ());
-				else
-					add_item (item);
+				if ((dupe = item_for_uri (item.Launcher)) != null) {
+					warning ("The launcher '%s' in dock item '%s' is already managed by dock item '%s'. Removing '%s'.",
+						item.Launcher, file.get_path (), dupe.DockItemFilename, item.DockItemFilename);
+					item.delete ();
+				} else if (!item.is_valid ()) {
+					warning ("The launcher '%s' in dock item '%s' does not exist. Removing '%s'.", item.Launcher, file.get_path (), item.DockItemFilename);
+					item.delete ();
+				} else {
+					add (item);
+				}
 			}
 			
 			queued_files.clear ();
@@ -408,6 +420,7 @@ namespace Plank.Items
 			item_window_added (item);
 		}
 		
+		[CCode (instance_pos = -1)]
 		void handle_entry_signal (DBusConnection connection, string sender_name, string object_path,
 			string interface_name, string signal_name, Variant parameters)
 		{
@@ -418,6 +431,7 @@ namespace Plank.Items
 				handle_update_request (sender_name, parameters);
 		}
 		
+		[CCode (instance_pos = -1)]
 		void handle_name_owner_changed (DBusConnection connection, string sender_name, string object_path,
 			string interface_name, string signal_name, Variant parameters)
 		{
@@ -442,9 +456,9 @@ namespace Plank.Items
 				// this removed LauncherEntry interface
 				unowned TransientDockItem? transient_item = item as TransientDockItem;
 				if (transient_item != null && transient_item.App == null)
-					remove_item (transient_item);
+					remove (transient_item);
 				else
-					item_state_changed ();
+					states_changed ();
 				
 				break;
 			}
@@ -492,9 +506,9 @@ namespace Plank.Items
 				unowned TransientDockItem? transient_item = current_item as TransientDockItem;
 				if (transient_item != null && transient_item.App == null
 					&& !(transient_item.has_unity_info ()))
-					remove_item (transient_item);
+					remove (transient_item);
 				else
-					item_state_changed ();
+					states_changed ();
 				
 				return;
 			}
@@ -520,7 +534,7 @@ namespace Plank.Items
 					// Only add item if there is actually a visible progress-bar or badge
 					// or the backing application provides a quicklist-dbusmenu
 					if (current_item.has_unity_info ())
-						add_item (current_item);
+						add (current_item);
 				}
 				
 				if (current_item == null)

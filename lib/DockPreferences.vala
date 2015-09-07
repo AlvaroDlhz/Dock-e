@@ -29,6 +29,9 @@ namespace Plank
 		public const int MIN_ICON_SIZE = 24;
 		public const int MAX_ICON_SIZE = 128;
 		
+		public const int MIN_ICON_ZOOM = 100;
+		public const int MAX_ICON_ZOOM = 200;
+		
 		[Description(nick = "current-workspace-only", blurb = "Whether to show only windows of the current workspace.")]
 		public bool CurrentWorkspaceOnly { get; set; }
 		
@@ -76,6 +79,15 @@ namespace Plank
 		
 		[Description(nick = "auto-pinning", blurb = "Whether to automatically pin an application if it seems useful to do.")]
 		public bool AutoPinning { get; set; }
+		
+		[Description(nick = "show-dock-item", blurb = "Whether to show the item for the dock itself.")]
+		public bool ShowDockItem { get; set; }
+		
+		[Description(nick = "zoom-enabled", blurb = "Whether the dock will zoom when hovered.")]
+		public bool ZoomEnabled { get; set; }
+		
+		[Description(nick = "zoom-percent", blurb = "The dock's icon-zoom (in percent).")]
+		public uint ZoomPercent { get; set; }
 		
 		/**
 		 * {@inheritDoc}
@@ -128,6 +140,9 @@ namespace Plank
 			PressureReveal = false;
 			PinnedOnly = false;
 			AutoPinning = true;
+			ShowDockItem = true;
+			ZoomEnabled = false;
+			ZoomPercent = 150;
 		}
 		
 		/**
@@ -227,6 +242,19 @@ namespace Plank
 				break;
 			
 			case "AutoPinning":
+				break;
+			
+			case "ShowDockItem":
+				break;
+			
+			case "ZoomEnabled":
+				break;
+			
+			case "ZoomPercent":
+				if (ZoomPercent < MIN_ICON_ZOOM)
+					ZoomPercent = MIN_ICON_ZOOM;
+				else if (ZoomPercent > MAX_ICON_ZOOM)
+					ZoomPercent = MAX_ICON_ZOOM;
 				break;
 			}
 		}

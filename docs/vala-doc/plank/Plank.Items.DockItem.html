@@ -21,7 +21,7 @@
 </map>
 
         <h2 class="main_title">Description:</h2>
-        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">class</span> <b><span class="class">DockItem</span></b> : <span class="main_type"><a href="Plank.Items.DockElement.html" class="abstract_class">DockElement</a></span>
+        <div class="main_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">abstract</span> <span class="main_keyword">class</span> <b><span class="abstract_class">DockItem</span></b> : <span class="main_type"><a href="Plank.Items.DockElement.html" class="abstract_class">DockElement</a></span>
         </div>
         <div class="description">
           <p>The base class for all dock items.</p>
@@ -30,9 +30,9 @@
           <div class="headline">
             <div class="text">All known sub-classes:</div>
             <div class="toggle">
-              <img onclick="toggle_box  (this, 'box-content-55')" src="coll_open.png">&nbsp;</div>
+              <img onclick="toggle_box  (this, 'box-content-57')" src="coll_open.png">&nbsp;</div>
             </div>
-            <div class="content" id="box-content-55">
+            <div class="content" id="box-content-57">
               <div class="column">
                 <ul class="navi_inline">
                   <li class="class"><a href="Plank.Items.ApplicationDockItem.html">ApplicationDockItem</a></li>
@@ -146,11 +146,15 @@
               </span>
               <div class="leaf_brief_description">
               </div></li>
-            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span>? <b><a href="Plank.Items.DockItem.get_background_surface.html" class="method">get_background_surface</a></b> (<span class="main_type"><a href="Plank.Items.DrawItemFunc.html" class="delegate">DrawItemFunc</a></span>? draw_func = <span class="main_optional_parameter">null</span>)
+            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span> <b><a href="Plank.Items.DockItem.get_surface.html" class="method">get_surface</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> width, <span class="main_basic_type"><span class="struct">int</span></span> height, <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span> model)
+              </span>
+              <div class="leaf_brief_description"><span class="brief_description">Returns the dock surface for this item.</span>
+              </div></li>
+            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span>? <b><a href="Plank.Items.DockItem.get_background_surface.html" class="method">get_background_surface</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> width, <span class="main_basic_type"><span class="struct">int</span></span> height, <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span> model, <span class="main_type"><a href="Plank.Drawing.DrawDataFunc.html" class="delegate">DrawDataFunc</a></span>&lt;<span class="main_type"><span class="abstract_class">DockItem</span></span>&gt;? draw_data_func)
               </span>
               <div class="leaf_brief_description"><span class="brief_description">Returns the background surface for this item.</span>
               </div></li>
-            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">weak</span> <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span>? <b><a href="Plank.Items.DockItem.get_foreground_surface.html" class="method">get_foreground_surface</a></b> (<span class="main_type"><a href="Plank.Items.DrawItemFunc.html" class="delegate">DrawItemFunc</a></span>? draw_func = <span class="main_optional_parameter">null</span>)
+            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span>? <b><a href="Plank.Items.DockItem.get_foreground_surface.html" class="method">get_foreground_surface</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> width, <span class="main_basic_type"><span class="struct">int</span></span> height, <span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span> model, <span class="main_type"><a href="Plank.Drawing.DrawDataFunc.html" class="delegate">DrawDataFunc</a></span>&lt;<span class="main_type"><span class="abstract_class">DockItem</span></span>&gt;? draw_data_func)
               </span>
               <div class="leaf_brief_description"><span class="brief_description">Returns the foreground surface for this item.</span>
               </div></li>
@@ -162,11 +166,16 @@
               </span>
               <div class="leaf_brief_description"><span class="brief_description">Draws the item's icon onto a surface.</span>
               </div></li>
+            <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_keyword">void</span> <b><a href="Plank.Items.DockItem.draw_icon_fast.html" class="virtual_method">draw_icon_fast</a></b> (<span class="main_type"><a href="Plank.Drawing.DockSurface.html" class="class">DockSurface</a></span> surface)
+              </span>
+              <div class="leaf_brief_description"><span class="brief_description">Draws a placeholder icon onto a surface. This method should be 
+                  considered time-critical! Make sure to only use simple drawing routines, and do not rely on external resources!</span>
+              </div></li>
             <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">virtual</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Plank.Items.DockItem.is_valid.html" class="virtual_method">is_valid</a></b> ()
               </span>
               <div class="leaf_brief_description"><span class="brief_description">Check the validity of this item.</span>
               </div></li>
-            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Plank.Items.DockItem.copy_values_to.html" class="method">copy_values_to</a></b> (<span class="main_type"><span class="class">DockItem</span></span> target)
+            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Plank.Items.DockItem.copy_values_to.html" class="method">copy_values_to</a></b> (<span class="main_type"><span class="abstract_class">DockItem</span></span> target)
               </span>
               <div class="leaf_brief_description"><span class="brief_description">Copy all property value of this dockitem instance to target 
                   instance.</span>
@@ -184,9 +193,9 @@
             <div class="headline">
               <div class="text">All known members inherited from class Plank.Items.DockElement</div>
               <div class="toggle">
-                <img onclick="toggle_box  (this, 'box-content-56')" src="coll_open.png">&nbsp;</div>
+                <img onclick="toggle_box  (this, 'box-content-58')" src="coll_open.png">&nbsp;</div>
               </div>
-              <div class="content" id="box-content-56">
+              <div class="content" id="box-content-58">
                 <div class="column">
                   <ul class="navi_inline">
                     <li class="property"><a href="Plank.Items.DockElement.Container.html">Container</a></li>
@@ -200,15 +209,16 @@
                     <li class="property"><a href="Plank.Items.DockElement.AddTime.html">AddTime</a></li>
                     <li class="property"><a href="Plank.Items.DockElement.RemoveTime.html">RemoveTime</a></li>
                     <li class="property"><a href="Plank.Items.DockElement.LastClicked.html">LastClicked</a></li>
+                    <li class="property"><a href="Plank.Items.DockElement.LastHovered.html">LastHovered</a></li>
                   </ul>
                 </div>
                 <div class="column">
                   <ul class="navi_inline">
-                    <li class="property"><a href="Plank.Items.DockElement.LastHovered.html">LastHovered</a></li>
                     <li class="property"><a href="Plank.Items.DockElement.LastScrolled.html">LastScrolled</a></li>
                     <li class="property"><a href="Plank.Items.DockElement.LastUrgent.html">LastUrgent</a></li>
                     <li class="property"><a href="Plank.Items.DockElement.LastActive.html">LastActive</a></li>
                     <li class="property"><a href="Plank.Items.DockElement.LastMove.html">LastMove</a></li>
+                    <li class="property"><a href="Plank.Items.DockElement.LastValid.html">LastValid</a></li>
                     <li class="static_method"><a href="Plank.Items.DockElement.create_menu_item.html">create_menu_item</a></li>
                     <li class="static_method"><a href="Plank.Items.DockElement.create_menu_item_with_pixbuf.html">create_menu_item_with_pixbuf</a>
                     </li>
@@ -239,9 +249,9 @@
               <div class="headline">
                 <div class="text">All known members inherited from class GLib.Object</div>
                 <div class="toggle">
-                  <img onclick="toggle_box  (this, 'box-content-57')" src="coll_open.png">&nbsp;</div>
+                  <img onclick="toggle_box  (this, 'box-content-59')" src="coll_open.png">&nbsp;</div>
                 </div>
-                <div class="content" id="box-content-57">
+                <div class="content" id="box-content-59">
                   <div class="column">
                     <ul class="navi_inline">
                       <li class="static_method">@new</li>

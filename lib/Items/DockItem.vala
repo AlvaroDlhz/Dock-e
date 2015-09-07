@@ -24,63 +24,9 @@ using Plank.Services.Windows;
 namespace Plank.Items
 {
 	/**
-	 * Draws a modified surface onto another newly created or given surface
-	 *
-	 * @param item the dock-item
-	 * @param source original surface which may not be changed
-	 * @param target the previously modified surface
-	 * @return the modified surface or passed through target
-	 */
-	public delegate DockSurface DrawItemFunc (DockItem item, DockSurface source, DockSurface? target);
-	
-	/**
-	 * What item indicator to show.
-	 */
-	public enum IndicatorState
-	{
-		/**
-		 * None - no windows for this item.
-		 */
-		NONE,
-		/**
-		 * Show a single indicator - there is 1 window for this item.
-		 */
-		SINGLE,
-		/**
-		 * Show multiple indicators - there are more than 1 window for this item.
-		 */
-		SINGLE_PLUS
-	}
-	
-	/**
-	 * The current activity state of an item.  The item has several
-	 * states to track and can be in any combination of them.
-	 */
-	[Flags]
-	public enum ItemState
-	{
-		/**
-		 * The item is in a normal state.
-		 */
-		NORMAL = 1 << 0,
-		/**
-		 * The item is currently active (a window in the group is focused).
-		 */
-		ACTIVE = 1 << 1,
-		/**
-		 * The item is currently urgent (a window in the group has the urgent flag).
-		 */
-		URGENT = 1 << 2,
-		/**
-		 * The item is currently moved to its new position.
-		 */
-		MOVE = 1 << 3
-	}
-	
-	/**
 	 * The base class for all dock items.
 	 */
-	public class DockItem : DockElement
+	public abstract class DockItem : DockElement
 	{
 		/**
 		 * Signal fired when the .dockitem for this item was deleted.
@@ -178,14 +124,15 @@ namespace Plank.Items
 		 */
 		public DockItemPreferences Prefs { get; construct; }
 		
-		DockSurface? surface = null;
-		DockSurface? background_surface = null;
+		SurfaceCache<DockItem> buffer;
+		SurfaceCache<DockItem> background_buffer;
 		DockSurface? foreground_surface = null;
 		
 		FileMonitor? launcher_file_monitor = null;
 		FileMonitor? icon_file_monitor = null;
 		
 		bool launcher_exists = false;
+		uint removal_timer_id = 0U;
 		
 		/**
 		 * Creates a new dock item.
@@ -197,10 +144,13 @@ namespace Plank.Items
 		
 		construct
 		{
+			buffer = new SurfaceCache<DockItem> (SurfaceCacheFlags.NONE);
+			background_buffer = new SurfaceCache<DockItem> (SurfaceCacheFlags.ALLOW_SCALE);
+			
 			Prefs.deleted.connect (handle_deleted);
 			Prefs.notify["Launcher"].connect (handle_launcher_changed);
 			
-			Gtk.IconTheme.get_default ().changed.connect (icon_theme_changed);
+			DrawingService.get_icon_theme ().changed.connect (icon_theme_changed);
 			notify["Icon"].connect (icon_changed);
 			notify["ForcePixbuf"].connect (icon_changed);
 			
@@ -216,10 +166,13 @@ namespace Plank.Items
 		
 		~DockItem ()
 		{
+			buffer.clear ();
+			background_buffer.clear ();
+			
 			Prefs.deleted.disconnect (handle_deleted);
 			Prefs.notify["Launcher"].disconnect (handle_launcher_changed);
 			
-			Gtk.IconTheme.get_default ().changed.disconnect (icon_theme_changed);
+			DrawingService.get_icon_theme ().changed.disconnect (icon_theme_changed);
 			notify["Icon"].disconnect (icon_changed);
 			notify["ForcePixbuf"].disconnect (icon_changed);
 			
@@ -230,6 +183,9 @@ namespace Plank.Items
 			
 			launcher_file_monitor_stop ();
 			icon_file_monitor_stop ();
+			
+			if (stop_removal ())
+				@delete ();
 		}
 		
 		/**
@@ -272,8 +228,8 @@ namespace Plank.Items
 		 */
 		protected void reset_icon_buffer ()
 		{
-			surface = null;
-			background_surface = null;
+			buffer.clear ();
+			background_buffer.clear ();
 			foreground_surface = null;
 			
 			needs_redraw ();
@@ -284,7 +240,7 @@ namespace Plank.Items
 		 */
 		public override void reset_buffers ()
 		{
-			background_surface = null;
+			background_buffer.clear ();
 			foreground_surface = null;
 		}
 		
@@ -302,7 +258,7 @@ namespace Plank.Items
 		{
 			// Put Gtk.IconTheme.changed emmitted signals in idle queue to avoid
 			// race conditions with concurrent handles
-			Gdk.threads_add_idle (() => {
+			Gdk.threads_add_idle_full (GLib.Priority.LOW, () => {
 				reset_icon_buffer ();
 				return false;
 			});
@@ -318,6 +274,17 @@ namespace Plank.Items
 			reset_icon_buffer ();
 		}
 		
+		void icon_file_changed (File f, File? other, FileMonitorEvent event)
+		{
+			switch (event) {
+			case FileMonitorEvent.CHANGES_DONE_HINT:
+				reset_icon_buffer ();
+				break;
+			default:
+				break;
+			}
+		}
+		
 		void icon_file_monitor_start ()
 		{
 			var icon_file = DrawingService.try_get_icon_file (Icon);
@@ -326,7 +293,7 @@ namespace Plank.Items
 			
 			try {
 				icon_file_monitor = icon_file.monitor_file (0);
-				icon_file_monitor.changed.connect (reset_icon_buffer);
+				icon_file_monitor.changed.connect (icon_file_changed);
 			} catch (Error e) {
 				critical ("Unable to watch the icon file '%s'", icon_file.get_path () ?? "");
 				debug (e.message);
@@ -338,7 +305,7 @@ namespace Plank.Items
 			if (icon_file_monitor == null)
 				return;
 			
-			icon_file_monitor.changed.disconnect (reset_icon_buffer);
+			icon_file_monitor.changed.disconnect (icon_file_changed);
 			icon_file_monitor.cancel ();
 			icon_file_monitor = null;
 		}
@@ -369,11 +336,18 @@ namespace Plank.Items
 				debug ("Launcher file '%s' deleted, item is invalid now", f.get_uri ());
 				
 				launcher_exists = false;
+				LastValid = GLib.get_monotonic_time ();
+				State |= ItemState.INVALID;
+				
+				schedule_removal_if_needed ();
 				break;
 			case FileMonitorEvent.CREATED:
 				debug ("Launcher file '%s' created, item is valid again", f.get_uri ());
 				
 				launcher_exists = true;
+				State &= ~ItemState.INVALID;
+				
+				stop_removal ();
 				break;
 			default:
 				break;
@@ -388,8 +362,10 @@ namespace Plank.Items
 				return;
 			
 			unowned string? launcher = Prefs.Launcher;
-			if (launcher == null || launcher == "")
+			if (launcher == null || launcher == "") {
+				State &= ~ItemState.INVALID;
 				return;
+			}
 			
 			try {
 				var launcher_file = File.new_for_uri (launcher);
@@ -411,16 +387,60 @@ namespace Plank.Items
 			launcher_file_monitor = null;
 		}
 		
-		unowned DockSurface get_surface (int width, int height, DockSurface model)
+		bool schedule_removal_if_needed ()
 		{
-			if (surface == null || width != surface.Width || height != surface.Height) {
-				surface = new DockSurface.with_dock_surface (width, height, model);
-				
-				Logger.verbose ("DockItem.draw_icon (width = %i, height = %i)", width, height);
-				draw_icon (surface);
-				
-				AverageIconColor = surface.average_color ();
-			}
+			if (removal_timer_id > 0U)
+				return true;
+			
+			if (launcher_file_monitor == null || is_valid ())
+				return false;
+			
+			removal_timer_id = Gdk.threads_add_timeout (3000, () => {
+				removal_timer_id = 0U;
+				if (!is_valid ())
+					@delete ();
+				return false;
+			});
+			
+			return true;
+		}
+		
+		bool stop_removal ()
+		{
+			if (removal_timer_id == 0U)
+				return false;
+			
+			Source.remove (removal_timer_id);
+			removal_timer_id = 0U;
+			
+			return true;
+		}
+		
+		/**
+		 * Returns the dock surface for this item.
+		 *
+		 * It might trigger an internal redraw if the requested size
+		 * isn't cached yet.
+		 *
+		 * @param width width of the icon surface
+		 * @param height height of the icon surface
+		 * @param model existing surface to use as basis of new surface
+		 * @return the dock surface for this item which may not be changed
+		 */
+		public DockSurface get_surface (int width, int height, DockSurface model)
+		{
+			return buffer.get_surface<DockItem> (width, height, model, (DrawFunc<DockItem>) internal_get_surface, null);
+		}
+		
+		[CCode (instance_pos = -1)]
+		DockSurface internal_get_surface (int width, int height, DockSurface model, DrawDataFunc<DockItem>? draw_data_func)
+		{
+			var surface = new DockSurface.with_dock_surface (width, height, model);
+			
+			Logger.verbose ("DockItem.draw_icon (width = %i, height = %i)", width, height);
+			draw_icon (surface);
+			
+			AverageIconColor = surface.average_color ();
 			
 			return surface;
 		}
@@ -433,18 +453,21 @@ namespace Plank.Items
 		 *
 		 * Passing null as draw_func will destroy the internal background buffer.
 		 *
-		 * @param draw_func function which creates/changes the background surface
+		 * @param draw_data_func function which creates/changes the background surface
 		 * @return the background surface of this item which may not be changed
 		 */
-		public unowned DockSurface? get_background_surface (DrawItemFunc? draw_func = null)
-			requires (surface != null)
+		public DockSurface? get_background_surface (int width, int height, DockSurface model, DrawDataFunc<DockItem>? draw_data_func)
 		{
-			if (draw_func != null)
-				background_surface = draw_func (this, surface, background_surface);
-			else
-				background_surface = null;
+			return background_buffer.get_surface<DockItem> (width, height, model, (DrawFunc<DockItem>) internal_get_background_surface, (DrawDataFunc<DockItem>) draw_data_func);
+		}
+		
+		[CCode (instance_pos = -1)]
+		DockSurface? internal_get_background_surface (int width, int height, DockSurface model, DrawDataFunc<DockItem>? draw_data_func)
+		{
+			if (draw_data_func == null)
+				return null;
 			
-			return background_surface;
+			return draw_data_func (width, height, model, this);
 		}
 		
 		/**
@@ -455,16 +478,21 @@ namespace Plank.Items
 		 *
 		 * Passing null as draw_func will destroy the internal foreground buffer.
 		 *
-		 * @param draw_func function which creates/changes the foreground surface
+		 * @param draw_data_func function which creates/changes the foreground surface
 		 * @return the background surface of this item which may not be changed
 		 */
-		public unowned DockSurface? get_foreground_surface (DrawItemFunc? draw_func = null)
-			requires (surface != null)
+		public DockSurface? get_foreground_surface (int width, int height, DockSurface model, DrawDataFunc<DockItem>? draw_data_func)
 		{
-			if (draw_func != null)
-				foreground_surface = draw_func (this, surface, foreground_surface);
-			else
+			if (draw_data_func == null) {
 				foreground_surface = null;
+				return null;
+			}
+			
+			if (foreground_surface != null
+				&& foreground_surface.Width == width && foreground_surface.Height == height)
+				return foreground_surface;
+			
+			foreground_surface = draw_data_func (width, height, model, this);
 			
 			return foreground_surface;
 		}
@@ -519,6 +547,38 @@ namespace Plank.Items
 			} else {
 				warn_if_reached ();
 			}
+		}
+		
+		/**
+		 * Draws a placeholder icon onto a surface.
+		 * This method should be considered time-critical!
+		 * Make sure to only use simple drawing routines, and do not rely on external resources!
+		 *
+		 * @param surface the surface to draw on
+		 */
+		protected virtual void draw_icon_fast (DockSurface surface)
+		{
+			unowned Cairo.Context cr = surface.Context;
+			var width = surface.Width;
+			var height = surface.Height;
+			var radius = width / 2 - 1;
+			
+			var line_width_half = 1;
+			
+			cr.move_to (radius, line_width_half);
+			cr.arc (radius + line_width_half, radius + line_width_half, radius, 0, 2 * Math.PI);
+			cr.close_path ();
+			
+			cr.set_source_rgba (1, 1, 1, 0.2);
+			cr.set_line_width (2 * line_width_half);
+			cr.stroke_preserve ();
+			
+			var rg = new Cairo.Pattern.radial (width / 2, height, height / 8, width / 2, height, height);
+			rg.add_color_stop_rgba (0, 0, 0, 0, 0.6);
+			rg.add_color_stop_rgba (1, 0, 0, 0, 0.3);
+			
+			cr.set_source (rg);
+			cr.fill ();
 		}
 		
 		/**

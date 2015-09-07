@@ -33,6 +33,7 @@ plank_doc_files = \
 	$(top_srcdir)/lib/Drawing/DockSurface.vala \
 	$(top_srcdir)/lib/Drawing/DockTheme.vala \
 	$(top_srcdir)/lib/Drawing/Easing.vala \
+	$(top_srcdir)/lib/Drawing/SurfaceCache.vala \
 	$(top_srcdir)/lib/Drawing/Theme.vala \
 	$(top_srcdir)/lib/Factories/AbstractMain.vala \
 	$(top_srcdir)/lib/Factories/Factory.vala \
@@ -45,6 +46,7 @@ plank_doc_files = \
 	$(top_srcdir)/lib/Items/DockItem.vala \
 	$(top_srcdir)/lib/Items/DockItemProvider.vala \
 	$(top_srcdir)/lib/Items/DockItemPreferences.vala \
+	$(top_srcdir)/lib/Items/Enums.vala \
 	$(top_srcdir)/lib/Items/FileDockItem.vala \
 	$(top_srcdir)/lib/Items/PlaceholderDockItem.vala \
 	$(top_srcdir)/lib/Items/PlankDockItem.vala \
@@ -53,6 +55,7 @@ plank_doc_files = \
 	$(top_srcdir)/lib/Services/Paths.vala \
 	$(top_srcdir)/lib/Services/Preferences.vala \
 	$(top_srcdir)/lib/Services/System.vala \
+	$(top_srcdir)/lib/Services/Worker.vala \
 	$(top_srcdir)/lib/Widgets/CompositedWindow.vala \
 	$(top_srcdir)/lib/Widgets/DockWindow.vala \
 	$(top_srcdir)/lib/Widgets/HoverWindow.vala \

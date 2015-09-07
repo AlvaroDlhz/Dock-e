@@ -125,6 +125,27 @@ namespace Plank.Drawing
 		}
 		
 		/**
+		 * Create a scaled copy of the surface
+		 *
+		 * @param width the resulting width
+		 * @param height the resulting height
+		 * @return scaled copy of this surface
+		 */
+		public DockSurface scaled_copy (int width, int height)
+		{
+			var result = new DockSurface.with_dock_surface (width, height, this);
+			unowned Cairo.Context cr = result.Context;
+			
+			cr.save ();
+			cr.scale ((double) width / Width, (double) height / Height);
+			cr.set_source_surface (Internal, 0, 0);
+			cr.paint ();
+			cr.restore ();
+			
+			return result;
+		}
+		
+		/**
 		 * Saves the current dock surface to a {@link Gdk.Pixbuf}.
 		 *
 		 * @return the {@link Gdk.Pixbuf}
@@ -546,11 +567,12 @@ namespace Plank.Drawing
 				for (var x = 0; x < width; x++) {
 					for (var k = 0; k < gaussWidth; k++) {
 						var source = cur_pixel + shift[x, k];
+						var kernel_k = kernel[k];
 						
-						dest[cur_pixel + 0] += src[source + 0] * kernel[k];
-						dest[cur_pixel + 1] += src[source + 1] * kernel[k];
-						dest[cur_pixel + 2] += src[source + 2] * kernel[k];
-						dest[cur_pixel + 3] += src[source + 3] * kernel[k];
+						dest[cur_pixel + 0] += src[source + 0] * kernel_k;
+						dest[cur_pixel + 1] += src[source + 1] * kernel_k;
+						dest[cur_pixel + 2] += src[source + 2] * kernel_k;
+						dest[cur_pixel + 3] += src[source + 3] * kernel_k;
 					}
 					
 					cur_pixel += 4;
@@ -566,11 +588,12 @@ namespace Plank.Drawing
 				for (var x = startCol; x < endCol; x++) {
 					for (var k = 0; k < gaussWidth; k++) {
 						var source = cur_pixel + shift[y, k];
+						var kernel_k = kernel[k];
 						
-						dest[cur_pixel + 0] += src[source + 0] * kernel[k];
-						dest[cur_pixel + 1] += src[source + 1] * kernel[k];
-						dest[cur_pixel + 2] += src[source + 2] * kernel[k];
-						dest[cur_pixel + 3] += src[source + 3] * kernel[k];
+						dest[cur_pixel + 0] += src[source + 0] * kernel_k;
+						dest[cur_pixel + 1] += src[source + 1] * kernel_k;
+						dest[cur_pixel + 2] += src[source + 2] * kernel_k;
+						dest[cur_pixel + 3] += src[source + 3] * kernel_k;
 					}
 					
 					cur_pixel += 4;

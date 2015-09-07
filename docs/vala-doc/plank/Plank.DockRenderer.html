@@ -46,6 +46,15 @@
             <div class="leaf_brief_description"><span class="brief_description">The current progress [0.0..1.0] of the hide-animation of the dock.
               </span>
             </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">double</span></span> <b><a href="Plank.DockRenderer.zoom_in_progress.html" class="property">zoom_in_progress</a></b> { <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The current progress [0.0..1.0] of the zoom-in-animation of the dock.
+              </span>
+            </div></li>
+          <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_type"><span class="struct">Point</span></span> <b><a href="Plank.DockRenderer.local_cursor.html" class="property">local_cursor</a></b> { <span class="main_keyword">get</span>; }
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">The current local cursor-position on the dock if hovered.</span>
+            </div></li>
         </ul>
         <h3 class="main_title">Creation methods:</h3>
         <ul class="navi_inline">
@@ -65,15 +74,23 @@
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Resets all internal buffers and forces a redraw.</span>
             </div></li>
-          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Plank.DockRenderer.draw_dock.html" class="method">draw_dock</a></b> (<span class="main_type"><span class="class">Context</span></span> cr)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Plank.DockRenderer.initialize_frame.html" class="virtual_method">initialize_frame</a></b> (<span class="main_basic_type"><span class="struct">int64</span></span> frame_time)
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Draws the dock onto a context.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Preparations which are not requiring a drawing context yet.</span>
+            </div></li>
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">override</span> <span class="main_keyword">void</span> <b><a href="Plank.DockRenderer.draw.html" class="virtual_method">draw</a></b> (<span class="main_type"><span class="class">Context</span></span> cr, <span class="main_basic_type"><span class="struct">int64</span></span> frame_time)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Draws onto a context.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Plank.DockRenderer.update_local_cursor.html" class="method">update_local_cursor</a></b> (<span class="main_basic_type"><span class="struct">int</span></span> x, <span class="main_basic_type"><span class="struct">int</span></span> y)
+            </span>
+            <div class="leaf_brief_description">
             </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Plank.DockRenderer.animate_items.html" class="method">animate_items</a></b> (<span class="main_type"><span class="interface">List</span></span>&lt;<span class="main_type"><a href="Plank.Items.DockElement.html" class="abstract_class">DockElement</a></span>&gt; elements)
             </span>
             <div class="leaf_brief_description">
             </div></li>
-          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Plank.DockRenderer.animation_needed.html" class="virtual_method">animation_needed</a></b> (<span class="main_basic_type"><span class="struct">int64</span></span> render_time)
+          <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">override</span> <span class="main_basic_type"><span class="struct">bool</span></span> <b><a href="Plank.DockRenderer.animation_needed.html" class="virtual_method">animation_needed</a></b> (<span class="main_basic_type"><span class="struct">int64</span></span> frame_time)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Determines if animation should continue.</span>
             </div></li>
@@ -89,15 +106,19 @@
               <div class="column">
                 <ul class="navi_inline">
                   <li class="property"><a href="Plank.Drawing.AnimatedRenderer.widget.html">widget</a></li>
-                </ul>
-              </div>
-              <div class="column">
-                <ul class="navi_inline">
+                  <li class="property"><a href="Plank.Drawing.AnimatedRenderer.frame_time.html">frame_time</a></li>
                   <li class="abstract_method"><a href="Plank.Drawing.AnimatedRenderer.animation_needed.html">animation_needed</a></li>
                 </ul>
               </div>
               <div class="column">
                 <ul class="navi_inline">
+                  <li class="abstract_method"><a href="Plank.Drawing.AnimatedRenderer.initialize_frame.html">initialize_frame</a></li>
+                  <li class="abstract_method"><a href="Plank.Drawing.AnimatedRenderer.draw.html">draw</a></li>
+                </ul>
+              </div>
+              <div class="column">
+                <ul class="navi_inline">
+                  <li class="method"><a href="Plank.Drawing.AnimatedRenderer.force_frame_time_update.html">force_frame_time_update</a></li>
                   <li class="method"><a href="Plank.Drawing.AnimatedRenderer.animated_draw.html">animated_draw</a></li>
                 </ul>
               </div>

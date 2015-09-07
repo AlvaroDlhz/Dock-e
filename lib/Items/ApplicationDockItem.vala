@@ -183,7 +183,7 @@ namespace Plank.Items
 			handle_active_changed (App.is_active ());
 			handle_urgent_changed (App.is_urgent ());
 			
-			update_indicator (WindowControl.get_num_windows (App));
+			update_indicator ();
 		}
 		
 		public bool is_running ()
@@ -269,24 +269,34 @@ namespace Plank.Items
 		
 		void handle_window_added (Bamf.View? child)
 		{
-			update_indicator (WindowControl.get_num_windows (App));
+			update_indicator ();
 			
 			app_window_added ();
 		}
 		
 		void handle_window_removed (Bamf.View? child)
 		{
-			update_indicator (WindowControl.get_num_windows (App));
+			update_indicator ();
 			
 			app_window_removed ();
 		}
 		
-		void update_indicator (uint window_count)
+		void update_indicator ()
 		{
-			if (window_count == 0) {
+			//FIXME Do not be silly if the application is running
+			//  we must indicate it, same goes for the opposite.
+			
+			var is_running = is_running ();
+			
+			if (!is_running) {
 				if (Indicator != IndicatorState.NONE)
 					Indicator = IndicatorState.NONE;
-			} else if (window_count == 1) {
+				return;
+			}
+			
+			var window_count = WindowControl.get_num_windows (App);
+			
+			if (window_count <= 1) {
 				if (Indicator != IndicatorState.SINGLE)
 					Indicator = IndicatorState.SINGLE;
 			} else {
@@ -299,7 +309,9 @@ namespace Plank.Items
 		{
 			handle_urgent_changed (false);
 			handle_active_changed (false);
-			update_indicator (0);
+			
+			if (Indicator != IndicatorState.NONE)
+				Indicator = IndicatorState.NONE;
 		}
 		
 		void launch ()
@@ -310,7 +322,7 @@ namespace Plank.Items
 		/**
 		 * {@inheritDoc}
 		 */
-		protected override Animation on_clicked (PopupButton button, Gdk.ModifierType mod)
+		protected override Animation on_clicked (PopupButton button, Gdk.ModifierType mod, uint32 event_time)
 		{
 			if (!is_window ())
 				if (button == PopupButton.MIDDLE
@@ -321,7 +333,7 @@ namespace Plank.Items
 				}
 			
 			if (button == PopupButton.LEFT && App != null && WindowControl.get_num_windows (App) > 0) {
-				WindowControl.smart_focus (App);
+				WindowControl.smart_focus (App, event_time);
 				return Animation.DARKEN;
 			}
 			
@@ -331,7 +343,7 @@ namespace Plank.Items
 		/**
 		 * {@inheritDoc}
 		 */
-		protected override Animation on_scrolled (Gdk.ScrollDirection direction, Gdk.ModifierType mod)
+		protected override Animation on_scrolled (Gdk.ScrollDirection direction, Gdk.ModifierType mod, uint32 event_time)
 		{
 			if (App == null || WindowControl.get_num_windows (App) == 0)
 				return Animation.NONE;
@@ -342,9 +354,9 @@ namespace Plank.Items
 			LastScrolled = GLib.get_monotonic_time ();
 			
 			if (direction == Gdk.ScrollDirection.UP || direction == Gdk.ScrollDirection.LEFT)
-				WindowControl.focus_previous (App);
+				WindowControl.focus_previous (App, event_time);
 			else
-				WindowControl.focus_next (App);
+				WindowControl.focus_next (App, event_time);
 			
 			return Animation.DARKEN;
 		}
@@ -445,9 +457,10 @@ namespace Plank.Items
 				items.add (item);
 			}
 			
+			var event_time = Gtk.get_current_event_time ();
 			if (is_running () && window_count > 0) {
 				var item = create_menu_item ((window_count > 1 ? _("_Close All") : _("_Close")), "window-close-symbolic;;window-close");
-				item.activate.connect (() => WindowControl.close_all (App));
+				item.activate.connect (() => WindowControl.close_all (App, event_time));
 				items.add (item);
 			}
 			
@@ -504,7 +517,7 @@ namespace Plank.Items
 					if (window.is_active ())
 						window_item.set_sensitive (false);
 					else
-						window_item.activate.connect (() => WindowControl.focus_window (window));
+						window_item.activate.connect (() => WindowControl.focus_window (window, event_time));
 					
 					items.add (window_item);
 				}
@@ -732,7 +745,7 @@ namespace Plank.Items
 			if (p.length == 0)
 				return;
 			
-			unity_application_uri = "application://" + p[p.length - 1];
+			unity_application_uri = "application://%s".printf (p[p.length - 1]);
 		}
 		
 		/**

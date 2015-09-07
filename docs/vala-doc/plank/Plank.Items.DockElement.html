@@ -29,9 +29,9 @@
           <div class="headline">
             <div class="text">All known sub-classes:</div>
             <div class="toggle">
-              <img onclick="toggle_box  (this, 'box-content-53')" src="coll_open.png">&nbsp;</div>
+              <img onclick="toggle_box  (this, 'box-content-55')" src="coll_open.png">&nbsp;</div>
             </div>
-            <div class="content" id="box-content-53">
+            <div class="content" id="box-content-55">
               <div class="column">
                 <ul class="navi_inline">
                   <li class="class"><a href="Plank.Items.ApplicationDockItem.html">ApplicationDockItem</a></li>
@@ -43,7 +43,7 @@
               <div class="column">
                 <ul class="navi_inline">
                   <li class="class"><a href="Plank.DockController.html">DockController</a></li>
-                  <li class="class"><a href="Plank.Items.DockItem.html">DockItem</a></li>
+                  <li class="abstract_class"><a href="Plank.Items.DockItem.html">DockItem</a></li>
                   <li class="class"><a href="Plank.Items.DockItemProvider.html">DockItemProvider</a></li>
                   <li class="class"><a href="Plank.Items.FileDockItem.html">FileDockItem</a></li>
                 </ul>
@@ -130,6 +130,10 @@
               </span>
               <div class="leaf_brief_description"><span class="brief_description">The last time the item changed its position.</span>
               </div></li>
+            <li class="property"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="struct">int64</span></span> <b><a href="Plank.Items.DockElement.LastValid.html" class="property">LastValid</a></b> { <span class="main_keyword">protected</span> <span class="main_keyword">set</span>; <span class="main_keyword">get</span>; }
+              </span>
+              <div class="leaf_brief_description"><span class="brief_description">The last time the item was valid.</span>
+              </div></li>
           </ul>
           <h3 class="main_title">Static methods:</h3>
           <ul class="navi_inline">
@@ -151,11 +155,11 @@
           </ul>
           <h3 class="main_title">Methods:</h3>
           <ul class="navi_inline">
-            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Plank.Items.DockElement.clicked.html" class="method">clicked</a></b> (<span class="main_type"><a href="Plank.Items.PopupButton.html" class="enum">PopupButton</a></span> button, <span class="main_type"><span class="enum">ModifierType</span></span> mod)
+            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Plank.Items.DockElement.clicked.html" class="method">clicked</a></b> (<span class="main_type"><a href="Plank.Items.PopupButton.html" class="enum">PopupButton</a></span> button, <span class="main_type"><span class="enum">ModifierType</span></span> mod, <span class="main_basic_type"><span class="struct">uint32</span></span> event_time)
               </span>
               <div class="leaf_brief_description"><span class="brief_description">Called when an item is clicked on.</span>
               </div></li>
-            <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_type"><a href="Plank.Items.Animation.html" class="enum">Animation</a></span> <b><a href="Plank.Items.DockElement.on_clicked.html" class="virtual_method">on_clicked</a></b> (<span class="main_type"><a href="Plank.Items.PopupButton.html" class="enum">PopupButton</a></span> button, <span class="main_type"><span class="enum">ModifierType</span></span> mod)
+            <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_type"><a href="Plank.Items.Animation.html" class="enum">Animation</a></span> <b><a href="Plank.Items.DockElement.on_clicked.html" class="virtual_method">on_clicked</a></b> (<span class="main_type"><a href="Plank.Items.PopupButton.html" class="enum">PopupButton</a></span> button, <span class="main_type"><span class="enum">ModifierType</span></span> mod, <span class="main_basic_type"><span class="struct">uint32</span></span> event_time)
               </span>
               <div class="leaf_brief_description"><span class="brief_description">Called when an item is clicked on.</span>
               </div></li>
@@ -167,11 +171,11 @@
               </span>
               <div class="leaf_brief_description"><span class="brief_description">Called when an item gets hovered.</span>
               </div></li>
-            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Plank.Items.DockElement.scrolled.html" class="method">scrolled</a></b> (<span class="main_type"><span class="enum">ScrollDirection</span></span> direction, <span class="main_type"><span class="enum">ModifierType</span></span> mod)
+            <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Plank.Items.DockElement.scrolled.html" class="method">scrolled</a></b> (<span class="main_type"><span class="enum">ScrollDirection</span></span> direction, <span class="main_type"><span class="enum">ModifierType</span></span> mod, <span class="main_basic_type"><span class="struct">uint32</span></span> event_time)
               </span>
               <div class="leaf_brief_description"><span class="brief_description">Called when an item is scrolled over.</span>
               </div></li>
-            <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_type"><a href="Plank.Items.Animation.html" class="enum">Animation</a></span> <b><a href="Plank.Items.DockElement.on_scrolled.html" class="virtual_method">on_scrolled</a></b> (<span class="main_type"><span class="enum">ScrollDirection</span></span> direction, <span class="main_type"><span class="enum">ModifierType</span></span> mod)
+            <li class="virtual_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">virtual</span> <span class="main_type"><a href="Plank.Items.Animation.html" class="enum">Animation</a></span> <b><a href="Plank.Items.DockElement.on_scrolled.html" class="virtual_method">on_scrolled</a></b> (<span class="main_type"><span class="enum">ScrollDirection</span></span> direction, <span class="main_type"><span class="enum">ModifierType</span></span> mod, <span class="main_basic_type"><span class="struct">uint32</span></span> event_time)
               </span>
               <div class="leaf_brief_description"><span class="brief_description">Called when an item is scrolled over.</span>
               </div></li>
@@ -220,9 +224,9 @@
             <div class="headline">
               <div class="text">All known members inherited from class GLib.Object</div>
               <div class="toggle">
-                <img onclick="toggle_box  (this, 'box-content-54')" src="coll_open.png">&nbsp;</div>
+                <img onclick="toggle_box  (this, 'box-content-56')" src="coll_open.png">&nbsp;</div>
               </div>
-              <div class="content" id="box-content-54">
+              <div class="content" id="box-content-56">
                 <div class="column">
                   <ul class="navi_inline">
                     <li class="static_method">@new</li>

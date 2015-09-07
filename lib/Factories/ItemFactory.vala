@@ -105,6 +105,16 @@ namespace Plank.Factories
 		}
 		
 		/**
+		 * Creates a new {@link Items.PlankDockItem} for the dock itself.
+		 *
+		 * @return the new {@link Items.PlankDockItem} created
+		 */
+		public virtual DockItem get_item_for_dock ()
+		{
+			return PlankDockItem.get_instance ();
+		}
+		
+		/**
 		 * Creates a new {@link Items.DockElement} for a launcher parsed from a .dockitem.
 		 *
 		 * @param file the {@link GLib.File} of .dockitem file that was parsed
@@ -113,8 +123,6 @@ namespace Plank.Factories
 		 */
 		protected DockElement default_make_element (GLib.File file, string launcher)
 		{
-			if (Factory.main.is_launcher_for_dock (launcher))
-				return new PlankDockItem.with_dockitem_file (file);
 			if (launcher.has_suffix (".desktop"))
 				return new ApplicationDockItem.with_dockitem_file (file);
 			return new FileDockItem.with_dockitem_file (file);
@@ -132,10 +140,14 @@ namespace Plank.Factories
 				var keyfile = new KeyFile ();
 				keyfile.load_from_file (file.get_path (), KeyFileFlags.NONE);
 				
-				return keyfile.get_string (typeof (Items.DockItemPreferences).name (), "Launcher");
-			} catch {
-				return "";
+				unowned string group_name = typeof (DockItemPreferences).name ();
+				if (keyfile.has_group (group_name))
+					return keyfile.get_string (group_name, "Launcher");
+			} catch (Error e) {
+				warning ("%s (%s)", e.message, file.get_basename ());
 			}
+			
+			return "";
 		}
 			
 		/**
@@ -170,13 +182,16 @@ namespace Plank.Factories
 						continue;
 					
 					unowned DockItem? dupe;
-					if ((dupe = find_item_for_uri (result, item.Launcher)) != null)
-						warning ("The launcher '%s' in dock item '%s' is already managed by dock item '%s'",
-							item.Launcher, file.get_path (), dupe.DockItemFilename);
-					else if (!item.is_valid ())
-						warning ("The launcher '%s' in dock item '%s' does not exist", item.Launcher, file.get_path ());
-					else
+					if ((dupe = find_item_for_uri (result, item.Launcher)) != null) {
+						warning ("The launcher '%s' in dock item '%s' is already managed by dock item '%s'. Removing '%s'.",
+							item.Launcher, file.get_path (), dupe.DockItemFilename, item.DockItemFilename);
+						item.delete ();
+					} else if (!item.is_valid ()) {
+						warning ("The launcher '%s' in dock item '%s' does not exist. Removing '%s'.", item.Launcher, file.get_path (), item.DockItemFilename);
+						item.delete ();
+					} else {
 						result.add (item);
+					}
 				}
 			} catch (Error e) {
 				critical ("Error loading dock items from '%s'. (%s)", source_dir.get_path () ?? "", e.message);
@@ -232,7 +247,7 @@ namespace Plank.Factories
 				return;
 			}
 			
-			var filename = app_info.get_filename ();
+			unowned string filename = app_info.get_filename ();
 			if (filename == null) {
 				warning ("Failed to create dock item for '%s'", id);
 				return;
@@ -286,9 +301,6 @@ namespace Plank.Factories
 		 */
 		public void make_default_items ()
 		{
-			// add plank item!
-			make_dock_item (Paths.DataFolder.get_parent ().get_child ("applications").get_child (Factory.main.app_launcher).get_uri ());
-			
 			if (make_default_gnome_items ())
 				return;
 			
@@ -352,7 +364,7 @@ namespace Plank.Factories
 					var basename = (launcher_file.get_basename () ?? "unknown");
 					var index_of_last_dot = basename.last_index_of (".");
 					var launcher_base = (index_of_last_dot >= 0 ? basename.slice (0, index_of_last_dot) : basename);
-					var dockitem = launcher_base + ".dockitem";
+					var dockitem = "%s.dockitem".printf (launcher_base);
 					var dockitem_file = target_dir.get_child (dockitem);
 					var counter = 1;
 					

@@ -73,12 +73,13 @@ namespace Plank
 		bool drag_canceled = false;
 		bool drag_known = false;
 		bool drag_data_requested = false;
-		uint marker = 0;
-		uint drag_hover_timer = 0;
+		uint marker = 0U;
+		uint drag_hover_timer_id = 0U;
 		
 		Gee.ArrayList<string>? drag_data = null;
 		
 		int window_scale_factor = 1;
+		ulong drag_item_redraw_handler_id = 0UL;
 		
 		/**
 		 * Creates a new instance of a DragManager, which handles
@@ -177,7 +178,7 @@ namespace Plank
 #if HAVE_HIDPI
 			window_scale_factor = controller.window.get_window ().get_scale_factor ();
 #endif
-			var drag_icon_size = (int) (1.2 * controller.position_manager.IconSize);
+			var drag_icon_size = (int) (1.2 * controller.position_manager.ZoomIconSize);
 			if (drag_icon_size % 2 == 1)
 				drag_icon_size++;
 #if HAVE_HIDPI
@@ -230,6 +231,9 @@ namespace Plank
 				DragItem = null;
 			
 			set_drag_icon (context, DragItem, 0.8);
+			drag_item_redraw_handler_id = DragItem.needs_redraw.connect (() => {
+				set_drag_icon (context, DragItem, 0.8);
+			});
 		}
 
 		[CCode (instance_pos = -1)]
@@ -239,7 +243,7 @@ namespace Plank
 				var uris = Uri.list_extract_uris ((string) selection_data.get_data ());
 				
 				drag_data = new Gee.ArrayList<string> ();
-				foreach (string s in uris) {
+				foreach (unowned string s in uris) {
 					var uri = File.new_for_uri (s).get_uri ();
 					if (uri != null)
 						drag_data.add (uri);
@@ -269,9 +273,9 @@ namespace Plank
 		{
 			Gtk.drag_finish (context, true, false, time_);
 			
-			if (drag_hover_timer > 0) {
-				GLib.Source.remove (drag_hover_timer);
-				drag_hover_timer = 0;
+			if (drag_hover_timer_id > 0U) {
+				GLib.Source.remove (drag_hover_timer_id);
+				drag_hover_timer_id = 0U;
 			}
 			
 			if (drag_data == null)
@@ -295,6 +299,12 @@ namespace Plank
 		{
 			unowned HideManager hide_manager = controller.hide_manager;
 			
+			if (drag_item_redraw_handler_id > 0UL) {
+				if (DragItem != null)
+					GLib.SignalHandler.disconnect (DragItem, drag_item_redraw_handler_id);
+				drag_item_redraw_handler_id = 0UL;
+			}
+			
 			if (!drag_canceled && DragItem != null) {
 				hide_manager.update_hovered ();
 				if (!hide_manager.Hovered) {
@@ -303,7 +313,7 @@ namespace Plank
 						unowned ApplicationDockItem? app_item = (DragItem as ApplicationDockItem);
 						if (app_item == null || !(app_item.is_running () || app_item.has_unity_info ())) {
 							DragItem.IsVisible = false;
-							DragItem.Container.remove_item (DragItem);
+							DragItem.Container.remove (DragItem);
 						}
 						DragItem.delete ();
 						
@@ -349,9 +359,9 @@ namespace Plank
 		[CCode (instance_pos = -1)]
 		void drag_leave (Gtk.Widget w, Gdk.DragContext context, uint time_)
 		{
-			if (drag_hover_timer > 0) {
-				GLib.Source.remove (drag_hover_timer);
-				drag_hover_timer = 0;
+			if (drag_hover_timer_id > 0U) {
+				GLib.Source.remove (drag_hover_timer_id);
+				drag_hover_timer_id = 0U;
 			}
 			
 			controller.hide_manager.update_hovered ();
@@ -431,7 +441,8 @@ namespace Plank
 				Gdk.drag_status (context, Gdk.DragAction.COPY, time_);
 			}
 			
-			hide_manager.update_hovered ();
+			controller.renderer.update_local_cursor (x, y);
+			hide_manager.update_hovered_with_coords (x, y);
 			window.update_hovered (x, y);
 			
 			return true;
@@ -442,22 +453,23 @@ namespace Plank
 			unowned DockItem hovered_item = controller.window.HoveredItem;
 			
 			if (InternalDragActive && DragItem != null && hovered_item != null
-				&& DragItem != hovered_item) {
-				DragItem.Container.move_item_to (DragItem, hovered_item);
+				&& DragItem != hovered_item
+				&& DragItem.Container == hovered_item.Container) {
+				DragItem.Container.move_to (DragItem, hovered_item);
 			}
 			
-			if (drag_hover_timer > 0) {
-				GLib.Source.remove (drag_hover_timer);
-				drag_hover_timer = 0;
+			if (drag_hover_timer_id > 0U) {
+				GLib.Source.remove (drag_hover_timer_id);
+				drag_hover_timer_id = 0U;
 			}
 			
 			if (ExternalDragActive && drag_data != null)
-				drag_hover_timer = Gdk.threads_add_timeout (1500, () => {
+				drag_hover_timer_id = Gdk.threads_add_timeout (1500, () => {
 					unowned DockItem item = controller.window.HoveredItem;
 					if (item != null)
-						item.scrolled (Gdk.ScrollDirection.DOWN, 0);
+						item.scrolled (Gdk.ScrollDirection.DOWN, 0, Gtk.get_current_event_time ());
 					else
-						drag_hover_timer = 0;
+						drag_hover_timer_id = 0U;
 					return item != null;
 				});
 		}
