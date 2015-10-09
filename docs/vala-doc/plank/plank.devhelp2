@@ -132,6 +132,7 @@
     <keyword type="function" name="Plank.PositionManager.get_draw_value_for_item" link="Plank.PositionManager.get_draw_value_for_item.html"/>
     <keyword type="function" name="Plank.PositionManager.update_draw_values" link="Plank.PositionManager.update_draw_values.html"/>
     <keyword type="function" name="Plank.PositionManager.get_hover_region_for_element" link="Plank.PositionManager.get_hover_region_for_element.html"/>
+    <keyword type="function" name="Plank.PositionManager.get_nearest_item_at" link="Plank.PositionManager.get_nearest_item_at.html"/>
     <keyword type="function" name="Plank.PositionManager.get_menu_position" link="Plank.PositionManager.get_menu_position.html"/>
     <keyword type="function" name="Plank.PositionManager.get_hover_position" link="Plank.PositionManager.get_hover_position.html"/>
     <keyword type="function" name="Plank.PositionManager.get_urgent_glow_position" link="Plank.PositionManager.get_urgent_glow_position.html"/>

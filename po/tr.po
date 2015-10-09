@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plank\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2015-09-03 21:06+0000\n"
-"PO-Revision-Date: 2015-08-11 06:35+0000\n"
+"POT-Creation-Date: 2015-10-08 19:57+0000\n"
+"PO-Revision-Date: 2015-09-20 06:08+0000\n"
 "Last-Translator: Rico Tzschichholz <Unknown>\n"
 "Language-Team: Turkish <tr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2015-09-04 05:21+0000\n"
-"X-Generator: Launchpad (build 17706)\n"
+"X-Launchpad-Export-Date: 2015-10-09 05:23+0000\n"
+"X-Generator: Launchpad (build 17802)\n"
 
 #: ../data/plank.appdata.xml.in.h:1
 msgid ""
@@ -153,7 +153,7 @@ msgstr "Dock'un gösteriminden önceki milisaniye gecikmesi"
 
 #: ../data/ui/preferences.ui.h:28
 msgid "Pressure Reveal:"
-msgstr ""
+msgstr "Zorla Gösterme:"
 
 #: ../data/ui/preferences.ui.h:29
 msgid "Item Management"
@@ -184,7 +184,7 @@ msgid "Behaviour"
 msgstr "Davranış"
 
 #: ../lib/Items/ApplicationDockItem.vala:454
-#: ../lib/Items/FileDockItem.vala:328 ../lib/Items/FileDockItem.vala:346
+#: ../lib/Items/FileDockItem.vala:330 ../lib/Items/FileDockItem.vala:348
 msgid "_Keep in Dock"
 msgstr "_Başlatıcıda tut"
 
@@ -196,17 +196,17 @@ msgstr "Hepsini _Kapat"
 msgid "_Close"
 msgstr "_Kapat"
 
-#: ../lib/Items/FileDockItem.vala:333
+#: ../lib/Items/FileDockItem.vala:335
 msgid "_Open in File Browser"
-msgstr "_Dosya yöneticisi içinde aç"
+msgstr "_Dosya Yöneticisinde Aç"
 
-#: ../lib/Items/FileDockItem.vala:351
+#: ../lib/Items/FileDockItem.vala:353
 msgid "_Open"
 msgstr "_Aç"
 
-#: ../lib/Items/FileDockItem.vala:355
+#: ../lib/Items/FileDockItem.vala:357
 msgid "Open Containing _Folder"
-msgstr "İçeren K_lasörü Aç"
+msgstr "Bulunduğu _Klasörü Aç"
 
 #: ../lib/Items/PlaceholderDockItem.vala:37
 msgid "Drop applications or files here"
