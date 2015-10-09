@@ -157,8 +157,9 @@ libplank_internal_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(libplank_internal_la_CFLAGS) $(CFLAGS) \
 	$(libplank_internal_la_LDFLAGS) $(LDFLAGS) -o $@
-libplank_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(builddir)/libplank-internal.la $(am__DEPENDENCIES_1)
+libplank_la_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(builddir)/libplank-internal.la \
+	$(am__DEPENDENCIES_1)
 am__objects_3 = plank-resources.lo $(am__objects_1)
 am__objects_4 = Version.lo $(am__objects_1)
 am__objects_5 = DBusManager.lo DockController.lo DockPreferences.lo \
@@ -642,11 +643,6 @@ AM_CFLAGS = \
 	-w \
 	$(NULL)
 
-AM_LDFLAGS = \
-	$(LIBM) \
-	$(COVERAGE_CFLAGS) \
-	$(NULL)
-
 AM_VALAFLAGS = \
 	$(COVERAGE_VALAFLAGS) \
 	$(PLANK_CORE_VALAFLAGS) \
@@ -690,6 +686,8 @@ libplank_la_VALAFLAGS = \
 
 libplank_la_LIBADD = \
 	$(PLANK_CORE_LIBS) \
+	$(COVERAGE_LDFLAGS) \
+	$(LIBM) \
 	$(builddir)/libplank-internal.la \
 	$(NULL)
 

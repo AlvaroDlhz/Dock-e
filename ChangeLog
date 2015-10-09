@@ -1,3 +1,88 @@
+2015-10-09  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Prepare 0.10.1 release
+
+2015-10-09  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-10-09  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Actually pass e.g. -lm to the linker by adding it to *_LIBADD
+
+2015-10-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	transientdockitem: Delayed reloading of the window-icon if needed
+
+	If the window-icon was null on the first try then schedule a 2nd one.
+
+2015-10-08  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	defaultappprovider: Don't ignore opened applications if Wnck
+	doesn't know
+
+	Better don't rely on Wnck if Bamf reported an opened application. If an
+	application is for whatever reason replacing or renaming its window on
+	startup we might drop it while Wnck reports a window-count of 0.
+
+2015-10-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	plankdockitem: Open "preferences" on left-click instead of "about"
+
+2015-10-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Avoid some superfluous reference-taking
+
+2015-10-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: FileMonitorEvent is a simple enum not a flag
+
+2015-10-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: Tweak method signature of file-monitor callbacks
+
+2015-10-06  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockitemprovider: Insert items where the data was dropped
+
+	If there is currently no HoveredItem try to determine the nearest
+	one as
+	drop-point.
+
+2015-10-01  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	positionmanager: Add verbose output for monitor_geo_changed
+
+2015-10-01  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	positionmanager: Just return primary_monitor if empty plug_name
+	was given
+
+2015-10-01  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	filedockitem: Correctly display filenames with underscores in
+	folder-menu
+
+2015-09-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-09-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2015-09-10  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Require valac >= 0.24.0 and obsolete conditionals
+
+2015-09-09  Mike Gabriel  <mike.gabriel@das-netzwerkteam.de>
+
+	animatedrenderer: Fix typo in error message
+
+2015-09-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Back to development
+
 2015-09-07  Rico Tzschichholz  <ricotz@ubuntu.com>
 
 	Prepare 0.10.0 release

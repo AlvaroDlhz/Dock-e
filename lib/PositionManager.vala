@@ -230,6 +230,9 @@ namespace Plank
 		
 		static int find_monitor_number (Gdk.Screen screen, string plug_name)
 		{
+			if (plug_name == "")
+				return screen.get_primary_monitor ();
+			
 			int n_monitors = screen.get_n_monitors ();
 			
 			for (int i = 0; i < n_monitors; i++) {
@@ -258,6 +261,9 @@ namespace Plank
 				&& old_monitor_geo.width == monitor_geo.width
 				&& old_monitor_geo.height == monitor_geo.height)
 				return;
+			
+			Logger.verbose ("PositionManager.monitor_geo_changed (%i,%i-%ix%i)",
+				monitor_geo.x, monitor_geo.y, monitor_geo.width, monitor_geo.height);
 			
 			freeze_notify ();
 			
@@ -1170,6 +1176,38 @@ namespace Plank
 			
 			Gdk.Rectangle result;
 			first_rect.union (last_rect, out result);
+			return result;
+		}
+		
+		/**
+		 * Get the item which is the nearest at the given coordinates. If a container is given
+		 * the result will be restricted to its children.
+		 *
+		 * @param x the x position
+		 * @param y the y position
+		 * @param container a container or NULL 
+		 */
+		public unowned DockItem? get_nearest_item_at (int x, int y, DockContainer? container = null)
+		{
+			unowned DockItem? result = null;
+			var square_distance = double.MAX;
+			
+			var draw_values_it = draw_values.map_iterator ();
+			while (draw_values_it.next ()) {
+				var val = draw_values_it.get_value ();
+				var center = val.static_center;
+				var new_square_distance = (x - center.x) * (x - center.x) + (y - center.y) * (y - center.y);
+				if (square_distance > new_square_distance) {
+					DockItem? item = (draw_values_it.get_key () as DockItem);
+					if (item == null)
+						continue;
+					if (container == null || item.Container == container) {
+						square_distance = new_square_distance;
+						result = item;
+					}				
+				}				
+			}
+			
 			return result;
 		}
 		
