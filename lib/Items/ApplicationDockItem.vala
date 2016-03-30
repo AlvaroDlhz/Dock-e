@@ -152,8 +152,8 @@ namespace Plank
 			app.running_changed.connect_after (handle_running_changed);
 			app.urgent_changed.connect_after (handle_urgent_changed);
 			app.user_visible_changed.connect_after (handle_user_visible_changed);
-			app.window_added.connect_after (handle_window_added);
-			app.window_removed.connect_after (handle_window_removed);
+			app.child_added.connect_after (handle_window_added);
+			app.child_removed.connect_after (handle_window_removed);
 			app.closed.connect_after (handle_closed);
 		}
 		
@@ -164,8 +164,8 @@ namespace Plank
 			app.running_changed.disconnect (handle_running_changed);
 			app.urgent_changed.disconnect (handle_urgent_changed);
 			app.user_visible_changed.disconnect (handle_user_visible_changed);
-			app.window_added.disconnect (handle_window_added);
-			app.window_removed.disconnect (handle_window_removed);
+			app.child_added.disconnect (handle_window_added);
+			app.child_removed.disconnect (handle_window_removed);
 			app.closed.disconnect (handle_closed);
 		}
 		
@@ -234,12 +234,14 @@ namespace Plank
 		
 		void handle_running_changed (bool is_running)
 		{
-			if (is_running) {
-				app_window_added ();
+			if (!is_running) {
+				reset_application_status ();
 				return;
 			}
 			
-			reset_application_status ();
+			update_indicator ();
+			
+			app_window_added ();
 		}
 		
 		public void set_urgent (bool is_urgent)
@@ -261,6 +263,9 @@ namespace Plank
 		
 		void handle_window_added (Bamf.View? child)
 		{
+			if (!(child is Bamf.Window))
+				return;
+			
 			update_indicator ();
 			
 			app_window_added ();
@@ -268,6 +273,9 @@ namespace Plank
 		
 		void handle_window_removed (Bamf.View? child)
 		{
+			if (!(child is Bamf.Window))
+				return;
+			
 			update_indicator ();
 			
 			app_window_removed ();
