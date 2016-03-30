@@ -1,3 +1,51 @@
+2016-03-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Prepare 0.11.1 release
+
+2016-03-29  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2016-03-29  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	applicationdockitem: Use child-* signals of Bamf.View
+
+	The window-* signals are emitted too early and the internal window/xid
+	caches of Bamf aren't updated yet.
+
+2016-03-25  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	applicationdockitem: Force indicator-update if running-state changed
+
+2016-03-23  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	vapi: Sync libbamf3.vapi with 0.5.3~bzr0+16.04.20160322.1-0ubuntu1
+
+2016-03-23  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	controller: Actually emmit elements_changed() to make DBusClient work
+
+2016-03-22  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	dockletmanager: Only handle properly named docklet-libraries
+
+2016-03-22  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2016-03-22  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	system: Use DesktopAppInfo.from_filename() to set desktop-filename
+
+	If the filename property is not set then an empty string will be
+	send out
+	via org.gtk.gio.DesktopAppInfo rather than the proper desktop-filename
+	that we actually have. This is used for startup-notifications by Bamf.
+
+2016-03-22  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Back to development
+
 2016-03-12  Rico Tzschichholz  <ricotz@ubuntu.com>
 
 	Prepare 0.11.0 release
