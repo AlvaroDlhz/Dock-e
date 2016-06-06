@@ -66,7 +66,7 @@ namespace Docky
 		}
 		
 		[CCode (instance_pos = -1)]
-		void clipboard_text_received (Gtk.Clipboard clipboard, string text)
+		void clipboard_text_received (Gtk.Clipboard clipboard, string? text)
 		{
 			if (text == null || text == "")
 				return;
@@ -119,6 +119,10 @@ namespace Docky
 		
 		void clear ()
 		{
+			// Make sure we own the current clipboard content,
+			// so we are allowed to clear it
+			clipboard.set_text ("", 0);
+			
 			clipboard.clear ();
 			clips.clear ();
 			cur_position = 0;
@@ -159,8 +163,9 @@ namespace Docky
 			
 			for (var i = clips.size ; i > 0; i--) {
 				var item = create_menu_item (clips.get (i - 1), "edit-cut");
+				var pos = i;
 				item.activate.connect (() => {
-					copy_entry_at (i);
+					copy_entry_at (pos);
 				});
 				items.add (item);
 			}

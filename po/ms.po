@@ -1,31 +1,33 @@
-# Japanese translation for plank
-# Copyright (c) 2013 Rosetta Contributors and Canonical Ltd 2013
+# Malay translation for plank
+# Copyright (c) 2016 Rosetta Contributors and Canonical Ltd 2016
 # This file is distributed under the same license as the plank package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2013.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: plank\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2016-05-12 09:10+0000\n"
-"PO-Revision-Date: 2016-05-25 06:33+0000\n"
-"Last-Translator: Haruki Ota <ootaharuki99@gmail.com>\n"
-"Language-Team: Japanese <ja@li.org>\n"
+"POT-Creation-Date: 2016-04-10 16:20+0000\n"
+"PO-Revision-Date: 2016-04-27 06:32+0000\n"
+"Last-Translator: abuyop <Unknown>\n"
+"Language-Team: Malay <ms@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-05-26 05:32+0000\n"
-"X-Generator: Launchpad (build 18053)\n"
+"X-Launchpad-Export-Date: 2016-04-28 05:31+0000\n"
+"X-Generator: Launchpad (build 17995)\n"
 
 #: ../data/plank.appdata.xml.in.h:1 ../data/plank.desktop.in.h:1
 msgid "Stupidly simple."
-msgstr "超シンプル"
+msgstr "Ringkas la sangat."
 
 #: ../data/plank.appdata.xml.in.h:2
 msgid ""
 "Plank is meant to be the simplest dock on the planet. The goal is to provide "
 "just what a dock needs and absolutely nothing more."
-msgstr "\"Plank\"は地球上で最もシンプルなドックです。他に必要とする物が無いドック提供することが目標です。"
+msgstr ""
+"Plank merupakan dok yang paling ringkas. Matlamat Plank adalah untuk "
+"menyediakan apa yang dok perlukan dan tiada apa-apa penambahan yang lain."
 
 #: ../data/plank.appdata.xml.in.h:3
 msgid ""
@@ -38,192 +40,187 @@ msgstr ""
 
 #: ../data/ui/preferences.ui.h:1
 msgid "Theme:"
-msgstr "テーマ:"
+msgstr "Tema:"
 
 #: ../data/ui/preferences.ui.h:2
 msgid "Position:"
-msgstr "位置:"
+msgstr "Kedudukan:"
 
 #: ../data/ui/preferences.ui.h:3
 msgid "Left"
-msgstr "左端"
+msgstr "Kiri"
 
 #: ../data/ui/preferences.ui.h:4
 msgid "Right"
-msgstr "右端"
+msgstr "Kanan"
 
 #: ../data/ui/preferences.ui.h:5
 msgid "Top"
-msgstr "上部"
+msgstr "Atas"
 
 #: ../data/ui/preferences.ui.h:6
 msgid "Bottom"
-msgstr "下部"
+msgstr "Bawah"
 
 #: ../data/ui/preferences.ui.h:7
 msgid "Alignment:"
-msgstr "寄せ方:"
+msgstr "Jajaran:"
 
 #: ../data/ui/preferences.ui.h:8
 msgid "Fill"
-msgstr ""
+msgstr "Isian"
 
 #: ../data/ui/preferences.ui.h:9
 msgid "Start"
-msgstr ""
+msgstr "Mula"
 
 #: ../data/ui/preferences.ui.h:10
 msgid "End"
-msgstr ""
+msgstr "Hujung"
 
 #: ../data/ui/preferences.ui.h:11
 msgid "Center"
-msgstr ""
+msgstr "Tengah"
 
 #: ../data/ui/preferences.ui.h:12
 msgid "On Primary Display:"
-msgstr "プライマリディスプレイ上:"
+msgstr "Pada Paparan Utama:"
 
 #: ../data/ui/preferences.ui.h:13
 msgid "Offset in percent from the center of the screen-edge"
-msgstr "スクリーン中央からの相対位置"
+msgstr ""
 
 #: ../data/ui/preferences.ui.h:14
 msgid "Icon Alignment:"
-msgstr "アイコンの配置:"
+msgstr "Jajaran Ikon:"
 
 #: ../data/ui/preferences.ui.h:15
 msgid "Icon Size:"
-msgstr "アイコンサイズ:"
+msgstr "Saiz Ikon:"
 
 #: ../data/ui/preferences.ui.h:16
 msgid "Icon Zoom:"
-msgstr ""
+msgstr "Zum Ikon:"
 
 #: ../data/ui/preferences.ui.h:17
 msgid "Appearance"
-msgstr "外観"
+msgstr "Penampilan"
 
 #: ../data/ui/preferences.ui.h:18
 msgid "Intellihide"
-msgstr "賢く隠す"
+msgstr "Sembunyi-Pintar"
 
 #: ../data/ui/preferences.ui.h:19
 msgid "Autohide"
-msgstr "自動的に隠す"
+msgstr "Sembunyi-Sendiri"
 
 #: ../data/ui/preferences.ui.h:20
 msgid "Dodge maximized window"
-msgstr "ウィンドウが最大化されたら隠す"
+msgstr "Elak tetingkap dimaksimumkan"
 
 #: ../data/ui/preferences.ui.h:21
 msgid "Window Dodge"
-msgstr "ウィンドウ回避"
+msgstr "Elak Tetingkap"
 
 #: ../data/ui/preferences.ui.h:22
 msgid "Dodge active window"
-msgstr ""
+msgstr "Elak tetingkap aktif"
 
 #: ../data/ui/preferences.ui.h:23
 msgid "Hide Dock"
-msgstr "ドックを隠す"
+msgstr "Sembunyi Labuh"
 
 #: ../data/ui/preferences.ui.h:24
 msgid "Hide Delay:"
-msgstr "隠れるまでの時間:"
+msgstr "Lengah Sembunyi:"
 
 #: ../data/ui/preferences.ui.h:25
 msgid "Delay in ms before hiding the dock"
-msgstr "ドックを隠すまでの時間(ミリ秒)"
+msgstr ""
 
 #: ../data/ui/preferences.ui.h:26
 msgid "Unhide Delay:"
-msgstr "復帰までの時間:"
+msgstr "Lengah Nyahsembunyi:"
 
 #: ../data/ui/preferences.ui.h:27
 msgid "Delay in ms before showing the dock"
-msgstr "ドックの復帰までの時間(ミリ秒)"
+msgstr ""
 
 #: ../data/ui/preferences.ui.h:28
 msgid "Pressure Reveal:"
-msgstr "押し込んで表示:"
+msgstr ""
 
 #: ../data/ui/preferences.ui.h:29
 msgid "Item Management"
-msgstr "アイテム管理"
+msgstr "Pengurusan Item"
 
 #: ../data/ui/preferences.ui.h:30
 msgid "Show Unpinned:"
-msgstr "固定してないソフトを表示する:"
+msgstr ""
 
 #: ../data/ui/preferences.ui.h:31
 msgid "Restrict to Workspace:"
-msgstr "ワークスペースを制限する:"
+msgstr ""
 
 #: ../data/ui/preferences.ui.h:32
 msgid "Lock Icons:"
-msgstr "アイコンをロック:"
+msgstr ""
 
 #: ../data/ui/preferences.ui.h:33
 msgid "Behaviour"
-msgstr "挙動"
+msgstr "Kelakuan"
 
 #: ../data/ui/preferences.ui.h:34
 msgid "Docklets"
-msgstr ""
+msgstr "Docklet"
 
 #: ../lib/DragManager.vala:477 ../lib/Items/PlaceholderDockItem.vala:51
 msgid "Drop to add to dock"
-msgstr "ドロップしてドックに追加"
+msgstr "Lepas untuk tambah ke labuh"
 
 #: ../lib/Factories/AbstractMain.vala:422 ../src/Main.vala:75
 msgid "translator-credits"
 msgstr ""
 "Launchpad Contributions:\n"
-"  Haruki Ota https://launchpad.net/~ootaharuki99-5\n"
-"  Rico Tzschichholz https://launchpad.net/~ricotz\n"
-"  Shota Shimazu https://launchpad.net/~hornet-live-mf\n"
-"  Shota Shimazu https://launchpad.net/~xylophone-project\n"
-"  Takefumi Nagata https://launchpad.net/~rago1975\n"
-"  smp https://launchpad.net/~cheat-hc0-ms"
+"  abuyop https://launchpad.net/~abuyop"
 
-#: ../lib/Items/ApplicationDockItem.vala:417 ../lib/Items/FileDockItem.vala:314
-#: ../lib/Items/FileDockItem.vala:336
+#: ../lib/Items/ApplicationDockItem.vala:417
+#: ../lib/Items/FileDockItem.vala:314 ../lib/Items/FileDockItem.vala:336
 msgid "_Keep in Dock"
-msgstr "ドックに追加(_K)"
+msgstr "_Kekal dalam Labuh"
 
 #: ../lib/Items/ApplicationDockItem.vala:425
 msgid "_Close All"
-msgstr "全て閉じる(_C)"
+msgstr "_Tutup Semua"
 
 #: ../lib/Items/ApplicationDockItem.vala:425
 msgid "_Close"
-msgstr "閉じる(_C)"
+msgstr "_Tutup"
 
 #: ../lib/Items/ApplicationDockItem.vala:497
 #, c-format
 msgid "Drop to open with %s"
-msgstr "ドロップして %s で開く"
+msgstr ""
 
 #: ../lib/Items/FileDockItem.vala:320
 msgid "_Open in File Browser"
-msgstr "ファイルブラウザで開く(_O)"
+msgstr ""
 
 #: ../lib/Items/FileDockItem.vala:342
 msgid "_Open"
-msgstr "開く(_O)"
+msgstr "_Buka"
 
 #: ../lib/Items/FileDockItem.vala:346
 msgid "Open Containing _Folder"
-msgstr "親フォルダーを開く(_F)"
+msgstr "Buka _Folder yang Mengandungi"
 
 #: ../lib/Items/PlaceholderDockItem.vala:37
 msgid "Drop applications or files here"
-msgstr "アプリケーションあるいはファイルをマウスでドロップする"
+msgstr ""
 
 #: ../lib/Items/PlankDockItem.vala:73
 msgid "Get _Help Online..."
-msgstr "オンラインでヘルプを表示(_H)..."
+msgstr ""
 
 #: ../lib/Items/PlankDockItem.vala:77
 msgid "_Translate This Application..."
@@ -231,4 +228,4 @@ msgstr ""
 
 #: ../lib/Widgets/PreferencesWindow.vala:90
 msgid "Preferences"
-msgstr "設定"
+msgstr "Keutamaan"
