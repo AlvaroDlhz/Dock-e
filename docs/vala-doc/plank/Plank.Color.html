@@ -32,6 +32,16 @@
         <h2 class="main_title">Content:</h2>
         <h3 class="main_title">Static methods:</h3>
         <ul class="navi_inline">
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_type"><span class="struct">Color</span></span> <b><a href="Plank.Color.from_hsv.html" class="static_method">from_hsv</a></b> (<span class="main_basic_type"><span class="struct">double</span></span> h, <span class="main_basic_type"><span class="struct">double</span></span> s, <span class="main_basic_type"><span class="struct">double</span></span> v)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Create new color for the given HSV values while h in [0,360), s in 
+                [0,1] and v in [0,1]</span>
+            </div></li>
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_type"><span class="struct">Color</span></span> <b><a href="Plank.Color.from_hsl.html" class="static_method">from_hsl</a></b> (<span class="main_basic_type"><span class="struct">double</span></span> h, <span class="main_basic_type"><span class="struct">double</span></span> s, <span class="main_basic_type"><span class="struct">double</span></span> l)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Create new color for the given HSL values while h in [0,360), s in 
+                [0,1] and l in [0,1]</span>
+            </div></li>
           <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">static</span> <span class="main_type"><span class="struct">Color</span></span> <b><a href="Plank.Color.from_prefs_string.html" class="static_method">from_prefs_string</a></b> (<span class="main_basic_type"><span class="class">string</span></span> s)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Create new color converted from string formatted like "%d;;%d;;%d;;%d"
@@ -111,6 +121,14 @@
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Plank.Color.darken_by_sat.html" class="method">darken_by_sat</a></b> (<span class="main_basic_type"><span class="struct">double</span></span> amount)
             </span>
             <div class="leaf_brief_description"><span class="brief_description">Darkens the color's value using the saturtion.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Plank.Color.get_hsl.html" class="method">get_hsl</a></b> (<span class="main_keyword">out</span> <span class="main_basic_type"><span class="struct">double</span></span> h, <span class="main_keyword">out</span> <span class="main_basic_type"><span class="struct">double</span></span> s, <span class="main_keyword">out</span> <span class="main_basic_type"><span class="struct">double</span></span> l)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Get HSL color values of this color.</span>
+            </div></li>
+          <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_keyword">void</span> <b><a href="Plank.Color.set_hsl.html" class="method">set_hsl</a></b> (<span class="main_basic_type"><span class="struct">double</span></span> h, <span class="main_basic_type"><span class="struct">double</span></span> s, <span class="main_basic_type"><span class="struct">double</span></span> v)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Set HSL color values of this color.</span>
             </div></li>
           <li class="method"><span class="leaf_code_definition"><span class="main_keyword">public</span> <span class="main_basic_type"><span class="class">string</span></span> <b><a href="Plank.Color.to_prefs_string.html" class="method">to_prefs_string</a></b> ()
             </span>
