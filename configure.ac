@@ -3,7 +3,7 @@ m4_define([plank_released], [1])
 
 m4_define([plank_major_version], [0])
 m4_define([plank_minor_version], [11])
-m4_define([plank_micro_version], [2])
+m4_define([plank_micro_version], [3])
 m4_define([plank_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -116,7 +116,6 @@ CAIRO_MIN_VERSION=1.10
 
 PLANK_CORE_PKGS="gobject-2.0 >= $GLIB_MIN_VERSION \
                  glib-2.0 >= $GLIB_MIN_VERSION \
-                 gthread-2.0 >= $GLIB_MIN_VERSION \
                  gio-2.0 >= $GLIB_MIN_VERSION \
                  gio-unix-2.0 >= $GLIB_MIN_VERSION \
                  gmodule-2.0 \
@@ -142,7 +141,7 @@ PLANK_CORE_VALA_PKGS="--pkg gio-unix-2.0 \
                       --pkg posix \
                       --pkg x11"
 
-VALAFLAGS_CORE="--thread"
+VALAFLAGS_CORE=""
 
 # Docklets
 DOCKLET_LDFLAGS="-module -avoid-version"
@@ -365,6 +364,7 @@ src/Makefile
 docklets/Makefile
 docklets/Clippy/Makefile
 docklets/Clock/Makefile
+docklets/CPUMonitor/Makefile
 docklets/Desktop/Makefile
 docklets/Trash/Makefile
 docs/Makefile

@@ -1,3 +1,100 @@
+2016-12-06  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Prepare 0.11.3 release
+
+2016-11-30  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	unity: Fix spelling error
+
+2016-11-20  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	logger: Reinstate null-check for non-initialized calling
+
+2016-11-19  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Drop references to gthread-2.0
+
+	This is deprecated and obsolete since glib 2.32.0.
+
+2016-11-06  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	filedockitem: Use the file's display-name where possible
+
+	This is the proper string to use for user-visible references to a file.
+
+2016-11-05  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	appdockitem: Trust bamf with providing us the window-count
+
+2016-11-05  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	appdockitem: Don't over-react on user-visible changes and keep
+	transients
+
+	Dropping an running application here is a bit harsh in case of
+	transient
+	items. If a splashscreen is shown then this bit changes along the
+	starting process and is fatal for not-pinned items.
+
+2016-11-04  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	windows: Hide tooltips if the user performed action on a dockitem
+
+	Obviously tooltips will be hidden on appearance of the menu. In
+	addition
+	to that it will hide on click- and scroll-events too now.
+
+	This avoids obstructing maybe important windows parts the user wants to
+	interact with.
+
+2016-11-03  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	vapi: Avoid "Deprecated" warning for libbamf3
+
+2016-11-03  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Make use of vala's native Regex support where possible
+
+2016-10-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2016-10-28  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	surfacecache: Never clear the cache completely
+
+2016-10-05  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2016-10-05  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	clippy: Move generic-typed field initializer to construct
+
+2016-09-14  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	tests: Fix type mismatch
+
+2016-08-11  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	appdata: Add some keywords and translate-url
+
+2016-08-09  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2016-08-09  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Add CPUMonitor docklet
+
+2016-07-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2016-07-07  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Back to development
+
 2016-06-06  Rico Tzschichholz  <ricotz@ubuntu.com>
 
 	Prepare 0.11.2 release
