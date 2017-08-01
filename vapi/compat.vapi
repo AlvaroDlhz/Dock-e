@@ -47,9 +47,14 @@ namespace Plank
 	public int clamp (int x, int low, int high);
 	[CCode (cheader_filename = "", cname = "CLAMP")]
 	public double fclamp (double x, double low, double high);
+
+	[CCode (cheader_filename = "", cname = "GPOINTER_TO_INT")]
+	public int pointer_to_int (void* p);
+	[CCode (cheader_filename = "", cname = "GPOINTER_TO_UINT")]
+	public uint pointer_to_uint (void* p);
 }
 
-[CCode (cheader_filename = "")]
+[CCode (cheader_filename = "gtk-compat.h")]
 namespace PlankCompat
 {
 	// Conditional compat-layer for Gtk+ 3.19.1+

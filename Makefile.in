@@ -89,7 +89,6 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@HAVE_VALADOC_TRUE@am__append_1 = docs
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gcov.m4 \
@@ -165,7 +164,7 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 CSCOPE = cscope
-DIST_SUBDIRS = data lib docklets po vapi src tests examples docs
+DIST_SUBDIRS = $(SUBDIRS)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/Makefile.common $(top_srcdir)/Makefile.coverage \
 	$(top_srcdir)/build-aux/compile \
@@ -175,8 +174,8 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/build-aux/ltmain.sh \
 	$(top_srcdir)/build-aux/missing AUTHORS COPYING ChangeLog \
 	INSTALL NEWS README build-aux/compile build-aux/config.guess \
-	build-aux/config.sub build-aux/install-sh build-aux/ltmain.sh \
-	build-aux/missing
+	build-aux/config.sub build-aux/depcomp build-aux/install-sh \
+	build-aux/ltmain.sh build-aux/missing
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -271,6 +270,7 @@ GREP = @GREP@
 GSETTINGS_DISABLE_SCHEMAS_COMPILE = @GSETTINGS_DISABLE_SCHEMAS_COMPILE@
 GTEST_INCLUDEDIR = @GTEST_INCLUDEDIR@
 GTEST_SRCDIR = @GTEST_SRCDIR@
+HELP2MAN = @HELP2MAN@
 HIDPI_CFLAGS = @HIDPI_CFLAGS@
 HIDPI_LIBS = @HIDPI_LIBS@
 INSTALL = @INSTALL@
@@ -420,8 +420,18 @@ AM_CPPFLAGS = \
 	$(NULL)
 
 ACLOCAL_AMFLAGS = --install -I m4 ${ACLOCAL_FLAGS}
-SUBDIRS = data lib docklets po vapi src tests examples $(NULL) \
-	$(am__append_1)
+SUBDIRS = \
+	data \
+	lib \
+	docklets \
+	po \
+	vapi \
+	src \
+	tests \
+	examples \
+	docs \
+	$(NULL)
+
 DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-barriers \
 	--enable-dbusmenu \

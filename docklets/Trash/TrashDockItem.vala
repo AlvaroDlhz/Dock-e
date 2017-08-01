@@ -185,7 +185,7 @@ namespace Docky
 				var count = 0;
 				foreach (File _f in files) {
 					var f = _f;
-					var item = create_menu_item (f.get_basename (), DrawingService.get_icon_from_file (f));
+					var item = create_literal_menu_item (f.get_basename (), DrawingService.get_icon_from_file (f), false);
 					item.activate.connect (() => restore_file (f));
 					items.add (item);
 					
@@ -271,6 +271,9 @@ namespace Docky
 			md.add_button (_("_Cancel"), Gtk.ResponseType.CANCEL);
 			md.add_button (_("Empty _Trash"), Gtk.ResponseType.OK);
 			md.set_default_response (Gtk.ResponseType.OK);
+			md.window_position = Gtk.WindowPosition.CENTER;
+			md.gravity = Gdk.Gravity.CENTER;
+			md.set_transient_for (((Gtk.Application) Application.get_default ()).get_active_window ());
 			
 			md.response.connect ((response_id) => {
 				if (response_id != Gtk.ResponseType.CANCEL)

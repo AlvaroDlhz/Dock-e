@@ -136,11 +136,19 @@
         <ul class="navi_inline">
           <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">static</span> <span class="main_type"><span class="class">MenuItem</span></span> <b><a href="Plank.DockElement.create_menu_item.html" class="static_method">create_menu_item</a></b> (<span class="main_basic_type"><span class="class">string</span></span> title, <span class="main_basic_type"><span class="class">string</span></span>? icon = <span class="main_literal">null</span>, <span class="main_basic_type"><span class="struct">bool</span></span> force_show_icon = <span class="main_literal">false</span>)
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Creates a new menu item.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Creates a new menu item with mnemonics enabled.</span>
             </div></li>
           <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">static</span> <span class="main_type"><span class="class">MenuItem</span></span> <b><a href="Plank.DockElement.create_menu_item_with_pixbuf.html" class="static_method">create_menu_item_with_pixbuf</a></b> (<span class="main_basic_type"><span class="class">string</span></span> title, <span class="main_keyword">owned</span> <span class="main_type"><span class="class">Pixbuf</span></span> pixbuf, <span class="main_basic_type"><span class="struct">bool</span></span> force_show_icon = <span class="main_literal">false</span>)
             </span>
-            <div class="leaf_brief_description"><span class="brief_description">Creates a new menu item.</span>
+            <div class="leaf_brief_description"><span class="brief_description">Creates a new menu item with mnemonics enabled.</span>
+            </div></li>
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">static</span> <span class="main_type"><span class="class">MenuItem</span></span> <b><a href="Plank.DockElement.create_literal_menu_item.html" class="static_method">create_literal_menu_item</a></b> (<span class="main_basic_type"><span class="class">string</span></span> title, <span class="main_basic_type"><span class="class">string</span></span>? icon = <span class="main_literal">null</span>, <span class="main_basic_type"><span class="struct">bool</span></span> force_show_icon = <span class="main_literal">true</span>)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Creates a new menu item with mnemonics disabled.</span>
+            </div></li>
+          <li class="static_method"><span class="leaf_code_definition"><span class="main_keyword">protected</span> <span class="main_keyword">static</span> <span class="main_type"><span class="class">MenuItem</span></span> <b><a href="Plank.DockElement.create_literal_menu_item_with_pixbuf.html" class="static_method">create_literal_menu_item_with_pixbuf</a></b> (<span class="main_basic_type"><span class="class">string</span></span> title, <span class="main_keyword">owned</span> <span class="main_type"><span class="class">Pixbuf</span></span> pixbuf, <span class="main_basic_type"><span class="struct">bool</span></span> force_show_icon = <span class="main_literal">true</span>)
+            </span>
+            <div class="leaf_brief_description"><span class="brief_description">Creates a new menu item with mnemonics disabled.</span>
             </div></li>
         </ul>
         <h3 class="main_title">Creation methods:</h3>
@@ -257,11 +265,11 @@
                 <li class="method">remove_toggle_ref</li>
                 <li class="method">remove_weak_pointer</li>
                 <li class="method">@set</li>
+                <li class="method">set_data</li>
               </ul>
             </div>
             <div class="column">
               <ul class="navi_inline">
-                <li class="method">set_data</li>
                 <li class="method">set_data_full</li>
                 <li class="method">set_property</li>
                 <li class="method">set_qdata</li>
@@ -270,6 +278,7 @@
                 <li class="method">steal_qdata</li>
                 <li class="method">thaw_notify</li>
                 <li class="method">unref</li>
+                <li class="method">watch_closure</li>
                 <li class="method">weak_ref</li>
                 <li class="method">weak_unref</li>
                 <li class="signal">notify</li>

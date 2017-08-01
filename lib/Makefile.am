@@ -5,7 +5,6 @@ AM_CFLAGS = \
 	-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
 	-include config.h \
 	$(PLANK_CORE_CFLAGS) \
-	-w \
 	$(NULL)
 
 AM_VALAFLAGS = \
@@ -148,6 +147,7 @@ noinst_LTLIBRARIES = libplank-internal.la
 
 libplank_internal_la_CFLAGS = \
 	$(AM_CFLAGS) \
+	-fPIC \
 	-fvisibility=internal \
 	$(NULL)
 
@@ -171,8 +171,8 @@ libplank_internal_la_VALASOURCES = \
 	$(NULL)
 
 libplank_internal_la_SOURCES = \
-	glib-compat.c \
 	gtk-compat.c \
+	gtk-compat.h \
 	$(NULL)
 
 nodist_libplank_internal_la_SOURCES = \
