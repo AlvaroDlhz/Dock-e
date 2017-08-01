@@ -3,7 +3,7 @@ m4_define([plank_released], [1])
 
 m4_define([plank_major_version], [0])
 m4_define([plank_minor_version], [11])
-m4_define([plank_micro_version], [3])
+m4_define([plank_micro_version], [4])
 m4_define([plank_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -170,6 +170,11 @@ fi
 # -----------------------------------------------------------
 
 VALAFLAGS="--target-glib=2.40"
+CFLAGS="$CFLAGS \
+ -DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_40 \
+ -DGLIB_VERSION_MAX_ALLOWED=GLIB_VERSION_2_40 \
+ -DGDK_VERSION_MIN_REQUIRED=GDK_VERSION_3_10 \
+ -DGDK_VERSION_MAX_ALLOWED=GDK_VERSION_3_10"
 
 # -----------------------------------------------------------
 # Optional Dependencies
@@ -315,6 +320,9 @@ AM_CONDITIONAL([HAVE_VALADOC], [test "x$have_valadoc" = "xyes"])
 if test "x$enable_docs" = "xyes" -a "x$have_valadoc" != "xyes"; then
     AC_MSG_ERROR([Doc building requested but valadoc not installed.])
 fi
+
+AC_CHECK_PROG([HELP2MAN], [help2man], [help2man])
+AM_CONDITIONAL([HAVE_HELP2MAN], [test x$HELP2MAN = xhelp2man])
 
 
 # -----------------------------------------------------------

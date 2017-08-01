@@ -140,8 +140,8 @@ am__DEPENDENCIES_1 =
 libplank_internal_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
 am__objects_1 =
-am_libplank_internal_la_OBJECTS = libplank_internal_la-glib-compat.lo \
-	libplank_internal_la-gtk-compat.lo $(am__objects_1)
+am_libplank_internal_la_OBJECTS = libplank_internal_la-gtk-compat.lo \
+	$(am__objects_1)
 am__dirstamp = $(am__leading_dot)dirstamp
 am__objects_2 = libplank_internal_la-InternalConsts.lo \
 	libplank_internal_la-InternalQuarks.lo \
@@ -496,6 +496,7 @@ GREP = @GREP@
 GSETTINGS_DISABLE_SCHEMAS_COMPILE = @GSETTINGS_DISABLE_SCHEMAS_COMPILE@
 GTEST_INCLUDEDIR = @GTEST_INCLUDEDIR@
 GTEST_SRCDIR = @GTEST_SRCDIR@
+HELP2MAN = @HELP2MAN@
 HIDPI_CFLAGS = @HIDPI_CFLAGS@
 HIDPI_LIBS = @HIDPI_LIBS@
 INSTALL = @INSTALL@
@@ -649,7 +650,6 @@ AM_CFLAGS = \
 	-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
 	-include config.h \
 	$(PLANK_CORE_CFLAGS) \
-	-w \
 	$(NULL)
 
 AM_VALAFLAGS = \
@@ -766,6 +766,7 @@ nodist_libplank_la_SOURCES = \
 noinst_LTLIBRARIES = libplank-internal.la
 libplank_internal_la_CFLAGS = \
 	$(AM_CFLAGS) \
+	-fPIC \
 	-fvisibility=internal \
 	$(NULL)
 
@@ -789,8 +790,8 @@ libplank_internal_la_VALASOURCES = \
 	$(NULL)
 
 libplank_internal_la_SOURCES = \
-	glib-compat.c \
 	gtk-compat.c \
+	gtk-compat.h \
 	$(NULL)
 
 nodist_libplank_internal_la_SOURCES = \
@@ -1082,7 +1083,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Version.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libplank_internal_la-InternalConsts.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libplank_internal_la-InternalQuarks.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libplank_internal_la-glib-compat.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libplank_internal_la-gtk-compat.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plank-resources.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@DBus/$(DEPDIR)/Client.Plo@am__quote@
@@ -1158,13 +1158,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
-
-libplank_internal_la-glib-compat.lo: glib-compat.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT libplank_internal_la-glib-compat.lo -MD -MP -MF $(DEPDIR)/libplank_internal_la-glib-compat.Tpo -c -o libplank_internal_la-glib-compat.lo `test -f 'glib-compat.c' || echo '$(srcdir)/'`glib-compat.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libplank_internal_la-glib-compat.Tpo $(DEPDIR)/libplank_internal_la-glib-compat.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='glib-compat.c' object='libplank_internal_la-glib-compat.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o libplank_internal_la-glib-compat.lo `test -f 'glib-compat.c' || echo '$(srcdir)/'`glib-compat.c
 
 libplank_internal_la-gtk-compat.lo: gtk-compat.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT libplank_internal_la-gtk-compat.lo -MD -MP -MF $(DEPDIR)/libplank_internal_la-gtk-compat.Tpo -c -o libplank_internal_la-gtk-compat.lo `test -f 'gtk-compat.c' || echo '$(srcdir)/'`gtk-compat.c

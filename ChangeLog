@@ -1,3 +1,85 @@
+2017-03-27  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Prepare 0.11.4 release
+
+2017-03-27  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2017-03-24  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Pass -D*_VERSION_MIN_REQUIRED/*_VERSION_MAX_ALLOWED for glib and gdk
+
+	This should be a better way to deal with deprecation warnings.
+
+2017-03-24  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	lib: glib-compat.c is superfluous while requiring glib >= 2.40
+
+2017-03-24  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Fix build with -Werror=implicit-function-declaration
+
+2017-03-24  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Fix build with -Werror=format
+
+2017-03-19  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	po: Update translations
+
+2017-03-05  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	trash: Make window-manager aware that empty-trash dialog is part
+	of plank
+
+2017-03-05  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Stop suppressing c-warnings except for deprecations
+
+2017-03-05  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	widgets: Fix build with -Werror=pointer-to-int-cast
+
+2017-02-19  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	build: Add -fPIC to libplank-internal.la
+
+	It is needed because libplank.la is used as a shared library, which
+	requires all dependencies be built as PIC.
+
+2017-02-09  Peter Feichtinger  <shippo@gmx.at>
+
+	Fix underscores not being shown in some menu items
+
+	Previously all menu items would be created with mnemonics enabled,
+	which
+	resulted in underscores being interpreted instead of shown literally.
+
+	This is not really useful for window titles and file names, which
+	frequently contain underscores.
+
+	This commit fixes the issue by introducing new menu item factory
+	functions in addition to the existing ones, which create menu items
+	with mnemonics disabled. Those items are used wherever names need to be
+	shown literally (i.e. window titles and file names).
+
+2017-02-05  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	docs: Make sure to install manpage from its new source
+
+2017-02-05  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	docs: Generate or update manpage with help2man if available
+
+2017-01-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Welcome to 2017
+
+2017-01-16  Rico Tzschichholz  <ricotz@ubuntu.com>
+
+	Back to development
+
 2016-12-06  Rico Tzschichholz  <ricotz@ubuntu.com>
 
 	Prepare 0.11.3 release

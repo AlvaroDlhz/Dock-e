@@ -88,6 +88,11 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@HAVE_VALADOC_TRUE@am__append_1 = \
+@HAVE_VALADOC_TRUE@	$(BUILT_SOURCES) \
+@HAVE_VALADOC_TRUE@	vala-doc/* \
+@HAVE_VALADOC_TRUE@	$(NULL)
+
 subdir = docs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gcov.m4 \
@@ -150,10 +155,14 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(docdir)"
+man1dir = $(mandir)/man1
+am__installdirs = "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(docdir)"
+NROFF = nroff
+MANS = $(dist_man_MANS)
 DATA = $(doc_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
-am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/Makefile.common
+am__DIST_COMMON = $(dist_man_MANS) $(srcdir)/Makefile.in \
+	$(top_srcdir)/Makefile.common
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ALL_LINGUAS = @ALL_LINGUAS@
@@ -207,6 +216,7 @@ GREP = @GREP@
 GSETTINGS_DISABLE_SCHEMAS_COMPILE = @GSETTINGS_DISABLE_SCHEMAS_COMPILE@
 GTEST_INCLUDEDIR = @GTEST_INCLUDEDIR@
 GTEST_SRCDIR = @GTEST_SRCDIR@
+HELP2MAN = @HELP2MAN@
 HIDPI_CFLAGS = @HIDPI_CFLAGS@
 HIDPI_LIBS = @HIDPI_LIBS@
 INSTALL = @INSTALL@
@@ -355,95 +365,95 @@ AM_CPPFLAGS = \
 	-DDOCKLETSDIR=\"$(pkglibdir)/docklets\" \
 	$(NULL)
 
-BUILT_SOURCES = \
-	plank_vala_doc.stamp \
+dist_man_MANS = \
+	plank.1 \
 	$(NULL)
 
-common_doc_files = \
-	*.css \
-	*.devhelp2 \
-	*.html \
-	*.png \
-	$(NULL)
+EXTRA_DIST = plank.h2m $(NULL) $(am__append_1)
+@HAVE_VALADOC_TRUE@BUILT_SOURCES = \
+@HAVE_VALADOC_TRUE@	plank_vala_doc.stamp \
+@HAVE_VALADOC_TRUE@	$(NULL)
 
-doc_DATA = \
-	$(addprefix vala-doc/plank/,$(common_doc_files) index.htm *.js) \
-	vala-doc/plank/img/*.png \
-	$(NULL)
+@HAVE_VALADOC_TRUE@common_doc_files = \
+@HAVE_VALADOC_TRUE@	*.css \
+@HAVE_VALADOC_TRUE@	*.devhelp2 \
+@HAVE_VALADOC_TRUE@	*.html \
+@HAVE_VALADOC_TRUE@	*.png \
+@HAVE_VALADOC_TRUE@	$(NULL)
 
-plank_doc_files = \
-	$(top_srcdir)/lib/DBusManager.vala \
-	$(top_srcdir)/lib/DockController.vala \
-	$(top_srcdir)/lib/DockPreferences.vala \
-	$(top_srcdir)/lib/DockRenderer.vala \
-	$(top_srcdir)/lib/DragManager.vala \
-	$(top_srcdir)/lib/HideManager.vala \
-	$(top_srcdir)/lib/PositionManager.vala \
-	$(top_builddir)/lib/Version.vala \
-	$(top_srcdir)/lib/DBus/Client.vala \
-	$(top_srcdir)/lib/DBus/Interfaces.vala \
-	$(top_srcdir)/lib/Docklets/Docklet.vala \
-	$(top_srcdir)/lib/Docklets/DockletItem.vala \
-	$(top_srcdir)/lib/Docklets/DockletManager.vala \
-	$(top_srcdir)/lib/Drawing/Color.vala \
-	$(top_srcdir)/lib/Drawing/DrawingService.vala \
-	$(top_srcdir)/lib/Drawing/DockTheme.vala \
-	$(top_srcdir)/lib/Drawing/Easing.vala \
-	$(top_srcdir)/lib/Drawing/Renderer.vala \
-	$(top_srcdir)/lib/Drawing/Surface.vala \
-	$(top_srcdir)/lib/Drawing/SurfaceCache.vala \
-	$(top_srcdir)/lib/Drawing/Theme.vala \
-	$(top_srcdir)/lib/Factories/AbstractMain.vala \
-	$(top_srcdir)/lib/Factories/Factory.vala \
-	$(top_srcdir)/lib/Factories/ItemFactory.vala \
-	$(top_srcdir)/lib/Items/ApplicationDockItem.vala \
-	$(top_srcdir)/lib/Items/ApplicationDockItemProvider.vala \
-	$(top_srcdir)/lib/Items/DefaultApplicationDockItemProvider.vala \
-	$(top_srcdir)/lib/Items/DockContainer.vala \
-	$(top_srcdir)/lib/Items/DockElement.vala \
-	$(top_srcdir)/lib/Items/DockItem.vala \
-	$(top_srcdir)/lib/Items/DockItemDrawValue.vala \
-	$(top_srcdir)/lib/Items/DockItemProvider.vala \
-	$(top_srcdir)/lib/Items/DockItemPreferences.vala \
-	$(top_srcdir)/lib/Items/Enums.vala \
-	$(top_srcdir)/lib/Items/FileDockItem.vala \
-	$(top_srcdir)/lib/Items/PlaceholderDockItem.vala \
-	$(top_srcdir)/lib/Items/PlankDockItem.vala \
-	$(top_srcdir)/lib/Items/TransientDockItem.vala \
-	$(top_srcdir)/lib/Services/Environment.vala \
-	$(top_srcdir)/lib/Services/EnvironmentSettings.vala \
-	$(top_srcdir)/lib/Services/Logger.vala \
-	$(top_srcdir)/lib/Services/Paths.vala \
-	$(top_srcdir)/lib/Services/Preferences.vala \
-	$(top_srcdir)/lib/Services/Settings.vala \
-	$(top_srcdir)/lib/Services/System.vala \
-	$(top_srcdir)/lib/Services/Unity.vala \
-	$(top_srcdir)/lib/Services/Worker.vala \
-	$(top_srcdir)/lib/Widgets/CompositedWindow.vala \
-	$(top_srcdir)/lib/Widgets/DockWindow.vala \
-	$(top_srcdir)/lib/Widgets/HoverWindow.vala \
-	$(top_srcdir)/lib/Widgets/PoofWindow.vala \
-	$(top_srcdir)/lib/Widgets/PreferencesWindow.vala \
-	$(top_srcdir)/lib/Widgets/TitledSeparatorMenuItem.vala \
-	$(NULL)
+@HAVE_VALADOC_TRUE@doc_DATA = \
+@HAVE_VALADOC_TRUE@	$(addprefix vala-doc/plank/,$(common_doc_files) index.htm *.js) \
+@HAVE_VALADOC_TRUE@	vala-doc/plank/img/*.png \
+@HAVE_VALADOC_TRUE@	$(NULL)
 
-valadoc_flags_plank = \
-	--force \
-	--verbose \
-	--package-name $(PACKAGE_NAME) \
-	--package-version $(PACKAGE_VERSION) \
-	$(PLANK_DOCS_VALAFLAGS) \
-	--driver "`$(VALAC) --version`" \
-	--pkg plank-internal \
-	--pkg compat \
-	--pkg config \
-	--vapidir=$(top_builddir)/lib \
-	--vapidir=$(top_srcdir)/vapi \
-	$(NULL)
+@HAVE_VALADOC_TRUE@plank_doc_files = \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/DBusManager.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/DockController.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/DockPreferences.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/DockRenderer.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/DragManager.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/HideManager.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/PositionManager.vala \
+@HAVE_VALADOC_TRUE@	$(top_builddir)/lib/Version.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/DBus/Client.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/DBus/Interfaces.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Docklets/Docklet.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Docklets/DockletItem.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Docklets/DockletManager.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Drawing/Color.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Drawing/DrawingService.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Drawing/DockTheme.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Drawing/Easing.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Drawing/Renderer.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Drawing/Surface.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Drawing/SurfaceCache.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Drawing/Theme.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Factories/AbstractMain.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Factories/Factory.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Factories/ItemFactory.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Items/ApplicationDockItem.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Items/ApplicationDockItemProvider.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Items/DefaultApplicationDockItemProvider.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Items/DockContainer.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Items/DockElement.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Items/DockItem.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Items/DockItemDrawValue.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Items/DockItemProvider.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Items/DockItemPreferences.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Items/Enums.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Items/FileDockItem.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Items/PlaceholderDockItem.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Items/PlankDockItem.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Items/TransientDockItem.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Services/Environment.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Services/EnvironmentSettings.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Services/Logger.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Services/Paths.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Services/Preferences.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Services/Settings.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Services/System.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Services/Unity.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Services/Worker.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Widgets/CompositedWindow.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Widgets/DockWindow.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Widgets/HoverWindow.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Widgets/PoofWindow.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Widgets/PreferencesWindow.vala \
+@HAVE_VALADOC_TRUE@	$(top_srcdir)/lib/Widgets/TitledSeparatorMenuItem.vala \
+@HAVE_VALADOC_TRUE@	$(NULL)
 
-@HAVE_VALADOC_TRUE@EXTRA_DIST = \
-@HAVE_VALADOC_TRUE@	$(BUILT_SOURCES) \
-@HAVE_VALADOC_TRUE@	vala-doc/* \
+@HAVE_VALADOC_TRUE@valadoc_flags_plank = \
+@HAVE_VALADOC_TRUE@	--force \
+@HAVE_VALADOC_TRUE@	--verbose \
+@HAVE_VALADOC_TRUE@	--package-name $(PACKAGE_NAME) \
+@HAVE_VALADOC_TRUE@	--package-version $(PACKAGE_VERSION) \
+@HAVE_VALADOC_TRUE@	$(PLANK_DOCS_VALAFLAGS) \
+@HAVE_VALADOC_TRUE@	--driver "`$(VALAC) --version`" \
+@HAVE_VALADOC_TRUE@	--pkg plank-internal \
+@HAVE_VALADOC_TRUE@	--pkg compat \
+@HAVE_VALADOC_TRUE@	--pkg config \
+@HAVE_VALADOC_TRUE@	--vapidir=$(top_builddir)/lib \
+@HAVE_VALADOC_TRUE@	--vapidir=$(top_srcdir)/vapi \
 @HAVE_VALADOC_TRUE@	$(NULL)
 
 @HAVE_VALADOC_TRUE@DISTCLEANFILES = \
@@ -492,6 +502,49 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-man1: $(dist_man_MANS)
+	@$(NORMAL_INSTALL)
+	@list1=''; \
+	list2='$(dist_man_MANS)'; \
+	test -n "$(man1dir)" \
+	  && test -n "`echo $$list1$$list2`" \
+	  || exit 0; \
+	echo " $(MKDIR_P) '$(DESTDIR)$(man1dir)'"; \
+	$(MKDIR_P) "$(DESTDIR)$(man1dir)" || exit 1; \
+	{ for i in $$list1; do echo "$$i"; done;  \
+	if test -n "$$list2"; then \
+	  for i in $$list2; do echo "$$i"; done \
+	    | sed -n '/\.1[a-z]*$$/p'; \
+	fi; \
+	} | while read p; do \
+	  if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; echo "$$p"; \
+	done | \
+	sed -e 'n;s,.*/,,;p;h;s,.*\.,,;s,^[^1][0-9a-z]*$$,1,;x' \
+	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,' | \
+	sed 'N;N;s,\n, ,g' | { \
+	list=; while read file base inst; do \
+	  if test "$$base" = "$$inst"; then list="$$list $$file"; else \
+	    echo " $(INSTALL_DATA) '$$file' '$(DESTDIR)$(man1dir)/$$inst'"; \
+	    $(INSTALL_DATA) "$$file" "$(DESTDIR)$(man1dir)/$$inst" || exit $$?; \
+	  fi; \
+	done; \
+	for i in $$list; do echo "$$i"; done | $(am__base_list) | \
+	while read files; do \
+	  test -z "$$files" || { \
+	    echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(man1dir)'"; \
+	    $(INSTALL_DATA) $$files "$(DESTDIR)$(man1dir)" || exit $$?; }; \
+	done; }
+
+uninstall-man1:
+	@$(NORMAL_UNINSTALL)
+	@list=''; test -n "$(man1dir)" || exit 0; \
+	files=`{ for i in $$list; do echo "$$i"; done; \
+	l2='$(dist_man_MANS)'; for i in $$l2; do echo "$$i"; done | \
+	  sed -n '/\.1[a-z]*$$/p'; \
+	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^1][0-9a-z]*$$,1,;x' \
+	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
+	dir='$(DESTDIR)$(man1dir)'; $(am__uninstall_files_from_dir)
 install-docDATA: $(doc_DATA)
 	@$(NORMAL_INSTALL)
 	@list='$(doc_DATA)'; test -n "$(docdir)" || list=; \
@@ -553,9 +606,9 @@ distdir: $(DISTFILES)
 check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
-all-am: Makefile $(DATA)
+all-am: Makefile $(MANS) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(docdir)"; do \
+	for dir in "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(docdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -611,7 +664,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-docDATA
+install-data-am: install-docDATA install-man
 
 install-dvi: install-dvi-am
 
@@ -627,7 +680,7 @@ install-info: install-info-am
 
 install-info-am:
 
-install-man:
+install-man: install-man1
 
 install-pdf: install-pdf-am
 
@@ -655,7 +708,9 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-docDATA
+uninstall-am: uninstall-docDATA uninstall-man
+
+uninstall-man: uninstall-man1
 
 .MAKE: all check install install-am install-strip
 
@@ -665,15 +720,22 @@ uninstall-am: uninstall-docDATA
 	html-am info info-am install install-am install-data \
 	install-data-am install-docDATA install-dvi install-dvi-am \
 	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags-am uninstall \
-	uninstall-am uninstall-docDATA
+	install-info install-info-am install-man install-man1 \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags-am uninstall uninstall-am uninstall-docDATA uninstall-man \
+	uninstall-man1
 
 .PRECIOUS: Makefile
 
+
+@HAVE_HELP2MAN_TRUE@plank.1: $(top_builddir)/src/plank $(srcdir)/plank.h2m
+@HAVE_HELP2MAN_TRUE@	$(HELP2MAN) $(top_builddir)/src/plank \
+@HAVE_HELP2MAN_TRUE@		--include $(srcdir)/plank.h2m \
+@HAVE_HELP2MAN_TRUE@		--libtool --no-info \
+@HAVE_HELP2MAN_TRUE@		--output=$@
 
 @HAVE_VALADOC_TRUE@cdocs: plank_c_doc.stamp
 @HAVE_VALADOC_TRUE@plank_c_doc.stamp: $(plank_doc_files) $(top_builddir)/lib/plank-internal.vapi Makefile

@@ -1,5 +1,22 @@
 include $(top_srcdir)/Makefile.common
 
+dist_man_MANS = \
+	plank.1 \
+	$(NULL)
+
+EXTRA_DIST = \
+	plank.h2m \
+	$(NULL)
+
+if HAVE_HELP2MAN
+plank.1: $(top_builddir)/src/plank $(srcdir)/plank.h2m
+	$(HELP2MAN) $(top_builddir)/src/plank \
+		--include $(srcdir)/plank.h2m \
+		--libtool --no-info \
+		--output=$@
+endif
+
+if HAVE_VALADOC
 BUILT_SOURCES = \
 	plank_vala_doc.stamp \
 	$(NULL)
@@ -86,8 +103,6 @@ valadoc_flags_plank = \
 	--vapidir=$(top_srcdir)/vapi \
 	$(NULL)
 
-if HAVE_VALADOC
-
 cdocs: plank_c_doc.stamp
 plank_c_doc.stamp: $(plank_doc_files) $(top_builddir)/lib/plank-internal.vapi Makefile
 	$(AM_V_GEN)$(VALADOC) \
@@ -116,7 +131,7 @@ plank_web_doc.stamp: $(plank_doc_files) $(top_builddir)/lib/plank-internal.vapi 
 		$(filter %.vala,$^)
 	$(AM_V_at)touch $@
 
-EXTRA_DIST = \
+EXTRA_DIST += \
 	$(BUILT_SOURCES) \
 	vala-doc/* \
 	$(NULL)

@@ -438,6 +438,8 @@
     <keyword type="signal" name="Plank.DockElement.needs_redraw" link="Plank.DockElement.needs_redraw.html"/>
     <keyword type="function" name="Plank.DockElement.create_menu_item" link="Plank.DockElement.create_menu_item.html"/>
     <keyword type="function" name="Plank.DockElement.create_menu_item_with_pixbuf" link="Plank.DockElement.create_menu_item_with_pixbuf.html"/>
+    <keyword type="function" name="Plank.DockElement.create_literal_menu_item" link="Plank.DockElement.create_literal_menu_item.html"/>
+    <keyword type="function" name="Plank.DockElement.create_literal_menu_item_with_pixbuf" link="Plank.DockElement.create_literal_menu_item_with_pixbuf.html"/>
     <keyword type="" name="Plank.DockElement" link="Plank.DockElement.html"/>
     <keyword type="function" name="Plank.DockItem.load_from_launcher" link="Plank.DockItem.load_from_launcher.html"/>
     <keyword type="function" name="Plank.DockItem.@delete" link="Plank.DockItem.@delete.html"/>
