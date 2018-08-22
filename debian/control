@@ -2,9 +2,9 @@ Source: plank
 Section: utils
 Priority: optional
 Maintainer: Rico Tzschichholz <ricotz@ubuntu.com>
-Uploaders: MATE Packaging Team <pkg-mate-team@lists.alioth.debian.org>,
+Uploaders: Debian+Ubuntu MATE Packaging Team <debian-mate@lists.debian.org>,
            Mike Gabriel <sunweaver@debian.org>,
-Build-Depends: debhelper (>= 10.3~),
+Build-Depends: debhelper (>= 11),
                dpkg-dev (>= 1.16.1.1),
                gnome-common,
                valac (>= 0.26.0),
@@ -21,10 +21,10 @@ Build-Depends: debhelper (>= 10.3~),
                at-spi2-core,
                dbus-x11,
                xvfb
-Vcs-Git: https://anonscm.debian.org/git/pkg-mate/plank.git
-Vcs-Browser: https://anonscm.debian.org/cgit/pkg-mate/plank.git/
+Vcs-Git: https://salsa.debian.org/debian-mate-team/plank.git
+Vcs-Browser: https://salsa.debian.org/debian-mate-team/plank
 Homepage: https://launchpad.net/plank
-Standards-Version: 4.0.0
+Standards-Version: 4.2.0
 
 Package: plank
 Architecture: any
@@ -43,6 +43,7 @@ Description: Elegant, simple, clean dock
 
 Package: libplank1
 Architecture: any
+Section: libs
 Depends: ${shlibs:Depends},
          libplank-common (= ${source:Version}),
          bamfdaemon,
