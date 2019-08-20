@@ -3,7 +3,7 @@ m4_define([plank_released], [1])
 
 m4_define([plank_major_version], [0])
 m4_define([plank_minor_version], [11])
-m4_define([plank_micro_version], [4])
+m4_define([plank_micro_version], [89])
 m4_define([plank_nano_version], [0])
 
 # If library source has changed since last release, increment revision
@@ -24,7 +24,7 @@ m4_define([plank_full_version],
 
 # Extend version with bzr revision for non-release builds
 m4_define([plank_version], m4_if(plank_released, [1],
-          [plank_full_version], [m4_esyscmd([build-aux/bzr-version-gen plank_full_version])]))
+          [plank_full_version], [m4_esyscmd([build-aux/git-version-gen --prefix "" --fallback plank_full_version .tarball-version])]))
 m4_define([plank_major_minor_version], plank_major_version.plank_minor_version)
 m4_define([plank_module_version], plank_lt_current)
 
@@ -56,6 +56,13 @@ AM_PROG_CC_C_O
 AC_PROG_CXX
 AC_PROG_CXX_C_O
 AC_PROG_INSTALL
+
+GETTEXT_PACKAGE=AC_PACKAGE_NAME
+AC_SUBST(GETTEXT_PACKAGE)
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, ["$GETTEXT_PACKAGE"], [Define the gettext package to be used])
+
+AM_GNU_GETTEXT_VERSION([0.19.6])
+AM_GNU_GETTEXT([external])
 
 LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
@@ -94,7 +101,7 @@ AC_SUBST([API_VERSION])
 # -----------------------------------------------------------
 # Vala
 # -----------------------------------------------------------
-VALA_MIN_VERSION=0.26.0
+VALA_MIN_VERSION=0.34.0
 
 AM_PROG_VALAC([$VALA_MIN_VERSION],
     [],
@@ -111,8 +118,8 @@ fi
 GTK_MIN_VERSION=3.10.0
 GLIB_MIN_VERSION=2.40.0
 GDK_PIXBUF_MIN_VERSION=2.26.0
-BAMF_MIN_VERSION=0.2.92
-CAIRO_MIN_VERSION=1.10
+BAMF_MIN_VERSION=0.4.0
+CAIRO_MIN_VERSION=1.13
 
 PLANK_CORE_PKGS="gobject-2.0 >= $GLIB_MIN_VERSION \
                  glib-2.0 >= $GLIB_MIN_VERSION \
@@ -147,6 +154,12 @@ VALAFLAGS_CORE=""
 DOCKLET_LDFLAGS="-module -avoid-version"
 AC_SUBST([DOCKLET_LDFLAGS])
 
+GNOMEMENU3_PKGS="libgnome-menu-3.0"
+GNOMEMENU3_VALAFLAGS="--pkg libgnome-menu-3.0"
+AC_SUBST(GNOMEMENU3_VALAFLAGS)
+
+PKG_CHECK_MODULES(GNOMEMENU3, $GNOMEMENU3_PKGS)
+
 # -----------------------------------------------------------
 # GLib Resources
 # -----------------------------------------------------------
@@ -169,7 +182,7 @@ fi
 #   target-glib flag accoringly
 # -----------------------------------------------------------
 
-VALAFLAGS="--target-glib=2.40"
+VALAFLAGS="$VALAFLAGS --target-glib=2.40"
 CFLAGS="$CFLAGS \
  -DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_40 \
  -DGLIB_VERSION_MAX_ALLOWED=GLIB_VERSION_2_40 \
@@ -179,22 +192,6 @@ CFLAGS="$CFLAGS \
 # -----------------------------------------------------------
 # Optional Dependencies
 # -----------------------------------------------------------
-
-# Check for HiDPI support of Cairo
-HIDPI_PKGS="cairo >= 1.13"
-PKG_CHECK_MODULES(HIDPI, $HIDPI_PKGS, [enable_hidpi=yes], [enable_hidpi=no])
-if test "x$enable_hidpi" = "xyes" ; then
-    VALAFLAGS="$VALAFLAGS --define HAVE_HIDPI"
-fi
-AM_CONDITIONAL([HAVE_HIDPI], [test "x$enable_hidpi" = "xyes"])
-
-# Check for newer BAMF
-BAMF_PKGS="libbamf3 >= 0.4.0"
-PKG_CHECK_MODULES(BAMF, $BAMF_PKGS, [enable_bamf_0_4=yes], [enable_bamf_0_4=no])
-if test "x$enable_bamf_0_4" = "xyes" ; then
-    VALAFLAGS="$VALAFLAGS --define HAVE_BAMF_0_4"
-fi
-AM_CONDITIONAL([HAVE_BAMF_0_4], [test "x$enable_bamf_0_4" = "xyes"])
 
 # Support barrier-supported unhiding using Xinput 2.3
 XFIXES_MIN_VERSION=5.0
@@ -301,8 +298,6 @@ CFLAGS="$CFLAGS -Wl,--enable-new-dtags"
 # -----------------------------------------------------------
 # Documentation
 # -----------------------------------------------------------
-VALADOC_MIN_VERSION=0.3.1
-
 AC_ARG_ENABLE([docs],
               AS_HELP_STRING([--enable-docs],[Enable documentation generation]),
               [enable_docs=$enableval], [enable_docs=no])
@@ -310,8 +305,6 @@ AM_CONDITIONAL([ENABLE_DOCS], [test "x$enable_docs" = "xyes"])
 
 have_valadoc=no
 if test "x$enable_docs" = "xyes"; then
-    # make sure the library is new enough and the program exists
-    PKG_CHECK_MODULES([VALADOC], [valadoc-1.0 >= $VALADOC_MIN_VERSION])
     AC_PATH_PROG([VALADOC], [valadoc], [:])
     AS_IF([test "$VALADOC" != :], have_valadoc=yes)
 fi
@@ -333,26 +326,17 @@ AC_ARG_ENABLE([headless-tests],
               [enable_headless_tests=$enableval], [enable_headless_tests=no])
 if test "x$enable_headless_tests" != "xno"; then
     AC_PATH_PROG([XVFB_RUN], [xvfb-run], [:])
-    AC_PATH_PROG([DBUS_LAUNCH], [dbus-launch], [:])
+    AC_PATH_PROG([DBUS_RUN_SESSION], [dbus-run-session], [:])
     AS_IF([test "$XVFB_RUN" != :], [have_xvfb_run=yes], [have_xvfb_run=no])
-    AS_IF([test "$DBUS_LAUNCH" != :], [have_dbus_launch=yes], [have_dbus_launch=no])
+    AS_IF([test "$DBUS_RUN_SESSION" != :], [have_dbus_run_session=yes], [have_dbus_run_session=no])
 fi
-AM_CONDITIONAL(HAVE_HEADLESS_TESTS, [test "x$have_xvfb_run" == "xyes" -a "x$have_dbus_launch" == "xyes"])
+AM_CONDITIONAL(HAVE_HEADLESS_TESTS, [test "x$have_xvfb_run" == "xyes" -a "x$have_dbus_run_session" == "xyes"])
 
 if test "x$enable_headless_tests" = "xyes"; then
-  if test "x$have_xvfb_run" != "xyes" -o "x$have_dbus_launch" != "xyes"; then
-    AC_MSG_ERROR([Headless Tests requested but xvfb-run/dbus-launch not installed.])
+  if test "x$have_xvfb_run" != "xyes" -o "x$have_dbus_run_session" != "xyes"; then
+    AC_MSG_ERROR([Headless Tests requested but xvfb-run/dbus-run-session not installed.])
   fi
 fi
-
-
-# -----------------------------------------------------------
-# Gettext
-# -----------------------------------------------------------
-GETTEXT_PACKAGE=AC_PACKAGE_NAME
-AC_SUBST(GETTEXT_PACKAGE)
-AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, ["$GETTEXT_PACKAGE"], [Define the gettext package to be used])
-IT_PROG_INTLTOOL([0.35.0])
 
 
 # -----------------------------------------------------------
@@ -361,7 +345,6 @@ IT_PROG_INTLTOOL([0.35.0])
 AC_CONFIG_FILES([
 Makefile
 data/Makefile
-data/net.launchpad.plank.gschema.xml.in
 data/apport/Makefile
 data/icons/Makefile
 data/themes/Makefile
@@ -370,6 +353,8 @@ lib/plank.pc
 lib/Version.vala
 src/Makefile
 docklets/Makefile
+docklets/Applications/Makefile
+docklets/Battery/Makefile
 docklets/Clippy/Makefile
 docklets/Clock/Makefile
 docklets/CPUMonitor/Makefile

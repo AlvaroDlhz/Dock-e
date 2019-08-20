@@ -33,7 +33,7 @@ namespace Plank
 		/**
 		 * {@inheritDoc}
 		 */
-		public Settings (string schema)
+		protected Settings (string schema)
 		{
 			Object (settings: new GLib.Settings (schema));
 		}
@@ -41,7 +41,7 @@ namespace Plank
 		/**
 		 * {@inheritDoc}
 		 */
-		public Settings.with_path (string schema, string path)
+		protected Settings.with_path (string schema, string path)
 		{
 			Object (settings: new GLib.Settings.with_path (schema, path));
 		}
@@ -52,11 +52,7 @@ namespace Plank
 			
 			debug ("Bind '%s' to '%s'", class_type_name, settings.path);
 			
-#if VALA_0_32
 			(unowned ParamSpec)[] properties = get_class ().list_properties ();
-#else
-			(unowned ParamSpec)[] properties = g_object_class_list_properties (get_class ());
-#endif
 			
 			// Bind available gsettings-keys to their class-properties
 			foreach (unowned string key in settings.list_keys ()) {
