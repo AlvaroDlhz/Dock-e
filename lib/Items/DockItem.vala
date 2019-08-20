@@ -133,7 +133,7 @@ namespace Plank
 		/**
 		 * Creates a new dock item.
 		 */
-		public DockItem ()
+		protected DockItem ()
 		{
 			GLib.Object (Prefs: new DockItemPreferences ());
 		}
@@ -531,15 +531,11 @@ namespace Plank
 			Cairo.Surface? icon = null;
 			Gdk.Pixbuf? pbuf = ForcePixbuf;
 			if (pbuf == null) {
-#if HAVE_HIDPI
 				double x_scale = 1.0, y_scale = 1.0;
 				surface.Internal.get_device_scale (out x_scale, out y_scale);
 				icon = DrawingService.load_icon_for_scale (Icon, surface.Width, surface.Height, (int) double.max (x_scale, y_scale));
 				if (icon != null)
 					icon.set_device_scale (1.0, 1.0);
-#else
-				pbuf = DrawingService.load_icon (Icon, surface.Width, surface.Height);
-#endif
 			} else {
 				pbuf = DrawingService.ar_scale (pbuf, surface.Width, surface.Height);
 			}
@@ -606,11 +602,7 @@ namespace Plank
 		 */
 		public void copy_values_to (DockItem target)
 		{
-#if VALA_0_32
 			(unowned ParamSpec)[] properties = get_class ().list_properties ();
-#else
-			(unowned ParamSpec)[] properties = g_object_class_list_properties (get_class ());
-#endif
 			
 			foreach (unowned ParamSpec prop in properties) {
 				// Skip non-copyable properties to avoid warnings

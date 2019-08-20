@@ -23,7 +23,7 @@ namespace Docky
 {
 	[DBus (name = "org.gnome.Nautilus.FileOperations")]
 	interface NautilusFileOperations : Object {
-		public abstract void empty_trash () throws IOError;
+		public abstract void empty_trash () throws DBusError, IOError;
 	}
 	
 	public class TrashDockItem : DockletItem
@@ -244,8 +244,8 @@ namespace Docky
 		
 		void empty_trash ()
 		{
-			if (environment_is_session_desktop (XdgSessionDesktop.GNOME | XdgSessionDesktop.UNITY)) {
-				// Try using corresponding DBus-interface of Nautilus if available (GNOME, Unity)
+			if (environment_is_session_desktop (XdgSessionDesktop.GNOME | XdgSessionDesktop.UNITY | XdgSessionDesktop.UBUNTU)) {
+				// Try using corresponding DBus-interface of Nautilus if available (GNOME, Unity, Ubuntu)
 				try {
 					NautilusFileOperations nautilus_file_operations = Bus.get_proxy_sync (BusType.SESSION,
 						"org.gnome.Nautilus", "/org/gnome/Nautilus");

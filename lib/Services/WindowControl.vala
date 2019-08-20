@@ -182,7 +182,7 @@ namespace Plank
 			
 			for (var i = 0; xids != null && i < xids.length; i++) {
 				unowned Wnck.Window window = Wnck.Window.@get (xids.index (i));
-				if (window == null)
+				if (window == null || window.is_skip_tasklist ())
 					continue;
 				
 				if (!is_virtual) {
@@ -438,6 +438,8 @@ namespace Plank
 			additional_windows.reverse ();
 			
 			foreach (unowned Wnck.Window window in additional_windows) {
+				if (window == targetWindow)
+					continue;
 				if (!window.is_minimized () && windows_share_viewport (targetWindow, window)) {
 					center_and_focus_window (window, event_time);
 					Thread.usleep (WINDOW_GROUP_DELAY);
