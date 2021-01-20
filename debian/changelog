@@ -1,3 +1,11 @@
+plank (0.11.89-3) unstable; urgency=medium
+
+  * debian/patches:
+    + Add 0001_changed-plank-positioning-according-to-workarea.patch.
+      Change plank positioning according to workarea.
+
+ -- Mike Gabriel <sunweaver@debian.org>  Wed, 20 Jan 2021 16:58:38 +0100
+
 plank (0.11.89-2) unstable; urgency=medium
 
   [ Rico Tzschichholz ]
