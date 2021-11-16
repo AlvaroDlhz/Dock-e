@@ -29,7 +29,7 @@ common_doc_files = \
 	*.css \
 	*.devhelp2 \
 	*.html \
-	*.png \
+	*.svg \
 	$(NULL)
 
 doc_DATA = \
