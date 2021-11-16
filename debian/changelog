@@ -1,3 +1,25 @@
+plank (0.11.89-4) unstable; urgency=medium
+
+  [ Mike Gabriel ]
+  * debian/control:
+    + Bump Standards-Version: to 4.6.0. No changes needed.
+  * debian/patches:
+    + Add 1001_fix-vala-doc-build.patch. Fix vala-doc generation. Recently,
+      image file format has been changed from .png to .svg files. (Closes:
+      #997520).
+  * debian/libplank-doc.install:
+    + Install API doc files to /usr/share/doc/plank/html/.
+  * debian/libplank-doc.doc-base:
+    + Add file. Register libplank API with doc-base.
+  * debian/watch:
+    + Switch to file format version 4.
+
+  [ Martin Wimpress ]
+  * debian/patches:
+    + Add 0002_fix_disappearing_dock_items.patch (LP: #1760433).
+
+ -- Mike Gabriel <sunweaver@debian.org>  Tue, 16 Nov 2021 16:11:07 +0100
+
 plank (0.11.89-3) unstable; urgency=medium
 
   * debian/patches:

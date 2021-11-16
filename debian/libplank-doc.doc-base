@@ -1,0 +1,9 @@
+Document: libplank-doc
+Title: libplank API documentation
+Author:  Rico Tzschichholz
+Abstract: This document describes the API of the libplank library.
+Section: Programming/Vala
+
+Format: HTML
+Index: /usr/share/doc/plank/html/index.htm
+Files: /usr/share/doc/plank/html/*
