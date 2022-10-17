@@ -1,3 +1,16 @@
+plank (0.11.89-4ubuntu1) lunar; urgency=medium
+
+  * refresh 0001_changed-plank-positioning-according-to-workarea.patch
+    from upstream pull request
+    This ensures GNOME based desktops use the original calculation to
+    prevent plank misalignment issues when the resolution changes
+    (LP: #1949741)
+  * Packaging Changes
+    d/control Update plank-dev dependency to remove obsolete dependency
+     libgdk-pixbuf2.0-dev (>= 2.26.0) => libgdk-pixbuf-2.0-dev
+
+ -- David Mohammed <fossfreedom@ubuntu.com>  Mon, 17 Oct 2022 09:42:39 +0100
+
 plank (0.11.89-4) unstable; urgency=medium
 
   [ Mike Gabriel ]
