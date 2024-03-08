@@ -1,3 +1,9 @@
+plank (0.11.89-4ubuntu2) noble; urgency=medium
+
+  * No-change rebuild against libglib2.0-0t64
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Fri, 08 Mar 2024 06:40:20 +0000
+
 plank (0.11.89-4ubuntu1) lunar; urgency=medium
 
   * refresh 0001_changed-plank-positioning-according-to-workarea.patch
