@@ -1,3 +1,9 @@
+plank (0.11.89-4ubuntu3) noble; urgency=medium
+
+  * No-change rebuild against libglib2.0-0t64
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 11 Mar 2024 23:28:34 +0000
+
 plank (0.11.89-4ubuntu2) noble; urgency=medium
 
   * No-change rebuild against libglib2.0-0t64
