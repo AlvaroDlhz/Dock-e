@@ -1,3 +1,9 @@
+plank (0.11.89-4ubuntu4) noble; urgency=high
+
+  * No change rebuild against libbamf3-2t64.
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Fri, 22 Mar 2024 17:49:20 +0100
+
 plank (0.11.89-4ubuntu3) noble; urgency=medium
 
   * No-change rebuild against libglib2.0-0t64
