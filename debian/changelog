@@ -1,3 +1,9 @@
+plank (0.11.89-4ubuntu5) noble; urgency=medium
+
+  * No-change rebuild for CVE-2024-3094
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Sun, 31 Mar 2024 06:47:45 +0000
+
 plank (0.11.89-4ubuntu4) noble; urgency=high
 
   * No change rebuild against libbamf3-2t64.
