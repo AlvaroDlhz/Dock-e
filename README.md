@@ -1,119 +1,121 @@
 # Dock-e
 
-Dock-e es una barra de escritorio flotante para Linux basada en
-[Plank](https://launchpad.net/plank). Conserva el motor, la integración con
-ventanas y la arquitectura en Vala de Plank, pero amplía su interfaz con un
-lanzador de aplicaciones y controles del sistema integrados en el propio
-proyecto.
+Dock-e is a floating desktop dock for Linux based on
+[Plank](https://launchpad.net/plank). It retains Plank's window integration,
+rendering engine, and Vala architecture while extending the interface with a
+built-in application launcher and native system controls.
 
-El objetivo es ofrecer una barra compacta y coherente visualmente, sin depender
-de lanzadores o paneles externos para sus funciones principales.
+The goal is to provide a compact, visually consistent dock whose core features
+do not depend on external launchers or desktop panels.
 
-## Estado actual
+## Current State
 
-La barra ocupa prácticamente todo el ancho de la pantalla y conserva márgenes
-laterales e inferior para producir el efecto flotante. Su contenido está
-dividido en tres zonas:
+The dock spans nearly the full width of the screen while preserving side and
+bottom margins to create a floating appearance. Its contents are divided into
+three sections:
 
-- **Izquierda:** botón de Dock-e y acceso al lanzador nativo.
-- **Centro:** aplicaciones fijadas y ventanas abiertas, con ampliación animada,
-  indicadores sólidos para aplicaciones activas y áreas de interacción que
-  llegan hasta el borde inferior.
-- **Derecha:** volumen, Bluetooth, Wi-Fi, batería y hora.
+- **Left:** the Dock-e button and native application launcher.
+- **Center:** pinned applications and open windows, with animated magnification,
+  solid indicators for active applications, and interaction areas that extend
+  all the way to the bottom edge.
+- **Right:** volume, Bluetooth, Wi-Fi, battery, and clock indicators.
 
-## Lanzador nativo
+## Native Application Launcher
 
-El botón de Dock-e abre un lanzador construido dentro del proyecto. Incluye:
+The Dock-e button opens an application launcher built directly into the
+project. It includes:
 
-- Búsqueda difusa de aplicaciones instaladas.
-- Pestañas **Frequently used** y **All**.
-- Registro persistente de aplicaciones utilizadas.
-- Catálogo alfabético con separadores por inicial.
-- Navegación mediante ratón y teclado.
-- Menú de sesión para bloquear, suspender, cerrar sesión, reiniciar o apagar.
-- Tamaño y posición estables sobre la barra.
+- Fuzzy search across installed applications.
+- **Frequently used** and **All** tabs.
+- Persistent application usage tracking.
+- An alphabetical catalog with section dividers.
+- Full mouse and keyboard navigation.
+- Session controls for locking, suspending, logging out, restarting, and
+  powering off the system.
+- Stable dimensions and positioning above the dock.
 
-El icono del botón está en `data/dock-menu.jpg` y se incorpora al binario a
-través de los recursos de GLib.
+The button artwork is stored in `data/dock-menu.jpg` and embedded in the binary
+through GLib resources.
 
-## Paneles del sistema
+## Native System Panels
 
-Los indicadores de la derecha utilizan una ventana nativa compartida en lugar
-de depender visualmente de los menús estándar de GTK. El contenido cambia según
-el indicador seleccionado:
+The indicators on the right use a shared native window instead of relying on
+the visual appearance of standard GTK menus. Its contents change according to
+the selected indicator:
 
-- **Volumen:** dispositivo de salida, volumen, silencio, entrada de micrófono,
-  controles por aplicación y acceso a la configuración avanzada.
-- **Bluetooth:** encendido y dispositivos emparejados.
-- **Wi-Fi:** encendido y redes detectadas.
-- **Batería:** porcentaje y estado de carga.
-- **Hora:** fecha y calendario.
+- **Volume:** output device selection, output volume and mute controls,
+  microphone input controls, per-application volume, and access to advanced
+  sound settings.
+- **Bluetooth:** power control and paired devices.
+- **Wi-Fi:** power control and detected networks.
+- **Battery:** charge percentage and charging state.
+- **Clock:** current date and calendar.
 
-Los paneles mantienen la barra visible mientras se utilizan y comparten fondo,
-bordes, espaciado y posición.
+These panels keep the dock visible while they are in use and share the same
+background, borders, spacing, and positioning.
 
-## Estructura del proyecto
+## Project Structure
 
 ```text
 data/
-  dock-menu.jpg                 Recurso del botón principal
-  plank.gresource.xml           Registro de recursos incluidos en el binario
-  themes/                       Temas y valores visuales de la barra
+  dock-menu.jpg                 Main button artwork
+  plank.gresource.xml           Resources embedded in the binary
+  themes/                       Dock themes and visual settings
 
 lib/
-  DockController.vala           Crea y coordina barra, proveedores y paneles
-  DockRenderer.vala             Renderizado, estados y animaciones
-  PositionManager.vala          Geometría de las tres zonas de la barra
-  HideManager.vala              Auto-ocultado e inhibición durante paneles
+  DockController.vala           Creates and coordinates the dock and panels
+  DockRenderer.vala             Rendering, visual states, and animations
+  PositionManager.vala          Geometry for the dock's three sections
+  HideManager.vala              Auto-hide behavior and panel inhibition
 
   Items/
-    LauncherItem.vala           Botón fijo de Dock-e
-    StatusIndicatorItem.vala    Indicadores de volumen, red, batería y hora
-    ApplicationDockItem.vala    Aplicaciones fijadas y ventanas abiertas
+    LauncherItem.vala           Fixed Dock-e launcher button
+    StatusIndicatorItem.vala    Volume, network, battery, and clock indicators
+    ApplicationDockItem.vala    Pinned applications and open windows
 
   Widgets/
-    DockWindow.vala             Entrada de ratón y ventana principal
-    LauncherWindow.vala         Lanzador nativo de aplicaciones
-    StatusPanelWindow.vala      Panel reutilizable para controles del sistema
+    DockWindow.vala             Main window and pointer input handling
+    LauncherWindow.vala         Native application launcher
+    StatusPanelWindow.vala      Shared panel for native system controls
 
-docklets/                       Docklets heredados de Plank
-src/                            Punto de entrada del ejecutable
-tests/                          Pruebas heredadas y componentes de prueba
-vapi/                           Definiciones de interfaces Vala
+docklets/                       Docklets inherited from Plank
+src/                            Application entry point
+tests/                          Test suite and supporting test components
+vapi/                           Vala interface definitions
 ```
 
-El flujo principal es:
+The main execution flow is:
 
-1. `DockController` crea la ventana y registra los proveedores fijos.
-2. `PositionManager` separa el botón, las aplicaciones y los indicadores.
-3. `DockRenderer` dibuja cada región y anima sus estados.
-4. `DockWindow` dirige los clics hacia `LauncherWindow` o
+1. `DockController` creates the dock window and registers its fixed providers.
+2. `PositionManager` separates the launcher button, applications, and system
+   indicators.
+3. `DockRenderer` draws each section and animates its visual states.
+4. `DockWindow` routes input to either `LauncherWindow` or
    `StatusPanelWindow`.
-5. Los paneles interactúan con los servicios del escritorio mediante
-   herramientas como PipeWire/WirePlumber, PulseAudio, NetworkManager, BlueZ y
-   XFCE Power Manager.
+5. The native panels interact with desktop services through PipeWire and
+   WirePlumber, PulseAudio, NetworkManager, BlueZ, and XFCE Power Manager.
 
-## Compilación
+## Building
 
-Dock-e utiliza Autotools, Vala y GTK 3. En un sistema con las dependencias de
-Plank instaladas:
+Dock-e uses Autotools, Vala, and GTK 3. On a system with Plank's build
+dependencies installed, run:
 
 ```bash
 ./autogen.sh
 make -j$(nproc)
 ```
 
-Para ejecutar la compilación local sin instalarla:
+To run the local build without installing it:
 
 ```bash
 LD_LIBRARY_PATH="$PWD/lib/.libs" "$PWD/src/.libs/plank" -n dev -d
 ```
 
-## Origen y licencia
+## Origin and License
 
-Dock-e está basado en Plank y mantiene su licencia **GNU General Public License
-v3 o posterior**. Los avisos de copyright y autoría existentes en el código
-original se conservan.
+Dock-e is based on Plank and remains licensed under the **GNU General Public
+License, version 3 or later**. Existing copyright and attribution notices from
+the original codebase are preserved.
 
-La documentación histórica y las instrucciones para contribuir al código base
-pueden consultarse en `HACKING` y en el proyecto original de Plank.
+Historical documentation and contribution guidelines for the upstream codebase
+are available in `HACKING` and through the original Plank project.
