@@ -138,12 +138,12 @@ namespace Plank
 			TopRoundness    = 6;
 			BottomRoundness = 6;
 			
-			LineWidth = 1;
+			LineWidth = 0;
 			
-			OuterStrokeColor = { 0.1647, 0.1647, 0.1647, 1.0 };
+			OuterStrokeColor = { 0.1647, 0.1647, 0.1647, 0.0 };
 			FillStartColor   = { 0.1647, 0.1647, 0.1647, 1.0 };
-			FillEndColor     = { 0.3176, 0.3176, 0.3176, 1.0 };
-			InnerStrokeColor = { 1.0, 1.0, 1.0, 1.0 };
+			FillEndColor     = { 0.1647, 0.1647, 0.1647, 1.0 };
+			InnerStrokeColor = { 1.0, 1.0, 1.0, 0.0 };
 		}
 		
 		/**

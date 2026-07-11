@@ -36,6 +36,9 @@ namespace Plank
 		
 		[Description(nick = "bottom-padding", blurb = "The padding on the bottom dock edge, in tenths of a percent of IconSize.")]
 		public double BottomPadding { get; set; }
+
+		[Description(nick = "dock-margin", blurb = "The space between the dock and the screen edge, in tenths of a percent of IconSize.")]
+		public double DockMargin { get; set; }
 		
 		[Description(nick = "item-padding", blurb = "The padding between items on the dock, in tenths of a percent of IconSize.")]
 		public double ItemPadding { get; set; }
@@ -108,11 +111,12 @@ namespace Plank
 		protected override void reset_properties ()
 		{
 			base.reset_properties ();
-			TopRoundness = 4;
-			BottomRoundness = 0;
-			HorizPadding = 0.0;
-			TopPadding = -11.0;
-			BottomPadding = 2.5;
+			TopRoundness = 8;
+			BottomRoundness = 8;
+			HorizPadding = 1.5;
+			TopPadding = 1.5;
+			BottomPadding = 1.5;
+			DockMargin = 1.5;
 			ItemPadding = 2.5;
 			IndicatorSize = 5.0;
 			IconShadowSize = 1.0;
@@ -125,7 +129,7 @@ namespace Plank
 			ActiveTime = 300;
 			SlideTime = 300;
 			FadeTime = 250;
-			HideTime = 250;
+			HideTime = 35;
 			GlowSize = 30;
 			GlowTime = 10000;
 			GlowPulseTime = 2000;
@@ -299,36 +303,30 @@ namespace Plank
 			var rotate = 0.0;
 			var xoffset = 0.0, yoffset = 0.0;
 			
-			Cairo.Pattern gradient = null;
-			
 			switch (pos) {
 			default:
 			case Gtk.PositionType.BOTTOM:
 				xoffset = clip_rect.x;
 				yoffset = clip_rect.y;
 				
-				gradient = new Cairo.Pattern.linear (0, rect.y, 0, rect.y + rect.height);
 				break;
 			case Gtk.PositionType.TOP:
 				rotate = Math.PI;
 				xoffset = -clip_rect.x - clip_rect.width;
 				yoffset = -clip_rect.height;
 				
-				gradient = new Cairo.Pattern.linear (0, rect.y + rect.height, 0, rect.y);
 				break;
 			case Gtk.PositionType.LEFT:
 				rotate = Math.PI_2;
 				xoffset = clip_rect.y;
 				yoffset = -clip_rect.width;
 				
-				gradient = new Cairo.Pattern.linear (rect.x + rect.width, 0, rect.x, 0);
 				break;
 			case Gtk.PositionType.RIGHT:
 				rotate = -Math.PI_2;
 				xoffset = -clip_rect.y - clip_rect.height;
 				yoffset = clip_rect.x;
 				
-				gradient = new Cairo.Pattern.linear (rect.x, 0, rect.x + rect.width, 0);
 				break;
 			}
 			
@@ -344,11 +342,8 @@ namespace Plank
 			cr.set_line_width (LineWidth);
 			cr.clip ();
 
-			gradient.add_color_stop_rgba (0, color.red, color.green, color.blue, 0);
-			gradient.add_color_stop_rgba (1, color.red, color.green, color.blue, 0.6 * opacity);
-			
 			cr.rectangle (rect.x, rect.y, rect.width, rect.height);
-			cr.set_source (gradient);
+			cr.set_source_rgba (color.red, color.green, color.blue, 0.3 * opacity);
 			cr.fill ();
 			
 			cr.reset_clip ();

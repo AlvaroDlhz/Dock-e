@@ -24,6 +24,8 @@ namespace Plank
 	 */
 	public class DockRenderer : Renderer
 	{
+		const double CLOSED_APPLICATION_OPACITY = 0.60;
+
 		public DockController controller { private get; construct; }
 		
 		public DockTheme theme { get; private set; }
@@ -58,7 +60,9 @@ namespace Plank
 		Surface? shadow_buffer = null;
 		
 		Surface? background_buffer = null;
+		Surface? status_background_buffer = null;
 		Gdk.Rectangle background_rect;
+		Gdk.Rectangle status_background_rect;
 		Surface? indicator_buffer = null;
 		Surface? urgent_indicator_buffer = null;
 		Surface? urgent_glow_buffer = null;
@@ -76,6 +80,12 @@ namespace Plank
 		ulong gtk_theme_name_changed_handler_id = 0UL;
 		
 		double dynamic_animation_offset = 0.0;
+		int64 last_zoom_frame = 0LL;
+		bool zoom_animation_active = false;
+		double primary_hide_progress = 1.0;
+		double status_hide_progress = 1.0;
+		int64 last_section_frame = 0LL;
+		bool section_animation_active = false;
 		
 		Gee.ArrayList<unowned DockItem> current_items;
 		Gee.HashSet<DockItem> transient_items;
@@ -209,6 +219,7 @@ namespace Plank
 			shadow_buffer = null;
 			
 			background_buffer = null;
+			status_background_buffer = null;
 			indicator_buffer = null;
 			urgent_indicator_buffer = null;
 			urgent_glow_buffer = null;
@@ -263,18 +274,19 @@ namespace Plank
 					hide_progress = (controller.hide_manager.Hidden ? 1.0 : 0.0);
 				}
 				
-				var zoom_duration = DOCK_ZOOM_DURATION * 1000;
-				var zoom_time = int64.max (0LL, frame_time - last_hovered_changed);
-				double zoom_progress;
-				if (zoom_time < zoom_duration) {
-					if (controller.hide_manager.Hovered)
-						zoom_progress = easing_for_mode (AnimationMode.EASE_OUT_CUBIC, zoom_time, zoom_duration);
-					else
-						zoom_progress = 1.0 - easing_for_mode (AnimationMode.EASE_IN_CUBIC, zoom_time, zoom_duration);
+				var zoom_duration = double.max (1.0, DOCK_ZOOM_DURATION * 1000.0);
+				var zoom_target = controller.hide_manager.Hovered
+					&& position_manager.pointer_is_over_primary_section (local_cursor.x) ? 1.0 : 0.0;
+				if (last_zoom_frame == 0LL) {
+					zoom_in_progress = zoom_target;
 				} else {
-					zoom_progress = (controller.hide_manager.Hovered ? 1.0 : 0.0);
+					var frame_step = double.min (1.0, (frame_time - last_zoom_frame) / zoom_duration);
+					var eased_step = 1.0 - Math.pow (1.0 - frame_step, 3.0);
+					zoom_in_progress += (zoom_target - zoom_in_progress) * eased_step;
 				}
-				zoom_in_progress = zoom_progress * (1.0 - hide_progress);
+				last_zoom_frame = frame_time;
+				zoom_in_progress *= 1.0 - hide_progress;
+				zoom_animation_active = Math.fabs (zoom_in_progress - zoom_target) > 0.002;
 			} else {
 				hide_progress = 0.0;
 				zoom_in_progress = 0.0;
@@ -284,6 +296,8 @@ namespace Plank
 				opacity = 1.0 - (1.0 - fade_opacity) * hide_progress;
 			else
 				opacity = 1.0;
+
+			update_section_progress (frame_time);
 			
 			// Update *ordered* list of items
 			current_items.clear ();
@@ -331,6 +345,33 @@ namespace Plank
 				(DrawValuesFunc) post_process_draw_values);
 			
 			background_rect = position_manager.get_background_region ();
+			status_background_rect = {};
+		}
+
+		void update_section_progress (int64 current_frame_time)
+		{
+			var primary_target = 0.0;
+			var status_target = 0.0;
+
+			if (controller.hide_manager.Hidden) {
+				primary_target = status_target = 1.0;
+			} else if (controller.hide_manager.Hovered) {
+				primary_target = status_target = 0.0;
+			}
+
+			if (last_section_frame == 0LL) {
+				primary_hide_progress = primary_target;
+				status_hide_progress = status_target;
+			} else {
+				var duration = double.max (1.0, theme.HideTime * 1000.0);
+				var step = double.min (1.0, (current_frame_time - last_section_frame) / duration);
+				primary_hide_progress += (primary_target - primary_hide_progress) * step;
+				status_hide_progress += (status_target - status_hide_progress) * step;
+			}
+
+			last_section_frame = current_frame_time;
+			section_animation_active = Math.fabs (primary_hide_progress - primary_target) > 0.002
+				|| Math.fabs (status_hide_progress - status_target) > 0.002;
 		}
 		
 		/**
@@ -403,9 +444,9 @@ namespace Plank
 			unowned Cairo.Context shadow_cr = shadow_buffer.Context;
 			
 			// calculate drawing offset
-			var x_offset = 0, y_offset = 0;
-			if (opacity == 1.0)
-				position_manager.get_dock_draw_position (out x_offset, out y_offset);
+			var primary_x_offset = 0, primary_y_offset = 0;
+			position_manager.get_dock_draw_position_for_progress (primary_hide_progress,
+				out primary_x_offset, out primary_y_offset);
 			
 			// composite dock layers and make sure to draw onto the window's context with one operation
 			main_buffer.clear ();
@@ -416,7 +457,8 @@ namespace Plank
 			start2 = new DateTime.now_local ();
 #endif
 			// draw background-layer
-			draw_dock_background (main_cr, background_rect, x_offset, y_offset);
+			draw_dock_background (main_cr, background_rect, primary_x_offset, primary_y_offset,
+				primary_hide_progress);
 #if BENCHMARK
 			end2 = new DateTime.now_local ();
 			benchmark.add ("background render time - %f ms".printf (end2.difference (start2) / 1000.0));
@@ -439,12 +481,9 @@ namespace Plank
 #endif
 			}
 			
-			// draw items-shadow-layer
-			main_cr.set_source_surface (shadow_buffer.Internal, x_offset, y_offset);
+			main_cr.set_source_surface (shadow_buffer.Internal, primary_x_offset, primary_y_offset);
 			main_cr.paint ();
-			
-			// draw items-layer
-			main_cr.set_source_surface (item_buffer.Internal, x_offset, y_offset);
+			main_cr.set_source_surface (item_buffer.Internal, primary_x_offset, primary_y_offset);
 			main_cr.paint ();
 			
 			// draw the dock on the window and fade it if need be
@@ -505,28 +544,37 @@ namespace Plank
 			}
 		}
 		
-		void draw_dock_background (Cairo.Context cr, Gdk.Rectangle background_rect, int x_offset, int y_offset)
+		void draw_dock_background (Cairo.Context cr, Gdk.Rectangle background_rect, int x_offset, int y_offset,
+			double section_progress, bool is_status = false)
 		{
 			unowned PositionManager position_manager = controller.position_manager;
 			
 			if (background_rect.width <= 0 || background_rect.height <= 0) {
-				background_buffer = null;
+				if (is_status)
+					status_background_buffer = null;
+				else
+					background_buffer = null;
 				return;
 			}
-			
-			if (background_buffer == null || background_buffer.Width != background_rect.width
-				|| background_buffer.Height != background_rect.height)
-				background_buffer = theme.create_background (background_rect.width, background_rect.height,
+
+			Surface? buffer = is_status ? status_background_buffer : background_buffer;
+			if (buffer == null || buffer.Width != background_rect.width || buffer.Height != background_rect.height) {
+				buffer = theme.create_background (background_rect.width, background_rect.height,
 					position_manager.Position, main_buffer);
-			
-			if (hide_progress > 0.0 && theme.CascadeHide) {
-				int x, y;
-				position_manager.get_background_padding (out x, out y);
-				x_offset -= (int) (x * hide_progress);
-				y_offset -= (int) (y * hide_progress);
+				if (is_status)
+					status_background_buffer = buffer;
+				else
+					background_buffer = buffer;
 			}
 			
-			cr.set_source_surface (background_buffer.Internal, background_rect.x + x_offset, background_rect.y + y_offset);
+			if (section_progress > 0.0 && theme.CascadeHide) {
+				int x, y;
+				position_manager.get_background_padding (out x, out y);
+				x_offset -= (int) (x * section_progress);
+				y_offset -= (int) (y * section_progress);
+			}
+			
+			cr.set_source_surface (buffer.Internal, background_rect.x + x_offset, background_rect.y + y_offset);
 			cr.paint ();
 		}
 		
@@ -760,6 +808,36 @@ namespace Plank
 			return private_icon_surface;
 		}
 		
+		double get_item_opacity (DockItem item, DockItemDrawValue draw_value)
+		{
+			if (is_inactive_item (item))
+				return draw_value.opacity * CLOSED_APPLICATION_OPACITY;
+
+			return draw_value.opacity;
+		}
+
+		bool is_inactive_item (DockItem item)
+		{
+			var app_item = item as ApplicationDockItem;
+			if (app_item != null)
+				return !app_item.is_running ();
+
+			return item is LauncherItem && !controller.launcher.visible;
+		}
+
+		void desaturate_icon (Surface icon_surface)
+		{
+			var source = icon_surface.to_pixbuf ();
+			var grayscale = source.copy ();
+			source.saturate_and_pixelate (grayscale, 0.0f, false);
+
+			unowned Cairo.Context icon_cr = icon_surface.Context;
+			icon_cr.set_operator (Cairo.Operator.SOURCE);
+			Gdk.cairo_set_source_pixbuf (icon_cr, grayscale, 0, 0);
+			icon_cr.paint ();
+			icon_cr.set_operator (Cairo.Operator.OVER);
+		}
+
 		void draw_item (Cairo.Context cr, DockItem item, DockItemDrawValue draw_value, int64 frame_time)
 		{
 			unowned PositionManager position_manager = controller.position_manager;
@@ -802,6 +880,9 @@ namespace Plank
 				icon_cr.fill ();
 				icon_cr.set_operator (Cairo.Operator.OVER);
 			}
+
+			if (is_inactive_item (item))
+				desaturate_icon (icon_surface);
 			
 			// draw active glow
 			var active_time = int64.max (0LL, frame_time - item.LastActive);
@@ -819,15 +900,16 @@ namespace Plank
 			}
 			var draw_region = draw_value.draw_region;
 			cr.set_source_surface (icon_surface.Internal, draw_region.x * window_scale_factor, draw_region.y * window_scale_factor);
-			if (draw_value.opacity < 1.0)
-				cr.paint_with_alpha (draw_value.opacity);
+			var item_opacity = get_item_opacity (item, draw_value);
+			if (item_opacity < 1.0)
+				cr.paint_with_alpha (item_opacity);
 			else
 				cr.paint ();
 			if (window_scale_factor > 1)
 				cr.restore ();
 			
 			// draw indicators
-			if (draw_value.show_indicator && item.Indicator != IndicatorState.NONE)
+			if (!(item is ApplicationDockItem) && draw_value.show_indicator && item.Indicator != IndicatorState.NONE)
 				draw_indicator_state (cr, draw_value.hover_region, item.Indicator, item.State);
 		}
 		
@@ -851,8 +933,9 @@ namespace Plank
 				var draw_region = draw_value.draw_region;
 				cr.set_operator (Cairo.Operator.OVER);
 				cr.set_source_surface (icon_shadow_surface.Internal, (draw_region.x - shadow_size) * window_scale_factor, (draw_region.y - shadow_size) * window_scale_factor);
-				if (draw_value.opacity < 1.0)
-					cr.paint_with_alpha (draw_value.opacity);
+				var item_opacity = get_item_opacity (item, draw_value);
+				if (item_opacity < 1.0)
+					cr.paint_with_alpha (item_opacity);
 				else
 					cr.paint ();
 				if (window_scale_factor > 1)
@@ -1085,6 +1168,12 @@ namespace Plank
 		 */
 		protected override bool animation_needed (int64 frame_time)
 		{
+			if (zoom_animation_active)
+				return true;
+
+			if (section_animation_active)
+				return true;
+
 			if (zoom_changed) {
 				//FIXME reset at a better place
 				zoom_changed = false;

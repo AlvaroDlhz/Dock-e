@@ -241,6 +241,10 @@ namespace Plank
 		 */
 		public int BottomPadding { get; private set; }
 		/**
+		 * Theme-based distance from the screen edge, scaled by icon size.
+		 */
+		public int DockMargin { get; private set; }
+		/**
 		 * Theme-based item padding, scaled by icon size.
 		 */
 		public int ItemPadding   { get; private set; }
@@ -297,6 +301,8 @@ namespace Plank
 		double ZoomPercent;
 		
 		Gdk.Rectangle background_rect;
+		Gdk.Rectangle primary_background_rect;
+		Gdk.Rectangle status_background_rect;
 		
 		/**
 		 * The maximum item count which fit the dock in its maximum
@@ -374,6 +380,7 @@ namespace Plank
 			HorizPadding  = (int) (theme.HorizPadding  * scaled_icon_size);
 			TopPadding    = (int) (theme.TopPadding    * scaled_icon_size);
 			BottomPadding = (int) (theme.BottomPadding * scaled_icon_size);
+			DockMargin    = (int) (theme.DockMargin    * scaled_icon_size);
 			ItemPadding   = (int) (theme.ItemPadding   * scaled_icon_size);
 			UrgentBounceHeight = (int) (theme.UrgentBounceHeight * IconSize);
 			LaunchBounceHeight = (int) (theme.LaunchBounceHeight * IconSize);
@@ -480,7 +487,7 @@ namespace Plank
 				width = int.min (monitor_geo.width, width);
 				VisibleDockHeight = height;
 				VisibleDockWidth = width;
-				DockHeight = dock_height;
+				DockHeight = dock_height + DockMargin;
 				DockWidth = (screen_is_composited ? monitor_geo.width : width);
 				DockBackgroundHeight = background_height;
 				DockBackgroundWidth = background_width;
@@ -490,7 +497,7 @@ namespace Plank
 				VisibleDockHeight = width;
 				VisibleDockWidth = height;
 				DockHeight = (screen_is_composited ? monitor_geo.height : width);
-				DockWidth = dock_height;
+				DockWidth = dock_height + DockMargin;
 				DockBackgroundHeight = background_width;
 				DockBackgroundWidth = background_height;
 				MaxItemCount = (int) Math.floor ((double) (monitor_geo.height - 2 * HorizPadding + 4 * LineWidth) / (ItemPadding + IconSize));
@@ -518,6 +525,18 @@ namespace Plank
 			var cursor_region = static_dock_region;
 			var progress = 1.0 - controller.renderer.hide_progress;
 			window_scale_factor = controller.window.get_window ().get_scale_factor ();
+
+			// The visual dock can contain multiple separated sections.  Input must
+			// cover their complete union rather than the original centered region.
+			if (background_rect.width > 0 && background_rect.height > 0) {
+				if (is_horizontal_dock ()) {
+					cursor_region.x = background_rect.x;
+					cursor_region.width = background_rect.width;
+				} else {
+					cursor_region.y = background_rect.y;
+					cursor_region.height = background_rect.height;
+				}
+			}
 			
 			// If zoom is enabled extend cursor-region based on current hovered-item
 			if (controller.prefs.ZoomEnabled) {
@@ -531,19 +550,19 @@ namespace Plank
 			switch (Position) {
 			default:
 			case Gtk.PositionType.BOTTOM:
-				cursor_region.height = int.max (1 * window_scale_factor, (int) (progress * cursor_region.height));
+				cursor_region.height = int.max (1 * window_scale_factor, (int) (progress * (cursor_region.height + DockMargin)));
 				cursor_region.y = DockHeight - cursor_region.height + (window_scale_factor - 1);
 				break;
 			case Gtk.PositionType.TOP:
-				cursor_region.height = int.max (1 * window_scale_factor, (int) (progress * cursor_region.height));
+				cursor_region.height = int.max (1 * window_scale_factor, (int) (progress * (cursor_region.height + DockMargin)));
 				cursor_region.y = 0;
 				break;
 			case Gtk.PositionType.LEFT:
-				cursor_region.width = int.max (1 * window_scale_factor, (int) (progress * cursor_region.width));
+				cursor_region.width = int.max (1 * window_scale_factor, (int) (progress * (cursor_region.width + DockMargin)));
 				cursor_region.x = 0;
 				break;
 			case Gtk.PositionType.RIGHT:
-				cursor_region.width = int.max (1 * window_scale_factor, (int) (progress * cursor_region.width));
+				cursor_region.width = int.max (1 * window_scale_factor, (int) (progress * (cursor_region.width + DockMargin)));
 				cursor_region.x = DockWidth - cursor_region.width + (window_scale_factor - 1);
 				break;
 			}
@@ -638,19 +657,19 @@ namespace Plank
 			default:
 			case Gtk.PositionType.BOTTOM:
 				static_dock_region.x = xoffset;
-				static_dock_region.y = DockHeight - static_dock_region.height;
+				static_dock_region.y = DockHeight - static_dock_region.height - DockMargin;
 				break;
 			case Gtk.PositionType.TOP:
 				static_dock_region.x = xoffset;
-				static_dock_region.y = 0;
+				static_dock_region.y = DockMargin;
 				break;
 			case Gtk.PositionType.LEFT:
 				static_dock_region.y = yoffset;
-				static_dock_region.x = 0;
+				static_dock_region.x = DockMargin;
 				break;
 			case Gtk.PositionType.RIGHT:
 				static_dock_region.y = yoffset;
-				static_dock_region.x = DockWidth - static_dock_region.width;
+				static_dock_region.x = DockWidth - static_dock_region.width - DockMargin;
 				break;
 			}
 			
@@ -720,6 +739,28 @@ namespace Plank
 			int icon_size = IconSize;
 			
 			Gdk.Point cursor = renderer.local_cursor;
+			var pointer_on_status = status_background_rect.width > 0
+				&& cursor.x >= status_background_rect.x
+				&& cursor.x < status_background_rect.x + status_background_rect.width;
+			var pointer_on_primary = primary_background_rect.width > 0
+				&& cursor.x >= primary_background_rect.x
+				&& cursor.x < primary_background_rect.x + primary_background_rect.width;
+
+			// Launcher positions are calculated first in the original combined
+			// coordinate space and centered later, after the status section is
+			// split out.  Apply the inverse layout shift to the cursor so the
+			// magnification curve remains centered on the item under the pointer.
+			if (is_horizontal_dock () && (pointer_on_primary || renderer.zoom_in_progress > 0.002)) {
+				var status_item_count = 0;
+				var launcher_item_count = 0;
+				foreach (unowned DockItem item in items)
+					if (item is StatusIndicatorItem)
+						status_item_count++;
+					else if (item is LauncherItem)
+						launcher_item_count++;
+				cursor.x -= (status_item_count - launcher_item_count)
+					* (IconSize + ItemPadding) / 2;
+			}
 			
 			// "relocate" our cursor to be on the top
 			switch (Position) {
@@ -783,7 +824,7 @@ namespace Plank
 			// We need a number that is 1 when ZoomIn is 0, and ZoomPercent when ZoomIn is 1.
 			// Then we treat this as if it were the ZoomPercent for the rest of the calculation.
 			bool expand_for_drop = (controller.drag_manager.ExternalDragActive && !prefs.LockItems);
-			bool zoom_enabled = prefs.ZoomEnabled;
+			bool zoom_enabled = prefs.ZoomEnabled && renderer.zoom_in_progress > 0.002;
 			double zoom_in_progress = (zoom_enabled || expand_for_drop ? renderer.zoom_in_progress : 0.0);
 			double zoom_in_percent = (zoom_enabled ? 1.0 + (ZoomPercent - 1.0) * zoom_in_progress : 1.0);
 			double zoom_icon_size = ZoomIconSize;
@@ -882,7 +923,15 @@ namespace Plank
 				}
 				
 				//FIXME
-				val.move_in (Position, bottom_offset);
+				val.move_in (Position, bottom_offset + DockMargin);
+
+				// System indicators form a fixed status section and never participate
+				// in the launcher magnification or its displacement curve.
+				if (item is StatusIndicatorItem || item is LauncherItem) {
+					val.center = val.static_center;
+					val.icon_size = icon_size;
+					val.zoom = 1.0;
+				}
 				
 				// let the draw-value be modified by the given function
 				if (func != null)
@@ -898,8 +947,97 @@ namespace Plank
 			
 			if (post_func != null)
 				post_func (draw_values);
-			
-			update_background_region (draw_values[items.first ()], draw_values[items.last ()]);
+
+			DockItem? primary_first = null;
+			DockItem? primary_last = null;
+			DockItem? status_first = null;
+			DockItem? status_last = null;
+			DockItem? menu_item = null;
+			var status_count = 0;
+			foreach (unowned DockItem item in items) {
+				if (item is LauncherItem) {
+					menu_item = item;
+				} else if (item is StatusIndicatorItem) {
+					if (status_first == null)
+						status_first = item;
+					status_last = item;
+					status_count++;
+				} else {
+					if (primary_first == null)
+						primary_first = item;
+					primary_last = item;
+				}
+			}
+
+			if (primary_first != null && primary_last != null && prefs.is_horizontal_dock ()) {
+				// Center the primary section against the full bar, independently of
+				// the number and width of the controls anchored at either edge.
+				var primary_center = (draw_values[primary_first].static_center.x
+					+ draw_values[primary_last].static_center.x) / 2.0;
+				var primary_shift = DockWidth / 2.0 - primary_center;
+				foreach (unowned DockItem item in items) {
+					if (!(item is StatusIndicatorItem) && !(item is LauncherItem))
+						draw_values[item].move_right (Position, primary_shift);
+				}
+			}
+
+			if (status_count > 0 && prefs.is_horizontal_dock ()) {
+				var background_padding = ItemPadding + 2 * HorizPadding + 4 * LineWidth;
+				var status_last_center = draw_values[status_last].center.x;
+				var desired_last_center = DockWidth - DockMargin
+					- (IconSize + background_padding) / 2.0;
+				var status_shift = desired_last_center - status_last_center;
+				foreach (unowned DockItem item in items) {
+					if (item is StatusIndicatorItem)
+						draw_values[item].move_right (Position, status_shift);
+				}
+			}
+
+			if (menu_item != null && prefs.is_horizontal_dock ()) {
+				var background_padding = ItemPadding + 2 * HorizPadding + 4 * LineWidth;
+				var desired_center = DockMargin + (IconSize + background_padding) / 2.0;
+				var value = draw_values[menu_item];
+				value.move_right (Position, desired_center - value.center.x);
+			}
+
+			primary_background_rect = {};
+			status_background_rect = {};
+			if (primary_first != null && primary_last != null) {
+				update_background_region (draw_values[primary_first], draw_values[primary_last]);
+				primary_background_rect = background_rect;
+			}
+			if (status_first != null && status_last != null) {
+				update_background_region (draw_values[status_first], draw_values[status_last]);
+				status_background_rect = background_rect;
+			}
+
+			// Keep the fixed status icons centered inside their own background,
+			// independently of the launchers' zoom-oriented baseline.
+			if (is_horizontal_dock () && status_background_rect.height > 0) {
+				var status_center_y = status_background_rect.y + status_background_rect.height / 2.0;
+				foreach (unowned DockItem item in items) {
+					if (!(item is StatusIndicatorItem) && !(item is LauncherItem))
+						continue;
+
+					var value = draw_values[item];
+					value.center.y = status_center_y;
+					value.static_center.y = status_center_y;
+				}
+			}
+
+			if (primary_background_rect.width > 0 && status_background_rect.width > 0)
+				primary_background_rect.union (status_background_rect, out background_rect);
+			else if (primary_background_rect.width > 0)
+				background_rect = primary_background_rect;
+			else
+				background_rect = status_background_rect;
+
+			// Render one continuous bar with the theme's floating margin on every edge.
+			// Item regions remain separate so launchers stay centered and status items stay right-aligned.
+			if (is_horizontal_dock () && background_rect.height > 0) {
+				background_rect.x = DockMargin;
+				background_rect.width = int.max (1, DockWidth - 2 * DockMargin);
+			}
 			
 			// precalculate and cache regions (for the current frame)
 			draw_values.map_iterator ().foreach ((i, val) => {
@@ -1023,6 +1161,29 @@ namespace Plank
 			
 			if (rect.intersect (get_background_region (), out background_region))
 				background_region.union (get_item_draw_region (val), out rect);
+
+			// Keep the visual spacing while extending each item's invisible hit target
+			// to the screen-facing edge. This lets the user acquire an icon directly
+			// from the edge without first moving into the painted background.
+			switch (Position) {
+			default:
+			case Gtk.PositionType.BOTTOM:
+				rect.height = int.max (rect.height, DockHeight - rect.y);
+				break;
+			case Gtk.PositionType.TOP:
+				var bottom = rect.y + rect.height;
+				rect.y = 0;
+				rect.height = bottom;
+				break;
+			case Gtk.PositionType.LEFT:
+				var right = rect.x + rect.width;
+				rect.x = 0;
+				rect.width = right;
+				break;
+			case Gtk.PositionType.RIGHT:
+				rect.width = int.max (rect.width, DockWidth - rect.x);
+				break;
+			}
 			
 			return rect;
 		}
@@ -1324,30 +1485,33 @@ namespace Plank
 		 */
 		public void get_dock_draw_position (out int x, out int y)
 		{
+			get_dock_draw_position_for_progress (controller.renderer.hide_progress, out x, out y);
+		}
+
+		public void get_dock_draw_position_for_progress (double progress, out int x, out int y)
+		{
 			if (!screen_is_composited) {
 				x = 0;
 				y = 0;
 				return;
 			}
 			
-			var progress = controller.renderer.hide_progress;
-			
 			switch (Position) {
 			default:
 			case Gtk.PositionType.BOTTOM:
 				x = 0;
-				y = (int) ((VisibleDockHeight + extra_hide_offset) * progress);
+				y = (int) ((VisibleDockHeight + extra_hide_offset + DockMargin) * progress);
 				break;
 			case Gtk.PositionType.TOP:
 				x = 0;
-				y = (int) (- (VisibleDockHeight + extra_hide_offset) * progress);
+				y = (int) (- (VisibleDockHeight + extra_hide_offset + DockMargin) * progress);
 				break;
 			case Gtk.PositionType.LEFT:
-				x = (int) (- (VisibleDockWidth + extra_hide_offset) * progress);
+				x = (int) (- (VisibleDockWidth + extra_hide_offset + DockMargin) * progress);
 				y = 0;
 				break;
 			case Gtk.PositionType.RIGHT:
-				x = (int) ((VisibleDockWidth + extra_hide_offset) * progress);
+				x = (int) ((VisibleDockWidth + extra_hide_offset + DockMargin) * progress);
 				y = 0;
 				break;
 			}
@@ -1361,6 +1525,20 @@ namespace Plank
 		public Gdk.Rectangle get_dock_window_region ()
 		{
 			return { win_x, win_y, DockWidth, DockHeight };
+		}
+
+		public Gdk.Rectangle get_screen_background_region ()
+		{
+			return { win_x + background_rect.x, win_y + background_rect.y,
+				background_rect.width, background_rect.height };
+		}
+
+		public Gdk.Rectangle get_screen_region_for_item (DockItem item)
+		{
+			var rect = get_draw_value_for_item (item).draw_region;
+			rect.x += win_x;
+			rect.y += win_y;
+			return rect;
 		}
 		
 		/**
@@ -1400,6 +1578,28 @@ namespace Plank
 		public Gdk.Rectangle get_background_region ()
 		{
 			return background_rect;
+		}
+
+		public Gdk.Rectangle get_primary_background_region ()
+		{
+			return primary_background_rect;
+		}
+
+		public Gdk.Rectangle get_status_background_region ()
+		{
+			return status_background_rect;
+		}
+
+		public bool pointer_is_over_primary_section (int x)
+		{
+			return x >= primary_background_rect.x
+				&& x < primary_background_rect.x + primary_background_rect.width;
+		}
+
+		public bool pointer_is_over_status_section (int x)
+		{
+			return x >= status_background_rect.x
+				&& x < status_background_rect.x + status_background_rect.width;
 		}
 		
 		void update_background_region (DockItemDrawValue val_first, DockItemDrawValue val_last)

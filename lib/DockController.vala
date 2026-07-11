@@ -40,8 +40,12 @@ namespace Plank
 		public DockRenderer renderer { get; protected set; }
 		public DockWindow window { get; protected set; }
 		public HoverWindow hover { get; protected set; }
+		public LauncherWindow launcher { get; protected set; }
+		public StatusPanelWindow status_panel { get; protected set; }
 		
 		public DockItemProvider? default_provider { get; private set; }
+		LauncherProvider? launcher_provider;
+		StatusIndicatorProvider? status_indicator_provider;
 		
 		DBusManager dbus_manager;
 		Gee.ArrayList<unowned DockItem> visible_items;
@@ -101,6 +105,8 @@ namespace Plank
 			window = new DockWindow (this);
 			hover = new HoverWindow ();
 			renderer = new DockRenderer (this, window);
+			launcher = new LauncherWindow (this);
+			status_panel = new StatusPanelWindow (this);
 		}
 		
 		~DockController ()
@@ -129,8 +135,15 @@ namespace Plank
 		{
 			if (internal_elements.size <= 0)
 				add_default_provider ();
+
+			// Status indicators always live in their own fixed provider at the
+			// trailing edge, after application launchers and custom providers.
+			status_indicator_provider = new StatusIndicatorProvider ();
+			add (status_indicator_provider);
 			
 			update_show_dock_item ();
+			launcher_provider = new LauncherProvider ();
+			prepend (launcher_provider);
 			update_items ();
 			
 			AddTime = GLib.get_monotonic_time ();

@@ -20,6 +20,7 @@
 <gresources>
 	<gresource prefix="/net/launchpad/plank">
 		<file alias="img/application-default-icon.svg" compressed="true" preprocess="xml-stripblanks">application-default-icon.svg</file>
+		<file alias="img/dock-menu.jpg" compressed="true">dock-menu.jpg</file>
 		<file alias="img/poof.svg" compressed="true" preprocess="xml-stripblanks">poof.svg</file>
 		<file compressed="true" preprocess="xml-stripblanks">ui/preferences.ui</file>
 	</gresource>

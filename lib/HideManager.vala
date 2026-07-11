@@ -89,6 +89,9 @@ namespace Plank
 		 * If the dock is currently hovered by the mouse cursor.
 		 */
 		public bool Hovered { get; private set; default = false; }
+
+		/** Keep the dock visible while a menu owned by another dock window is open. */
+		public bool ExternalMenuVisible { get; set; default = false; }
 		
 		uint hide_timer_id = 0U;
 		uint unhide_timer_id = 0U;
@@ -233,7 +236,8 @@ namespace Plank
 			}
 			
 			// disable hiding if menu is visible or drags are active
-			var disabled = (window.menu_is_visible () || drag_manager.InternalDragActive || drag_manager.ExternalDragActive);
+			var disabled = (window.menu_is_visible () || ExternalMenuVisible
+				|| drag_manager.InternalDragActive || drag_manager.ExternalDragActive);
 			if (Disabled != disabled) {
 				Disabled = disabled;
 				update_needed = true;

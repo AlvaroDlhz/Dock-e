@@ -134,6 +134,23 @@ namespace Plank
 				update_hovered ((int) event.x, (int) event.y);
 			
 			ClickedItem = HoveredItem;
+
+			// A click anywhere else on the dock dismisses the native launcher,
+			// while the launcher item itself keeps its normal toggle behaviour.
+			if (controller.launcher.visible && !(HoveredItem is LauncherItem))
+				controller.launcher.dismiss ();
+			if (controller.status_panel.visible && !(HoveredItem is StatusIndicatorItem))
+				controller.status_panel.dismiss ();
+
+			if (HoveredItem is StatusIndicatorItem && event.button == 1U) {
+				var status_item = (StatusIndicatorItem) HoveredItem;
+				ClickedItem = null;
+				Idle.add (() => {
+					controller.status_panel.toggle (status_item);
+					return false;
+				});
+				return Gdk.EVENT_STOP;
+			}
 			
 			// Check and try to show the menu
 			if (show_menu (HoveredItem, event))

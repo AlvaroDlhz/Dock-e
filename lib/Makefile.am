@@ -94,7 +94,9 @@ libplank_la_VALASOURCES = \
 	Items/FileDockItem.vala \
 	Items/PlaceholderDockItem.vala \
 	Items/PlankDockItem.vala \
+	Items/StatusIndicatorItem.vala \
 	Items/TransientDockItem.vala \
+	Items/LauncherItem.vala \
 	Services/Environment.vala \
 	Services/EnvironmentSettings.vala \
 	Services/Logger.vala \
@@ -106,7 +108,9 @@ libplank_la_VALASOURCES = \
 	Services/Worker.vala \
 	Widgets/CompositedWindow.vala \
 	Widgets/DockWindow.vala \
+	Widgets/StatusPanelWindow.vala \
 	Widgets/HoverWindow.vala \
+	Widgets/LauncherWindow.vala \
 	Widgets/PoofWindow.vala \
 	Widgets/PreferencesWindow.vala \
 	Widgets/TitledSeparatorMenuItem.vala \
@@ -217,4 +221,3 @@ EXTRA_DIST = \
 	plank.pc.in \
 	Version.vala.in \
 	$(NULL)
-
