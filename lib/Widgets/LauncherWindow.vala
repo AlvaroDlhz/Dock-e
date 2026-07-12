@@ -4,6 +4,20 @@
 
 namespace Plank
 {
+	class UninstallTarget : GLib.Object
+	{
+		public string package_id;
+		public string source;
+		public string command;
+
+		public UninstallTarget (string package_id, string source, string command)
+		{
+			this.package_id = package_id;
+			this.source = source;
+			this.command = command;
+		}
+	}
+
 	public class LauncherWindow : Gtk.Window
 	{
 		const int RESULT_LIMIT = 7;
@@ -28,6 +42,9 @@ namespace Plank
 		int panel_y = 0;
 		bool showing_all = false;
 		bool changing_tab = false;
+		bool context_menu_open = false;
+		bool context_dialog_open = false;
+		Gtk.Window? application_context;
 
 		public LauncherWindow (DockController controller)
 		{
@@ -99,6 +116,16 @@ namespace Plank
 			result_list.selection_mode = Gtk.SelectionMode.SINGLE;
 			result_list.activate_on_single_click = true;
 			result_list.row_activated.connect ((row) => activate_row (row));
+			result_list.button_press_event.connect ((event) => {
+				if (event.button != 3U)
+					return false;
+				var row = result_list.get_row_at_y ((int) event.y);
+				if (row == null || row.get_index () < 0 || row.get_index () >= visible_results.size)
+					return false;
+				result_list.select_row (row);
+				show_application_context_menu (visible_results[row.get_index ()], event);
+				return true;
+			});
 			var result_scroll = new Gtk.ScrolledWindow (null, null);
 			result_scroll.hscrollbar_policy = Gtk.PolicyType.NEVER;
 			result_scroll.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC;
@@ -127,7 +154,7 @@ namespace Plank
 
 			key_press_event.connect (handle_key_press);
 			focus_out_event.connect (() => {
-				if (!power_menu.visible)
+				if (!power_menu.visible && !context_menu_open)
 					hide_animated ();
 				return false;
 			});
@@ -202,12 +229,30 @@ namespace Plank
 			var seen = new Gee.HashSet<string> ();
 			foreach (unowned AppInfo app in AppInfo.get_all ()) {
 				var id = app.get_id () ?? app.get_name ();
-				if (!app.should_show () || id in seen)
+				if (!app.should_show () || !application_is_available (app) || id in seen)
 					continue;
 				seen.add (id);
 				applications.add (app);
 			}
 			applications.sort ((a, b) => a.get_display_name ().collate (b.get_display_name ()));
+		}
+
+		bool application_is_available (AppInfo app)
+		{
+			var executable = app.get_executable ();
+			if (executable == null || executable.strip () == "")
+				return false;
+			try {
+				string[] arguments;
+				Shell.parse_argv (executable, out arguments);
+				if (arguments.length == 0)
+					return false;
+				if (Path.is_absolute (arguments[0]))
+					return FileUtils.test (arguments[0], FileTest.EXISTS | FileTest.IS_EXECUTABLE);
+				return Environment.find_program_in_path (arguments[0]) != null;
+			} catch (ShellError e) {
+				return false;
+			}
 		}
 
 		public void toggle (LauncherItem item)
@@ -221,12 +266,20 @@ namespace Plank
 
 		public void dismiss ()
 		{
+			dismiss_application_context ();
 			hide_animated ();
+		}
+
+		public void dismiss_application_context ()
+		{
+			if (application_context != null && application_context.visible)
+				application_context.hide ();
 		}
 
 		public void show_for_item (LauncherItem item)
 		{
 			anchor_item = item;
+			index_applications ();
 			search_entry.text = "";
 			refresh_results ();
 			apply_theme ();
@@ -429,6 +482,213 @@ namespace Plank
 			return row;
 		}
 
+		void show_application_context_menu (AppInfo app, Gdk.EventButton event)
+		{
+			var target = detect_uninstall_target (app);
+			if (application_context != null)
+				application_context.destroy ();
+			application_context = new Gtk.Window (Gtk.WindowType.TOPLEVEL);
+			application_context.decorated = false;
+			application_context.resizable = false;
+			application_context.skip_taskbar_hint = true;
+			application_context.skip_pager_hint = true;
+			application_context.set_keep_above (true);
+			application_context.transient_for = this;
+			application_context.type_hint = Gdk.WindowTypeHint.DIALOG;
+			application_context.get_style_context ().add_class ("launcher-app-context");
+
+			var card = new Gtk.Box (Gtk.Orientation.VERTICAL, 4);
+			card.margin = 8;
+			application_context.add (card);
+			var header = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
+			header.get_style_context ().add_class ("app-context-header");
+			Gtk.Image app_icon;
+			if (app.get_icon () != null)
+				app_icon = new Gtk.Image.from_gicon (app.get_icon (), Gtk.IconSize.DIALOG);
+			else
+				app_icon = new Gtk.Image.from_icon_name ("application-x-executable", Gtk.IconSize.DIALOG);
+			app_icon.pixel_size = 32;
+			header.pack_start (app_icon, false, false, 0);
+			var heading = new Gtk.Box (Gtk.Orientation.VERTICAL, 1);
+			var name = new Gtk.Label (app.get_display_name ()) { xalign = 0.0f };
+			name.get_style_context ().add_class ("app-context-title");
+			heading.pack_start (name, false, false, 0);
+			var origin = new Gtk.Label (target != null ? _("Installed via %s").printf (target.source) : _("Installed application")) { xalign = 0.0f };
+			origin.get_style_context ().add_class (Gtk.STYLE_CLASS_DIM_LABEL);
+			heading.pack_start (origin, false, false, 0);
+			header.pack_start (heading, true, true, 0);
+			card.pack_start (header, false, false, 0);
+			card.pack_start (new Gtk.Separator (Gtk.Orientation.HORIZONTAL), false, false, 2);
+
+			card.pack_start (context_action_button (_("Open"), "media-playback-start-symbolic", () => {
+				try { app.launch (null, null); } catch (Error e) { warning ("Unable to launch app: %s", e.message); }
+				application_context.hide ();
+				hide_animated ();
+			}), false, false, 0);
+
+			var desktop = app as DesktopAppInfo;
+			if (desktop != null) {
+				foreach (unowned string action in desktop.list_actions ()) {
+					var action_name = desktop.get_action_name (action);
+					if (action_name == null || action_name == "")
+						continue;
+					var action_id = action;
+					card.pack_start (context_action_button (action_name, "list-add-symbolic", () => {
+						desktop.launch_action (action_id, null);
+						application_context.hide ();
+						hide_animated ();
+					}), false, false, 0);
+				}
+			}
+
+			if (target != null) {
+				card.pack_start (new Gtk.Separator (Gtk.Orientation.HORIZONTAL), false, false, 2);
+				var uninstall = context_action_button (_("Uninstall…"), "user-trash-symbolic", () => {
+					context_dialog_open = true;
+					confirm_uninstall (app, target);
+					context_dialog_open = false;
+				});
+				uninstall.get_style_context ().add_class ("destructive-action");
+				card.pack_start (uninstall, false, false, 0);
+			}
+
+			context_menu_open = true;
+			application_context.hide.connect (() => {
+				context_menu_open = false;
+				if (visible)
+					Idle.add (() => { present (); return false; });
+			});
+			application_context.focus_out_event.connect (() => {
+				if (!context_dialog_open)
+					application_context.hide ();
+				return false;
+			});
+			application_context.key_press_event.connect ((key) => {
+				if (key.keyval == Gdk.Key.Escape) {
+					application_context.hide ();
+					return true;
+				}
+				return false;
+			});
+			application_context.show_all ();
+			application_context.present ();
+			Idle.add (() => {
+				int width, height;
+				application_context.get_size (out width, out height);
+				var screen = application_context.get_screen ();
+				var monitor = screen.get_monitor_at_point ((int) event.x_root, (int) event.y_root);
+				var workarea = screen.get_monitor_workarea (monitor);
+				var x = int.max (workarea.x + 8, int.min (workarea.x + workarea.width - width - 8, (int) event.x_root));
+				var y = int.max (workarea.y + 8, int.min (workarea.y + workarea.height - height - 8, (int) event.y_root));
+				application_context.move (x, y);
+				return false;
+			});
+		}
+
+		delegate void ContextAction ();
+
+		Gtk.Button context_action_button (string label, string icon, owned ContextAction action)
+		{
+			var button = new Gtk.Button ();
+			button.get_style_context ().add_class ("app-context-action");
+			var box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 9);
+			box.pack_start (new Gtk.Image.from_icon_name (icon, Gtk.IconSize.MENU), false, false, 0);
+			box.pack_start (new Gtk.Label (label) { xalign = 0.0f }, true, true, 0);
+			button.add (box);
+			button.clicked.connect (() => { action (); });
+			return button;
+		}
+
+		UninstallTarget? detect_uninstall_target (AppInfo app)
+		{
+			var id = app.get_id () ?? "";
+			var app_id = id.has_suffix (".desktop") ? id.substring (0, id.length - 8) : id;
+			string output;
+			if (run_sync ("flatpak info " + Shell.quote (app_id), out output))
+				return new UninstallTarget (app_id, "Flatpak",
+					"flatpak uninstall --noninteractive " + Shell.quote (app_id));
+
+			var executable = app.get_executable () ?? "";
+			var snap_marker = executable.index_of ("/snap/bin/");
+			if (snap_marker >= 0) {
+				var snap_name = executable.substring (snap_marker + 10).split (" ")[0].split (".")[0];
+				if (snap_name != "" && run_sync ("snap list " + Shell.quote (snap_name), out output))
+					return new UninstallTarget (snap_name, "Snap",
+						"pkexec snap remove " + Shell.quote (snap_name));
+			}
+
+			var desktop = app as DesktopAppInfo;
+			var filename = desktop != null ? desktop.get_filename () : null;
+			if (filename == null || filename == "")
+				return null;
+			if (run_sync ("dpkg-query -S " + Shell.quote (filename), out output)) {
+				var separator = output.index_of (": ");
+				if (separator > 0) {
+					var package = output.substring (0, separator).split ("\n")[0];
+					return new UninstallTarget (package, "System package",
+						"pkcon remove -y " + Shell.quote (package));
+				}
+			}
+			if (run_sync ("rpm -qf " + Shell.quote (filename), out output)) {
+				var package = output.strip ();
+				if (package != "")
+					return new UninstallTarget (package, "System package",
+						"pkcon remove -y " + Shell.quote (package));
+			}
+			return null;
+		}
+
+		void confirm_uninstall (AppInfo app, UninstallTarget target)
+		{
+			context_menu_open = true;
+			var dialog = new Gtk.MessageDialog (this, Gtk.DialogFlags.MODAL,
+				Gtk.MessageType.WARNING, Gtk.ButtonsType.CANCEL,
+				_("Uninstall %s?").printf (app.get_display_name ()));
+			dialog.format_secondary_text (_("This will remove %s using %s. Your personal data may be kept by the package manager.")
+				.printf (target.package_id, target.source));
+			dialog.add_button (_("Uninstall"), Gtk.ResponseType.ACCEPT);
+			dialog.set_default_response (Gtk.ResponseType.CANCEL);
+			var response = dialog.run ();
+			dialog.destroy ();
+			context_menu_open = false;
+			if (response == Gtk.ResponseType.ACCEPT)
+				run_uninstall (target);
+			else if (visible)
+				present ();
+		}
+
+		void run_uninstall (UninstallTarget target)
+		{
+			try {
+				string[] arguments;
+				Shell.parse_argv (target.command, out arguments);
+				Pid pid;
+				Process.spawn_async (null, arguments, null,
+					SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD, null, out pid);
+				ChildWatch.add (pid, (child_pid, status) => {
+					Process.close_pid (child_pid);
+					index_applications ();
+					if (visible)
+						refresh_results ();
+				});
+			} catch (Error e) {
+				warning ("Unable to uninstall '%s': %s", target.package_id, e.message);
+			}
+		}
+
+		static bool run_sync (string command, out string output)
+		{
+			string error_output;
+			int status;
+			try {
+				Process.spawn_command_line_sync (command, out output, out error_output, out status);
+				return status == 0;
+			} catch (SpawnError e) {
+				output = "";
+				return false;
+			}
+		}
+
 		Gtk.Widget create_alphabet_header (string initial)
 		{
 			var header = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 9);
@@ -539,6 +799,13 @@ namespace Plank
 			css += ".plank-native-launcher .launcher-enter { color: rgba(255,255,255,0.28); font-size: 16px; }";
 			css += ".plank-native-launcher row:selected .launcher-enter { color: rgba(255,255,255,0.85); }";
 			css += ".plank-native-launcher .launcher-empty { color: rgba(255,255,255,0.55); }";
+			css += ".launcher-app-context { background-color: rgba(%d,%d,%d,%.3f); border: 1px solid rgba(255,255,255,0.10); border-radius: 11px; padding: 5px; }"
+				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255), color.alpha);
+			css += ".launcher-app-context .app-context-header { color: white; padding: 7px; min-width: 250px; }";
+			css += ".launcher-app-context .app-context-title { font-weight: bold; font-size: 14px; }";
+			css += ".launcher-app-context .app-context-action { color: white; background: transparent; background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 7px 9px; }";
+			css += ".launcher-app-context .app-context-action:hover { background-color: rgba(255,255,255,0.10); }";
+			css += ".launcher-app-context .destructive-action { color: #ff7b73; }";
 			css += ".plank-power-menu { background-color: rgba(%d,%d,%d,%.3f); border: 1px solid rgba(255,255,255,0.10); border-radius: 10px; padding: 5px; }"
 				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255), color.alpha);
 			css += ".plank-power-menu menuitem { color: white; border-radius: 10px; padding: 7px 10px; margin: 2px; }";

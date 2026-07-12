@@ -1,5 +1,5 @@
 Widgets/StatusPanelWindow.lo: Widgets/StatusPanelWindow.c \
- /usr/include/stdc-predef.h ../config.h ../config.h \
+ /usr/include/stdc-predef.h ../config.h ../config.h plank.h \
  /usr/include/glib-2.0/glib-object.h \
  /usr/include/glib-2.0/gobject/gbinding.h /usr/include/glib-2.0/glib.h \
  /usr/include/glib-2.0/glib/galloca.h /usr/include/glib-2.0/glib/gtypes.h \
@@ -186,7 +186,7 @@ Widgets/StatusPanelWindow.lo: Widgets/StatusPanelWindow.c \
  /usr/include/glib-2.0/gobject/gtypeplugin.h \
  /usr/include/glib-2.0/gobject/gvaluearray.h \
  /usr/include/glib-2.0/gobject/gvaluetypes.h \
- /usr/include/glib-2.0/gobject/gobject-autocleanups.h plank.h \
+ /usr/include/glib-2.0/gobject/gobject-autocleanups.h \
  /usr/include/gtk-3.0/gdk/gdk.h /usr/include/gtk-3.0/gdk/gdkconfig.h \
  /usr/include/gtk-3.0/gdk/gdkversionmacros.h \
  /usr/include/gtk-3.0/gdk/gdkapplaunchcontext.h \
@@ -761,6 +761,7 @@ Widgets/StatusPanelWindow.lo: Widgets/StatusPanelWindow.c \
 /usr/include/stdc-predef.h:
 ../config.h:
 ../config.h:
+plank.h:
 /usr/include/glib-2.0/glib-object.h:
 /usr/include/glib-2.0/gobject/gbinding.h:
 /usr/include/glib-2.0/glib.h:
@@ -976,7 +977,6 @@ Widgets/StatusPanelWindow.lo: Widgets/StatusPanelWindow.c \
 /usr/include/glib-2.0/gobject/gvaluearray.h:
 /usr/include/glib-2.0/gobject/gvaluetypes.h:
 /usr/include/glib-2.0/gobject/gobject-autocleanups.h:
-plank.h:
 /usr/include/gtk-3.0/gdk/gdk.h:
 /usr/include/gtk-3.0/gdk/gdkconfig.h:
 /usr/include/gtk-3.0/gdk/gdkversionmacros.h:

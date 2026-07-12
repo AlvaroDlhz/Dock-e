@@ -193,7 +193,7 @@ static void plank_position_manager_set_MaxItemCount (PlankPositionManager* self,
 static void plank_position_manager_update_background_region (PlankPositionManager* self,
                                                       PlankDockItemDrawValue* val_first,
                                                       PlankDockItemDrawValue* val_last);
-static gboolean __lambda47_ (PlankPositionManager* self,
+static gboolean __lambda63_ (PlankPositionManager* self,
                       PlankDockElement* i,
                       PlankDockItemDrawValue* val);
 static void plank_position_manager_get_item_draw_region (PlankPositionManager* self,
@@ -205,7 +205,7 @@ static void plank_position_manager_get_item_hover_region (PlankPositionManager* 
 static void plank_position_manager_get_item_background_region (PlankPositionManager* self,
                                                         PlankDockItemDrawValue* val,
                                                         GdkRectangle* result);
-static gboolean ___lambda47__gee_forall_map_func (gconstpointer k,
+static gboolean ___lambda63__gee_forall_map_func (gconstpointer k,
                                            gconstpointer v,
                                            gpointer self);
 static GObject * plank_position_manager_constructor (GType type,
@@ -1812,7 +1812,7 @@ _g_object_ref0 (gpointer self)
 }
 
 static gboolean
-__lambda47_ (PlankPositionManager* self,
+__lambda63_ (PlankPositionManager* self,
              PlankDockElement* i,
              PlankDockItemDrawValue* val)
 {
@@ -1833,12 +1833,12 @@ __lambda47_ (PlankPositionManager* self,
 }
 
 static gboolean
-___lambda47__gee_forall_map_func (gconstpointer k,
+___lambda63__gee_forall_map_func (gconstpointer k,
                                   gconstpointer v,
                                   gpointer self)
 {
 	gboolean result;
-	result = __lambda47_ ((PlankPositionManager*) self, (PlankDockElement*) k, (PlankDockItemDrawValue*) v);
+	result = __lambda63_ ((PlankPositionManager*) self, (PlankDockElement*) k, (PlankDockItemDrawValue*) v);
 	return result;
 }
 
@@ -1876,58 +1876,60 @@ plank_position_manager_update_draw_values (PlankPositionManager* self,
 	GdkRectangle _tmp21_;
 	gboolean pointer_on_primary = FALSE;
 	gboolean _tmp27_ = FALSE;
-	GtkPositionType _tmp45_;
-	gdouble _tmp50_ = 0.0;
+	GtkPositionType _tmp47_;
+	gdouble _tmp52_ = 0.0;
 	gdouble center_y = 0.0;
 	gdouble center_x = 0.0;
-	gint _tmp53_;
-	GtkAlign _tmp54_;
+	gint _tmp55_;
+	GtkAlign _tmp56_;
 	PlankPointD center = {0};
-	PlankPointD _tmp66_ = {0};
-	gboolean _tmp67_ = FALSE;
-	PlankDockController* _tmp68_;
-	PlankDragManager* _tmp69_;
-	PlankDragManager* _tmp70_;
-	gboolean _tmp71_;
-	gboolean _tmp72_;
+	PlankPointD _tmp68_ = {0};
+	gboolean _tmp69_ = FALSE;
+	PlankDockController* _tmp70_;
+	PlankDragManager* _tmp71_;
+	PlankDragManager* _tmp72_;
+	gboolean _tmp73_;
+	gboolean _tmp74_;
 	gboolean expand_for_drop = FALSE;
-	gboolean _tmp76_ = FALSE;
-	PlankDockPreferences* _tmp77_;
-	gboolean _tmp78_;
-	gboolean _tmp79_;
+	gboolean _tmp78_ = FALSE;
+	PlankDockPreferences* _tmp79_;
+	gboolean _tmp80_;
+	gboolean _tmp81_;
 	gboolean zoom_enabled = FALSE;
-	gdouble _tmp83_ = 0.0;
-	gboolean _tmp84_ = FALSE;
+	gdouble _tmp85_ = 0.0;
+	gboolean _tmp86_ = FALSE;
 	gdouble zoom_in_progress = 0.0;
-	gdouble _tmp88_ = 0.0;
+	gdouble _tmp90_ = 0.0;
 	gdouble zoom_in_percent = 0.0;
 	gdouble zoom_icon_size = 0.0;
-	gint _tmp89_;
+	gint _tmp91_;
 	PlankDockItem* primary_first = NULL;
 	PlankDockItem* primary_last = NULL;
 	PlankDockItem* status_first = NULL;
 	PlankDockItem* status_last = NULL;
-	PlankDockItem* menu_item = NULL;
+	PlankDockItem* left_first = NULL;
+	PlankDockItem* left_last = NULL;
 	gint status_count = 0;
-	gboolean _tmp179_ = FALSE;
-	gboolean _tmp180_ = FALSE;
-	PlankDockItem* _tmp181_;
-	gboolean _tmp210_ = FALSE;
-	gboolean _tmp236_ = FALSE;
-	PlankDockItem* _tmp237_;
-	GdkRectangle _tmp251_ = {0};
-	GdkRectangle _tmp252_ = {0};
-	gboolean _tmp253_ = FALSE;
-	PlankDockItem* _tmp254_;
-	gboolean _tmp265_ = FALSE;
-	PlankDockItem* _tmp266_;
-	gboolean _tmp277_ = FALSE;
-	gboolean _tmp296_ = FALSE;
-	GdkRectangle _tmp297_;
+	gboolean _tmp188_ = FALSE;
+	gboolean _tmp189_ = FALSE;
+	PlankDockItem* _tmp190_;
+	gboolean _tmp221_ = FALSE;
+	gboolean _tmp247_ = FALSE;
+	gboolean _tmp248_ = FALSE;
+	PlankDockItem* _tmp249_;
+	GdkRectangle _tmp278_ = {0};
+	GdkRectangle _tmp279_ = {0};
+	gboolean _tmp280_ = FALSE;
+	PlankDockItem* _tmp281_;
+	gboolean _tmp292_ = FALSE;
+	PlankDockItem* _tmp293_;
 	gboolean _tmp304_ = FALSE;
-	GeeHashMap* _tmp308_;
-	GeeMapIterator* _tmp309_;
-	GeeMapIterator* _tmp310_;
+	gboolean _tmp325_ = FALSE;
+	GdkRectangle _tmp326_;
+	gboolean _tmp333_ = FALSE;
+	GeeHashMap* _tmp337_;
+	GeeMapIterator* _tmp338_;
+	GeeMapIterator* _tmp339_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (items != NULL);
 	_tmp0_ = self->priv->_controller;
@@ -2012,8 +2014,8 @@ plank_position_manager_update_draw_values (PlankPositionManager* self,
 	if (_tmp27_) {
 		gint status_item_count = 0;
 		gint launcher_item_count = 0;
-		gint _tmp43_;
-		gint _tmp44_;
+		gint _tmp45_;
+		gint _tmp46_;
 		status_item_count = 0;
 		launcher_item_count = 0;
 		{
@@ -2051,34 +2053,42 @@ plank_position_manager_update_draw_values (PlankPositionManager* self,
 					_tmp40_ = status_item_count;
 					status_item_count = _tmp40_ + 1;
 				} else {
-					PlankDockItem* _tmp41_;
-					_tmp41_ = item;
-					if (PLANK_IS_LAUNCHER_ITEM (_tmp41_)) {
-						gint _tmp42_;
-						_tmp42_ = launcher_item_count;
-						launcher_item_count = _tmp42_ + 1;
+					gboolean _tmp41_ = FALSE;
+					PlankDockItem* _tmp42_;
+					_tmp42_ = item;
+					if (PLANK_IS_LAUNCHER_ITEM (_tmp42_)) {
+						_tmp41_ = TRUE;
+					} else {
+						PlankDockItem* _tmp43_;
+						_tmp43_ = item;
+						_tmp41_ = PLANK_IS_UPDATE_MANAGER_ITEM (_tmp43_);
+					}
+					if (_tmp41_) {
+						gint _tmp44_;
+						_tmp44_ = launcher_item_count;
+						launcher_item_count = _tmp44_ + 1;
 					}
 				}
 			}
 		}
-		_tmp43_ = self->priv->_IconSize;
-		_tmp44_ = self->priv->_ItemPadding;
-		cursor.x = cursor.x - (((status_item_count - launcher_item_count) * (_tmp43_ + _tmp44_)) / 2);
+		_tmp45_ = self->priv->_IconSize;
+		_tmp46_ = self->priv->_ItemPadding;
+		cursor.x = cursor.x - (((status_item_count - launcher_item_count) * (_tmp45_ + _tmp46_)) / 2);
 	}
-	_tmp45_ = self->priv->_Position;
-	switch (_tmp45_) {
+	_tmp47_ = self->priv->_Position;
+	switch (_tmp47_) {
 		case GTK_POS_RIGHT:
 		{
-			GdkPoint _tmp46_;
-			_tmp46_ = cursor;
-			cursor.x = width - _tmp46_.x;
+			GdkPoint _tmp48_;
+			_tmp48_ = cursor;
+			cursor.x = width - _tmp48_.x;
 			break;
 		}
 		case GTK_POS_BOTTOM:
 		{
-			GdkPoint _tmp47_;
-			_tmp47_ = cursor;
-			cursor.y = height - _tmp47_.y;
+			GdkPoint _tmp49_;
+			_tmp49_ = cursor;
+			cursor.y = height - _tmp49_.y;
 			break;
 		}
 		default:
@@ -2088,50 +2098,50 @@ plank_position_manager_update_draw_values (PlankPositionManager* self,
 	}
 	if (!plank_position_manager_is_horizontal_dock (self)) {
 		gint tmp = 0;
-		GdkPoint _tmp48_;
-		GdkPoint _tmp49_;
-		_tmp48_ = cursor;
-		tmp = _tmp48_.y;
-		_tmp49_ = cursor;
-		cursor.y = _tmp49_.x;
+		GdkPoint _tmp50_;
+		GdkPoint _tmp51_;
+		_tmp50_ = cursor;
+		tmp = _tmp50_.y;
+		_tmp51_ = cursor;
+		cursor.y = _tmp51_.x;
 		cursor.x = tmp;
 		tmp = width;
 		width = height;
 		height = tmp;
 	}
 	if (plank_position_manager_is_horizontal_dock (self)) {
-		GdkRectangle _tmp51_;
-		_tmp51_ = self->priv->static_dock_region;
-		_tmp50_ = _tmp51_.height / 2.0;
+		GdkRectangle _tmp53_;
+		_tmp53_ = self->priv->static_dock_region;
+		_tmp52_ = _tmp53_.height / 2.0;
 	} else {
-		GdkRectangle _tmp52_;
-		_tmp52_ = self->priv->static_dock_region;
-		_tmp50_ = _tmp52_.width / 2.0;
+		GdkRectangle _tmp54_;
+		_tmp54_ = self->priv->static_dock_region;
+		_tmp52_ = _tmp54_.width / 2.0;
 	}
-	center_y = _tmp50_;
-	_tmp53_ = self->priv->_ItemPadding;
-	center_x = ((icon_size + _tmp53_) / 2.0) + self->priv->items_offset;
-	_tmp54_ = self->priv->_Alignment;
-	if (_tmp54_ == GTK_ALIGN_FILL) {
-		GtkAlign _tmp55_;
-		_tmp55_ = self->priv->_ItemsAlignment;
-		switch (_tmp55_) {
+	center_y = _tmp52_;
+	_tmp55_ = self->priv->_ItemPadding;
+	center_x = ((icon_size + _tmp55_) / 2.0) + self->priv->items_offset;
+	_tmp56_ = self->priv->_Alignment;
+	if (_tmp56_ == GTK_ALIGN_FILL) {
+		GtkAlign _tmp57_;
+		_tmp57_ = self->priv->_ItemsAlignment;
+		switch (_tmp57_) {
 			default:
 			case GTK_ALIGN_FILL:
 			case GTK_ALIGN_CENTER:
 			{
 				if (plank_position_manager_is_horizontal_dock (self)) {
-					GdkRectangle _tmp56_;
-					GdkRectangle _tmp57_;
-					_tmp56_ = self->priv->static_dock_region;
-					_tmp57_ = self->priv->static_dock_region;
-					center_x += (gdouble) (_tmp56_.x + (((_tmp57_.width - (2 * self->priv->items_offset)) - self->priv->items_width) / 2));
-				} else {
 					GdkRectangle _tmp58_;
 					GdkRectangle _tmp59_;
 					_tmp58_ = self->priv->static_dock_region;
 					_tmp59_ = self->priv->static_dock_region;
-					center_x += (gdouble) (_tmp58_.y + (((_tmp59_.height - (2 * self->priv->items_offset)) - self->priv->items_width) / 2));
+					center_x += (gdouble) (_tmp58_.x + (((_tmp59_.width - (2 * self->priv->items_offset)) - self->priv->items_width) / 2));
+				} else {
+					GdkRectangle _tmp60_;
+					GdkRectangle _tmp61_;
+					_tmp60_ = self->priv->static_dock_region;
+					_tmp61_ = self->priv->static_dock_region;
+					center_x += (gdouble) (_tmp60_.y + (((_tmp61_.height - (2 * self->priv->items_offset)) - self->priv->items_width) / 2));
 				}
 				break;
 			}
@@ -2142,172 +2152,173 @@ plank_position_manager_update_draw_values (PlankPositionManager* self,
 			case GTK_ALIGN_END:
 			{
 				if (plank_position_manager_is_horizontal_dock (self)) {
-					GdkRectangle _tmp60_;
-					GdkRectangle _tmp61_;
-					_tmp60_ = self->priv->static_dock_region;
-					_tmp61_ = self->priv->static_dock_region;
-					center_x += (gdouble) (_tmp60_.x + ((_tmp61_.width - (2 * self->priv->items_offset)) - self->priv->items_width));
-				} else {
 					GdkRectangle _tmp62_;
 					GdkRectangle _tmp63_;
 					_tmp62_ = self->priv->static_dock_region;
 					_tmp63_ = self->priv->static_dock_region;
-					center_x += (gdouble) (_tmp62_.y + ((_tmp63_.height - (2 * self->priv->items_offset)) - self->priv->items_width));
+					center_x += (gdouble) (_tmp62_.x + ((_tmp63_.width - (2 * self->priv->items_offset)) - self->priv->items_width));
+				} else {
+					GdkRectangle _tmp64_;
+					GdkRectangle _tmp65_;
+					_tmp64_ = self->priv->static_dock_region;
+					_tmp65_ = self->priv->static_dock_region;
+					center_x += (gdouble) (_tmp64_.y + ((_tmp65_.height - (2 * self->priv->items_offset)) - self->priv->items_width));
 				}
 				break;
 			}
 		}
 	} else {
 		if (plank_position_manager_is_horizontal_dock (self)) {
-			GdkRectangle _tmp64_;
-			_tmp64_ = self->priv->static_dock_region;
-			center_x += (gdouble) _tmp64_.x;
+			GdkRectangle _tmp66_;
+			_tmp66_ = self->priv->static_dock_region;
+			center_x += (gdouble) _tmp66_.x;
 		} else {
-			GdkRectangle _tmp65_;
-			_tmp65_ = self->priv->static_dock_region;
-			center_x += (gdouble) _tmp65_.y;
+			GdkRectangle _tmp67_;
+			_tmp67_ = self->priv->static_dock_region;
+			center_x += (gdouble) _tmp67_.y;
 		}
 	}
-	_tmp66_.x = floor (center_x);
-	_tmp66_.y = floor (center_y);
-	center = _tmp66_;
-	_tmp68_ = self->priv->_controller;
-	_tmp69_ = plank_dock_controller_get_drag_manager (_tmp68_);
-	_tmp70_ = _tmp69_;
-	_tmp71_ = plank_drag_manager_get_ExternalDragActive (_tmp70_);
+	_tmp68_.x = floor (center_x);
+	_tmp68_.y = floor (center_y);
+	center = _tmp68_;
+	_tmp70_ = self->priv->_controller;
+	_tmp71_ = plank_dock_controller_get_drag_manager (_tmp70_);
 	_tmp72_ = _tmp71_;
-	if (_tmp72_) {
-		PlankDockPreferences* _tmp73_;
-		gboolean _tmp74_;
-		gboolean _tmp75_;
-		_tmp73_ = prefs;
-		_tmp74_ = plank_dock_preferences_get_LockItems (_tmp73_);
-		_tmp75_ = _tmp74_;
-		_tmp67_ = !_tmp75_;
+	_tmp73_ = plank_drag_manager_get_ExternalDragActive (_tmp72_);
+	_tmp74_ = _tmp73_;
+	if (_tmp74_) {
+		PlankDockPreferences* _tmp75_;
+		gboolean _tmp76_;
+		gboolean _tmp77_;
+		_tmp75_ = prefs;
+		_tmp76_ = plank_dock_preferences_get_LockItems (_tmp75_);
+		_tmp77_ = _tmp76_;
+		_tmp69_ = !_tmp77_;
 	} else {
-		_tmp67_ = FALSE;
+		_tmp69_ = FALSE;
 	}
-	expand_for_drop = _tmp67_;
-	_tmp77_ = prefs;
-	_tmp78_ = plank_dock_preferences_get_ZoomEnabled (_tmp77_);
-	_tmp79_ = _tmp78_;
-	if (_tmp79_) {
-		PlankDockRenderer* _tmp80_;
-		gdouble _tmp81_;
-		gdouble _tmp82_;
-		_tmp80_ = renderer;
-		_tmp81_ = plank_dock_renderer_get_zoom_in_progress (_tmp80_);
-		_tmp82_ = _tmp81_;
-		_tmp76_ = _tmp82_ > 0.002;
+	expand_for_drop = _tmp69_;
+	_tmp79_ = prefs;
+	_tmp80_ = plank_dock_preferences_get_ZoomEnabled (_tmp79_);
+	_tmp81_ = _tmp80_;
+	if (_tmp81_) {
+		PlankDockRenderer* _tmp82_;
+		gdouble _tmp83_;
+		gdouble _tmp84_;
+		_tmp82_ = renderer;
+		_tmp83_ = plank_dock_renderer_get_zoom_in_progress (_tmp82_);
+		_tmp84_ = _tmp83_;
+		_tmp78_ = _tmp84_ > 0.002;
 	} else {
-		_tmp76_ = FALSE;
+		_tmp78_ = FALSE;
 	}
-	zoom_enabled = _tmp76_;
+	zoom_enabled = _tmp78_;
 	if (zoom_enabled) {
-		_tmp84_ = TRUE;
+		_tmp86_ = TRUE;
 	} else {
-		_tmp84_ = expand_for_drop;
+		_tmp86_ = expand_for_drop;
 	}
-	if (_tmp84_) {
-		PlankDockRenderer* _tmp85_;
-		gdouble _tmp86_;
-		gdouble _tmp87_;
-		_tmp85_ = renderer;
-		_tmp86_ = plank_dock_renderer_get_zoom_in_progress (_tmp85_);
-		_tmp87_ = _tmp86_;
-		_tmp83_ = _tmp87_;
+	if (_tmp86_) {
+		PlankDockRenderer* _tmp87_;
+		gdouble _tmp88_;
+		gdouble _tmp89_;
+		_tmp87_ = renderer;
+		_tmp88_ = plank_dock_renderer_get_zoom_in_progress (_tmp87_);
+		_tmp89_ = _tmp88_;
+		_tmp85_ = _tmp89_;
 	} else {
-		_tmp83_ = 0.0;
+		_tmp85_ = 0.0;
 	}
-	zoom_in_progress = _tmp83_;
+	zoom_in_progress = _tmp85_;
 	if (zoom_enabled) {
-		_tmp88_ = 1.0 + ((self->priv->ZoomPercent - 1.0) * zoom_in_progress);
+		_tmp90_ = 1.0 + ((self->priv->ZoomPercent - 1.0) * zoom_in_progress);
 	} else {
-		_tmp88_ = 1.0;
+		_tmp90_ = 1.0;
 	}
-	zoom_in_percent = _tmp88_;
-	_tmp89_ = self->priv->_ZoomIconSize;
-	zoom_icon_size = (gdouble) _tmp89_;
+	zoom_in_percent = _tmp90_;
+	_tmp91_ = self->priv->_ZoomIconSize;
+	zoom_icon_size = (gdouble) _tmp91_;
 	{
 		GeeArrayList* _item_list = NULL;
 		gint _item_size = 0;
-		GeeArrayList* _tmp90_;
-		gint _tmp91_;
-		gint _tmp92_;
+		GeeArrayList* _tmp92_;
+		gint _tmp93_;
+		gint _tmp94_;
 		gint _item_index = 0;
 		_item_list = items;
-		_tmp90_ = _item_list;
-		_tmp91_ = gee_abstract_collection_get_size ((GeeAbstractCollection*) _tmp90_);
-		_tmp92_ = _tmp91_;
-		_item_size = _tmp92_;
+		_tmp92_ = _item_list;
+		_tmp93_ = gee_abstract_collection_get_size ((GeeAbstractCollection*) _tmp92_);
+		_tmp94_ = _tmp93_;
+		_item_size = _tmp94_;
 		_item_index = -1;
 		while (TRUE) {
-			gint _tmp93_;
-			gint _tmp94_;
+			gint _tmp95_;
+			gint _tmp96_;
 			PlankDockItem* item = NULL;
-			GeeArrayList* _tmp95_;
-			gpointer _tmp96_;
+			GeeArrayList* _tmp97_;
+			gpointer _tmp98_;
 			PlankDockItemDrawValue* val = NULL;
-			PlankDockItemDrawValue* _tmp97_;
-			PlankDockItemDrawValue* _tmp98_;
 			PlankDockItemDrawValue* _tmp99_;
 			PlankDockItemDrawValue* _tmp100_;
 			PlankDockItemDrawValue* _tmp101_;
 			PlankDockItemDrawValue* _tmp102_;
 			PlankDockItemDrawValue* _tmp103_;
-			PlankPointD _tmp104_;
-			gdouble cursor_position = 0.0;
-			GdkPoint _tmp105_;
-			gdouble center_position = 0.0;
+			PlankDockItemDrawValue* _tmp104_;
+			PlankDockItemDrawValue* _tmp105_;
 			PlankPointD _tmp106_;
+			gdouble cursor_position = 0.0;
+			GdkPoint _tmp107_;
+			gdouble center_position = 0.0;
+			PlankPointD _tmp108_;
 			gdouble offset = 0.0;
 			gdouble offset_percent = 0.0;
 			gdouble zoom = 0.0;
 			gdouble zoomed_center_height = 0.0;
-			PlankDockItemDrawValue* _tmp107_;
-			PlankPointD _tmp108_ = {0};
 			PlankDockItemDrawValue* _tmp109_;
-			PlankDockItemDrawValue* _tmp110_;
-			GtkPositionType _tmp123_;
-			PlankDockItemDrawValue* _tmp136_;
-			GtkPositionType _tmp137_;
-			gint _tmp138_;
-			gboolean _tmp139_ = FALSE;
-			PlankDockItem* _tmp140_;
-			GeeHashMap* _tmp149_;
-			PlankDockItem* _tmp150_;
-			PlankDockItemDrawValue* _tmp151_;
-			PlankDockItem* _tmp152_;
-			gint64 _tmp153_;
-			gint64 _tmp154_;
+			PlankPointD _tmp110_ = {0};
+			PlankDockItemDrawValue* _tmp111_;
+			PlankDockItemDrawValue* _tmp112_;
+			GtkPositionType _tmp125_;
+			PlankDockItemDrawValue* _tmp138_;
+			GtkPositionType _tmp139_;
+			gint _tmp140_;
+			gboolean _tmp141_ = FALSE;
+			gboolean _tmp142_ = FALSE;
+			PlankDockItem* _tmp143_;
+			GeeHashMap* _tmp153_;
+			PlankDockItem* _tmp154_;
+			PlankDockItemDrawValue* _tmp155_;
+			PlankDockItem* _tmp156_;
+			gint64 _tmp157_;
+			gint64 _tmp158_;
 			_item_index = _item_index + 1;
-			_tmp93_ = _item_index;
-			_tmp94_ = _item_size;
-			if (!(_tmp93_ < _tmp94_)) {
+			_tmp95_ = _item_index;
+			_tmp96_ = _item_size;
+			if (!(_tmp95_ < _tmp96_)) {
 				break;
 			}
-			_tmp95_ = _item_list;
-			_tmp96_ = gee_abstract_list_get ((GeeAbstractList*) _tmp95_, _item_index);
-			item = (PlankDockItem*) _tmp96_;
-			_tmp97_ = plank_dock_item_draw_value_new ();
-			val = _tmp97_;
-			_tmp98_ = val;
-			_tmp98_->opacity = 1.0;
-			_tmp99_ = val;
-			_tmp99_->darken = 0.0;
+			_tmp97_ = _item_list;
+			_tmp98_ = gee_abstract_list_get ((GeeAbstractList*) _tmp97_, _item_index);
+			item = (PlankDockItem*) _tmp98_;
+			_tmp99_ = plank_dock_item_draw_value_new ();
+			val = _tmp99_;
 			_tmp100_ = val;
-			_tmp100_->lighten = 0.0;
+			_tmp100_->opacity = 1.0;
 			_tmp101_ = val;
-			_tmp101_->show_indicator = TRUE;
+			_tmp101_->darken = 0.0;
 			_tmp102_ = val;
-			_tmp102_->zoom = 1.0;
+			_tmp102_->lighten = 0.0;
 			_tmp103_ = val;
-			_tmp104_ = center;
-			_tmp103_->static_center = _tmp104_;
-			_tmp105_ = cursor;
-			cursor_position = (gdouble) _tmp105_.x;
+			_tmp103_->show_indicator = TRUE;
+			_tmp104_ = val;
+			_tmp104_->zoom = 1.0;
+			_tmp105_ = val;
 			_tmp106_ = center;
-			center_position = _tmp106_.x;
+			_tmp105_->static_center = _tmp106_;
+			_tmp107_ = cursor;
+			cursor_position = (gdouble) _tmp107_.x;
+			_tmp108_ = center;
+			center_position = _tmp108_.x;
 			offset = MIN (fabs (cursor_position - center_position), zoom_icon_size);
 			if (expand_for_drop) {
 				offset += (offset * zoom_icon_size) / icon_size;
@@ -2335,83 +2346,83 @@ plank_position_manager_update_draw_values (PlankPositionManager* self,
 			if (zoom == 1.0) {
 				center_position = round (center_position);
 			}
-			_tmp107_ = val;
-			_tmp108_.x = center_position;
-			_tmp108_.y = zoomed_center_height;
-			_tmp107_->center = _tmp108_;
 			_tmp109_ = val;
-			_tmp109_->zoom = zoom;
-			_tmp110_ = val;
-			_tmp110_->icon_size = round (zoom * icon_size);
+			_tmp110_.x = center_position;
+			_tmp110_.y = zoomed_center_height;
+			_tmp109_->center = _tmp110_;
+			_tmp111_ = val;
+			_tmp111_->zoom = zoom;
+			_tmp112_ = val;
+			_tmp112_->icon_size = round (zoom * icon_size);
 			if (!plank_position_manager_is_horizontal_dock (self)) {
 				gdouble tmp = 0.0;
-				PlankDockItemDrawValue* _tmp111_;
-				PlankPointD _tmp112_;
 				PlankDockItemDrawValue* _tmp113_;
-				PlankDockItemDrawValue* _tmp114_;
-				PlankPointD _tmp115_;
+				PlankPointD _tmp114_;
+				PlankDockItemDrawValue* _tmp115_;
 				PlankDockItemDrawValue* _tmp116_;
-				PlankDockItemDrawValue* _tmp117_;
-				PlankPointD _tmp118_;
+				PlankPointD _tmp117_;
+				PlankDockItemDrawValue* _tmp118_;
 				PlankDockItemDrawValue* _tmp119_;
-				PlankDockItemDrawValue* _tmp120_;
-				PlankPointD _tmp121_;
+				PlankPointD _tmp120_;
+				PlankDockItemDrawValue* _tmp121_;
 				PlankDockItemDrawValue* _tmp122_;
-				_tmp111_ = val;
-				_tmp112_ = _tmp111_->center;
-				tmp = _tmp112_.y;
+				PlankPointD _tmp123_;
+				PlankDockItemDrawValue* _tmp124_;
 				_tmp113_ = val;
-				_tmp114_ = val;
-				_tmp115_ = _tmp114_->center;
-				_tmp113_->center.y = _tmp115_.x;
+				_tmp114_ = _tmp113_->center;
+				tmp = _tmp114_.y;
+				_tmp115_ = val;
 				_tmp116_ = val;
-				_tmp116_->center.x = tmp;
-				_tmp117_ = val;
-				_tmp118_ = _tmp117_->static_center;
-				tmp = _tmp118_.y;
+				_tmp117_ = _tmp116_->center;
+				_tmp115_->center.y = _tmp117_.x;
+				_tmp118_ = val;
+				_tmp118_->center.x = tmp;
 				_tmp119_ = val;
-				_tmp120_ = val;
-				_tmp121_ = _tmp120_->static_center;
-				_tmp119_->static_center.y = _tmp121_.x;
+				_tmp120_ = _tmp119_->static_center;
+				tmp = _tmp120_.y;
+				_tmp121_ = val;
 				_tmp122_ = val;
-				_tmp122_->static_center.x = tmp;
+				_tmp123_ = _tmp122_->static_center;
+				_tmp121_->static_center.y = _tmp123_.x;
+				_tmp124_ = val;
+				_tmp124_->static_center.x = tmp;
 			}
-			_tmp123_ = self->priv->_Position;
-			switch (_tmp123_) {
+			_tmp125_ = self->priv->_Position;
+			switch (_tmp125_) {
 				case GTK_POS_RIGHT:
 				{
-					PlankDockItemDrawValue* _tmp124_;
-					PlankDockItemDrawValue* _tmp125_;
-					PlankPointD _tmp126_;
+					PlankDockItemDrawValue* _tmp126_;
 					PlankDockItemDrawValue* _tmp127_;
-					PlankDockItemDrawValue* _tmp128_;
-					PlankPointD _tmp129_;
-					_tmp124_ = val;
-					_tmp125_ = val;
-					_tmp126_ = _tmp125_->center;
-					_tmp124_->center.x = height - _tmp126_.x;
+					PlankPointD _tmp128_;
+					PlankDockItemDrawValue* _tmp129_;
+					PlankDockItemDrawValue* _tmp130_;
+					PlankPointD _tmp131_;
+					_tmp126_ = val;
 					_tmp127_ = val;
-					_tmp128_ = val;
-					_tmp129_ = _tmp128_->static_center;
-					_tmp127_->static_center.x = height - _tmp129_.x;
+					_tmp128_ = _tmp127_->center;
+					_tmp126_->center.x = height - _tmp128_.x;
+					_tmp129_ = val;
+					_tmp130_ = val;
+					_tmp131_ = _tmp130_->static_center;
+					_tmp129_->static_center.x = height - _tmp131_.x;
 					break;
 				}
 				case GTK_POS_BOTTOM:
 				{
-					PlankDockItemDrawValue* _tmp130_;
-					PlankDockItemDrawValue* _tmp131_;
-					PlankPointD _tmp132_;
+					PlankDockItemDrawValue* _tmp132_;
 					PlankDockItemDrawValue* _tmp133_;
-					PlankDockItemDrawValue* _tmp134_;
-					PlankPointD _tmp135_;
-					_tmp130_ = val;
-					_tmp131_ = val;
-					_tmp132_ = _tmp131_->center;
-					_tmp130_->center.y = height - _tmp132_.y;
+					PlankPointD _tmp134_;
+					PlankDockItemDrawValue* _tmp135_;
+					PlankDockItemDrawValue* _tmp136_;
+					PlankPointD _tmp137_;
+					_tmp132_ = val;
 					_tmp133_ = val;
-					_tmp134_ = val;
-					_tmp135_ = _tmp134_->static_center;
-					_tmp133_->static_center.y = height - _tmp135_.y;
+					_tmp134_ = _tmp133_->center;
+					_tmp132_->center.y = height - _tmp134_.y;
+					_tmp135_ = val;
+					_tmp136_ = val;
+					_tmp137_ = _tmp136_->static_center;
+					_tmp135_->static_center.y = height - _tmp137_.y;
 					break;
 				}
 				default:
@@ -2419,561 +2430,662 @@ plank_position_manager_update_draw_values (PlankPositionManager* self,
 					break;
 				}
 			}
-			_tmp136_ = val;
-			_tmp137_ = self->priv->_Position;
-			_tmp138_ = self->priv->_DockMargin;
-			plank_dock_item_draw_value_move_in (_tmp136_, _tmp137_, (gdouble) (self->priv->bottom_offset + _tmp138_));
-			_tmp140_ = item;
-			if (PLANK_IS_STATUS_INDICATOR_ITEM (_tmp140_)) {
-				_tmp139_ = TRUE;
+			_tmp138_ = val;
+			_tmp139_ = self->priv->_Position;
+			_tmp140_ = self->priv->_DockMargin;
+			plank_dock_item_draw_value_move_in (_tmp138_, _tmp139_, (gdouble) (self->priv->bottom_offset + _tmp140_));
+			_tmp143_ = item;
+			if (PLANK_IS_STATUS_INDICATOR_ITEM (_tmp143_)) {
+				_tmp142_ = TRUE;
 			} else {
-				PlankDockItem* _tmp141_;
-				_tmp141_ = item;
-				_tmp139_ = PLANK_IS_LAUNCHER_ITEM (_tmp141_);
+				PlankDockItem* _tmp144_;
+				_tmp144_ = item;
+				_tmp142_ = PLANK_IS_LAUNCHER_ITEM (_tmp144_);
 			}
-			if (_tmp139_) {
-				PlankDockItemDrawValue* _tmp142_;
-				PlankDockItemDrawValue* _tmp143_;
-				PlankPointD _tmp144_;
-				PlankDockItemDrawValue* _tmp145_;
+			if (_tmp142_) {
+				_tmp141_ = TRUE;
+			} else {
+				PlankDockItem* _tmp145_;
+				_tmp145_ = item;
+				_tmp141_ = PLANK_IS_UPDATE_MANAGER_ITEM (_tmp145_);
+			}
+			if (_tmp141_) {
 				PlankDockItemDrawValue* _tmp146_;
-				_tmp142_ = val;
-				_tmp143_ = val;
-				_tmp144_ = _tmp143_->static_center;
-				_tmp142_->center = _tmp144_;
-				_tmp145_ = val;
-				_tmp145_->icon_size = (gdouble) icon_size;
+				PlankDockItemDrawValue* _tmp147_;
+				PlankPointD _tmp148_;
+				PlankDockItemDrawValue* _tmp149_;
+				PlankDockItemDrawValue* _tmp150_;
 				_tmp146_ = val;
-				_tmp146_->zoom = 1.0;
+				_tmp147_ = val;
+				_tmp148_ = _tmp147_->static_center;
+				_tmp146_->center = _tmp148_;
+				_tmp149_ = val;
+				_tmp149_->icon_size = (gdouble) icon_size;
+				_tmp150_ = val;
+				_tmp150_->zoom = 1.0;
 			}
 			if (func != NULL) {
-				PlankDockItem* _tmp147_;
-				PlankDockItemDrawValue* _tmp148_;
-				_tmp147_ = item;
-				_tmp148_ = val;
-				func (_tmp147_, _tmp148_, func_target);
+				PlankDockItem* _tmp151_;
+				PlankDockItemDrawValue* _tmp152_;
+				_tmp151_ = item;
+				_tmp152_ = val;
+				func (_tmp151_, _tmp152_, func_target);
 			}
-			_tmp149_ = self->priv->draw_values;
-			_tmp150_ = item;
-			_tmp151_ = val;
-			gee_abstract_map_set ((GeeAbstractMap*) _tmp149_, (PlankDockElement*) _tmp150_, _tmp151_);
-			_tmp152_ = item;
-			_tmp153_ = plank_dock_element_get_RemoveTime ((PlankDockElement*) _tmp152_);
-			_tmp154_ = _tmp153_;
-			if (_tmp154_ == ((gint64) 0)) {
-				gint _tmp155_;
-				_tmp155_ = self->priv->_ItemPadding;
-				center.x = center.x + (icon_size + _tmp155_);
+			_tmp153_ = self->priv->draw_values;
+			_tmp154_ = item;
+			_tmp155_ = val;
+			gee_abstract_map_set ((GeeAbstractMap*) _tmp153_, (PlankDockElement*) _tmp154_, _tmp155_);
+			_tmp156_ = item;
+			_tmp157_ = plank_dock_element_get_RemoveTime ((PlankDockElement*) _tmp156_);
+			_tmp158_ = _tmp157_;
+			if (_tmp158_ == ((gint64) 0)) {
+				gint _tmp159_;
+				_tmp159_ = self->priv->_ItemPadding;
+				center.x = center.x + (icon_size + _tmp159_);
 			}
 			_plank_dock_item_draw_value_unref0 (val);
 		}
 	}
 	if (post_func != NULL) {
-		GeeHashMap* _tmp156_;
-		_tmp156_ = self->priv->draw_values;
-		post_func (_tmp156_, post_func_target);
+		GeeHashMap* _tmp160_;
+		_tmp160_ = self->priv->draw_values;
+		post_func (_tmp160_, post_func_target);
 	}
 	primary_first = NULL;
 	primary_last = NULL;
 	status_first = NULL;
 	status_last = NULL;
-	menu_item = NULL;
+	left_first = NULL;
+	left_last = NULL;
 	status_count = 0;
 	{
 		GeeArrayList* _item_list = NULL;
 		gint _item_size = 0;
-		GeeArrayList* _tmp157_;
-		gint _tmp158_;
-		gint _tmp159_;
+		GeeArrayList* _tmp161_;
+		gint _tmp162_;
+		gint _tmp163_;
 		gint _item_index = 0;
 		_item_list = items;
-		_tmp157_ = _item_list;
-		_tmp158_ = gee_abstract_collection_get_size ((GeeAbstractCollection*) _tmp157_);
-		_tmp159_ = _tmp158_;
-		_item_size = _tmp159_;
+		_tmp161_ = _item_list;
+		_tmp162_ = gee_abstract_collection_get_size ((GeeAbstractCollection*) _tmp161_);
+		_tmp163_ = _tmp162_;
+		_item_size = _tmp163_;
 		_item_index = -1;
 		while (TRUE) {
-			gint _tmp160_;
-			gint _tmp161_;
+			gint _tmp164_;
+			gint _tmp165_;
 			PlankDockItem* item = NULL;
-			GeeArrayList* _tmp162_;
-			gpointer _tmp163_;
-			PlankDockItem* _tmp164_;
+			GeeArrayList* _tmp166_;
+			gpointer _tmp167_;
+			gboolean _tmp168_ = FALSE;
+			PlankDockItem* _tmp169_;
 			_item_index = _item_index + 1;
-			_tmp160_ = _item_index;
-			_tmp161_ = _item_size;
-			if (!(_tmp160_ < _tmp161_)) {
+			_tmp164_ = _item_index;
+			_tmp165_ = _item_size;
+			if (!(_tmp164_ < _tmp165_)) {
 				break;
 			}
-			_tmp162_ = _item_list;
-			_tmp163_ = gee_abstract_list_get ((GeeAbstractList*) _tmp162_, _item_index);
-			item = (PlankDockItem*) _tmp163_;
-			_tmp164_ = item;
-			if (PLANK_IS_LAUNCHER_ITEM (_tmp164_)) {
-				PlankDockItem* _tmp165_;
-				PlankDockItem* _tmp166_;
-				_tmp165_ = item;
-				_tmp166_ = _g_object_ref0 (_tmp165_);
-				_g_object_unref0 (menu_item);
-				menu_item = _tmp166_;
+			_tmp166_ = _item_list;
+			_tmp167_ = gee_abstract_list_get ((GeeAbstractList*) _tmp166_, _item_index);
+			item = (PlankDockItem*) _tmp167_;
+			_tmp169_ = item;
+			if (PLANK_IS_LAUNCHER_ITEM (_tmp169_)) {
+				_tmp168_ = TRUE;
 			} else {
-				PlankDockItem* _tmp167_;
-				_tmp167_ = item;
-				if (PLANK_IS_STATUS_INDICATOR_ITEM (_tmp167_)) {
-					PlankDockItem* _tmp168_;
-					PlankDockItem* _tmp171_;
+				PlankDockItem* _tmp170_;
+				_tmp170_ = item;
+				_tmp168_ = PLANK_IS_UPDATE_MANAGER_ITEM (_tmp170_);
+			}
+			if (_tmp168_) {
+				PlankDockItem* _tmp171_;
+				PlankDockItem* _tmp174_;
+				PlankDockItem* _tmp175_;
+				_tmp171_ = left_first;
+				if (_tmp171_ == NULL) {
 					PlankDockItem* _tmp172_;
-					gint _tmp173_;
-					_tmp168_ = status_first;
-					if (_tmp168_ == NULL) {
-						PlankDockItem* _tmp169_;
-						PlankDockItem* _tmp170_;
-						_tmp169_ = item;
-						_tmp170_ = _g_object_ref0 (_tmp169_);
-						_g_object_unref0 (status_first);
-						status_first = _tmp170_;
-					}
-					_tmp171_ = item;
-					_tmp172_ = _g_object_ref0 (_tmp171_);
-					_g_object_unref0 (status_last);
-					status_last = _tmp172_;
-					_tmp173_ = status_count;
-					status_count = _tmp173_ + 1;
-				} else {
-					PlankDockItem* _tmp174_;
+					PlankDockItem* _tmp173_;
+					_tmp172_ = item;
+					_tmp173_ = _g_object_ref0 (_tmp172_);
+					_g_object_unref0 (left_first);
+					left_first = _tmp173_;
+				}
+				_tmp174_ = item;
+				_tmp175_ = _g_object_ref0 (_tmp174_);
+				_g_object_unref0 (left_last);
+				left_last = _tmp175_;
+			} else {
+				PlankDockItem* _tmp176_;
+				_tmp176_ = item;
+				if (PLANK_IS_STATUS_INDICATOR_ITEM (_tmp176_)) {
 					PlankDockItem* _tmp177_;
-					PlankDockItem* _tmp178_;
-					_tmp174_ = primary_first;
-					if (_tmp174_ == NULL) {
-						PlankDockItem* _tmp175_;
-						PlankDockItem* _tmp176_;
-						_tmp175_ = item;
-						_tmp176_ = _g_object_ref0 (_tmp175_);
-						_g_object_unref0 (primary_first);
-						primary_first = _tmp176_;
+					PlankDockItem* _tmp180_;
+					PlankDockItem* _tmp181_;
+					gint _tmp182_;
+					_tmp177_ = status_first;
+					if (_tmp177_ == NULL) {
+						PlankDockItem* _tmp178_;
+						PlankDockItem* _tmp179_;
+						_tmp178_ = item;
+						_tmp179_ = _g_object_ref0 (_tmp178_);
+						_g_object_unref0 (status_first);
+						status_first = _tmp179_;
 					}
-					_tmp177_ = item;
-					_tmp178_ = _g_object_ref0 (_tmp177_);
+					_tmp180_ = item;
+					_tmp181_ = _g_object_ref0 (_tmp180_);
+					_g_object_unref0 (status_last);
+					status_last = _tmp181_;
+					_tmp182_ = status_count;
+					status_count = _tmp182_ + 1;
+				} else {
+					PlankDockItem* _tmp183_;
+					PlankDockItem* _tmp186_;
+					PlankDockItem* _tmp187_;
+					_tmp183_ = primary_first;
+					if (_tmp183_ == NULL) {
+						PlankDockItem* _tmp184_;
+						PlankDockItem* _tmp185_;
+						_tmp184_ = item;
+						_tmp185_ = _g_object_ref0 (_tmp184_);
+						_g_object_unref0 (primary_first);
+						primary_first = _tmp185_;
+					}
+					_tmp186_ = item;
+					_tmp187_ = _g_object_ref0 (_tmp186_);
 					_g_object_unref0 (primary_last);
-					primary_last = _tmp178_;
+					primary_last = _tmp187_;
 				}
 			}
 		}
 	}
-	_tmp181_ = primary_first;
-	if (_tmp181_ != NULL) {
-		PlankDockItem* _tmp182_;
-		_tmp182_ = primary_last;
-		_tmp180_ = _tmp182_ != NULL;
+	_tmp190_ = primary_first;
+	if (_tmp190_ != NULL) {
+		PlankDockItem* _tmp191_;
+		_tmp191_ = primary_last;
+		_tmp189_ = _tmp191_ != NULL;
 	} else {
-		_tmp180_ = FALSE;
+		_tmp189_ = FALSE;
 	}
-	if (_tmp180_) {
-		PlankDockPreferences* _tmp183_;
-		_tmp183_ = prefs;
-		_tmp179_ = plank_dock_preferences_is_horizontal_dock (_tmp183_);
+	if (_tmp189_) {
+		PlankDockPreferences* _tmp192_;
+		_tmp192_ = prefs;
+		_tmp188_ = plank_dock_preferences_is_horizontal_dock (_tmp192_);
 	} else {
-		_tmp179_ = FALSE;
+		_tmp188_ = FALSE;
 	}
-	if (_tmp179_) {
+	if (_tmp188_) {
 		gdouble primary_center = 0.0;
-		GeeHashMap* _tmp184_;
-		PlankDockItem* _tmp185_;
-		gpointer _tmp186_;
-		PlankDockItemDrawValue* _tmp187_;
-		PlankPointD _tmp188_;
-		GeeHashMap* _tmp189_;
-		PlankDockItem* _tmp190_;
-		gpointer _tmp191_;
-		PlankDockItemDrawValue* _tmp192_;
-		PlankPointD _tmp193_;
-		gdouble _tmp194_;
+		GeeHashMap* _tmp193_;
+		PlankDockItem* _tmp194_;
+		gpointer _tmp195_;
+		PlankDockItemDrawValue* _tmp196_;
+		PlankPointD _tmp197_;
+		GeeHashMap* _tmp198_;
+		PlankDockItem* _tmp199_;
+		gpointer _tmp200_;
+		PlankDockItemDrawValue* _tmp201_;
+		PlankPointD _tmp202_;
+		gdouble _tmp203_;
 		gdouble primary_shift = 0.0;
-		_tmp184_ = self->priv->draw_values;
-		_tmp185_ = primary_first;
-		_tmp186_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp184_, (PlankDockElement*) _tmp185_);
-		_tmp187_ = (PlankDockItemDrawValue*) _tmp186_;
-		_tmp188_ = _tmp187_->static_center;
-		_tmp189_ = self->priv->draw_values;
-		_tmp190_ = primary_last;
-		_tmp191_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp189_, (PlankDockElement*) _tmp190_);
-		_tmp192_ = (PlankDockItemDrawValue*) _tmp191_;
-		_tmp193_ = _tmp192_->static_center;
-		_tmp194_ = (_tmp188_.x + _tmp193_.x) / 2.0;
-		_plank_dock_item_draw_value_unref0 (_tmp192_);
-		_plank_dock_item_draw_value_unref0 (_tmp187_);
-		primary_center = _tmp194_;
+		_tmp193_ = self->priv->draw_values;
+		_tmp194_ = primary_first;
+		_tmp195_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp193_, (PlankDockElement*) _tmp194_);
+		_tmp196_ = (PlankDockItemDrawValue*) _tmp195_;
+		_tmp197_ = _tmp196_->static_center;
+		_tmp198_ = self->priv->draw_values;
+		_tmp199_ = primary_last;
+		_tmp200_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp198_, (PlankDockElement*) _tmp199_);
+		_tmp201_ = (PlankDockItemDrawValue*) _tmp200_;
+		_tmp202_ = _tmp201_->static_center;
+		_tmp203_ = (_tmp197_.x + _tmp202_.x) / 2.0;
+		_plank_dock_item_draw_value_unref0 (_tmp201_);
+		_plank_dock_item_draw_value_unref0 (_tmp196_);
+		primary_center = _tmp203_;
 		primary_shift = (self->priv->DockWidth / 2.0) - primary_center;
 		{
 			GeeArrayList* _item_list = NULL;
 			gint _item_size = 0;
-			GeeArrayList* _tmp195_;
-			gint _tmp196_;
-			gint _tmp197_;
+			GeeArrayList* _tmp204_;
+			gint _tmp205_;
+			gint _tmp206_;
 			gint _item_index = 0;
 			_item_list = items;
-			_tmp195_ = _item_list;
-			_tmp196_ = gee_abstract_collection_get_size ((GeeAbstractCollection*) _tmp195_);
-			_tmp197_ = _tmp196_;
-			_item_size = _tmp197_;
+			_tmp204_ = _item_list;
+			_tmp205_ = gee_abstract_collection_get_size ((GeeAbstractCollection*) _tmp204_);
+			_tmp206_ = _tmp205_;
+			_item_size = _tmp206_;
 			_item_index = -1;
 			while (TRUE) {
-				gint _tmp198_;
-				gint _tmp199_;
+				gint _tmp207_;
+				gint _tmp208_;
 				PlankDockItem* item = NULL;
-				GeeArrayList* _tmp200_;
-				gpointer _tmp201_;
-				gboolean _tmp202_ = FALSE;
-				PlankDockItem* _tmp203_;
+				GeeArrayList* _tmp209_;
+				gpointer _tmp210_;
+				gboolean _tmp211_ = FALSE;
+				gboolean _tmp212_ = FALSE;
+				PlankDockItem* _tmp213_;
 				_item_index = _item_index + 1;
-				_tmp198_ = _item_index;
-				_tmp199_ = _item_size;
-				if (!(_tmp198_ < _tmp199_)) {
+				_tmp207_ = _item_index;
+				_tmp208_ = _item_size;
+				if (!(_tmp207_ < _tmp208_)) {
 					break;
 				}
-				_tmp200_ = _item_list;
-				_tmp201_ = gee_abstract_list_get ((GeeAbstractList*) _tmp200_, _item_index);
-				item = (PlankDockItem*) _tmp201_;
-				_tmp203_ = item;
-				if (!PLANK_IS_STATUS_INDICATOR_ITEM (_tmp203_)) {
-					PlankDockItem* _tmp204_;
-					_tmp204_ = item;
-					_tmp202_ = !PLANK_IS_LAUNCHER_ITEM (_tmp204_);
+				_tmp209_ = _item_list;
+				_tmp210_ = gee_abstract_list_get ((GeeAbstractList*) _tmp209_, _item_index);
+				item = (PlankDockItem*) _tmp210_;
+				_tmp213_ = item;
+				if (!PLANK_IS_STATUS_INDICATOR_ITEM (_tmp213_)) {
+					PlankDockItem* _tmp214_;
+					_tmp214_ = item;
+					_tmp212_ = !PLANK_IS_LAUNCHER_ITEM (_tmp214_);
 				} else {
-					_tmp202_ = FALSE;
+					_tmp212_ = FALSE;
 				}
-				if (_tmp202_) {
-					GeeHashMap* _tmp205_;
-					PlankDockItem* _tmp206_;
-					gpointer _tmp207_;
-					PlankDockItemDrawValue* _tmp208_;
-					GtkPositionType _tmp209_;
-					_tmp205_ = self->priv->draw_values;
-					_tmp206_ = item;
-					_tmp207_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp205_, (PlankDockElement*) _tmp206_);
-					_tmp208_ = (PlankDockItemDrawValue*) _tmp207_;
-					_tmp209_ = self->priv->_Position;
-					plank_dock_item_draw_value_move_right (_tmp208_, _tmp209_, primary_shift);
-					_plank_dock_item_draw_value_unref0 (_tmp208_);
+				if (_tmp212_) {
+					PlankDockItem* _tmp215_;
+					_tmp215_ = item;
+					_tmp211_ = !PLANK_IS_UPDATE_MANAGER_ITEM (_tmp215_);
+				} else {
+					_tmp211_ = FALSE;
+				}
+				if (_tmp211_) {
+					GeeHashMap* _tmp216_;
+					PlankDockItem* _tmp217_;
+					gpointer _tmp218_;
+					PlankDockItemDrawValue* _tmp219_;
+					GtkPositionType _tmp220_;
+					_tmp216_ = self->priv->draw_values;
+					_tmp217_ = item;
+					_tmp218_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp216_, (PlankDockElement*) _tmp217_);
+					_tmp219_ = (PlankDockItemDrawValue*) _tmp218_;
+					_tmp220_ = self->priv->_Position;
+					plank_dock_item_draw_value_move_right (_tmp219_, _tmp220_, primary_shift);
+					_plank_dock_item_draw_value_unref0 (_tmp219_);
 				}
 			}
 		}
 	}
 	if (status_count > 0) {
-		PlankDockPreferences* _tmp211_;
-		_tmp211_ = prefs;
-		_tmp210_ = plank_dock_preferences_is_horizontal_dock (_tmp211_);
+		PlankDockPreferences* _tmp222_;
+		_tmp222_ = prefs;
+		_tmp221_ = plank_dock_preferences_is_horizontal_dock (_tmp222_);
 	} else {
-		_tmp210_ = FALSE;
+		_tmp221_ = FALSE;
 	}
-	if (_tmp210_) {
+	if (_tmp221_) {
 		gint background_padding = 0;
-		gint _tmp212_;
-		gint _tmp213_;
-		gint _tmp214_;
+		gint _tmp223_;
+		gint _tmp224_;
+		gint _tmp225_;
 		gdouble status_last_center = 0.0;
-		GeeHashMap* _tmp215_;
-		PlankDockItem* _tmp216_;
-		gpointer _tmp217_;
-		PlankDockItemDrawValue* _tmp218_;
-		PlankPointD _tmp219_;
-		gdouble _tmp220_;
+		GeeHashMap* _tmp226_;
+		PlankDockItem* _tmp227_;
+		gpointer _tmp228_;
+		PlankDockItemDrawValue* _tmp229_;
+		PlankPointD _tmp230_;
+		gdouble _tmp231_;
 		gdouble desired_last_center = 0.0;
-		gint _tmp221_;
-		gint _tmp222_;
+		gint _tmp232_;
+		gint _tmp233_;
 		gdouble status_shift = 0.0;
-		_tmp212_ = self->priv->_ItemPadding;
-		_tmp213_ = self->priv->_HorizPadding;
-		_tmp214_ = self->priv->_LineWidth;
-		background_padding = (_tmp212_ + (2 * _tmp213_)) + (4 * _tmp214_);
-		_tmp215_ = self->priv->draw_values;
-		_tmp216_ = status_last;
-		_tmp217_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp215_, (PlankDockElement*) _tmp216_);
-		_tmp218_ = (PlankDockItemDrawValue*) _tmp217_;
-		_tmp219_ = _tmp218_->center;
-		_tmp220_ = _tmp219_.x;
-		_plank_dock_item_draw_value_unref0 (_tmp218_);
-		status_last_center = _tmp220_;
-		_tmp221_ = self->priv->_DockMargin;
-		_tmp222_ = self->priv->_IconSize;
-		desired_last_center = (self->priv->DockWidth - _tmp221_) - ((_tmp222_ + background_padding) / 2.0);
+		_tmp223_ = self->priv->_ItemPadding;
+		_tmp224_ = self->priv->_HorizPadding;
+		_tmp225_ = self->priv->_LineWidth;
+		background_padding = (_tmp223_ + (2 * _tmp224_)) + (4 * _tmp225_);
+		_tmp226_ = self->priv->draw_values;
+		_tmp227_ = status_last;
+		_tmp228_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp226_, (PlankDockElement*) _tmp227_);
+		_tmp229_ = (PlankDockItemDrawValue*) _tmp228_;
+		_tmp230_ = _tmp229_->center;
+		_tmp231_ = _tmp230_.x;
+		_plank_dock_item_draw_value_unref0 (_tmp229_);
+		status_last_center = _tmp231_;
+		_tmp232_ = self->priv->_DockMargin;
+		_tmp233_ = self->priv->_IconSize;
+		desired_last_center = (self->priv->DockWidth - _tmp232_) - ((_tmp233_ + background_padding) / 2.0);
 		status_shift = desired_last_center - status_last_center;
 		{
 			GeeArrayList* _item_list = NULL;
 			gint _item_size = 0;
-			GeeArrayList* _tmp223_;
-			gint _tmp224_;
-			gint _tmp225_;
+			GeeArrayList* _tmp234_;
+			gint _tmp235_;
+			gint _tmp236_;
 			gint _item_index = 0;
 			_item_list = items;
-			_tmp223_ = _item_list;
-			_tmp224_ = gee_abstract_collection_get_size ((GeeAbstractCollection*) _tmp223_);
-			_tmp225_ = _tmp224_;
-			_item_size = _tmp225_;
+			_tmp234_ = _item_list;
+			_tmp235_ = gee_abstract_collection_get_size ((GeeAbstractCollection*) _tmp234_);
+			_tmp236_ = _tmp235_;
+			_item_size = _tmp236_;
 			_item_index = -1;
 			while (TRUE) {
-				gint _tmp226_;
-				gint _tmp227_;
+				gint _tmp237_;
+				gint _tmp238_;
 				PlankDockItem* item = NULL;
-				GeeArrayList* _tmp228_;
-				gpointer _tmp229_;
-				PlankDockItem* _tmp230_;
+				GeeArrayList* _tmp239_;
+				gpointer _tmp240_;
+				PlankDockItem* _tmp241_;
 				_item_index = _item_index + 1;
-				_tmp226_ = _item_index;
-				_tmp227_ = _item_size;
-				if (!(_tmp226_ < _tmp227_)) {
+				_tmp237_ = _item_index;
+				_tmp238_ = _item_size;
+				if (!(_tmp237_ < _tmp238_)) {
 					break;
 				}
-				_tmp228_ = _item_list;
-				_tmp229_ = gee_abstract_list_get ((GeeAbstractList*) _tmp228_, _item_index);
-				item = (PlankDockItem*) _tmp229_;
-				_tmp230_ = item;
-				if (PLANK_IS_STATUS_INDICATOR_ITEM (_tmp230_)) {
-					GeeHashMap* _tmp231_;
-					PlankDockItem* _tmp232_;
-					gpointer _tmp233_;
-					PlankDockItemDrawValue* _tmp234_;
-					GtkPositionType _tmp235_;
-					_tmp231_ = self->priv->draw_values;
-					_tmp232_ = item;
-					_tmp233_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp231_, (PlankDockElement*) _tmp232_);
-					_tmp234_ = (PlankDockItemDrawValue*) _tmp233_;
-					_tmp235_ = self->priv->_Position;
-					plank_dock_item_draw_value_move_right (_tmp234_, _tmp235_, status_shift);
-					_plank_dock_item_draw_value_unref0 (_tmp234_);
+				_tmp239_ = _item_list;
+				_tmp240_ = gee_abstract_list_get ((GeeAbstractList*) _tmp239_, _item_index);
+				item = (PlankDockItem*) _tmp240_;
+				_tmp241_ = item;
+				if (PLANK_IS_STATUS_INDICATOR_ITEM (_tmp241_)) {
+					GeeHashMap* _tmp242_;
+					PlankDockItem* _tmp243_;
+					gpointer _tmp244_;
+					PlankDockItemDrawValue* _tmp245_;
+					GtkPositionType _tmp246_;
+					_tmp242_ = self->priv->draw_values;
+					_tmp243_ = item;
+					_tmp244_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp242_, (PlankDockElement*) _tmp243_);
+					_tmp245_ = (PlankDockItemDrawValue*) _tmp244_;
+					_tmp246_ = self->priv->_Position;
+					plank_dock_item_draw_value_move_right (_tmp245_, _tmp246_, status_shift);
+					_plank_dock_item_draw_value_unref0 (_tmp245_);
 				}
 			}
 		}
 	}
-	_tmp237_ = menu_item;
-	if (_tmp237_ != NULL) {
-		PlankDockPreferences* _tmp238_;
-		_tmp238_ = prefs;
-		_tmp236_ = plank_dock_preferences_is_horizontal_dock (_tmp238_);
+	_tmp249_ = left_first;
+	if (_tmp249_ != NULL) {
+		PlankDockItem* _tmp250_;
+		_tmp250_ = left_last;
+		_tmp248_ = _tmp250_ != NULL;
 	} else {
-		_tmp236_ = FALSE;
+		_tmp248_ = FALSE;
 	}
-	if (_tmp236_) {
+	if (_tmp248_) {
+		PlankDockPreferences* _tmp251_;
+		_tmp251_ = prefs;
+		_tmp247_ = plank_dock_preferences_is_horizontal_dock (_tmp251_);
+	} else {
+		_tmp247_ = FALSE;
+	}
+	if (_tmp247_) {
 		gint background_padding = 0;
-		gint _tmp239_;
-		gint _tmp240_;
-		gint _tmp241_;
+		gint _tmp252_;
+		gint _tmp253_;
+		gint _tmp254_;
 		gdouble desired_center = 0.0;
-		gint _tmp242_;
-		gint _tmp243_;
-		PlankDockItemDrawValue* value = NULL;
-		GeeHashMap* _tmp244_;
-		PlankDockItem* _tmp245_;
-		gpointer _tmp246_;
-		PlankDockItemDrawValue* _tmp247_;
-		GtkPositionType _tmp248_;
-		PlankDockItemDrawValue* _tmp249_;
-		PlankPointD _tmp250_;
-		_tmp239_ = self->priv->_ItemPadding;
-		_tmp240_ = self->priv->_HorizPadding;
-		_tmp241_ = self->priv->_LineWidth;
-		background_padding = (_tmp239_ + (2 * _tmp240_)) + (4 * _tmp241_);
-		_tmp242_ = self->priv->_DockMargin;
-		_tmp243_ = self->priv->_IconSize;
-		desired_center = _tmp242_ + ((_tmp243_ + background_padding) / 2.0);
-		_tmp244_ = self->priv->draw_values;
-		_tmp245_ = menu_item;
-		_tmp246_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp244_, (PlankDockElement*) _tmp245_);
-		value = (PlankDockItemDrawValue*) _tmp246_;
-		_tmp247_ = value;
-		_tmp248_ = self->priv->_Position;
-		_tmp249_ = value;
-		_tmp250_ = _tmp249_->center;
-		plank_dock_item_draw_value_move_right (_tmp247_, _tmp248_, desired_center - _tmp250_.x);
-		_plank_dock_item_draw_value_unref0 (value);
-	}
-	self->priv->primary_background_rect = _tmp251_;
-	self->priv->status_background_rect = _tmp252_;
-	_tmp254_ = primary_first;
-	if (_tmp254_ != NULL) {
-		PlankDockItem* _tmp255_;
-		_tmp255_ = primary_last;
-		_tmp253_ = _tmp255_ != NULL;
-	} else {
-		_tmp253_ = FALSE;
-	}
-	if (_tmp253_) {
-		GeeHashMap* _tmp256_;
-		PlankDockItem* _tmp257_;
-		gpointer _tmp258_;
-		PlankDockItemDrawValue* _tmp259_;
-		GeeHashMap* _tmp260_;
-		PlankDockItem* _tmp261_;
-		gpointer _tmp262_;
-		PlankDockItemDrawValue* _tmp263_;
-		GdkRectangle _tmp264_;
-		_tmp256_ = self->priv->draw_values;
-		_tmp257_ = primary_first;
-		_tmp258_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp256_, (PlankDockElement*) _tmp257_);
-		_tmp259_ = (PlankDockItemDrawValue*) _tmp258_;
-		_tmp260_ = self->priv->draw_values;
-		_tmp261_ = primary_last;
-		_tmp262_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp260_, (PlankDockElement*) _tmp261_);
-		_tmp263_ = (PlankDockItemDrawValue*) _tmp262_;
-		plank_position_manager_update_background_region (self, _tmp259_, _tmp263_);
-		_plank_dock_item_draw_value_unref0 (_tmp263_);
-		_plank_dock_item_draw_value_unref0 (_tmp259_);
-		_tmp264_ = self->priv->background_rect;
-		self->priv->primary_background_rect = _tmp264_;
-	}
-	_tmp266_ = status_first;
-	if (_tmp266_ != NULL) {
-		PlankDockItem* _tmp267_;
-		_tmp267_ = status_last;
-		_tmp265_ = _tmp267_ != NULL;
-	} else {
-		_tmp265_ = FALSE;
-	}
-	if (_tmp265_) {
-		GeeHashMap* _tmp268_;
-		PlankDockItem* _tmp269_;
-		gpointer _tmp270_;
-		PlankDockItemDrawValue* _tmp271_;
-		GeeHashMap* _tmp272_;
-		PlankDockItem* _tmp273_;
-		gpointer _tmp274_;
-		PlankDockItemDrawValue* _tmp275_;
-		GdkRectangle _tmp276_;
-		_tmp268_ = self->priv->draw_values;
-		_tmp269_ = status_first;
-		_tmp270_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp268_, (PlankDockElement*) _tmp269_);
-		_tmp271_ = (PlankDockItemDrawValue*) _tmp270_;
-		_tmp272_ = self->priv->draw_values;
-		_tmp273_ = status_last;
-		_tmp274_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp272_, (PlankDockElement*) _tmp273_);
-		_tmp275_ = (PlankDockItemDrawValue*) _tmp274_;
-		plank_position_manager_update_background_region (self, _tmp271_, _tmp275_);
-		_plank_dock_item_draw_value_unref0 (_tmp275_);
-		_plank_dock_item_draw_value_unref0 (_tmp271_);
-		_tmp276_ = self->priv->background_rect;
-		self->priv->status_background_rect = _tmp276_;
-	}
-	if (plank_position_manager_is_horizontal_dock (self)) {
-		GdkRectangle _tmp278_;
-		_tmp278_ = self->priv->status_background_rect;
-		_tmp277_ = _tmp278_.height > 0;
-	} else {
-		_tmp277_ = FALSE;
-	}
-	if (_tmp277_) {
-		gdouble status_center_y = 0.0;
-		GdkRectangle _tmp279_;
-		GdkRectangle _tmp280_;
-		_tmp279_ = self->priv->status_background_rect;
-		_tmp280_ = self->priv->status_background_rect;
-		status_center_y = _tmp279_.y + (_tmp280_.height / 2.0);
+		gint _tmp255_;
+		gint _tmp256_;
+		gdouble left_shift = 0.0;
+		GeeHashMap* _tmp257_;
+		PlankDockItem* _tmp258_;
+		gpointer _tmp259_;
+		PlankDockItemDrawValue* _tmp260_;
+		PlankPointD _tmp261_;
+		gdouble _tmp262_;
+		_tmp252_ = self->priv->_ItemPadding;
+		_tmp253_ = self->priv->_HorizPadding;
+		_tmp254_ = self->priv->_LineWidth;
+		background_padding = (_tmp252_ + (2 * _tmp253_)) + (4 * _tmp254_);
+		_tmp255_ = self->priv->_DockMargin;
+		_tmp256_ = self->priv->_IconSize;
+		desired_center = _tmp255_ + ((_tmp256_ + background_padding) / 2.0);
+		_tmp257_ = self->priv->draw_values;
+		_tmp258_ = left_first;
+		_tmp259_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp257_, (PlankDockElement*) _tmp258_);
+		_tmp260_ = (PlankDockItemDrawValue*) _tmp259_;
+		_tmp261_ = _tmp260_->center;
+		_tmp262_ = desired_center - _tmp261_.x;
+		_plank_dock_item_draw_value_unref0 (_tmp260_);
+		left_shift = _tmp262_;
 		{
 			GeeArrayList* _item_list = NULL;
 			gint _item_size = 0;
-			GeeArrayList* _tmp281_;
-			gint _tmp282_;
-			gint _tmp283_;
+			GeeArrayList* _tmp263_;
+			gint _tmp264_;
+			gint _tmp265_;
 			gint _item_index = 0;
 			_item_list = items;
-			_tmp281_ = _item_list;
-			_tmp282_ = gee_abstract_collection_get_size ((GeeAbstractCollection*) _tmp281_);
-			_tmp283_ = _tmp282_;
-			_item_size = _tmp283_;
+			_tmp263_ = _item_list;
+			_tmp264_ = gee_abstract_collection_get_size ((GeeAbstractCollection*) _tmp263_);
+			_tmp265_ = _tmp264_;
+			_item_size = _tmp265_;
 			_item_index = -1;
 			while (TRUE) {
-				gint _tmp284_;
-				gint _tmp285_;
+				gint _tmp266_;
+				gint _tmp267_;
 				PlankDockItem* item = NULL;
-				GeeArrayList* _tmp286_;
-				gpointer _tmp287_;
-				gboolean _tmp288_ = FALSE;
-				PlankDockItem* _tmp289_;
-				PlankDockItemDrawValue* value = NULL;
-				GeeHashMap* _tmp291_;
-				PlankDockItem* _tmp292_;
-				gpointer _tmp293_;
-				PlankDockItemDrawValue* _tmp294_;
-				PlankDockItemDrawValue* _tmp295_;
+				GeeArrayList* _tmp268_;
+				gpointer _tmp269_;
+				gboolean _tmp270_ = FALSE;
+				PlankDockItem* _tmp271_;
 				_item_index = _item_index + 1;
-				_tmp284_ = _item_index;
-				_tmp285_ = _item_size;
-				if (!(_tmp284_ < _tmp285_)) {
+				_tmp266_ = _item_index;
+				_tmp267_ = _item_size;
+				if (!(_tmp266_ < _tmp267_)) {
 					break;
 				}
-				_tmp286_ = _item_list;
-				_tmp287_ = gee_abstract_list_get ((GeeAbstractList*) _tmp286_, _item_index);
-				item = (PlankDockItem*) _tmp287_;
-				_tmp289_ = item;
-				if (!PLANK_IS_STATUS_INDICATOR_ITEM (_tmp289_)) {
-					PlankDockItem* _tmp290_;
-					_tmp290_ = item;
-					_tmp288_ = !PLANK_IS_LAUNCHER_ITEM (_tmp290_);
+				_tmp268_ = _item_list;
+				_tmp269_ = gee_abstract_list_get ((GeeAbstractList*) _tmp268_, _item_index);
+				item = (PlankDockItem*) _tmp269_;
+				_tmp271_ = item;
+				if (PLANK_IS_LAUNCHER_ITEM (_tmp271_)) {
+					_tmp270_ = TRUE;
 				} else {
-					_tmp288_ = FALSE;
+					PlankDockItem* _tmp272_;
+					_tmp272_ = item;
+					_tmp270_ = PLANK_IS_UPDATE_MANAGER_ITEM (_tmp272_);
 				}
-				if (_tmp288_) {
-					continue;
+				if (_tmp270_) {
+					GeeHashMap* _tmp273_;
+					PlankDockItem* _tmp274_;
+					gpointer _tmp275_;
+					PlankDockItemDrawValue* _tmp276_;
+					GtkPositionType _tmp277_;
+					_tmp273_ = self->priv->draw_values;
+					_tmp274_ = item;
+					_tmp275_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp273_, (PlankDockElement*) _tmp274_);
+					_tmp276_ = (PlankDockItemDrawValue*) _tmp275_;
+					_tmp277_ = self->priv->_Position;
+					plank_dock_item_draw_value_move_right (_tmp276_, _tmp277_, left_shift);
+					_plank_dock_item_draw_value_unref0 (_tmp276_);
 				}
-				_tmp291_ = self->priv->draw_values;
-				_tmp292_ = item;
-				_tmp293_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp291_, (PlankDockElement*) _tmp292_);
-				value = (PlankDockItemDrawValue*) _tmp293_;
-				_tmp294_ = value;
-				_tmp294_->center.y = status_center_y;
-				_tmp295_ = value;
-				_tmp295_->static_center.y = status_center_y;
-				_plank_dock_item_draw_value_unref0 (value);
 			}
 		}
 	}
-	_tmp297_ = self->priv->primary_background_rect;
-	if (_tmp297_.width > 0) {
-		GdkRectangle _tmp298_;
-		_tmp298_ = self->priv->status_background_rect;
-		_tmp296_ = _tmp298_.width > 0;
+	self->priv->primary_background_rect = _tmp278_;
+	self->priv->status_background_rect = _tmp279_;
+	_tmp281_ = primary_first;
+	if (_tmp281_ != NULL) {
+		PlankDockItem* _tmp282_;
+		_tmp282_ = primary_last;
+		_tmp280_ = _tmp282_ != NULL;
 	} else {
-		_tmp296_ = FALSE;
+		_tmp280_ = FALSE;
 	}
-	if (_tmp296_) {
-		GdkRectangle _tmp299_;
-		GdkRectangle _tmp300_ = {0};
-		_tmp299_ = self->priv->status_background_rect;
-		gdk_rectangle_union (&self->priv->primary_background_rect, &_tmp299_, &_tmp300_);
-		self->priv->background_rect = _tmp300_;
+	if (_tmp280_) {
+		GeeHashMap* _tmp283_;
+		PlankDockItem* _tmp284_;
+		gpointer _tmp285_;
+		PlankDockItemDrawValue* _tmp286_;
+		GeeHashMap* _tmp287_;
+		PlankDockItem* _tmp288_;
+		gpointer _tmp289_;
+		PlankDockItemDrawValue* _tmp290_;
+		GdkRectangle _tmp291_;
+		_tmp283_ = self->priv->draw_values;
+		_tmp284_ = primary_first;
+		_tmp285_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp283_, (PlankDockElement*) _tmp284_);
+		_tmp286_ = (PlankDockItemDrawValue*) _tmp285_;
+		_tmp287_ = self->priv->draw_values;
+		_tmp288_ = primary_last;
+		_tmp289_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp287_, (PlankDockElement*) _tmp288_);
+		_tmp290_ = (PlankDockItemDrawValue*) _tmp289_;
+		plank_position_manager_update_background_region (self, _tmp286_, _tmp290_);
+		_plank_dock_item_draw_value_unref0 (_tmp290_);
+		_plank_dock_item_draw_value_unref0 (_tmp286_);
+		_tmp291_ = self->priv->background_rect;
+		self->priv->primary_background_rect = _tmp291_;
+	}
+	_tmp293_ = status_first;
+	if (_tmp293_ != NULL) {
+		PlankDockItem* _tmp294_;
+		_tmp294_ = status_last;
+		_tmp292_ = _tmp294_ != NULL;
 	} else {
-		GdkRectangle _tmp301_;
-		_tmp301_ = self->priv->primary_background_rect;
-		if (_tmp301_.width > 0) {
-			GdkRectangle _tmp302_;
-			_tmp302_ = self->priv->primary_background_rect;
-			self->priv->background_rect = _tmp302_;
-		} else {
-			GdkRectangle _tmp303_;
-			_tmp303_ = self->priv->status_background_rect;
-			self->priv->background_rect = _tmp303_;
-		}
+		_tmp292_ = FALSE;
+	}
+	if (_tmp292_) {
+		GeeHashMap* _tmp295_;
+		PlankDockItem* _tmp296_;
+		gpointer _tmp297_;
+		PlankDockItemDrawValue* _tmp298_;
+		GeeHashMap* _tmp299_;
+		PlankDockItem* _tmp300_;
+		gpointer _tmp301_;
+		PlankDockItemDrawValue* _tmp302_;
+		GdkRectangle _tmp303_;
+		_tmp295_ = self->priv->draw_values;
+		_tmp296_ = status_first;
+		_tmp297_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp295_, (PlankDockElement*) _tmp296_);
+		_tmp298_ = (PlankDockItemDrawValue*) _tmp297_;
+		_tmp299_ = self->priv->draw_values;
+		_tmp300_ = status_last;
+		_tmp301_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp299_, (PlankDockElement*) _tmp300_);
+		_tmp302_ = (PlankDockItemDrawValue*) _tmp301_;
+		plank_position_manager_update_background_region (self, _tmp298_, _tmp302_);
+		_plank_dock_item_draw_value_unref0 (_tmp302_);
+		_plank_dock_item_draw_value_unref0 (_tmp298_);
+		_tmp303_ = self->priv->background_rect;
+		self->priv->status_background_rect = _tmp303_;
 	}
 	if (plank_position_manager_is_horizontal_dock (self)) {
 		GdkRectangle _tmp305_;
-		_tmp305_ = self->priv->background_rect;
+		_tmp305_ = self->priv->status_background_rect;
 		_tmp304_ = _tmp305_.height > 0;
 	} else {
 		_tmp304_ = FALSE;
 	}
 	if (_tmp304_) {
-		gint _tmp306_;
-		gint _tmp307_;
-		_tmp306_ = self->priv->_DockMargin;
-		self->priv->background_rect.x = _tmp306_;
-		_tmp307_ = self->priv->_DockMargin;
-		self->priv->background_rect.width = MAX (1, self->priv->DockWidth - (2 * _tmp307_));
+		gdouble status_center_y = 0.0;
+		GdkRectangle _tmp306_;
+		GdkRectangle _tmp307_;
+		_tmp306_ = self->priv->status_background_rect;
+		_tmp307_ = self->priv->status_background_rect;
+		status_center_y = _tmp306_.y + (_tmp307_.height / 2.0);
+		{
+			GeeArrayList* _item_list = NULL;
+			gint _item_size = 0;
+			GeeArrayList* _tmp308_;
+			gint _tmp309_;
+			gint _tmp310_;
+			gint _item_index = 0;
+			_item_list = items;
+			_tmp308_ = _item_list;
+			_tmp309_ = gee_abstract_collection_get_size ((GeeAbstractCollection*) _tmp308_);
+			_tmp310_ = _tmp309_;
+			_item_size = _tmp310_;
+			_item_index = -1;
+			while (TRUE) {
+				gint _tmp311_;
+				gint _tmp312_;
+				PlankDockItem* item = NULL;
+				GeeArrayList* _tmp313_;
+				gpointer _tmp314_;
+				gboolean _tmp315_ = FALSE;
+				gboolean _tmp316_ = FALSE;
+				PlankDockItem* _tmp317_;
+				PlankDockItemDrawValue* value = NULL;
+				GeeHashMap* _tmp320_;
+				PlankDockItem* _tmp321_;
+				gpointer _tmp322_;
+				PlankDockItemDrawValue* _tmp323_;
+				PlankDockItemDrawValue* _tmp324_;
+				_item_index = _item_index + 1;
+				_tmp311_ = _item_index;
+				_tmp312_ = _item_size;
+				if (!(_tmp311_ < _tmp312_)) {
+					break;
+				}
+				_tmp313_ = _item_list;
+				_tmp314_ = gee_abstract_list_get ((GeeAbstractList*) _tmp313_, _item_index);
+				item = (PlankDockItem*) _tmp314_;
+				_tmp317_ = item;
+				if (!PLANK_IS_STATUS_INDICATOR_ITEM (_tmp317_)) {
+					PlankDockItem* _tmp318_;
+					_tmp318_ = item;
+					_tmp316_ = !PLANK_IS_LAUNCHER_ITEM (_tmp318_);
+				} else {
+					_tmp316_ = FALSE;
+				}
+				if (_tmp316_) {
+					PlankDockItem* _tmp319_;
+					_tmp319_ = item;
+					_tmp315_ = !PLANK_IS_UPDATE_MANAGER_ITEM (_tmp319_);
+				} else {
+					_tmp315_ = FALSE;
+				}
+				if (_tmp315_) {
+					continue;
+				}
+				_tmp320_ = self->priv->draw_values;
+				_tmp321_ = item;
+				_tmp322_ = gee_abstract_map_get ((GeeAbstractMap*) _tmp320_, (PlankDockElement*) _tmp321_);
+				value = (PlankDockItemDrawValue*) _tmp322_;
+				_tmp323_ = value;
+				_tmp323_->center.y = status_center_y;
+				_tmp324_ = value;
+				_tmp324_->static_center.y = status_center_y;
+				_plank_dock_item_draw_value_unref0 (value);
+			}
+		}
 	}
-	_tmp308_ = self->priv->draw_values;
-	_tmp309_ = gee_abstract_map_map_iterator ((GeeAbstractMap*) _tmp308_);
-	_tmp310_ = _tmp309_;
-	gee_map_iterator_foreach (_tmp310_, ___lambda47__gee_forall_map_func, self);
-	_g_object_unref0 (_tmp310_);
-	_g_object_unref0 (menu_item);
+	_tmp326_ = self->priv->primary_background_rect;
+	if (_tmp326_.width > 0) {
+		GdkRectangle _tmp327_;
+		_tmp327_ = self->priv->status_background_rect;
+		_tmp325_ = _tmp327_.width > 0;
+	} else {
+		_tmp325_ = FALSE;
+	}
+	if (_tmp325_) {
+		GdkRectangle _tmp328_;
+		GdkRectangle _tmp329_ = {0};
+		_tmp328_ = self->priv->status_background_rect;
+		gdk_rectangle_union (&self->priv->primary_background_rect, &_tmp328_, &_tmp329_);
+		self->priv->background_rect = _tmp329_;
+	} else {
+		GdkRectangle _tmp330_;
+		_tmp330_ = self->priv->primary_background_rect;
+		if (_tmp330_.width > 0) {
+			GdkRectangle _tmp331_;
+			_tmp331_ = self->priv->primary_background_rect;
+			self->priv->background_rect = _tmp331_;
+		} else {
+			GdkRectangle _tmp332_;
+			_tmp332_ = self->priv->status_background_rect;
+			self->priv->background_rect = _tmp332_;
+		}
+	}
+	if (plank_position_manager_is_horizontal_dock (self)) {
+		GdkRectangle _tmp334_;
+		_tmp334_ = self->priv->background_rect;
+		_tmp333_ = _tmp334_.height > 0;
+	} else {
+		_tmp333_ = FALSE;
+	}
+	if (_tmp333_) {
+		gint _tmp335_;
+		gint _tmp336_;
+		_tmp335_ = self->priv->_DockMargin;
+		self->priv->background_rect.x = _tmp335_;
+		_tmp336_ = self->priv->_DockMargin;
+		self->priv->background_rect.width = MAX (1, self->priv->DockWidth - (2 * _tmp336_));
+	}
+	_tmp337_ = self->priv->draw_values;
+	_tmp338_ = gee_abstract_map_map_iterator ((GeeAbstractMap*) _tmp337_);
+	_tmp339_ = _tmp338_;
+	gee_map_iterator_foreach (_tmp339_, ___lambda63__gee_forall_map_func, self);
+	_g_object_unref0 (_tmp339_);
+	_g_object_unref0 (left_last);
+	_g_object_unref0 (left_first);
 	_g_object_unref0 (status_last);
 	_g_object_unref0 (status_first);
 	_g_object_unref0 (primary_last);

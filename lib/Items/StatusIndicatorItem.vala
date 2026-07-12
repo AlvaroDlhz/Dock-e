@@ -20,6 +20,7 @@ namespace Plank
 
 		bool active = true;
 		bool muted = false;
+		double volume_level = 0.0;
 		int battery_percent = 0;
 		bool battery_charging = false;
 		uint update_timer_id = 0U;
@@ -62,6 +63,7 @@ namespace Plank
 		{
 			var old_active = active;
 			var old_muted = muted;
+			var old_volume_level = volume_level;
 			var old_battery_percent = battery_percent;
 			var old_battery_charging = battery_charging;
 
@@ -85,6 +87,7 @@ namespace Plank
 			// Time-based indicators need a fresh buffer even if their state did not change.
 			if (Kind == StatusIndicatorKind.CLOCK || Kind == StatusIndicatorKind.DATE
 				|| old_active != active || old_muted != muted
+				|| Math.fabs (old_volume_level - volume_level) > 0.005
 				|| old_battery_percent != battery_percent
 				|| old_battery_charging != battery_charging)
 				reset_icon_buffer ();
@@ -119,6 +122,12 @@ namespace Plank
 			string output = "";
 			active = run_command ("wpctl get-volume @DEFAULT_AUDIO_SINK@", out output);
 			muted = active && output.contains ("[MUTED]");
+			volume_level = 0.0;
+			if (active) {
+				var fields = output.split (" ");
+				if (fields.length > 1)
+					volume_level = double.parse (fields[1]);
+			}
 		}
 
 		static bool command_output_contains (string command, string needle)
@@ -431,17 +440,42 @@ namespace Plank
 				draw_text (cr, surface, new DateTime.now_local ().format ("%d/%m"), size * 0.24);
 				break;
 			case StatusIndicatorKind.WIFI:
-				draw_wifi (cr, size);
+				draw_lucide (surface, "wifi", alpha);
 				break;
 			case StatusIndicatorKind.VOLUME:
-				draw_volume (cr, size, muted || !active);
+				var volume_icon = muted || !active ? "volume-x" :
+					(volume_level <= 0.01 ? "volume" : (volume_level < 0.50 ? "volume-1" : "volume-2"));
+				draw_lucide (surface, volume_icon, alpha);
+				if (volume_level > 1.0 && !muted) {
+					cr.set_source_rgba (1.0, 1.0, 1.0, alpha);
+					cr.arc (size * 0.84, size * 0.22, size * 0.035, 0, Math.PI * 2.0);
+					cr.fill ();
+				}
 				break;
 			case StatusIndicatorKind.BLUETOOTH:
-				draw_bluetooth (cr, size);
+				draw_lucide (surface, "bluetooth", alpha);
 				break;
 			case StatusIndicatorKind.BATTERY:
-				draw_battery (cr, size);
+				var battery_icon = battery_charging ? "battery-charging" :
+					(battery_percent < 34 ? "battery-low" : (battery_percent < 67 ? "battery-medium" : "battery-full"));
+				draw_lucide (surface, battery_icon, alpha);
 				break;
+			}
+		}
+
+		void draw_lucide (Surface surface, string name, double alpha)
+		{
+			var icon_size = (int) (double.min (surface.Width, surface.Height) * 0.54);
+			try {
+				var pixbuf = new Gdk.Pixbuf.from_resource_at_scale (
+					"%s/lucide/%s.svg".printf (Plank.G_RESOURCE_PATH, name), icon_size, icon_size, true);
+				unowned Cairo.Context cr = surface.Context;
+				var x = (surface.Width - pixbuf.width) / 2.0;
+				var y = (surface.Height - pixbuf.height) / 2.0;
+				Gdk.cairo_set_source_pixbuf (cr, pixbuf, x, y);
+				cr.paint_with_alpha (alpha);
+			} catch (Error e) {
+				warning ("Unable to load Lucide icon '%s': %s", name, e.message);
 			}
 		}
 
@@ -468,7 +502,7 @@ namespace Plank
 			cr.fill ();
 		}
 
-		void draw_volume (Cairo.Context cr, double size, bool is_muted)
+		void draw_volume (Cairo.Context cr, double size, bool is_muted, double level)
 		{
 			cr.move_to (size * 0.20, size * 0.43);
 			cr.line_to (size * 0.34, size * 0.43);
@@ -483,10 +517,20 @@ namespace Plank
 				cr.line_to (size * 0.78, size * 0.58);
 				cr.move_to (size * 0.78, size * 0.42);
 				cr.line_to (size * 0.62, size * 0.58);
-			} else {
-				cr.arc (size * 0.49, size * 0.50, size * 0.20, -Math.PI / 3.0, Math.PI / 3.0);
+				cr.stroke ();
+				return;
 			}
-			cr.stroke ();
+
+			var wave_count = level <= 0.01 ? 0 : (level < 0.34 ? 1 : (level < 0.67 ? 2 : 3));
+			var radii = new double[] { size * 0.14, size * 0.24, size * 0.34 };
+			for (var i = 0; i < wave_count; i++) {
+				cr.arc (size * 0.49, size * 0.50, radii[i], -Math.PI / 3.0, Math.PI / 3.0);
+				cr.stroke ();
+			}
+			if (level > 1.0) {
+				cr.arc (size * 0.88, size * 0.25, size * 0.035, 0, Math.PI * 2.0);
+				cr.fill ();
+			}
 		}
 
 		void draw_bluetooth (Cairo.Context cr, double size)

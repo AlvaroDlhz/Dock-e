@@ -134,6 +134,7 @@ namespace Plank
 				update_hovered ((int) event.x, (int) event.y);
 			
 			ClickedItem = HoveredItem;
+			controller.launcher.dismiss_application_context ();
 
 			// A click anywhere else on the dock dismisses the native launcher,
 			// while the launcher item itself keeps its normal toggle behaviour.

@@ -129,8 +129,8 @@ static void _plank_dbus_items_handle_elements_changed_plank_dock_container_eleme
 VALA_EXTERN PlankDBusItems* plank_dbus_items_new (PlankDockController* _controller);
 VALA_EXTERN PlankDBusItems* plank_dbus_items_construct (GType object_type,
                                             PlankDockController* _controller);
-static gboolean __lambda105_ (PlankDBusItems* self);
-static gboolean ___lambda105__gsource_func (gpointer self);
+static gboolean __lambda121_ (PlankDBusItems* self);
+static gboolean ___lambda121__gsource_func (gpointer self);
 static gboolean plank_dbus_items_real_add (PlankDBusItemsIface* base,
                                     const gchar* uri,
                                     GError** error);
@@ -248,7 +248,7 @@ plank_dbus_items_new (PlankDockController* _controller)
 }
 
 static gboolean
-__lambda105_ (PlankDBusItems* self)
+__lambda121_ (PlankDBusItems* self)
 {
 	gboolean result;
 	self->priv->changed_timer_id = 0U;
@@ -258,10 +258,10 @@ __lambda105_ (PlankDBusItems* self)
 }
 
 static gboolean
-___lambda105__gsource_func (gpointer self)
+___lambda121__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = __lambda105_ ((PlankDBusItems*) self);
+	result = __lambda121_ ((PlankDBusItems*) self);
 	return result;
 }
 
@@ -272,7 +272,7 @@ plank_dbus_items_handle_elements_changed (PlankDBusItems* self)
 	if (self->priv->changed_timer_id > 0U) {
 		return;
 	}
-	self->priv->changed_timer_id = g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 500, ___lambda105__gsource_func, g_object_ref (self), g_object_unref);
+	self->priv->changed_timer_id = g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 500, ___lambda121__gsource_func, g_object_ref (self), g_object_unref);
 }
 
 static gboolean

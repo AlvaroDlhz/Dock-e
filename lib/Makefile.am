@@ -95,6 +95,7 @@ libplank_la_VALASOURCES = \
 	Items/PlaceholderDockItem.vala \
 	Items/PlankDockItem.vala \
 	Items/StatusIndicatorItem.vala \
+	Items/UpdateManagerItem.vala \
 	Items/TransientDockItem.vala \
 	Items/LauncherItem.vala \
 	Services/Environment.vala \

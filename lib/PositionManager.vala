@@ -756,7 +756,7 @@ namespace Plank
 				foreach (unowned DockItem item in items)
 					if (item is StatusIndicatorItem)
 						status_item_count++;
-					else if (item is LauncherItem)
+					else if (item is LauncherItem || item is UpdateManagerItem)
 						launcher_item_count++;
 				cursor.x -= (status_item_count - launcher_item_count)
 					* (IconSize + ItemPadding) / 2;
@@ -927,7 +927,7 @@ namespace Plank
 
 				// System indicators form a fixed status section and never participate
 				// in the launcher magnification or its displacement curve.
-				if (item is StatusIndicatorItem || item is LauncherItem) {
+				if (item is StatusIndicatorItem || item is LauncherItem || item is UpdateManagerItem) {
 					val.center = val.static_center;
 					val.icon_size = icon_size;
 					val.zoom = 1.0;
@@ -952,11 +952,14 @@ namespace Plank
 			DockItem? primary_last = null;
 			DockItem? status_first = null;
 			DockItem? status_last = null;
-			DockItem? menu_item = null;
+			DockItem? left_first = null;
+			DockItem? left_last = null;
 			var status_count = 0;
 			foreach (unowned DockItem item in items) {
-				if (item is LauncherItem) {
-					menu_item = item;
+				if (item is LauncherItem || item is UpdateManagerItem) {
+					if (left_first == null)
+						left_first = item;
+					left_last = item;
 				} else if (item is StatusIndicatorItem) {
 					if (status_first == null)
 						status_first = item;
@@ -976,7 +979,7 @@ namespace Plank
 					+ draw_values[primary_last].static_center.x) / 2.0;
 				var primary_shift = DockWidth / 2.0 - primary_center;
 				foreach (unowned DockItem item in items) {
-					if (!(item is StatusIndicatorItem) && !(item is LauncherItem))
+					if (!(item is StatusIndicatorItem) && !(item is LauncherItem) && !(item is UpdateManagerItem))
 						draw_values[item].move_right (Position, primary_shift);
 				}
 			}
@@ -993,11 +996,13 @@ namespace Plank
 				}
 			}
 
-			if (menu_item != null && prefs.is_horizontal_dock ()) {
+			if (left_first != null && left_last != null && prefs.is_horizontal_dock ()) {
 				var background_padding = ItemPadding + 2 * HorizPadding + 4 * LineWidth;
 				var desired_center = DockMargin + (IconSize + background_padding) / 2.0;
-				var value = draw_values[menu_item];
-				value.move_right (Position, desired_center - value.center.x);
+				var left_shift = desired_center - draw_values[left_first].center.x;
+				foreach (unowned DockItem item in items)
+					if (item is LauncherItem || item is UpdateManagerItem)
+						draw_values[item].move_right (Position, left_shift);
 			}
 
 			primary_background_rect = {};
@@ -1016,7 +1021,7 @@ namespace Plank
 			if (is_horizontal_dock () && status_background_rect.height > 0) {
 				var status_center_y = status_background_rect.y + status_background_rect.height / 2.0;
 				foreach (unowned DockItem item in items) {
-					if (!(item is StatusIndicatorItem) && !(item is LauncherItem))
+					if (!(item is StatusIndicatorItem) && !(item is LauncherItem) && !(item is UpdateManagerItem))
 						continue;
 
 					var value = draw_values[item];

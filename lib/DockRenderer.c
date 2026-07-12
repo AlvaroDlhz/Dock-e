@@ -151,9 +151,9 @@ static void _plank_renderer_animated_draw_g_object_notify (GObject* _sender,
                                                     gpointer self);
 static void plank_dock_renderer_reset_position_manager (PlankDockRenderer* self);
 static void plank_dock_renderer_load_theme (PlankDockRenderer* self);
-static gboolean __lambda85_ (PlankDockRenderer* self);
+static gboolean __lambda101_ (PlankDockRenderer* self);
 static void plank_dock_renderer_reset_item_buffers (PlankDockRenderer* self);
-static gboolean ___lambda85__gsource_func (gpointer self);
+static gboolean ___lambda101__gsource_func (gpointer self);
 static void _plank_dock_renderer_load_theme_g_object_notify (GObject* _sender,
                                                       GParamSpec* pspec,
                                                       gpointer self);
@@ -206,19 +206,19 @@ static void plank_dock_renderer_draw_item_shadow (PlankDockRenderer* self,
                                            PlankDockItem* item,
                                            PlankDockItemDrawValue* draw_value);
 static const gchar* plank_dock_renderer_cairo_surface_type_to_string (cairo_surface_type_t type);
-static gboolean ___lambda87_ (Block1Data* _data1_);
-static gboolean ____lambda87__gsource_func (gpointer self);
+static gboolean ___lambda103_ (Block1Data* _data1_);
+static gboolean ____lambda103__gsource_func (gpointer self);
 static gdouble plank_dock_renderer_easing_bounce (gdouble t,
                                            gdouble d,
                                            gdouble n);
 static Block2Data* block2_data_ref (Block2Data* _data2_);
 static void block2_data_unref (void * _userdata_);
-static gboolean __lambda86_ (Block2Data* _data2_,
-                      PlankDockElement* i,
-                      PlankDockItemDrawValue* val);
-static gboolean ___lambda86__gee_forall_map_func (gconstpointer k,
-                                           gconstpointer v,
-                                           gpointer self);
+static gboolean __lambda102_ (Block2Data* _data2_,
+                       PlankDockElement* i,
+                       PlankDockItemDrawValue* val);
+static gboolean ___lambda102__gee_forall_map_func (gconstpointer k,
+                                            gconstpointer v,
+                                            gpointer self);
 static inline PlankSurface* plank_dock_renderer_get_item_surface (PlankDockRenderer* self,
                                                     PlankDockItem* item,
                                                     gint icon_size);
@@ -440,7 +440,7 @@ plank_dock_renderer_theme_changed (PlankDockRenderer* self)
 }
 
 static gboolean
-__lambda85_ (PlankDockRenderer* self)
+__lambda101_ (PlankDockRenderer* self)
 {
 	PlankDockController* _tmp0_;
 	PlankPositionManager* _tmp1_;
@@ -460,10 +460,10 @@ __lambda85_ (PlankDockRenderer* self)
 }
 
 static gboolean
-___lambda85__gsource_func (gpointer self)
+___lambda101__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = __lambda85_ ((PlankDockRenderer*) self);
+	result = __lambda101_ ((PlankDockRenderer*) self);
 	return result;
 }
 
@@ -474,7 +474,7 @@ plank_dock_renderer_reset_position_manager (PlankDockRenderer* self)
 	if (self->priv->reset_position_manager_timer_id > 0U) {
 		g_source_remove (self->priv->reset_position_manager_timer_id);
 	}
-	self->priv->reset_position_manager_timer_id = gdk_threads_add_timeout ((guint) 50, ___lambda85__gsource_func, self);
+	self->priv->reset_position_manager_timer_id = gdk_threads_add_timeout ((guint) 50, ___lambda101__gsource_func, self);
 }
 
 static void
@@ -985,7 +985,7 @@ block1_data_unref (void * _userdata_)
 }
 
 static gboolean
-___lambda87_ (Block1Data* _data1_)
+___lambda103_ (Block1Data* _data1_)
 {
 	PlankDockRenderer* self;
 	PlankHideManager* hide_manager = NULL;
@@ -1019,10 +1019,10 @@ ___lambda87_ (Block1Data* _data1_)
 }
 
 static gboolean
-____lambda87__gsource_func (gpointer self)
+____lambda103__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = ___lambda87_ (self);
+	result = ___lambda103_ (self);
 	return result;
 }
 
@@ -1510,7 +1510,7 @@ plank_dock_renderer_real_draw (PlankRenderer* base,
 		_tmp149_ = cairo_get_target (cr);
 		_tmp150_ = plank_dock_renderer_cairo_surface_type_to_string (cairo_surface_get_type (_tmp149_));
 		g_message ("DockRenderer.vala:520: Cairo.SurfaceType: %s", _tmp150_);
-		gdk_threads_add_idle_full (G_PRIORITY_LOW, ____lambda87__gsource_func, block1_data_ref (_data1_), block1_data_unref);
+		gdk_threads_add_idle_full (G_PRIORITY_LOW, ____lambda103__gsource_func, block1_data_ref (_data1_), block1_data_unref);
 		self->priv->is_first_frame = FALSE;
 	}
 	block1_data_unref (_data1_);
@@ -2246,9 +2246,9 @@ block2_data_unref (void * _userdata_)
 }
 
 static gboolean
-__lambda86_ (Block2Data* _data2_,
-             PlankDockElement* i,
-             PlankDockItemDrawValue* val)
+__lambda102_ (Block2Data* _data2_,
+              PlankDockElement* i,
+              PlankDockItemDrawValue* val)
 {
 	PlankDockRenderer* self;
 	gboolean result;
@@ -2260,12 +2260,12 @@ __lambda86_ (Block2Data* _data2_,
 }
 
 static gboolean
-___lambda86__gee_forall_map_func (gconstpointer k,
-                                  gconstpointer v,
-                                  gpointer self)
+___lambda102__gee_forall_map_func (gconstpointer k,
+                                   gconstpointer v,
+                                   gpointer self)
 {
 	gboolean result;
-	result = __lambda86_ (self, (PlankDockElement*) k, (PlankDockItemDrawValue*) v);
+	result = __lambda102_ (self, (PlankDockElement*) k, (PlankDockItemDrawValue*) v);
 	return result;
 }
 
@@ -2360,7 +2360,7 @@ plank_dock_renderer_post_process_draw_values (GeeHashMap* draw_values,
 	}
 	_tmp12_ = gee_abstract_map_map_iterator ((GeeAbstractMap*) draw_values);
 	_tmp13_ = _tmp12_;
-	gee_map_iterator_foreach (_tmp13_, ___lambda86__gee_forall_map_func, _data2_);
+	gee_map_iterator_foreach (_tmp13_, ___lambda102__gee_forall_map_func, _data2_);
 	_g_object_unref0 (_tmp13_);
 	block2_data_unref (_data2_);
 	_data2_ = NULL;

@@ -1,5 +1,5 @@
 Widgets/LauncherWindow.lo: Widgets/LauncherWindow.c \
- /usr/include/stdc-predef.h ../config.h ../config.h plank.h \
+ /usr/include/stdc-predef.h ../config.h ../config.h \
  /usr/include/glib-2.0/glib-object.h \
  /usr/include/glib-2.0/gobject/gbinding.h /usr/include/glib-2.0/glib.h \
  /usr/include/glib-2.0/glib/galloca.h /usr/include/glib-2.0/glib/gtypes.h \
@@ -186,7 +186,7 @@ Widgets/LauncherWindow.lo: Widgets/LauncherWindow.c \
  /usr/include/glib-2.0/gobject/gtypeplugin.h \
  /usr/include/glib-2.0/gobject/gvaluearray.h \
  /usr/include/glib-2.0/gobject/gvaluetypes.h \
- /usr/include/glib-2.0/gobject/gobject-autocleanups.h \
+ /usr/include/glib-2.0/gobject/gobject-autocleanups.h plank.h \
  /usr/include/gtk-3.0/gdk/gdk.h /usr/include/gtk-3.0/gdk/gdkconfig.h \
  /usr/include/gtk-3.0/gdk/gdkversionmacros.h \
  /usr/include/gtk-3.0/gdk/gdkapplaunchcontext.h \
@@ -771,11 +771,11 @@ Widgets/LauncherWindow.lo: Widgets/LauncherWindow.c \
  /usr/include/glib-2.0/glib/gstdio.h /usr/include/glib-2.0/glib/gprintf.h \
  /usr/include/x86_64-linux-gnu/sys/stat.h \
  /usr/include/x86_64-linux-gnu/bits/stat.h \
- /usr/include/x86_64-linux-gnu/bits/struct_stat.h
+ /usr/include/x86_64-linux-gnu/bits/struct_stat.h \
+ /usr/include/gio-unix-2.0/gio/gdesktopappinfo.h
 /usr/include/stdc-predef.h:
 ../config.h:
 ../config.h:
-plank.h:
 /usr/include/glib-2.0/glib-object.h:
 /usr/include/glib-2.0/gobject/gbinding.h:
 /usr/include/glib-2.0/glib.h:
@@ -991,6 +991,7 @@ plank.h:
 /usr/include/glib-2.0/gobject/gvaluearray.h:
 /usr/include/glib-2.0/gobject/gvaluetypes.h:
 /usr/include/glib-2.0/gobject/gobject-autocleanups.h:
+plank.h:
 /usr/include/gtk-3.0/gdk/gdk.h:
 /usr/include/gtk-3.0/gdk/gdkconfig.h:
 /usr/include/gtk-3.0/gdk/gdkversionmacros.h:
@@ -1617,3 +1618,4 @@ plank-internal.h:
 /usr/include/x86_64-linux-gnu/sys/stat.h:
 /usr/include/x86_64-linux-gnu/bits/stat.h:
 /usr/include/x86_64-linux-gnu/bits/struct_stat.h:
+/usr/include/gio-unix-2.0/gio/gdesktopappinfo.h:

@@ -2,23 +2,21 @@
 
 namespace Plank
 {
-	class AudioStreamInfo : GLib.Object
-	{
-		public int id;
-		public string name = "";
-		public int volume = 100;
-	}
-
 	public class StatusPanelWindow : Gtk.Window
 	{
-		const int PANEL_WIDTH = 270;
+		const int PANEL_WIDTH = 245;
 		const int PANEL_HEIGHT = 400;
+		const int VOLUME_PANEL_SIZE = 300;
 		const int PANEL_GAP = 10;
 
 		unowned DockController controller;
 		Gtk.Box content;
+		Gtk.Box footer;
 		StatusIndicatorItem? current_item;
 		Gtk.CssProvider? css_provider;
+		int active_panel_width = PANEL_WIDTH;
+		int active_panel_height = PANEL_HEIGHT;
+		bool device_popup_open = false;
 
 		public StatusPanelWindow (DockController controller)
 		{
@@ -52,12 +50,18 @@ namespace Plank
 			scroll.hscrollbar_policy = Gtk.PolicyType.NEVER;
 			scroll.vscrollbar_policy = Gtk.PolicyType.NEVER;
 			scroll.overlay_scrolling = true;
+			scroll.propagate_natural_width = false;
+			scroll.propagate_natural_height = false;
 			scroll.get_style_context ().add_class ("status-scroll");
 			scroll.add (content);
 			card.pack_start (scroll, true, true, 0);
+			footer = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+			footer.get_style_context ().add_class ("status-footer");
+			card.pack_end (footer, false, false, 0);
 			add (card);
 			focus_out_event.connect (() => {
-				dismiss ();
+				if (!device_popup_open)
+					dismiss ();
 				return false;
 			});
 			show.connect (() => {
@@ -83,16 +87,44 @@ namespace Plank
 				return;
 			}
 			current_item = item;
+			apply_geometry (item.Kind);
 			rebuild (item.Kind);
 			apply_theme ();
 			opacity = 0.0;
 			show_all ();
 			present ();
 			Idle.add (() => {
+				resize (active_panel_width, active_panel_height);
 				position_over_item ();
 				opacity = 1.0;
+				Idle.add (() => { position_over_item (); return false; });
 				return false;
 			});
+		}
+
+		void apply_geometry (StatusIndicatorKind kind)
+		{
+			if (kind == StatusIndicatorKind.VOLUME) {
+				var workarea = active_workarea ();
+				var bar = controller.position_manager.get_screen_background_region ();
+				var available_above = bar.y - PANEL_GAP - workarea.y;
+				var square_size = int.min (VOLUME_PANEL_SIZE,
+					int.min (workarea.width - 20, available_above));
+				active_panel_width = active_panel_height = int.max (160, square_size);
+			} else {
+				active_panel_width = PANEL_WIDTH;
+				active_panel_height = PANEL_HEIGHT;
+			}
+			Gdk.Geometry geometry = {};
+			geometry.min_width = active_panel_width;
+			geometry.max_width = active_panel_width;
+			geometry.min_height = active_panel_height;
+			geometry.max_height = active_panel_height;
+			set_geometry_hints (null, geometry,
+				Gdk.WindowHints.MIN_SIZE | Gdk.WindowHints.MAX_SIZE);
+			set_size_request (active_panel_width, active_panel_height);
+			set_default_size (active_panel_width, active_panel_height);
+			resize (active_panel_width, active_panel_height);
 		}
 
 		public void dismiss ()
@@ -105,6 +137,8 @@ namespace Plank
 		{
 			foreach (unowned Gtk.Widget child in content.get_children ())
 				content.remove (child);
+			foreach (unowned Gtk.Widget child in footer.get_children ())
+				footer.remove (child);
 			content.pack_start (title_row (label_for_kind (kind), icon_for_kind (kind)), false, false, 0);
 			content.pack_start (new Gtk.Separator (Gtk.Orientation.HORIZONTAL), false, false, 0);
 			switch (kind) {
@@ -141,61 +175,54 @@ namespace Plank
 			}
 			content.pack_start (section_label (_("Output")), false, false, 0);
 			content.pack_start (device_selector (false), false, false, 0);
-			var scale = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 0, 150, 1);
-			scale.draw_value = false;
-			scale.set_value (percent);
-			var value = new Gtk.Label ("%.0f%%".printf (percent)) { width_request = 44 };
-			var row = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
-			row.pack_start (scale, true, true, 0);
-			var mute_button = icon_toggle_button ("audio-volume-muted-symbolic", muted);
-			mute_button.toggled.connect (() => run_action ("wpctl set-mute @DEFAULT_AUDIO_SINK@ " +
-				(mute_button.active ? "1" : "0")));
-			row.pack_end (mute_button, false, false, 0);
-			row.pack_end (value, false, false, 0);
-			scale.value_changed.connect (() => {
-				run_action ("wpctl set-volume @DEFAULT_AUDIO_SINK@ %.0f%%".printf (scale.get_value ()));
-				value.label = "%.0f%%".printf (scale.get_value ());
-			});
-			row.get_style_context ().add_class ("status-row");
-			content.pack_start (row, false, false, 0);
+			content.pack_start (modern_volume_bar ("@DEFAULT_AUDIO_SINK@", percent, 150,
+				"audio-volume-high-symbolic", muted), false, false, 0);
 
 			content.pack_start (section_label (_("Microphone")), false, false, 0);
 			content.pack_start (device_selector (true), false, false, 0);
 			var mic_percent = get_wpctl_volume ("@DEFAULT_AUDIO_SOURCE@");
-			var mic_scale = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 0, 100, 1);
-			mic_scale.draw_value = false;
-			mic_scale.set_value (mic_percent);
-			var mic_value = new Gtk.Label ("%.0f%%".printf (mic_percent)) { width_request = 44 };
-			var mic_row = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
-			mic_row.get_style_context ().add_class ("status-row");
-			mic_row.pack_start (mic_scale, true, true, 0);
-			var mic_mute = icon_toggle_button ("microphone-sensitivity-muted-symbolic",
-				wpctl_muted ("@DEFAULT_AUDIO_SOURCE@"));
-			mic_mute.toggled.connect (() => run_action ("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ " +
-				(mic_mute.active ? "1" : "0")));
-			mic_row.pack_end (mic_mute, false, false, 0);
-			mic_row.pack_end (mic_value, false, false, 0);
-			mic_scale.value_changed.connect (() => {
-				run_action ("wpctl set-volume @DEFAULT_AUDIO_SOURCE@ %.0f%%".printf (mic_scale.get_value ()));
-				mic_value.label = "%.0f%%".printf (mic_scale.get_value ());
-			});
-			content.pack_start (mic_row, false, false, 0);
-
-			var streams = audio_streams ();
-			if (streams.size > 0) {
-				content.pack_start (section_label (_("Applications")), false, false, 0);
-				var shown = 0;
-				foreach (var stream in streams) {
-					if (shown++ >= 2)
-						break;
-					content.pack_start (application_volume_row (stream), false, false, 0);
-				}
-			}
+			content.pack_start (modern_volume_bar ("@DEFAULT_AUDIO_SOURCE@", mic_percent, 100,
+				"audio-input-microphone-symbolic", wpctl_muted ("@DEFAULT_AUDIO_SOURCE@")), false, false, 0);
 
 			var settings = new Gtk.Button.with_label (_("Advanced sound settings"));
 			settings.get_style_context ().add_class ("status-action-button");
 			settings.clicked.connect (() => launch ("pavucontrol"));
-			content.pack_start (settings, false, false, 0);
+			footer.pack_start (settings, false, false, 0);
+		}
+
+		Gtk.Widget modern_volume_bar (string target, double percent, double maximum,
+			string icon_name, bool muted)
+		{
+			var overlay = new Gtk.Overlay ();
+			overlay.get_style_context ().add_class ("modern-volume-bar");
+			var scale = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 0, maximum, 1);
+			scale.draw_value = false;
+			scale.has_origin = true;
+			scale.height_request = 36;
+			scale.set_value (percent);
+			scale.get_style_context ().add_class ("modern-volume-scale");
+			overlay.add (scale);
+
+			var icon = icon_toggle_button (icon_name, muted);
+			icon.halign = Gtk.Align.START;
+			icon.valign = Gtk.Align.CENTER;
+			icon.margin_start = 5;
+			icon.toggled.connect (() => run_action ("wpctl set-mute %s %s".printf (target,
+				icon.active ? "1" : "0")));
+			overlay.add_overlay (icon);
+
+			var value = new Gtk.Label ("%.0f%%".printf (percent));
+			value.halign = Gtk.Align.END;
+			value.valign = Gtk.Align.CENTER;
+			value.margin_end = 10;
+			value.get_style_context ().add_class ("modern-volume-value");
+			overlay.add_overlay (value);
+			overlay.set_overlay_pass_through (value, true);
+			scale.value_changed.connect (() => {
+				run_action ("wpctl set-volume %s %.0f%%".printf (target, scale.get_value ()));
+				value.label = "%.0f%%".printf (scale.get_value ());
+			});
+			return overlay;
 		}
 
 		Gtk.ToggleButton icon_toggle_button (string icon, bool active)
@@ -218,10 +245,15 @@ namespace Plank
 		{
 			var row = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
 			row.get_style_context ().add_class ("status-row");
-			row.pack_start (new Gtk.Image.from_icon_name (source ? "audio-input-microphone-symbolic" :
-				"audio-speakers-symbolic", Gtk.IconSize.MENU), false, false, 0);
 			var combo = new Gtk.ComboBoxText ();
-			combo.width_request = 160;
+			combo.get_style_context ().add_class ("modern-device-selector");
+			foreach (unowned Gtk.CellRenderer renderer in combo.get_cells ()) {
+				var text_renderer = renderer as Gtk.CellRendererText;
+				if (text_renderer != null) {
+					text_renderer.ellipsize = Pango.EllipsizeMode.END;
+					text_renderer.width_chars = 14;
+				}
+			}
 			string current = "";
 			string output = "";
 			run (source ? "pactl get-default-source" : "pactl get-default-sink", out current);
@@ -234,12 +266,34 @@ namespace Plank
 				}
 			}
 			combo.active_id = current.strip ();
+			combo.notify["popup-shown"].connect (() => {
+				device_popup_open = combo.popup_shown;
+				if (!device_popup_open && visible)
+					Idle.add (() => { present (); return false; });
+			});
 			combo.changed.connect (() => {
-				if (combo.active_id != null)
+				if (combo.active_id != null) {
 					run_action ((source ? "pactl set-default-source " : "pactl set-default-sink ") + Shell.quote (combo.active_id));
+					move_active_streams (source, combo.active_id);
+				}
 			});
 			row.pack_start (combo, true, true, 0);
 			return row;
+		}
+
+		void move_active_streams (bool source, string device)
+		{
+			string output;
+			var list_command = source ? "pactl list short source-outputs" : "pactl list short sink-inputs";
+			if (!run (list_command, out output))
+				return;
+			foreach (unowned string line in output.split ("\n")) {
+				var fields = line.split ("\t");
+				if (fields.length < 1 || fields[0] == "")
+					continue;
+				run_action ((source ? "pactl move-source-output " : "pactl move-sink-input ")
+					+ fields[0] + " " + Shell.quote (device));
+			}
 		}
 
 		string friendly_device_name (string name)
@@ -263,53 +317,6 @@ namespace Plank
 		{
 			string output;
 			return run ("wpctl get-volume " + target, out output) && output.contains ("[MUTED]");
-		}
-
-		Gee.ArrayList<AudioStreamInfo> audio_streams ()
-		{
-			var streams = new Gee.ArrayList<AudioStreamInfo> ();
-			string output;
-			if (!run ("pactl list sink-inputs", out output))
-				return streams;
-			AudioStreamInfo? current = null;
-			foreach (unowned string raw_line in output.split ("\n")) {
-				var line = raw_line.strip ();
-				if (line.has_prefix ("Sink Input #")) {
-					if (current != null) streams.add (current);
-					current = new AudioStreamInfo ();
-					current.id = int.parse (line.substring (12));
-				} else if (current != null && line.has_prefix ("Volume:") && line.contains ("%")) {
-					var before_percent = line.substring (0, line.index_of ("%"));
-					var parts = before_percent.split ("/");
-					if (parts.length > 1) current.volume = int.parse (parts[1].strip ());
-				} else if (current != null && line.has_prefix ("application.name = ")) {
-					current.name = line.substring (19).replace ("\"", "");
-				} else if (current != null && current.name == "" && line.has_prefix ("media.name = ")) {
-					current.name = line.substring (13).replace ("\"", "");
-				}
-			}
-			if (current != null) streams.add (current);
-			return streams;
-		}
-
-		Gtk.Widget application_volume_row (AudioStreamInfo stream)
-		{
-			var box = new Gtk.Box (Gtk.Orientation.VERTICAL, 4);
-			box.get_style_context ().add_class ("status-row");
-			box.pack_start (new Gtk.Label (stream.name != "" ? stream.name : _("Application")) { xalign = 0.0f }, false, false, 0);
-			var row = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 8);
-			var scale = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 0, 150, 1);
-			scale.draw_value = false;
-			scale.set_value (stream.volume);
-			var value = new Gtk.Label ("%d%%".printf (stream.volume)) { width_request = 44 };
-			scale.value_changed.connect (() => {
-				run_action ("pactl set-sink-input-volume %d %.0f%%".printf (stream.id, scale.get_value ()));
-				value.label = "%.0f%%".printf (scale.get_value ());
-			});
-			row.pack_start (scale, true, true, 0);
-			row.pack_end (value, false, false, 0);
-			box.pack_start (row, false, false, 0);
-			return box;
 		}
 
 		void build_bluetooth ()
@@ -399,13 +406,27 @@ namespace Plank
 		{
 			if (current_item == null)
 				return;
-			int width, height;
-			get_size (out width, out height);
 			var item = controller.position_manager.get_screen_region_for_item (current_item);
 			var bar = controller.position_manager.get_screen_background_region ();
-			var desired_x = item.x + item.width / 2 - width / 2;
-			var max_x = bar.x + bar.width - width;
-			move (int.max (bar.x, int.min (max_x, desired_x)), bar.y - height - PANEL_GAP);
+			var workarea = active_workarea ();
+			int actual_width, actual_height;
+			get_size (out actual_width, out actual_height);
+			var desired_x = item.x + item.width / 2 - actual_width / 2;
+			var min_x = workarea.x + 8;
+			var max_x = workarea.x + workarea.width - actual_width - 8;
+			var desired_y = bar.y - actual_height - PANEL_GAP;
+			var min_y = workarea.y + 8;
+			var max_y = workarea.y + workarea.height - actual_height - 8;
+			move (int.max (min_x, int.min (max_x, desired_x)),
+				int.max (min_y, int.min (max_y, desired_y)));
+		}
+
+		Gdk.Rectangle active_workarea ()
+		{
+			var screen = get_screen ();
+			var bar = controller.position_manager.get_screen_background_region ();
+			var monitor = screen.get_monitor_at_point (bar.x + bar.width / 2, bar.y + bar.height / 2);
+			return screen.get_monitor_workarea (monitor);
 		}
 
 		void apply_theme ()
@@ -419,8 +440,18 @@ namespace Plank
 			css += ".plank-status-panel .status-row { color: white; padding: 4px 6px; border-radius: 8px; }";
 			css += ".plank-status-panel .status-section-label { color: rgba(255,255,255,0.58); font-size: 10px; font-weight: bold; margin: 4px 6px 0 6px; }";
 			css += ".plank-status-panel .status-action-button { color: white; background-color: rgba(255,255,255,0.08); background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 5px; margin-top: 4px; }";
+			css += ".plank-status-panel .status-footer { padding-top: 4px; }";
 			css += ".plank-status-panel .status-icon-toggle { color: rgba(255,255,255,0.65); background: transparent; background-image: none; border: none; border-radius: 7px; box-shadow: none; padding: 5px; }";
 			css += ".plank-status-panel .status-icon-toggle:checked { color: white; background-color: rgba(255,255,255,0.14); }";
+			css += ".plank-status-panel .modern-volume-bar { margin: 2px 6px 5px 6px; }";
+			css += ".plank-status-panel .modern-volume-scale trough { min-height: 36px; background-color: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; }";
+			css += ".plank-status-panel .modern-volume-scale highlight { background-color: rgba(115,210,22,0.48); border-radius: 9px; }";
+			css += ".plank-status-panel .modern-volume-scale slider { min-width: 0; min-height: 0; margin: 0; padding: 0; background: transparent; border: none; box-shadow: none; }";
+			css += ".plank-status-panel .modern-volume-bar .status-icon-toggle { color: white; background: transparent; padding: 5px; }";
+			css += ".plank-status-panel .modern-volume-value { color: white; font-size: 11px; font-weight: bold; }";
+			css += ".plank-status-panel .modern-device-selector { color: white; background: transparent; border: none; box-shadow: none; padding: 0; }";
+			css += ".plank-status-panel .modern-device-selector button { color: white; background-color: rgba(255,255,255,0.07); background-image: none; border: 1px solid rgba(255,255,255,0.09); border-radius: 9px; box-shadow: none; padding: 6px 9px; }";
+			css += ".plank-status-panel .modern-device-selector button:hover { background-color: rgba(255,255,255,0.11); }";
 			css += ".plank-status-panel separator { background-color: rgba(255,255,255,0.10); }";
 			css += ".plank-status-panel .status-scroll { background: transparent; border: none; box-shadow: none; }";
 			css += ".plank-status-panel scrollbar { background: transparent; border: none; }";

@@ -11,6 +11,19 @@ endif
 
 EXTRA_DIST = \
 	application-default-icon.svg \
+	lucide/LICENSE \
+	lucide/volume.svg \
+	lucide/volume-1.svg \
+	lucide/volume-2.svg \
+	lucide/volume-x.svg \
+	lucide/bluetooth.svg \
+	lucide/wifi.svg \
+	lucide/battery-low.svg \
+	lucide/battery-medium.svg \
+	lucide/battery-full.svg \
+	lucide/battery-charging.svg \
+	lucide/clock.svg \
+	lucide/refresh-cw.svg \
 	plank.appdata.xml.in \
 	net.launchpad.plank.gschema.xml.in \
 	plank.desktop.in \

@@ -3,22 +3,23 @@
 
 /* Native reusable panel for the fixed system indicators.*/
 
-#include <glib-object.h>
-#include <glib.h>
-#include <stdlib.h>
-#include <string.h>
 #include "plank.h"
 #include <gtk/gtk.h>
+#include <glib.h>
 #include <gdk/gdk.h>
+#include <glib-object.h>
+#include <cairo-gobject.h>
+#include <stdlib.h>
+#include <string.h>
 #include <float.h>
 #include <math.h>
 #include <glib/gi18n-lib.h>
-#include <gee.h>
+#include <pango/pango.h>
 #include <glib/gstdio.h>
-#include <cairo-gobject.h>
 
-#define PLANK_STATUS_PANEL_WINDOW_PANEL_WIDTH 270
+#define PLANK_STATUS_PANEL_WINDOW_PANEL_WIDTH 245
 #define PLANK_STATUS_PANEL_WINDOW_PANEL_HEIGHT 400
+#define PLANK_STATUS_PANEL_WINDOW_VOLUME_PANEL_SIZE 300
 #define PLANK_STATUS_PANEL_WINDOW_PANEL_GAP 10
 #if !defined(VALA_STRICT_C)
 #if !defined(__clang__) && defined(__GNUC__) && (__GNUC__ >= 14)
@@ -29,22 +30,6 @@
 #endif
 #endif
 
-#define PLANK_TYPE_AUDIO_STREAM_INFO (plank_audio_stream_info_get_type ())
-#define PLANK_AUDIO_STREAM_INFO(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PLANK_TYPE_AUDIO_STREAM_INFO, PlankAudioStreamInfo))
-#define PLANK_AUDIO_STREAM_INFO_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PLANK_TYPE_AUDIO_STREAM_INFO, PlankAudioStreamInfoClass))
-#define PLANK_IS_AUDIO_STREAM_INFO(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PLANK_TYPE_AUDIO_STREAM_INFO))
-#define PLANK_IS_AUDIO_STREAM_INFO_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), PLANK_TYPE_AUDIO_STREAM_INFO))
-#define PLANK_AUDIO_STREAM_INFO_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), PLANK_TYPE_AUDIO_STREAM_INFO, PlankAudioStreamInfoClass))
-
-typedef struct _PlankAudioStreamInfo PlankAudioStreamInfo;
-typedef struct _PlankAudioStreamInfoClass PlankAudioStreamInfoClass;
-typedef struct _PlankAudioStreamInfoPrivate PlankAudioStreamInfoPrivate;
-enum  {
-	PLANK_AUDIO_STREAM_INFO_0_PROPERTY,
-	PLANK_AUDIO_STREAM_INFO_NUM_PROPERTIES
-};
-static GParamSpec* plank_audio_stream_info_properties[PLANK_AUDIO_STREAM_INFO_NUM_PROPERTIES];
-#define _g_free0(var) (var = (g_free (var), NULL))
 enum  {
 	PLANK_STATUS_PANEL_WINDOW_0_PROPERTY,
 	PLANK_STATUS_PANEL_WINDOW_NUM_PROPERTIES
@@ -52,33 +37,25 @@ enum  {
 static GParamSpec* plank_status_panel_window_properties[PLANK_STATUS_PANEL_WINDOW_NUM_PROPERTIES];
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 typedef struct _Block27Data Block27Data;
+#define _g_free0(var) (var = (g_free (var), NULL))
 typedef struct _Block28Data Block28Data;
 typedef struct _Block29Data Block29Data;
 #define _g_regex_unref0(var) ((var == NULL) ? NULL : (var = (g_regex_unref (var), NULL)))
-typedef struct _Block30Data Block30Data;
 typedef void (*PlankStatusPanelWindowSwitchChanged) (gboolean state, gpointer user_data);
 #define _g_dir_close0(var) ((var == NULL) ? NULL : (var = (g_dir_close (var), NULL)))
 #define _g_date_time_unref0(var) ((var == NULL) ? NULL : (var = (g_date_time_unref (var), NULL)))
-typedef struct _Block31Data Block31Data;
+typedef struct _Block30Data Block30Data;
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
-
-struct _PlankAudioStreamInfo {
-	GObject parent_instance;
-	PlankAudioStreamInfoPrivate * priv;
-	gint id;
-	gchar* name;
-	gint volume;
-};
-
-struct _PlankAudioStreamInfoClass {
-	GObjectClass parent_class;
-};
 
 struct _PlankStatusPanelWindowPrivate {
 	PlankDockController* controller;
 	GtkBox* content;
+	GtkBox* footer;
 	PlankStatusIndicatorItem* current_item;
 	GtkCssProvider* css_provider;
+	gint active_panel_width;
+	gint active_panel_height;
+	gboolean device_popup_open;
 };
 
 struct _Block27Data {
@@ -91,11 +68,9 @@ struct _Block28Data {
 	int _ref_count_;
 	PlankStatusPanelWindow* self;
 	GtkScale* scale;
+	GtkToggleButton* icon;
 	GtkLabel* value;
-	GtkToggleButton* mute_button;
-	GtkScale* mic_scale;
-	GtkLabel* mic_value;
-	GtkToggleButton* mic_mute;
+	gchar* target;
 };
 
 struct _Block29Data {
@@ -108,29 +83,15 @@ struct _Block29Data {
 struct _Block30Data {
 	int _ref_count_;
 	PlankStatusPanelWindow* self;
-	GtkScale* scale;
-	GtkLabel* value;
-	PlankAudioStreamInfo* stream;
-};
-
-struct _Block31Data {
-	int _ref_count_;
-	PlankStatusPanelWindow* self;
 	GtkSwitch* toggle;
 	PlankStatusPanelWindowSwitchChanged changed;
 	gpointer changed_target;
 	GDestroyNotify changed_target_destroy_notify;
 };
 
-static gpointer plank_audio_stream_info_parent_class = NULL;
 static gint PlankStatusPanelWindow_private_offset;
 static gpointer plank_status_panel_window_parent_class = NULL;
 
-VALA_EXTERN GType plank_audio_stream_info_get_type (void) G_GNUC_CONST ;
-VALA_EXTERN PlankAudioStreamInfo* plank_audio_stream_info_new (void);
-VALA_EXTERN PlankAudioStreamInfo* plank_audio_stream_info_construct (GType object_type);
-static void plank_audio_stream_info_finalize (GObject * obj);
-static GType plank_audio_stream_info_get_type_once (void);
 static Block27Data* block27_data_ref (Block27Data* _data27_);
 static void block27_data_unref (void * _userdata_);
 static gboolean __lambda29_ (PlankStatusPanelWindow* self);
@@ -140,15 +101,21 @@ static gboolean ___lambda29__gtk_widget_focus_out_event (GtkWidget* _sender,
 static void __lambda30_ (Block27Data* _data27_);
 static void ___lambda30__gtk_widget_show (GtkWidget* _sender,
                                    gpointer self);
-static void __lambda48_ (Block27Data* _data27_);
-static void ___lambda48__gtk_widget_hide (GtkWidget* _sender,
+static void __lambda64_ (Block27Data* _data27_);
+static void ___lambda64__gtk_widget_hide (GtkWidget* _sender,
                                    gpointer self);
+static void plank_status_panel_window_apply_geometry (PlankStatusPanelWindow* self,
+                                               PlankStatusIndicatorKind kind);
 static void plank_status_panel_window_rebuild (PlankStatusPanelWindow* self,
                                         PlankStatusIndicatorKind kind);
 static void plank_status_panel_window_apply_theme (PlankStatusPanelWindow* self);
-static gboolean __lambda59_ (PlankStatusPanelWindow* self);
+static gboolean __lambda74_ (PlankStatusPanelWindow* self);
 static void plank_status_panel_window_position_over_item (PlankStatusPanelWindow* self);
-static gboolean ___lambda59__gsource_func (gpointer self);
+static gboolean __lambda75_ (PlankStatusPanelWindow* self);
+static gboolean ___lambda75__gsource_func (gpointer self);
+static gboolean ___lambda74__gsource_func (gpointer self);
+static void plank_status_panel_window_active_workarea (PlankStatusPanelWindow* self,
+                                                GdkRectangle* result);
 static GtkWidget* plank_status_panel_window_title_row (PlankStatusPanelWindow* self,
                                                 const gchar* title,
                                                 const gchar* icon);
@@ -159,53 +126,54 @@ static void plank_status_panel_window_build_bluetooth (PlankStatusPanelWindow* s
 static void plank_status_panel_window_build_wifi (PlankStatusPanelWindow* self);
 static void plank_status_panel_window_build_battery (PlankStatusPanelWindow* self);
 static void plank_status_panel_window_build_clock (PlankStatusPanelWindow* self);
-static Block28Data* block28_data_ref (Block28Data* _data28_);
-static void block28_data_unref (void * _userdata_);
 static gboolean plank_status_panel_window_run (const gchar* command,
                                         gchar** output);
 static GtkWidget* plank_status_panel_window_section_label (PlankStatusPanelWindow* self,
                                                     const gchar* text);
 static GtkWidget* plank_status_panel_window_device_selector (PlankStatusPanelWindow* self,
                                                       gboolean source);
-static GtkToggleButton* plank_status_panel_window_icon_toggle_button (PlankStatusPanelWindow* self,
-                                                               const gchar* icon,
-                                                               gboolean active);
-static void __lambda50_ (Block28Data* _data28_);
-static void plank_status_panel_window_run_action (const gchar* command);
-static void ___lambda50__gtk_toggle_button_toggled (GtkToggleButton* _sender,
-                                             gpointer self);
-static void __lambda51_ (Block28Data* _data28_);
-static void ___lambda51__gtk_range_value_changed (GtkRange* _sender,
-                                           gpointer self);
+static GtkWidget* plank_status_panel_window_modern_volume_bar (PlankStatusPanelWindow* self,
+                                                        const gchar* target,
+                                                        gdouble percent,
+                                                        gdouble maximum,
+                                                        const gchar* icon_name,
+                                                        gboolean muted);
 static gdouble plank_status_panel_window_get_wpctl_volume (PlankStatusPanelWindow* self,
                                                     const gchar* target);
 static gboolean plank_status_panel_window_wpctl_muted (PlankStatusPanelWindow* self,
                                                 const gchar* target);
-static void __lambda52_ (Block28Data* _data28_);
-static void ___lambda52__gtk_toggle_button_toggled (GtkToggleButton* _sender,
-                                             gpointer self);
-static void __lambda53_ (Block28Data* _data28_);
-static void ___lambda53__gtk_range_value_changed (GtkRange* _sender,
-                                           gpointer self);
-static GeeArrayList* plank_status_panel_window_audio_streams (PlankStatusPanelWindow* self);
-static GtkWidget* plank_status_panel_window_application_volume_row (PlankStatusPanelWindow* self,
-                                                             PlankAudioStreamInfo* stream);
-static void __lambda55_ (PlankStatusPanelWindow* self);
+static void __lambda70_ (PlankStatusPanelWindow* self);
 static void plank_status_panel_window_launch (const gchar* command);
-static void ___lambda55__gtk_button_clicked (GtkButton* _sender,
+static void ___lambda70__gtk_button_clicked (GtkButton* _sender,
                                       gpointer self);
+static Block28Data* block28_data_ref (Block28Data* _data28_);
+static void block28_data_unref (void * _userdata_);
+static GtkToggleButton* plank_status_panel_window_icon_toggle_button (PlankStatusPanelWindow* self,
+                                                               const gchar* icon,
+                                                               gboolean active);
+static void __lambda68_ (Block28Data* _data28_);
+static void plank_status_panel_window_run_action (const gchar* command);
+static void ___lambda68__gtk_toggle_button_toggled (GtkToggleButton* _sender,
+                                             gpointer self);
+static void __lambda69_ (Block28Data* _data28_);
+static void ___lambda69__gtk_range_value_changed (GtkRange* _sender,
+                                           gpointer self);
 static Block29Data* block29_data_ref (Block29Data* _data29_);
 static void block29_data_unref (void * _userdata_);
 static gchar* plank_status_panel_window_friendly_device_name (PlankStatusPanelWindow* self,
                                                        const gchar* name);
-static void __lambda49_ (Block29Data* _data29_);
-static void ___lambda49__gtk_combo_box_changed (GtkComboBox* _sender,
+static void __lambda65_ (Block29Data* _data29_);
+static gboolean ___lambda66_ (PlankStatusPanelWindow* self);
+static gboolean ____lambda66__gsource_func (gpointer self);
+static void ___lambda65__g_object_notify (GObject* _sender,
+                                   GParamSpec* pspec,
+                                   gpointer self);
+static void __lambda67_ (Block29Data* _data29_);
+static void plank_status_panel_window_move_active_streams (PlankStatusPanelWindow* self,
+                                                    gboolean source,
+                                                    const gchar* device);
+static void ___lambda67__gtk_combo_box_changed (GtkComboBox* _sender,
                                          gpointer self);
-static Block30Data* block30_data_ref (Block30Data* _data30_);
-static void block30_data_unref (void * _userdata_);
-static void __lambda54_ (Block30Data* _data30_);
-static void ___lambda54__gtk_range_value_changed (GtkRange* _sender,
-                                           gpointer self);
 static gboolean plank_status_panel_window_contains (const gchar* command,
                                              const gchar* needle);
 static GtkWidget* plank_status_panel_window_switch_row (PlankStatusPanelWindow* self,
@@ -214,21 +182,21 @@ static GtkWidget* plank_status_panel_window_switch_row (PlankStatusPanelWindow* 
                                                  PlankStatusPanelWindowSwitchChanged changed,
                                                  gpointer changed_target,
                                                  GDestroyNotify changed_target_destroy_notify);
-static void __lambda57_ (PlankStatusPanelWindow* self,
+static void __lambda72_ (PlankStatusPanelWindow* self,
                   gboolean state);
-static void ___lambda57__plank_status_panel_window_switch_changed (gboolean state,
+static void ___lambda72__plank_status_panel_window_switch_changed (gboolean state,
                                                             gpointer self);
 static GtkWidget* plank_status_panel_window_info_row (PlankStatusPanelWindow* self,
                                                const gchar* title,
                                                const gchar* subtitle);
-static void __lambda58_ (PlankStatusPanelWindow* self,
+static void __lambda73_ (PlankStatusPanelWindow* self,
                   gboolean state);
-static void ___lambda58__plank_status_panel_window_switch_changed (gboolean state,
+static void ___lambda73__plank_status_panel_window_switch_changed (gboolean state,
                                                             gpointer self);
-static Block31Data* block31_data_ref (Block31Data* _data31_);
-static void block31_data_unref (void * _userdata_);
-static void __lambda56_ (Block31Data* _data31_);
-static void ___lambda56__g_object_notify (GObject* _sender,
+static Block30Data* block30_data_ref (Block30Data* _data30_);
+static void block30_data_unref (void * _userdata_);
+static void __lambda71_ (Block30Data* _data30_);
+static void ___lambda71__g_object_notify (GObject* _sender,
                                    GParamSpec* pspec,
                                    gpointer self);
 static void plank_status_panel_window_finalize (GObject * obj);
@@ -240,68 +208,6 @@ static void _vala_array_free (gpointer array,
                        gssize array_length,
                        GDestroyNotify destroy_func);
 static gssize _vala_array_length (gpointer array);
-
-PlankAudioStreamInfo*
-plank_audio_stream_info_construct (GType object_type)
-{
-	PlankAudioStreamInfo * self = NULL;
-	self = (PlankAudioStreamInfo*) g_object_new (object_type, NULL);
-	return self;
-}
-
-PlankAudioStreamInfo*
-plank_audio_stream_info_new (void)
-{
-	return plank_audio_stream_info_construct (PLANK_TYPE_AUDIO_STREAM_INFO);
-}
-
-static void
-plank_audio_stream_info_class_init (PlankAudioStreamInfoClass * klass,
-                                    gpointer klass_data)
-{
-	plank_audio_stream_info_parent_class = g_type_class_peek_parent (klass);
-	G_OBJECT_CLASS (klass)->finalize = plank_audio_stream_info_finalize;
-}
-
-static void
-plank_audio_stream_info_instance_init (PlankAudioStreamInfo * self,
-                                       gpointer klass)
-{
-	gchar* _tmp0_;
-	_tmp0_ = g_strdup ("");
-	self->name = _tmp0_;
-	self->volume = 100;
-}
-
-static void
-plank_audio_stream_info_finalize (GObject * obj)
-{
-	PlankAudioStreamInfo * self;
-	self = G_TYPE_CHECK_INSTANCE_CAST (obj, PLANK_TYPE_AUDIO_STREAM_INFO, PlankAudioStreamInfo);
-	_g_free0 (self->name);
-	G_OBJECT_CLASS (plank_audio_stream_info_parent_class)->finalize (obj);
-}
-
-static GType
-plank_audio_stream_info_get_type_once (void)
-{
-	static const GTypeInfo g_define_type_info = { sizeof (PlankAudioStreamInfoClass), (GBaseInitFunc) NULL, (GBaseFinalizeFunc) NULL, (GClassInitFunc) plank_audio_stream_info_class_init, (GClassFinalizeFunc) NULL, NULL, sizeof (PlankAudioStreamInfo), 0, (GInstanceInitFunc) plank_audio_stream_info_instance_init, NULL };
-	GType plank_audio_stream_info_type_id;
-	plank_audio_stream_info_type_id = g_type_register_static (G_TYPE_OBJECT, "PlankAudioStreamInfo", &g_define_type_info, 0);
-	return plank_audio_stream_info_type_id;
-}
-
-GType
-plank_audio_stream_info_get_type (void)
-{
-	static volatile gsize plank_audio_stream_info_type_id__once = 0;
-	if (g_once_init_enter (&plank_audio_stream_info_type_id__once)) {
-		GType plank_audio_stream_info_type_id;
-		plank_audio_stream_info_type_id = plank_audio_stream_info_get_type_once ();
-		g_once_init_leave (&plank_audio_stream_info_type_id__once, plank_audio_stream_info_type_id);
-	}
-	return plank_audio_stream_info_type_id__once;
-}
 
 static inline gpointer
 plank_status_panel_window_get_instance_private (PlankStatusPanelWindow* self)
@@ -340,7 +246,9 @@ static gboolean
 __lambda29_ (PlankStatusPanelWindow* self)
 {
 	gboolean result;
-	plank_status_panel_window_dismiss (self);
+	if (!self->priv->device_popup_open) {
+		plank_status_panel_window_dismiss (self);
+	}
 	result = FALSE;
 	return result;
 }
@@ -380,7 +288,7 @@ ___lambda30__gtk_widget_show (GtkWidget* _sender,
 }
 
 static void
-__lambda48_ (Block27Data* _data27_)
+__lambda64_ (Block27Data* _data27_)
 {
 	PlankStatusPanelWindow* self;
 	PlankHideManager* _tmp0_;
@@ -397,10 +305,10 @@ __lambda48_ (Block27Data* _data27_)
 }
 
 static void
-___lambda48__gtk_widget_hide (GtkWidget* _sender,
+___lambda64__gtk_widget_hide (GtkWidget* _sender,
                               gpointer self)
 {
-	__lambda48_ (self);
+	__lambda64_ (self);
 }
 
 PlankStatusPanelWindow*
@@ -427,6 +335,10 @@ plank_status_panel_window_construct (GType object_type,
 	GtkScrolledWindow* _tmp12_;
 	GtkStyleContext* _tmp13_;
 	GtkBox* _tmp14_;
+	GtkBox* _tmp15_;
+	GtkBox* _tmp16_;
+	GtkStyleContext* _tmp17_;
+	GtkBox* _tmp18_;
 	g_return_val_if_fail (controller != NULL, NULL);
 	_data27_ = g_slice_new0 (Block27Data);
 	_data27_->_ref_count_ = 1;
@@ -479,15 +391,26 @@ plank_status_panel_window_construct (GType object_type,
 	g_object_set (scroll, "hscrollbar-policy", GTK_POLICY_NEVER, NULL);
 	g_object_set (scroll, "vscrollbar-policy", GTK_POLICY_NEVER, NULL);
 	gtk_scrolled_window_set_overlay_scrolling (scroll, TRUE);
+	gtk_scrolled_window_set_propagate_natural_width (scroll, FALSE);
+	gtk_scrolled_window_set_propagate_natural_height (scroll, FALSE);
 	_tmp13_ = gtk_widget_get_style_context ((GtkWidget*) scroll);
 	gtk_style_context_add_class (_tmp13_, "status-scroll");
 	_tmp14_ = self->priv->content;
 	gtk_container_add ((GtkContainer*) scroll, (GtkWidget*) _tmp14_);
 	gtk_box_pack_start (card, (GtkWidget*) scroll, TRUE, TRUE, (guint) 0);
+	_tmp15_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+	g_object_ref_sink (_tmp15_);
+	_g_object_unref0 (self->priv->footer);
+	self->priv->footer = _tmp15_;
+	_tmp16_ = self->priv->footer;
+	_tmp17_ = gtk_widget_get_style_context ((GtkWidget*) _tmp16_);
+	gtk_style_context_add_class (_tmp17_, "status-footer");
+	_tmp18_ = self->priv->footer;
+	gtk_box_pack_end (card, (GtkWidget*) _tmp18_, FALSE, FALSE, (guint) 0);
 	gtk_container_add ((GtkContainer*) self, (GtkWidget*) card);
 	g_signal_connect_object ((GtkWidget*) self, "focus-out-event", (GCallback) ___lambda29__gtk_widget_focus_out_event, self, 0);
 	g_signal_connect_data ((GtkWidget*) self, "show", (GCallback) ___lambda30__gtk_widget_show, block27_data_ref (_data27_), (GClosureNotify) block27_data_unref, 0);
-	g_signal_connect_data ((GtkWidget*) self, "hide", (GCallback) ___lambda48__gtk_widget_hide, block27_data_ref (_data27_), (GClosureNotify) block27_data_unref, 0);
+	g_signal_connect_data ((GtkWidget*) self, "hide", (GCallback) ___lambda64__gtk_widget_hide, block27_data_ref (_data27_), (GClosureNotify) block27_data_unref, 0);
 	_g_object_unref0 (scroll);
 	_g_object_unref0 (card);
 	_g_object_unref0 (visual);
@@ -503,20 +426,39 @@ plank_status_panel_window_new (PlankDockController* controller)
 }
 
 static gboolean
-__lambda59_ (PlankStatusPanelWindow* self)
+__lambda75_ (PlankStatusPanelWindow* self)
 {
 	gboolean result;
 	plank_status_panel_window_position_over_item (self);
-	gtk_widget_set_opacity ((GtkWidget*) self, 1.0);
 	result = FALSE;
 	return result;
 }
 
 static gboolean
-___lambda59__gsource_func (gpointer self)
+___lambda75__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = __lambda59_ ((PlankStatusPanelWindow*) self);
+	result = __lambda75_ ((PlankStatusPanelWindow*) self);
+	return result;
+}
+
+static gboolean
+__lambda74_ (PlankStatusPanelWindow* self)
+{
+	gboolean result;
+	gtk_window_resize ((GtkWindow*) self, self->priv->active_panel_width, self->priv->active_panel_height);
+	plank_status_panel_window_position_over_item (self);
+	gtk_widget_set_opacity ((GtkWidget*) self, 1.0);
+	g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ___lambda75__gsource_func, g_object_ref (self), g_object_unref);
+	result = FALSE;
+	return result;
+}
+
+static gboolean
+___lambda74__gsource_func (gpointer self)
+{
+	gboolean result;
+	result = __lambda74_ ((PlankStatusPanelWindow*) self);
 	return result;
 }
 
@@ -530,6 +472,8 @@ plank_status_panel_window_toggle (PlankStatusPanelWindow* self,
 	PlankStatusIndicatorItem* _tmp4_;
 	PlankStatusIndicatorKind _tmp5_;
 	PlankStatusIndicatorKind _tmp6_;
+	PlankStatusIndicatorKind _tmp7_;
+	PlankStatusIndicatorKind _tmp8_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (item != NULL);
 	_tmp1_ = gtk_widget_get_visible ((GtkWidget*) self);
@@ -550,12 +494,66 @@ plank_status_panel_window_toggle (PlankStatusPanelWindow* self,
 	self->priv->current_item = _tmp4_;
 	_tmp5_ = plank_status_indicator_item_get_Kind (item);
 	_tmp6_ = _tmp5_;
-	plank_status_panel_window_rebuild (self, _tmp6_);
+	plank_status_panel_window_apply_geometry (self, _tmp6_);
+	_tmp7_ = plank_status_indicator_item_get_Kind (item);
+	_tmp8_ = _tmp7_;
+	plank_status_panel_window_rebuild (self, _tmp8_);
 	plank_status_panel_window_apply_theme (self);
 	gtk_widget_set_opacity ((GtkWidget*) self, 0.0);
 	gtk_widget_show_all ((GtkWidget*) self);
 	gtk_window_present ((GtkWindow*) self);
-	g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ___lambda59__gsource_func, g_object_ref (self), g_object_unref);
+	g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ___lambda74__gsource_func, g_object_ref (self), g_object_unref);
+}
+
+static void
+plank_status_panel_window_apply_geometry (PlankStatusPanelWindow* self,
+                                          PlankStatusIndicatorKind kind)
+{
+	GdkGeometry geometry = {0};
+	GdkGeometry _tmp8_ = {0};
+	GdkGeometry _tmp9_;
+	g_return_if_fail (self != NULL);
+	if (kind == PLANK_STATUS_INDICATOR_KIND_VOLUME) {
+		GdkRectangle workarea = {0};
+		GdkRectangle _tmp0_ = {0};
+		GdkRectangle bar = {0};
+		PlankDockController* _tmp1_;
+		PlankPositionManager* _tmp2_;
+		PlankPositionManager* _tmp3_;
+		GdkRectangle _tmp4_ = {0};
+		gint available_above = 0;
+		GdkRectangle _tmp5_;
+		GdkRectangle _tmp6_;
+		gint square_size = 0;
+		GdkRectangle _tmp7_;
+		plank_status_panel_window_active_workarea (self, &_tmp0_);
+		workarea = _tmp0_;
+		_tmp1_ = self->priv->controller;
+		_tmp2_ = plank_dock_controller_get_position_manager (_tmp1_);
+		_tmp3_ = _tmp2_;
+		plank_position_manager_get_screen_background_region (_tmp3_, &_tmp4_);
+		bar = _tmp4_;
+		_tmp5_ = bar;
+		_tmp6_ = workarea;
+		available_above = (_tmp5_.y - PLANK_STATUS_PANEL_WINDOW_PANEL_GAP) - _tmp6_.y;
+		_tmp7_ = workarea;
+		square_size = MIN (PLANK_STATUS_PANEL_WINDOW_VOLUME_PANEL_SIZE, MIN (_tmp7_.width - 20, available_above));
+		self->priv->active_panel_height = MAX (160, square_size);
+		self->priv->active_panel_width = self->priv->active_panel_height;
+	} else {
+		self->priv->active_panel_width = PLANK_STATUS_PANEL_WINDOW_PANEL_WIDTH;
+		self->priv->active_panel_height = PLANK_STATUS_PANEL_WINDOW_PANEL_HEIGHT;
+	}
+	geometry = _tmp8_;
+	geometry.min_width = self->priv->active_panel_width;
+	geometry.max_width = self->priv->active_panel_width;
+	geometry.min_height = self->priv->active_panel_height;
+	geometry.max_height = self->priv->active_panel_height;
+	_tmp9_ = geometry;
+	gtk_window_set_geometry_hints ((GtkWindow*) self, NULL, &_tmp9_, GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE);
+	gtk_widget_set_size_request ((GtkWidget*) self, self->priv->active_panel_width, self->priv->active_panel_height);
+	gtk_window_set_default_size ((GtkWindow*) self, self->priv->active_panel_width, self->priv->active_panel_height);
+	gtk_window_resize ((GtkWindow*) self, self->priv->active_panel_width, self->priv->active_panel_height);
 }
 
 void
@@ -578,15 +576,17 @@ plank_status_panel_window_rebuild (PlankStatusPanelWindow* self,
 	GtkBox* _tmp0_;
 	GList* _tmp1_;
 	GtkBox* _tmp4_;
-	gchar* _tmp5_;
-	gchar* _tmp6_;
-	gchar* _tmp7_;
-	gchar* _tmp8_;
-	GtkWidget* _tmp9_;
-	GtkWidget* _tmp10_;
-	GtkBox* _tmp11_;
-	GtkSeparator* _tmp12_;
-	GtkSeparator* _tmp13_;
+	GList* _tmp5_;
+	GtkBox* _tmp8_;
+	gchar* _tmp9_;
+	gchar* _tmp10_;
+	gchar* _tmp11_;
+	gchar* _tmp12_;
+	GtkWidget* _tmp13_;
+	GtkWidget* _tmp14_;
+	GtkBox* _tmp15_;
+	GtkSeparator* _tmp16_;
+	GtkSeparator* _tmp17_;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->priv->content;
 	_tmp1_ = gtk_container_get_children ((GtkContainer*) _tmp0_);
@@ -607,23 +607,42 @@ plank_status_panel_window_rebuild (PlankStatusPanelWindow* self,
 		}
 		(child_collection == NULL) ? NULL : (child_collection = (g_list_free (child_collection), NULL));
 	}
-	_tmp4_ = self->priv->content;
-	_tmp5_ = plank_status_panel_window_label_for_kind (kind);
-	_tmp6_ = _tmp5_;
-	_tmp7_ = plank_status_panel_window_icon_for_kind (kind);
-	_tmp8_ = _tmp7_;
-	_tmp9_ = plank_status_panel_window_title_row (self, _tmp6_, _tmp8_);
+	_tmp4_ = self->priv->footer;
+	_tmp5_ = gtk_container_get_children ((GtkContainer*) _tmp4_);
+	{
+		GList* child_collection = NULL;
+		GList* child_it = NULL;
+		child_collection = _tmp5_;
+		for (child_it = child_collection; child_it != NULL; child_it = child_it->next) {
+			GtkWidget* child = NULL;
+			child = (GtkWidget*) child_it->data;
+			{
+				GtkBox* _tmp6_;
+				GtkWidget* _tmp7_;
+				_tmp6_ = self->priv->footer;
+				_tmp7_ = child;
+				gtk_container_remove ((GtkContainer*) _tmp6_, _tmp7_);
+			}
+		}
+		(child_collection == NULL) ? NULL : (child_collection = (g_list_free (child_collection), NULL));
+	}
+	_tmp8_ = self->priv->content;
+	_tmp9_ = plank_status_panel_window_label_for_kind (kind);
 	_tmp10_ = _tmp9_;
-	gtk_box_pack_start (_tmp4_, _tmp10_, FALSE, FALSE, (guint) 0);
-	_g_object_unref0 (_tmp10_);
-	_g_free0 (_tmp8_);
-	_g_free0 (_tmp6_);
-	_tmp11_ = self->priv->content;
-	_tmp12_ = (GtkSeparator*) gtk_separator_new (GTK_ORIENTATION_HORIZONTAL);
-	g_object_ref_sink (_tmp12_);
-	_tmp13_ = _tmp12_;
-	gtk_box_pack_start (_tmp11_, (GtkWidget*) _tmp13_, FALSE, FALSE, (guint) 0);
-	_g_object_unref0 (_tmp13_);
+	_tmp11_ = plank_status_panel_window_icon_for_kind (kind);
+	_tmp12_ = _tmp11_;
+	_tmp13_ = plank_status_panel_window_title_row (self, _tmp10_, _tmp12_);
+	_tmp14_ = _tmp13_;
+	gtk_box_pack_start (_tmp8_, _tmp14_, FALSE, FALSE, (guint) 0);
+	_g_object_unref0 (_tmp14_);
+	_g_free0 (_tmp12_);
+	_g_free0 (_tmp10_);
+	_tmp15_ = self->priv->content;
+	_tmp16_ = (GtkSeparator*) gtk_separator_new (GTK_ORIENTATION_HORIZONTAL);
+	g_object_ref_sink (_tmp16_);
+	_tmp17_ = _tmp16_;
+	gtk_box_pack_start (_tmp15_, (GtkWidget*) _tmp17_, FALSE, FALSE, (guint) 0);
+	_g_object_unref0 (_tmp17_);
 	switch (kind) {
 		case PLANK_STATUS_INDICATOR_KIND_VOLUME:
 		{
@@ -696,32 +715,6 @@ plank_status_panel_window_title_row (PlankStatusPanelWindow* self,
 	return result;
 }
 
-static Block28Data*
-block28_data_ref (Block28Data* _data28_)
-{
-	g_atomic_int_inc (&_data28_->_ref_count_);
-	return _data28_;
-}
-
-static void
-block28_data_unref (void * _userdata_)
-{
-	Block28Data* _data28_;
-	_data28_ = (Block28Data*) _userdata_;
-	if (g_atomic_int_dec_and_test (&_data28_->_ref_count_)) {
-		PlankStatusPanelWindow* self;
-		self = _data28_->self;
-		_g_object_unref0 (_data28_->mic_mute);
-		_g_object_unref0 (_data28_->mic_value);
-		_g_object_unref0 (_data28_->mic_scale);
-		_g_object_unref0 (_data28_->mute_button);
-		_g_object_unref0 (_data28_->value);
-		_g_object_unref0 (_data28_->scale);
-		_g_object_unref0 (self);
-		g_slice_free (Block28Data, _data28_);
-	}
-}
-
 static gdouble
 double_parse (const gchar* str)
 {
@@ -745,150 +738,21 @@ string_contains (const gchar* self,
 }
 
 static void
-__lambda50_ (Block28Data* _data28_)
-{
-	PlankStatusPanelWindow* self;
-	const gchar* _tmp0_ = NULL;
-	GtkToggleButton* _tmp1_;
-	gboolean _tmp2_;
-	gboolean _tmp3_;
-	gchar* _tmp4_;
-	gchar* _tmp5_;
-	self = _data28_->self;
-	_tmp1_ = _data28_->mute_button;
-	_tmp2_ = gtk_toggle_button_get_active (_tmp1_);
-	_tmp3_ = _tmp2_;
-	if (_tmp3_) {
-		_tmp0_ = "1";
-	} else {
-		_tmp0_ = "0";
-	}
-	_tmp4_ = g_strconcat ("wpctl set-mute @DEFAULT_AUDIO_SINK@ ", _tmp0_, NULL);
-	_tmp5_ = _tmp4_;
-	plank_status_panel_window_run_action (_tmp5_);
-	_g_free0 (_tmp5_);
-}
-
-static void
-___lambda50__gtk_toggle_button_toggled (GtkToggleButton* _sender,
-                                        gpointer self)
-{
-	__lambda50_ (self);
-}
-
-static void
-__lambda51_ (Block28Data* _data28_)
-{
-	PlankStatusPanelWindow* self;
-	GtkScale* _tmp0_;
-	gchar* _tmp1_;
-	gchar* _tmp2_;
-	GtkLabel* _tmp3_;
-	GtkScale* _tmp4_;
-	gchar* _tmp5_;
-	gchar* _tmp6_;
-	self = _data28_->self;
-	_tmp0_ = _data28_->scale;
-	_tmp1_ = g_strdup_printf ("wpctl set-volume @DEFAULT_AUDIO_SINK@ %.0f%%", gtk_range_get_value ((GtkRange*) _tmp0_));
-	_tmp2_ = _tmp1_;
-	plank_status_panel_window_run_action (_tmp2_);
-	_g_free0 (_tmp2_);
-	_tmp3_ = _data28_->value;
-	_tmp4_ = _data28_->scale;
-	_tmp5_ = g_strdup_printf ("%.0f%%", gtk_range_get_value ((GtkRange*) _tmp4_));
-	_tmp6_ = _tmp5_;
-	gtk_label_set_label (_tmp3_, _tmp6_);
-	_g_free0 (_tmp6_);
-}
-
-static void
-___lambda51__gtk_range_value_changed (GtkRange* _sender,
-                                      gpointer self)
-{
-	__lambda51_ (self);
-}
-
-static void
-__lambda52_ (Block28Data* _data28_)
-{
-	PlankStatusPanelWindow* self;
-	const gchar* _tmp0_ = NULL;
-	GtkToggleButton* _tmp1_;
-	gboolean _tmp2_;
-	gboolean _tmp3_;
-	gchar* _tmp4_;
-	gchar* _tmp5_;
-	self = _data28_->self;
-	_tmp1_ = _data28_->mic_mute;
-	_tmp2_ = gtk_toggle_button_get_active (_tmp1_);
-	_tmp3_ = _tmp2_;
-	if (_tmp3_) {
-		_tmp0_ = "1";
-	} else {
-		_tmp0_ = "0";
-	}
-	_tmp4_ = g_strconcat ("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ ", _tmp0_, NULL);
-	_tmp5_ = _tmp4_;
-	plank_status_panel_window_run_action (_tmp5_);
-	_g_free0 (_tmp5_);
-}
-
-static void
-___lambda52__gtk_toggle_button_toggled (GtkToggleButton* _sender,
-                                        gpointer self)
-{
-	__lambda52_ (self);
-}
-
-static void
-__lambda53_ (Block28Data* _data28_)
-{
-	PlankStatusPanelWindow* self;
-	GtkScale* _tmp0_;
-	gchar* _tmp1_;
-	gchar* _tmp2_;
-	GtkLabel* _tmp3_;
-	GtkScale* _tmp4_;
-	gchar* _tmp5_;
-	gchar* _tmp6_;
-	self = _data28_->self;
-	_tmp0_ = _data28_->mic_scale;
-	_tmp1_ = g_strdup_printf ("wpctl set-volume @DEFAULT_AUDIO_SOURCE@ %.0f%%", gtk_range_get_value ((GtkRange*) _tmp0_));
-	_tmp2_ = _tmp1_;
-	plank_status_panel_window_run_action (_tmp2_);
-	_g_free0 (_tmp2_);
-	_tmp3_ = _data28_->mic_value;
-	_tmp4_ = _data28_->mic_scale;
-	_tmp5_ = g_strdup_printf ("%.0f%%", gtk_range_get_value ((GtkRange*) _tmp4_));
-	_tmp6_ = _tmp5_;
-	gtk_label_set_label (_tmp3_, _tmp6_);
-	_g_free0 (_tmp6_);
-}
-
-static void
-___lambda53__gtk_range_value_changed (GtkRange* _sender,
-                                      gpointer self)
-{
-	__lambda53_ (self);
-}
-
-static void
-__lambda55_ (PlankStatusPanelWindow* self)
+__lambda70_ (PlankStatusPanelWindow* self)
 {
 	plank_status_panel_window_launch ("pavucontrol");
 }
 
 static void
-___lambda55__gtk_button_clicked (GtkButton* _sender,
+___lambda70__gtk_button_clicked (GtkButton* _sender,
                                  gpointer self)
 {
-	__lambda55_ ((PlankStatusPanelWindow*) self);
+	__lambda70_ ((PlankStatusPanelWindow*) self);
 }
 
 static void
 plank_status_panel_window_build_volume (PlankStatusPanelWindow* self)
 {
-	Block28Data* _data28_;
 	gchar* output = NULL;
 	gdouble percent = 0.0;
 	gboolean muted = FALSE;
@@ -900,70 +764,24 @@ plank_status_panel_window_build_volume (PlankStatusPanelWindow* self)
 	GtkBox* _tmp12_;
 	GtkWidget* _tmp13_;
 	GtkWidget* _tmp14_;
-	GtkScale* _tmp15_;
-	GtkScale* _tmp16_;
-	GtkScale* _tmp17_;
-	gchar* _tmp18_;
-	gchar* _tmp19_;
-	GtkLabel* _tmp20_ = NULL;
-	GtkLabel* _tmp21_;
-	GtkBox* row = NULL;
-	GtkBox* _tmp22_;
-	GtkBox* _tmp23_;
-	GtkScale* _tmp24_;
-	GtkToggleButton* _tmp25_;
-	GtkToggleButton* _tmp26_;
-	GtkBox* _tmp27_;
-	GtkToggleButton* _tmp28_;
-	GtkBox* _tmp29_;
-	GtkLabel* _tmp30_;
-	GtkScale* _tmp31_;
-	GtkBox* _tmp32_;
-	GtkStyleContext* _tmp33_;
-	GtkBox* _tmp34_;
-	GtkBox* _tmp35_;
-	GtkBox* _tmp36_;
-	GtkWidget* _tmp37_;
-	GtkWidget* _tmp38_;
-	GtkBox* _tmp39_;
-	GtkWidget* _tmp40_;
-	GtkWidget* _tmp41_;
+	GtkBox* _tmp15_;
+	GtkWidget* _tmp16_;
+	GtkWidget* _tmp17_;
+	GtkBox* _tmp18_;
+	GtkWidget* _tmp19_;
+	GtkWidget* _tmp20_;
+	GtkBox* _tmp21_;
+	GtkWidget* _tmp22_;
+	GtkWidget* _tmp23_;
 	gdouble mic_percent = 0.0;
-	GtkScale* _tmp42_;
-	GtkScale* _tmp43_;
-	GtkScale* _tmp44_;
-	gchar* _tmp45_;
-	gchar* _tmp46_;
-	GtkLabel* _tmp47_ = NULL;
-	GtkLabel* _tmp48_;
-	GtkBox* mic_row = NULL;
-	GtkBox* _tmp49_;
-	GtkBox* _tmp50_;
-	GtkStyleContext* _tmp51_;
-	GtkBox* _tmp52_;
-	GtkScale* _tmp53_;
-	GtkToggleButton* _tmp54_;
-	GtkToggleButton* _tmp55_;
-	GtkBox* _tmp56_;
-	GtkToggleButton* _tmp57_;
-	GtkBox* _tmp58_;
-	GtkLabel* _tmp59_;
-	GtkScale* _tmp60_;
-	GtkBox* _tmp61_;
-	GtkBox* _tmp62_;
-	GeeArrayList* streams = NULL;
-	GeeArrayList* _tmp63_;
-	GeeArrayList* _tmp64_;
-	gint _tmp65_;
-	gint _tmp66_;
+	GtkBox* _tmp24_;
+	GtkWidget* _tmp25_;
+	GtkWidget* _tmp26_;
 	GtkButton* settings = NULL;
-	GtkButton* _tmp83_;
-	GtkStyleContext* _tmp84_;
-	GtkBox* _tmp85_;
+	GtkButton* _tmp27_;
+	GtkStyleContext* _tmp28_;
+	GtkBox* _tmp29_;
 	g_return_if_fail (self != NULL);
-	_data28_ = g_slice_new0 (Block28Data);
-	_data28_->_ref_count_ = 1;
-	_data28_->self = g_object_ref (self);
 	percent = 0.0;
 	muted = FALSE;
 	_tmp1_ = plank_status_panel_window_run ("wpctl get-volume @DEFAULT_AUDIO_SINK@", &_tmp0_);
@@ -1009,177 +827,191 @@ plank_status_panel_window_build_volume (PlankStatusPanelWindow* self)
 	_tmp14_ = _tmp13_;
 	gtk_box_pack_start (_tmp12_, _tmp14_, FALSE, FALSE, (guint) 0);
 	_g_object_unref0 (_tmp14_);
-	_tmp15_ = (GtkScale*) gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL, (gdouble) 0, (gdouble) 150, (gdouble) 1);
-	g_object_ref_sink (_tmp15_);
-	_data28_->scale = _tmp15_;
-	_tmp16_ = _data28_->scale;
-	gtk_scale_set_draw_value (_tmp16_, FALSE);
-	_tmp17_ = _data28_->scale;
-	gtk_range_set_value ((GtkRange*) _tmp17_, percent);
-	_tmp18_ = g_strdup_printf ("%.0f%%", percent);
-	_tmp19_ = _tmp18_;
-	_tmp20_ = (GtkLabel*) gtk_label_new (_tmp19_);
-	g_object_set ((GtkWidget*) _tmp20_, "width-request", 44, NULL);
-	g_object_ref_sink (_tmp20_);
-	_tmp21_ = _tmp20_;
-	_g_free0 (_tmp19_);
-	_data28_->value = _tmp21_;
-	_tmp22_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 10);
-	g_object_ref_sink (_tmp22_);
-	row = _tmp22_;
-	_tmp23_ = row;
-	_tmp24_ = _data28_->scale;
-	gtk_box_pack_start (_tmp23_, (GtkWidget*) _tmp24_, TRUE, TRUE, (guint) 0);
-	_tmp25_ = plank_status_panel_window_icon_toggle_button (self, "audio-volume-muted-symbolic", muted);
-	_data28_->mute_button = _tmp25_;
-	_tmp26_ = _data28_->mute_button;
-	g_signal_connect_data (_tmp26_, "toggled", (GCallback) ___lambda50__gtk_toggle_button_toggled, block28_data_ref (_data28_), (GClosureNotify) block28_data_unref, 0);
-	_tmp27_ = row;
-	_tmp28_ = _data28_->mute_button;
-	gtk_box_pack_end (_tmp27_, (GtkWidget*) _tmp28_, FALSE, FALSE, (guint) 0);
-	_tmp29_ = row;
-	_tmp30_ = _data28_->value;
-	gtk_box_pack_end (_tmp29_, (GtkWidget*) _tmp30_, FALSE, FALSE, (guint) 0);
-	_tmp31_ = _data28_->scale;
-	g_signal_connect_data ((GtkRange*) _tmp31_, "value-changed", (GCallback) ___lambda51__gtk_range_value_changed, block28_data_ref (_data28_), (GClosureNotify) block28_data_unref, 0);
-	_tmp32_ = row;
-	_tmp33_ = gtk_widget_get_style_context ((GtkWidget*) _tmp32_);
-	gtk_style_context_add_class (_tmp33_, "status-row");
-	_tmp34_ = self->priv->content;
-	_tmp35_ = row;
-	gtk_box_pack_start (_tmp34_, (GtkWidget*) _tmp35_, FALSE, FALSE, (guint) 0);
-	_tmp36_ = self->priv->content;
-	_tmp37_ = plank_status_panel_window_section_label (self, _ ("Microphone"));
-	_tmp38_ = _tmp37_;
-	gtk_box_pack_start (_tmp36_, _tmp38_, FALSE, FALSE, (guint) 0);
-	_g_object_unref0 (_tmp38_);
-	_tmp39_ = self->priv->content;
-	_tmp40_ = plank_status_panel_window_device_selector (self, TRUE);
-	_tmp41_ = _tmp40_;
-	gtk_box_pack_start (_tmp39_, _tmp41_, FALSE, FALSE, (guint) 0);
-	_g_object_unref0 (_tmp41_);
+	_tmp15_ = self->priv->content;
+	_tmp16_ = plank_status_panel_window_modern_volume_bar (self, "@DEFAULT_AUDIO_SINK@", percent, (gdouble) 150, "audio-volume-high-symbolic", muted);
+	_tmp17_ = _tmp16_;
+	gtk_box_pack_start (_tmp15_, _tmp17_, FALSE, FALSE, (guint) 0);
+	_g_object_unref0 (_tmp17_);
+	_tmp18_ = self->priv->content;
+	_tmp19_ = plank_status_panel_window_section_label (self, _ ("Microphone"));
+	_tmp20_ = _tmp19_;
+	gtk_box_pack_start (_tmp18_, _tmp20_, FALSE, FALSE, (guint) 0);
+	_g_object_unref0 (_tmp20_);
+	_tmp21_ = self->priv->content;
+	_tmp22_ = plank_status_panel_window_device_selector (self, TRUE);
+	_tmp23_ = _tmp22_;
+	gtk_box_pack_start (_tmp21_, _tmp23_, FALSE, FALSE, (guint) 0);
+	_g_object_unref0 (_tmp23_);
 	mic_percent = plank_status_panel_window_get_wpctl_volume (self, "@DEFAULT_AUDIO_SOURCE@");
-	_tmp42_ = (GtkScale*) gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL, (gdouble) 0, (gdouble) 100, (gdouble) 1);
-	g_object_ref_sink (_tmp42_);
-	_data28_->mic_scale = _tmp42_;
-	_tmp43_ = _data28_->mic_scale;
-	gtk_scale_set_draw_value (_tmp43_, FALSE);
-	_tmp44_ = _data28_->mic_scale;
-	gtk_range_set_value ((GtkRange*) _tmp44_, mic_percent);
-	_tmp45_ = g_strdup_printf ("%.0f%%", mic_percent);
-	_tmp46_ = _tmp45_;
-	_tmp47_ = (GtkLabel*) gtk_label_new (_tmp46_);
-	g_object_set ((GtkWidget*) _tmp47_, "width-request", 44, NULL);
-	g_object_ref_sink (_tmp47_);
-	_tmp48_ = _tmp47_;
-	_g_free0 (_tmp46_);
-	_data28_->mic_value = _tmp48_;
-	_tmp49_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 10);
-	g_object_ref_sink (_tmp49_);
-	mic_row = _tmp49_;
-	_tmp50_ = mic_row;
-	_tmp51_ = gtk_widget_get_style_context ((GtkWidget*) _tmp50_);
-	gtk_style_context_add_class (_tmp51_, "status-row");
-	_tmp52_ = mic_row;
-	_tmp53_ = _data28_->mic_scale;
-	gtk_box_pack_start (_tmp52_, (GtkWidget*) _tmp53_, TRUE, TRUE, (guint) 0);
-	_tmp54_ = plank_status_panel_window_icon_toggle_button (self, "microphone-sensitivity-muted-symbolic", plank_status_panel_window_wpctl_muted (self, "@DEFAULT_AUDIO_SOURCE@"));
-	_data28_->mic_mute = _tmp54_;
-	_tmp55_ = _data28_->mic_mute;
-	g_signal_connect_data (_tmp55_, "toggled", (GCallback) ___lambda52__gtk_toggle_button_toggled, block28_data_ref (_data28_), (GClosureNotify) block28_data_unref, 0);
-	_tmp56_ = mic_row;
-	_tmp57_ = _data28_->mic_mute;
-	gtk_box_pack_end (_tmp56_, (GtkWidget*) _tmp57_, FALSE, FALSE, (guint) 0);
-	_tmp58_ = mic_row;
-	_tmp59_ = _data28_->mic_value;
-	gtk_box_pack_end (_tmp58_, (GtkWidget*) _tmp59_, FALSE, FALSE, (guint) 0);
-	_tmp60_ = _data28_->mic_scale;
-	g_signal_connect_data ((GtkRange*) _tmp60_, "value-changed", (GCallback) ___lambda53__gtk_range_value_changed, block28_data_ref (_data28_), (GClosureNotify) block28_data_unref, 0);
-	_tmp61_ = self->priv->content;
-	_tmp62_ = mic_row;
-	gtk_box_pack_start (_tmp61_, (GtkWidget*) _tmp62_, FALSE, FALSE, (guint) 0);
-	_tmp63_ = plank_status_panel_window_audio_streams (self);
-	streams = _tmp63_;
-	_tmp64_ = streams;
-	_tmp65_ = gee_abstract_collection_get_size ((GeeAbstractCollection*) _tmp64_);
-	_tmp66_ = _tmp65_;
-	if (_tmp66_ > 0) {
-		GtkBox* _tmp67_;
-		GtkWidget* _tmp68_;
-		GtkWidget* _tmp69_;
-		gint shown = 0;
-		_tmp67_ = self->priv->content;
-		_tmp68_ = plank_status_panel_window_section_label (self, _ ("Applications"));
-		_tmp69_ = _tmp68_;
-		gtk_box_pack_start (_tmp67_, _tmp69_, FALSE, FALSE, (guint) 0);
-		_g_object_unref0 (_tmp69_);
-		shown = 0;
-		{
-			GeeArrayList* _stream_list = NULL;
-			GeeArrayList* _tmp70_;
-			gint _stream_size = 0;
-			GeeArrayList* _tmp71_;
-			gint _tmp72_;
-			gint _tmp73_;
-			gint _stream_index = 0;
-			_tmp70_ = streams;
-			_stream_list = _tmp70_;
-			_tmp71_ = _stream_list;
-			_tmp72_ = gee_abstract_collection_get_size ((GeeAbstractCollection*) _tmp71_);
-			_tmp73_ = _tmp72_;
-			_stream_size = _tmp73_;
-			_stream_index = -1;
-			while (TRUE) {
-				gint _tmp74_;
-				gint _tmp75_;
-				PlankAudioStreamInfo* stream = NULL;
-				GeeArrayList* _tmp76_;
-				gpointer _tmp77_;
-				gint _tmp78_;
-				GtkBox* _tmp79_;
-				PlankAudioStreamInfo* _tmp80_;
-				GtkWidget* _tmp81_;
-				GtkWidget* _tmp82_;
-				_stream_index = _stream_index + 1;
-				_tmp74_ = _stream_index;
-				_tmp75_ = _stream_size;
-				if (!(_tmp74_ < _tmp75_)) {
-					break;
-				}
-				_tmp76_ = _stream_list;
-				_tmp77_ = gee_abstract_list_get ((GeeAbstractList*) _tmp76_, _stream_index);
-				stream = (PlankAudioStreamInfo*) _tmp77_;
-				_tmp78_ = shown;
-				shown = _tmp78_ + 1;
-				if (_tmp78_ >= 2) {
-					_g_object_unref0 (stream);
-					break;
-				}
-				_tmp79_ = self->priv->content;
-				_tmp80_ = stream;
-				_tmp81_ = plank_status_panel_window_application_volume_row (self, _tmp80_);
-				_tmp82_ = _tmp81_;
-				gtk_box_pack_start (_tmp79_, _tmp82_, FALSE, FALSE, (guint) 0);
-				_g_object_unref0 (_tmp82_);
-				_g_object_unref0 (stream);
-			}
-		}
-	}
-	_tmp83_ = (GtkButton*) gtk_button_new_with_label (_ ("Advanced sound settings"));
-	g_object_ref_sink (_tmp83_);
-	settings = _tmp83_;
-	_tmp84_ = gtk_widget_get_style_context ((GtkWidget*) settings);
-	gtk_style_context_add_class (_tmp84_, "status-action-button");
-	g_signal_connect_object (settings, "clicked", (GCallback) ___lambda55__gtk_button_clicked, self, 0);
-	_tmp85_ = self->priv->content;
-	gtk_box_pack_start (_tmp85_, (GtkWidget*) settings, FALSE, FALSE, (guint) 0);
+	_tmp24_ = self->priv->content;
+	_tmp25_ = plank_status_panel_window_modern_volume_bar (self, "@DEFAULT_AUDIO_SOURCE@", mic_percent, (gdouble) 100, "audio-input-microphone-symbolic", plank_status_panel_window_wpctl_muted (self, "@DEFAULT_AUDIO_SOURCE@"));
+	_tmp26_ = _tmp25_;
+	gtk_box_pack_start (_tmp24_, _tmp26_, FALSE, FALSE, (guint) 0);
+	_g_object_unref0 (_tmp26_);
+	_tmp27_ = (GtkButton*) gtk_button_new_with_label (_ ("Advanced sound settings"));
+	g_object_ref_sink (_tmp27_);
+	settings = _tmp27_;
+	_tmp28_ = gtk_widget_get_style_context ((GtkWidget*) settings);
+	gtk_style_context_add_class (_tmp28_, "status-action-button");
+	g_signal_connect_object (settings, "clicked", (GCallback) ___lambda70__gtk_button_clicked, self, 0);
+	_tmp29_ = self->priv->footer;
+	gtk_box_pack_start (_tmp29_, (GtkWidget*) settings, FALSE, FALSE, (guint) 0);
 	_g_object_unref0 (settings);
-	_g_object_unref0 (streams);
-	_g_object_unref0 (mic_row);
-	_g_object_unref0 (row);
 	_g_free0 (output);
+}
+
+static Block28Data*
+block28_data_ref (Block28Data* _data28_)
+{
+	g_atomic_int_inc (&_data28_->_ref_count_);
+	return _data28_;
+}
+
+static void
+block28_data_unref (void * _userdata_)
+{
+	Block28Data* _data28_;
+	_data28_ = (Block28Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data28_->_ref_count_)) {
+		PlankStatusPanelWindow* self;
+		self = _data28_->self;
+		_g_object_unref0 (_data28_->value);
+		_g_object_unref0 (_data28_->icon);
+		_g_object_unref0 (_data28_->scale);
+		_g_free0 (_data28_->target);
+		_g_object_unref0 (self);
+		g_slice_free (Block28Data, _data28_);
+	}
+}
+
+static void
+__lambda68_ (Block28Data* _data28_)
+{
+	PlankStatusPanelWindow* self;
+	const gchar* _tmp0_ = NULL;
+	gboolean _tmp1_;
+	gboolean _tmp2_;
+	gchar* _tmp3_;
+	gchar* _tmp4_;
+	self = _data28_->self;
+	_tmp1_ = gtk_toggle_button_get_active (_data28_->icon);
+	_tmp2_ = _tmp1_;
+	if (_tmp2_) {
+		_tmp0_ = "1";
+	} else {
+		_tmp0_ = "0";
+	}
+	_tmp3_ = g_strdup_printf ("wpctl set-mute %s %s", _data28_->target, _tmp0_);
+	_tmp4_ = _tmp3_;
+	plank_status_panel_window_run_action (_tmp4_);
+	_g_free0 (_tmp4_);
+}
+
+static void
+___lambda68__gtk_toggle_button_toggled (GtkToggleButton* _sender,
+                                        gpointer self)
+{
+	__lambda68_ (self);
+}
+
+static void
+__lambda69_ (Block28Data* _data28_)
+{
+	PlankStatusPanelWindow* self;
+	gchar* _tmp0_;
+	gchar* _tmp1_;
+	gchar* _tmp2_;
+	gchar* _tmp3_;
+	self = _data28_->self;
+	_tmp0_ = g_strdup_printf ("wpctl set-volume %s %.0f%%", _data28_->target, gtk_range_get_value ((GtkRange*) _data28_->scale));
+	_tmp1_ = _tmp0_;
+	plank_status_panel_window_run_action (_tmp1_);
+	_g_free0 (_tmp1_);
+	_tmp2_ = g_strdup_printf ("%.0f%%", gtk_range_get_value ((GtkRange*) _data28_->scale));
+	_tmp3_ = _tmp2_;
+	gtk_label_set_label (_data28_->value, _tmp3_);
+	_g_free0 (_tmp3_);
+}
+
+static void
+___lambda69__gtk_range_value_changed (GtkRange* _sender,
+                                      gpointer self)
+{
+	__lambda69_ (self);
+}
+
+static GtkWidget*
+plank_status_panel_window_modern_volume_bar (PlankStatusPanelWindow* self,
+                                             const gchar* target,
+                                             gdouble percent,
+                                             gdouble maximum,
+                                             const gchar* icon_name,
+                                             gboolean muted)
+{
+	Block28Data* _data28_;
+	gchar* _tmp0_;
+	GtkOverlay* overlay = NULL;
+	GtkOverlay* _tmp1_;
+	GtkStyleContext* _tmp2_;
+	GtkScale* _tmp3_;
+	GtkStyleContext* _tmp4_;
+	GtkToggleButton* _tmp5_;
+	gchar* _tmp6_;
+	gchar* _tmp7_;
+	GtkLabel* _tmp8_;
+	GtkLabel* _tmp9_;
+	GtkStyleContext* _tmp10_;
+	GtkWidget* result;
+	g_return_val_if_fail (self != NULL, NULL);
+	g_return_val_if_fail (target != NULL, NULL);
+	g_return_val_if_fail (icon_name != NULL, NULL);
+	_data28_ = g_slice_new0 (Block28Data);
+	_data28_->_ref_count_ = 1;
+	_data28_->self = g_object_ref (self);
+	_tmp0_ = g_strdup (target);
+	_g_free0 (_data28_->target);
+	_data28_->target = _tmp0_;
+	_tmp1_ = (GtkOverlay*) gtk_overlay_new ();
+	g_object_ref_sink (_tmp1_);
+	overlay = _tmp1_;
+	_tmp2_ = gtk_widget_get_style_context ((GtkWidget*) overlay);
+	gtk_style_context_add_class (_tmp2_, "modern-volume-bar");
+	_tmp3_ = (GtkScale*) gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL, (gdouble) 0, maximum, (gdouble) 1);
+	g_object_ref_sink (_tmp3_);
+	_data28_->scale = _tmp3_;
+	gtk_scale_set_draw_value (_data28_->scale, FALSE);
+	gtk_scale_set_has_origin (_data28_->scale, TRUE);
+	g_object_set ((GtkWidget*) _data28_->scale, "height-request", 36, NULL);
+	gtk_range_set_value ((GtkRange*) _data28_->scale, percent);
+	_tmp4_ = gtk_widget_get_style_context ((GtkWidget*) _data28_->scale);
+	gtk_style_context_add_class (_tmp4_, "modern-volume-scale");
+	gtk_container_add ((GtkContainer*) overlay, (GtkWidget*) _data28_->scale);
+	_tmp5_ = plank_status_panel_window_icon_toggle_button (self, icon_name, muted);
+	_data28_->icon = _tmp5_;
+	gtk_widget_set_halign ((GtkWidget*) _data28_->icon, GTK_ALIGN_START);
+	gtk_widget_set_valign ((GtkWidget*) _data28_->icon, GTK_ALIGN_CENTER);
+	gtk_widget_set_margin_start ((GtkWidget*) _data28_->icon, 5);
+	g_signal_connect_data (_data28_->icon, "toggled", (GCallback) ___lambda68__gtk_toggle_button_toggled, block28_data_ref (_data28_), (GClosureNotify) block28_data_unref, 0);
+	gtk_overlay_add_overlay (overlay, (GtkWidget*) _data28_->icon);
+	_tmp6_ = g_strdup_printf ("%.0f%%", percent);
+	_tmp7_ = _tmp6_;
+	_tmp8_ = (GtkLabel*) gtk_label_new (_tmp7_);
+	g_object_ref_sink (_tmp8_);
+	_tmp9_ = _tmp8_;
+	_g_free0 (_tmp7_);
+	_data28_->value = _tmp9_;
+	gtk_widget_set_halign ((GtkWidget*) _data28_->value, GTK_ALIGN_END);
+	gtk_widget_set_valign ((GtkWidget*) _data28_->value, GTK_ALIGN_CENTER);
+	gtk_widget_set_margin_end ((GtkWidget*) _data28_->value, 10);
+	_tmp10_ = gtk_widget_get_style_context ((GtkWidget*) _data28_->value);
+	gtk_style_context_add_class (_tmp10_, "modern-volume-value");
+	gtk_overlay_add_overlay (overlay, (GtkWidget*) _data28_->value);
+	gtk_overlay_set_overlay_pass_through (overlay, (GtkWidget*) _data28_->value, TRUE);
+	g_signal_connect_data ((GtkRange*) _data28_->scale, "value-changed", (GCallback) ___lambda69__gtk_range_value_changed, block28_data_ref (_data28_), (GClosureNotify) block28_data_unref, 0);
+	result = (GtkWidget*) overlay;
 	block28_data_unref (_data28_);
 	_data28_ = NULL;
+	return result;
 }
 
 static GtkToggleButton*
@@ -1265,8 +1097,60 @@ string_strip (const gchar* self)
 	return result;
 }
 
+static gboolean
+___lambda66_ (PlankStatusPanelWindow* self)
+{
+	gboolean result;
+	gtk_window_present ((GtkWindow*) self);
+	result = FALSE;
+	return result;
+}
+
+static gboolean
+____lambda66__gsource_func (gpointer self)
+{
+	gboolean result;
+	result = ___lambda66_ ((PlankStatusPanelWindow*) self);
+	return result;
+}
+
 static void
-__lambda49_ (Block29Data* _data29_)
+__lambda65_ (Block29Data* _data29_)
+{
+	PlankStatusPanelWindow* self;
+	GtkComboBoxText* _tmp0_;
+	gboolean _tmp1_;
+	gboolean _tmp2_;
+	gboolean _tmp3_ = FALSE;
+	self = _data29_->self;
+	_tmp0_ = _data29_->combo;
+	g_object_get ((GtkComboBox*) _tmp0_, "popup-shown", &_tmp1_, NULL);
+	_tmp2_ = _tmp1_;
+	self->priv->device_popup_open = _tmp2_;
+	if (!self->priv->device_popup_open) {
+		gboolean _tmp4_;
+		gboolean _tmp5_;
+		_tmp4_ = gtk_widget_get_visible ((GtkWidget*) self);
+		_tmp5_ = _tmp4_;
+		_tmp3_ = _tmp5_;
+	} else {
+		_tmp3_ = FALSE;
+	}
+	if (_tmp3_) {
+		g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ____lambda66__gsource_func, g_object_ref (self), g_object_unref);
+	}
+}
+
+static void
+___lambda65__g_object_notify (GObject* _sender,
+                              GParamSpec* pspec,
+                              gpointer self)
+{
+	__lambda65_ (self);
+}
+
+static void
+__lambda67_ (Block29Data* _data29_)
 {
 	PlankStatusPanelWindow* self;
 	GtkComboBoxText* _tmp0_;
@@ -1285,6 +1169,9 @@ __lambda49_ (Block29Data* _data29_)
 		gchar* _tmp8_;
 		gchar* _tmp9_;
 		gchar* _tmp10_;
+		GtkComboBoxText* _tmp11_;
+		const gchar* _tmp12_;
+		const gchar* _tmp13_;
 		if (_data29_->source) {
 			_tmp3_ = "pactl set-default-source ";
 		} else {
@@ -1300,14 +1187,18 @@ __lambda49_ (Block29Data* _data29_)
 		plank_status_panel_window_run_action (_tmp10_);
 		_g_free0 (_tmp10_);
 		_g_free0 (_tmp8_);
+		_tmp11_ = _data29_->combo;
+		_tmp12_ = gtk_combo_box_get_active_id ((GtkComboBox*) _tmp11_);
+		_tmp13_ = _tmp12_;
+		plank_status_panel_window_move_active_streams (self, _data29_->source, _tmp13_);
 	}
 }
 
 static void
-___lambda49__gtk_combo_box_changed (GtkComboBox* _sender,
+___lambda67__gtk_combo_box_changed (GtkComboBox* _sender,
                                     gpointer self)
 {
-	__lambda49_ (self);
+	__lambda67_ (self);
 }
 
 static GtkWidget*
@@ -1319,28 +1210,28 @@ plank_status_panel_window_device_selector (PlankStatusPanelWindow* self,
 	GtkBox* _tmp0_;
 	GtkBox* _tmp1_;
 	GtkStyleContext* _tmp2_;
-	const gchar* _tmp3_ = NULL;
-	GtkBox* _tmp4_;
-	GtkImage* _tmp5_;
-	GtkImage* _tmp6_;
-	GtkComboBoxText* _tmp7_;
-	GtkComboBoxText* _tmp8_;
+	GtkComboBoxText* _tmp3_;
+	GtkComboBoxText* _tmp4_;
+	GtkStyleContext* _tmp5_;
+	GtkComboBoxText* _tmp6_;
+	GList* _tmp7_;
 	gchar* current = NULL;
-	gchar* _tmp9_;
+	gchar* _tmp13_;
 	gchar* output = NULL;
-	gchar* _tmp10_;
-	const gchar* _tmp11_ = NULL;
-	gchar* _tmp12_ = NULL;
-	const gchar* _tmp13_ = NULL;
-	gchar* _tmp14_ = NULL;
-	gboolean _tmp15_;
-	GtkComboBoxText* _tmp34_;
-	const gchar* _tmp35_;
-	gchar* _tmp36_;
-	gchar* _tmp37_;
+	gchar* _tmp14_;
+	const gchar* _tmp15_ = NULL;
+	gchar* _tmp16_ = NULL;
+	const gchar* _tmp17_ = NULL;
+	gchar* _tmp18_ = NULL;
+	gboolean _tmp19_;
 	GtkComboBoxText* _tmp38_;
-	GtkBox* _tmp39_;
-	GtkComboBoxText* _tmp40_;
+	const gchar* _tmp39_;
+	gchar* _tmp40_;
+	gchar* _tmp41_;
+	GtkComboBoxText* _tmp42_;
+	GtkComboBoxText* _tmp43_;
+	GtkBox* _tmp44_;
+	GtkComboBoxText* _tmp45_;
 	GtkWidget* result;
 	g_return_val_if_fail (self != NULL, NULL);
 	_data29_ = g_slice_new0 (Block29Data);
@@ -1353,139 +1244,281 @@ plank_status_panel_window_device_selector (PlankStatusPanelWindow* self,
 	_tmp1_ = row;
 	_tmp2_ = gtk_widget_get_style_context ((GtkWidget*) _tmp1_);
 	gtk_style_context_add_class (_tmp2_, "status-row");
-	if (_data29_->source) {
-		_tmp3_ = "audio-input-microphone-symbolic";
-	} else {
-		_tmp3_ = "audio-speakers-symbolic";
+	_tmp3_ = (GtkComboBoxText*) gtk_combo_box_text_new ();
+	g_object_ref_sink (_tmp3_);
+	_data29_->combo = _tmp3_;
+	_tmp4_ = _data29_->combo;
+	_tmp5_ = gtk_widget_get_style_context ((GtkWidget*) _tmp4_);
+	gtk_style_context_add_class (_tmp5_, "modern-device-selector");
+	_tmp6_ = _data29_->combo;
+	_tmp7_ = gtk_cell_layout_get_cells ((GtkCellLayout*) _tmp6_);
+	{
+		GList* renderer_collection = NULL;
+		GList* renderer_it = NULL;
+		renderer_collection = _tmp7_;
+		for (renderer_it = renderer_collection; renderer_it != NULL; renderer_it = renderer_it->next) {
+			GtkCellRenderer* renderer = NULL;
+			renderer = (GtkCellRenderer*) renderer_it->data;
+			{
+				GtkCellRendererText* text_renderer = NULL;
+				GtkCellRenderer* _tmp8_;
+				GtkCellRendererText* _tmp9_;
+				GtkCellRendererText* _tmp10_;
+				_tmp8_ = renderer;
+				_tmp9_ = _g_object_ref0 (G_TYPE_CHECK_INSTANCE_TYPE (_tmp8_, gtk_cell_renderer_text_get_type ()) ? ((GtkCellRendererText*) _tmp8_) : NULL);
+				text_renderer = _tmp9_;
+				_tmp10_ = text_renderer;
+				if (_tmp10_ != NULL) {
+					GtkCellRendererText* _tmp11_;
+					GtkCellRendererText* _tmp12_;
+					_tmp11_ = text_renderer;
+					g_object_set (_tmp11_, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+					_tmp12_ = text_renderer;
+					g_object_set (_tmp12_, "width-chars", 14, NULL);
+				}
+				_g_object_unref0 (text_renderer);
+			}
+		}
+		(renderer_collection == NULL) ? NULL : (renderer_collection = (g_list_free (renderer_collection), NULL));
 	}
-	_tmp4_ = row;
-	_tmp5_ = (GtkImage*) gtk_image_new_from_icon_name (_tmp3_, (GtkIconSize) GTK_ICON_SIZE_MENU);
-	g_object_ref_sink (_tmp5_);
-	_tmp6_ = _tmp5_;
-	gtk_box_pack_start (_tmp4_, (GtkWidget*) _tmp6_, FALSE, FALSE, (guint) 0);
-	_g_object_unref0 (_tmp6_);
-	_tmp7_ = (GtkComboBoxText*) gtk_combo_box_text_new ();
-	g_object_ref_sink (_tmp7_);
-	_data29_->combo = _tmp7_;
-	_tmp8_ = _data29_->combo;
-	g_object_set ((GtkWidget*) _tmp8_, "width-request", 160, NULL);
-	_tmp9_ = g_strdup ("");
-	current = _tmp9_;
-	_tmp10_ = g_strdup ("");
-	output = _tmp10_;
-	if (_data29_->source) {
-		_tmp11_ = "pactl get-default-source";
-	} else {
-		_tmp11_ = "pactl get-default-sink";
-	}
-	plank_status_panel_window_run (_tmp11_, &_tmp12_);
-	_g_free0 (current);
-	current = _tmp12_;
-	if (_data29_->source) {
-		_tmp13_ = "pactl list short sources";
-	} else {
-		_tmp13_ = "pactl list short sinks";
-	}
-	_tmp15_ = plank_status_panel_window_run (_tmp13_, &_tmp14_);
-	_g_free0 (output);
+	_tmp13_ = g_strdup ("");
+	current = _tmp13_;
+	_tmp14_ = g_strdup ("");
 	output = _tmp14_;
-	if (_tmp15_) {
-		const gchar* _tmp16_;
-		gchar** _tmp17_;
-		gchar** _tmp18_;
-		_tmp16_ = output;
-		_tmp18_ = _tmp17_ = g_strsplit (_tmp16_, "\n", 0);
+	if (_data29_->source) {
+		_tmp15_ = "pactl get-default-source";
+	} else {
+		_tmp15_ = "pactl get-default-sink";
+	}
+	plank_status_panel_window_run (_tmp15_, &_tmp16_);
+	_g_free0 (current);
+	current = _tmp16_;
+	if (_data29_->source) {
+		_tmp17_ = "pactl list short sources";
+	} else {
+		_tmp17_ = "pactl list short sinks";
+	}
+	_tmp19_ = plank_status_panel_window_run (_tmp17_, &_tmp18_);
+	_g_free0 (output);
+	output = _tmp18_;
+	if (_tmp19_) {
+		const gchar* _tmp20_;
+		gchar** _tmp21_;
+		gchar** _tmp22_;
+		_tmp20_ = output;
+		_tmp22_ = _tmp21_ = g_strsplit (_tmp20_, "\n", 0);
 		{
 			gchar** line_collection = NULL;
 			gint line_collection_length1 = 0;
 			gint _line_collection_size_ = 0;
 			gint line_it = 0;
-			line_collection = _tmp18_;
-			line_collection_length1 = _vala_array_length (_tmp17_);
+			line_collection = _tmp22_;
+			line_collection_length1 = _vala_array_length (_tmp21_);
 			for (line_it = 0; line_it < line_collection_length1; line_it = line_it + 1) {
 				const gchar* line = NULL;
 				line = line_collection[line_it];
 				{
 					gchar** fields = NULL;
-					const gchar* _tmp19_;
-					gchar** _tmp20_;
-					gchar** _tmp21_;
+					const gchar* _tmp23_;
+					gchar** _tmp24_;
+					gchar** _tmp25_;
 					gint fields_length1;
 					gint _fields_size_;
-					gboolean _tmp22_ = FALSE;
-					gchar** _tmp23_;
-					gint _tmp23__length1;
-					GtkComboBoxText* _tmp27_;
-					gchar** _tmp28_;
-					gint _tmp28__length1;
-					const gchar* _tmp29_;
-					gchar** _tmp30_;
-					gint _tmp30__length1;
-					const gchar* _tmp31_;
-					gchar* _tmp32_;
-					gchar* _tmp33_;
-					_tmp19_ = line;
-					_tmp21_ = _tmp20_ = g_strsplit (_tmp19_, "\t", 0);
-					fields = _tmp21_;
-					fields_length1 = _vala_array_length (_tmp20_);
+					gboolean _tmp26_ = FALSE;
+					gchar** _tmp27_;
+					gint _tmp27__length1;
+					GtkComboBoxText* _tmp31_;
+					gchar** _tmp32_;
+					gint _tmp32__length1;
+					const gchar* _tmp33_;
+					gchar** _tmp34_;
+					gint _tmp34__length1;
+					const gchar* _tmp35_;
+					gchar* _tmp36_;
+					gchar* _tmp37_;
+					_tmp23_ = line;
+					_tmp25_ = _tmp24_ = g_strsplit (_tmp23_, "\t", 0);
+					fields = _tmp25_;
+					fields_length1 = _vala_array_length (_tmp24_);
 					_fields_size_ = fields_length1;
-					_tmp23_ = fields;
-					_tmp23__length1 = fields_length1;
-					if (_tmp23__length1 < 2) {
-						_tmp22_ = TRUE;
+					_tmp27_ = fields;
+					_tmp27__length1 = fields_length1;
+					if (_tmp27__length1 < 2) {
+						_tmp26_ = TRUE;
 					} else {
-						gboolean _tmp24_ = FALSE;
+						gboolean _tmp28_ = FALSE;
 						if (_data29_->source) {
-							gchar** _tmp25_;
-							gint _tmp25__length1;
-							const gchar* _tmp26_;
-							_tmp25_ = fields;
-							_tmp25__length1 = fields_length1;
-							_tmp26_ = _tmp25_[1];
-							_tmp24_ = g_str_has_suffix (_tmp26_, ".monitor");
+							gchar** _tmp29_;
+							gint _tmp29__length1;
+							const gchar* _tmp30_;
+							_tmp29_ = fields;
+							_tmp29__length1 = fields_length1;
+							_tmp30_ = _tmp29_[1];
+							_tmp28_ = g_str_has_suffix (_tmp30_, ".monitor");
 						} else {
-							_tmp24_ = FALSE;
+							_tmp28_ = FALSE;
 						}
-						_tmp22_ = _tmp24_;
+						_tmp26_ = _tmp28_;
 					}
-					if (_tmp22_) {
+					if (_tmp26_) {
 						fields = (_vala_array_free (fields, fields_length1, (GDestroyNotify) g_free), NULL);
 						continue;
 					}
-					_tmp27_ = _data29_->combo;
-					_tmp28_ = fields;
-					_tmp28__length1 = fields_length1;
-					_tmp29_ = _tmp28_[1];
-					_tmp30_ = fields;
-					_tmp30__length1 = fields_length1;
-					_tmp31_ = _tmp30_[1];
-					_tmp32_ = plank_status_panel_window_friendly_device_name (self, _tmp31_);
-					_tmp33_ = _tmp32_;
-					gtk_combo_box_text_append (_tmp27_, _tmp29_, _tmp33_);
-					_g_free0 (_tmp33_);
+					_tmp31_ = _data29_->combo;
+					_tmp32_ = fields;
+					_tmp32__length1 = fields_length1;
+					_tmp33_ = _tmp32_[1];
+					_tmp34_ = fields;
+					_tmp34__length1 = fields_length1;
+					_tmp35_ = _tmp34_[1];
+					_tmp36_ = plank_status_panel_window_friendly_device_name (self, _tmp35_);
+					_tmp37_ = _tmp36_;
+					gtk_combo_box_text_append (_tmp31_, _tmp33_, _tmp37_);
+					_g_free0 (_tmp37_);
 					fields = (_vala_array_free (fields, fields_length1, (GDestroyNotify) g_free), NULL);
 				}
 			}
 			line_collection = (_vala_array_free (line_collection, line_collection_length1, (GDestroyNotify) g_free), NULL);
 		}
 	}
-	_tmp34_ = _data29_->combo;
-	_tmp35_ = current;
-	_tmp36_ = string_strip (_tmp35_);
-	_tmp37_ = _tmp36_;
-	gtk_combo_box_set_active_id ((GtkComboBox*) _tmp34_, _tmp37_);
-	_g_free0 (_tmp37_);
 	_tmp38_ = _data29_->combo;
-	g_signal_connect_data ((GtkComboBox*) _tmp38_, "changed", (GCallback) ___lambda49__gtk_combo_box_changed, block29_data_ref (_data29_), (GClosureNotify) block29_data_unref, 0);
-	_tmp39_ = row;
-	_tmp40_ = _data29_->combo;
-	gtk_box_pack_start (_tmp39_, (GtkWidget*) _tmp40_, TRUE, TRUE, (guint) 0);
+	_tmp39_ = current;
+	_tmp40_ = string_strip (_tmp39_);
+	_tmp41_ = _tmp40_;
+	gtk_combo_box_set_active_id ((GtkComboBox*) _tmp38_, _tmp41_);
+	_g_free0 (_tmp41_);
+	_tmp42_ = _data29_->combo;
+	g_signal_connect_data ((GObject*) _tmp42_, "notify::popup-shown", (GCallback) ___lambda65__g_object_notify, block29_data_ref (_data29_), (GClosureNotify) block29_data_unref, 0);
+	_tmp43_ = _data29_->combo;
+	g_signal_connect_data ((GtkComboBox*) _tmp43_, "changed", (GCallback) ___lambda67__gtk_combo_box_changed, block29_data_ref (_data29_), (GClosureNotify) block29_data_unref, 0);
+	_tmp44_ = row;
+	_tmp45_ = _data29_->combo;
+	gtk_box_pack_start (_tmp44_, (GtkWidget*) _tmp45_, TRUE, TRUE, (guint) 0);
 	result = (GtkWidget*) row;
 	_g_free0 (output);
 	_g_free0 (current);
 	block29_data_unref (_data29_);
 	_data29_ = NULL;
 	return result;
+}
+
+static void
+plank_status_panel_window_move_active_streams (PlankStatusPanelWindow* self,
+                                               gboolean source,
+                                               const gchar* device)
+{
+	gchar* output = NULL;
+	const gchar* _tmp0_ = NULL;
+	gchar* list_command = NULL;
+	gchar* _tmp1_;
+	const gchar* _tmp2_;
+	gchar* _tmp3_ = NULL;
+	gboolean _tmp4_;
+	const gchar* _tmp5_;
+	gchar** _tmp6_;
+	gchar** _tmp7_;
+	g_return_if_fail (self != NULL);
+	g_return_if_fail (device != NULL);
+	if (source) {
+		_tmp0_ = "pactl list short source-outputs";
+	} else {
+		_tmp0_ = "pactl list short sink-inputs";
+	}
+	_tmp1_ = g_strdup (_tmp0_);
+	list_command = _tmp1_;
+	_tmp2_ = list_command;
+	_tmp4_ = plank_status_panel_window_run (_tmp2_, &_tmp3_);
+	_g_free0 (output);
+	output = _tmp3_;
+	if (!_tmp4_) {
+		_g_free0 (list_command);
+		_g_free0 (output);
+		return;
+	}
+	_tmp5_ = output;
+	_tmp7_ = _tmp6_ = g_strsplit (_tmp5_, "\n", 0);
+	{
+		gchar** line_collection = NULL;
+		gint line_collection_length1 = 0;
+		gint _line_collection_size_ = 0;
+		gint line_it = 0;
+		line_collection = _tmp7_;
+		line_collection_length1 = _vala_array_length (_tmp6_);
+		for (line_it = 0; line_it < line_collection_length1; line_it = line_it + 1) {
+			const gchar* line = NULL;
+			line = line_collection[line_it];
+			{
+				gchar** fields = NULL;
+				const gchar* _tmp8_;
+				gchar** _tmp9_;
+				gchar** _tmp10_;
+				gint fields_length1;
+				gint _fields_size_;
+				gboolean _tmp11_ = FALSE;
+				gchar** _tmp12_;
+				gint _tmp12__length1;
+				const gchar* _tmp15_ = NULL;
+				gchar** _tmp16_;
+				gint _tmp16__length1;
+				const gchar* _tmp17_;
+				gchar* _tmp18_;
+				gchar* _tmp19_;
+				gchar* _tmp20_;
+				gchar* _tmp21_;
+				gchar* _tmp22_;
+				gchar* _tmp23_;
+				gchar* _tmp24_;
+				gchar* _tmp25_;
+				_tmp8_ = line;
+				_tmp10_ = _tmp9_ = g_strsplit (_tmp8_, "\t", 0);
+				fields = _tmp10_;
+				fields_length1 = _vala_array_length (_tmp9_);
+				_fields_size_ = fields_length1;
+				_tmp12_ = fields;
+				_tmp12__length1 = fields_length1;
+				if (_tmp12__length1 < 1) {
+					_tmp11_ = TRUE;
+				} else {
+					gchar** _tmp13_;
+					gint _tmp13__length1;
+					const gchar* _tmp14_;
+					_tmp13_ = fields;
+					_tmp13__length1 = fields_length1;
+					_tmp14_ = _tmp13_[0];
+					_tmp11_ = g_strcmp0 (_tmp14_, "") == 0;
+				}
+				if (_tmp11_) {
+					fields = (_vala_array_free (fields, fields_length1, (GDestroyNotify) g_free), NULL);
+					continue;
+				}
+				if (source) {
+					_tmp15_ = "pactl move-source-output ";
+				} else {
+					_tmp15_ = "pactl move-sink-input ";
+				}
+				_tmp16_ = fields;
+				_tmp16__length1 = fields_length1;
+				_tmp17_ = _tmp16_[0];
+				_tmp18_ = g_strconcat (_tmp15_, _tmp17_, NULL);
+				_tmp19_ = _tmp18_;
+				_tmp20_ = g_strconcat (_tmp19_, " ", NULL);
+				_tmp21_ = _tmp20_;
+				_tmp22_ = g_shell_quote (device);
+				_tmp23_ = _tmp22_;
+				_tmp24_ = g_strconcat (_tmp21_, _tmp23_, NULL);
+				_tmp25_ = _tmp24_;
+				plank_status_panel_window_run_action (_tmp25_);
+				_g_free0 (_tmp25_);
+				_g_free0 (_tmp23_);
+				_g_free0 (_tmp21_);
+				_g_free0 (_tmp19_);
+				fields = (_vala_array_free (fields, fields_length1, (GDestroyNotify) g_free), NULL);
+			}
+		}
+		line_collection = (_vala_array_free (line_collection, line_collection_length1, (GDestroyNotify) g_free), NULL);
+	}
+	_g_free0 (list_command);
+	_g_free0 (output);
 }
 
 static gchar*
@@ -1706,439 +1739,8 @@ plank_status_panel_window_wpctl_muted (PlankStatusPanelWindow* self,
 	return result;
 }
 
-static glong
-string_strnlen (gchar* str,
-                glong maxlen)
-{
-	gchar* end = NULL;
-	gchar* _tmp0_;
-	gchar* _tmp1_;
-	glong result;
-	_tmp0_ = memchr (str, 0, (gsize) maxlen);
-	end = _tmp0_;
-	_tmp1_ = end;
-	if (_tmp1_ == NULL) {
-		result = maxlen;
-		return result;
-	} else {
-		gchar* _tmp2_;
-		_tmp2_ = end;
-		result = (glong) (_tmp2_ - str);
-		return result;
-	}
-}
-
-static gchar*
-string_substring (const gchar* self,
-                  glong offset,
-                  glong len)
-{
-	glong string_length = 0L;
-	gboolean _tmp0_ = FALSE;
-	gchar* _tmp3_;
-	gchar* result;
-	g_return_val_if_fail (self != NULL, NULL);
-	if (offset >= ((glong) 0)) {
-		_tmp0_ = len >= ((glong) 0);
-	} else {
-		_tmp0_ = FALSE;
-	}
-	if (_tmp0_) {
-		string_length = string_strnlen ((gchar*) self, offset + len);
-	} else {
-		gint _tmp1_;
-		gint _tmp2_;
-		_tmp1_ = strlen (self);
-		_tmp2_ = _tmp1_;
-		string_length = (glong) _tmp2_;
-	}
-	if (offset < ((glong) 0)) {
-		offset = string_length + offset;
-		g_return_val_if_fail (offset >= ((glong) 0), NULL);
-	} else {
-		g_return_val_if_fail (offset <= string_length, NULL);
-	}
-	if (len < ((glong) 0)) {
-		len = string_length - offset;
-	}
-	g_return_val_if_fail ((offset + len) <= string_length, NULL);
-	_tmp3_ = g_strndup (((gchar*) self) + offset, (gsize) len);
-	result = _tmp3_;
-	return result;
-}
-
-static gint
-string_index_of (const gchar* self,
-                 const gchar* needle,
-                 gint start_index)
-{
-	gchar* _result_ = NULL;
-	gchar* _tmp0_;
-	gchar* _tmp1_;
-	gint result;
-	g_return_val_if_fail (self != NULL, 0);
-	g_return_val_if_fail (needle != NULL, 0);
-	_tmp0_ = strstr (((gchar*) self) + start_index, (gchar*) needle);
-	_result_ = _tmp0_;
-	_tmp1_ = _result_;
-	if (_tmp1_ != NULL) {
-		gchar* _tmp2_;
-		_tmp2_ = _result_;
-		result = (gint) (_tmp2_ - ((gchar*) self));
-		return result;
-	} else {
-		result = -1;
-		return result;
-	}
-}
-
-static GeeArrayList*
-plank_status_panel_window_audio_streams (PlankStatusPanelWindow* self)
-{
-	GeeArrayList* streams = NULL;
-	GeeArrayList* _tmp0_;
-	gchar* output = NULL;
-	gchar* _tmp1_ = NULL;
-	gboolean _tmp2_;
-	PlankAudioStreamInfo* current = NULL;
-	const gchar* _tmp3_;
-	gchar** _tmp4_;
-	gchar** _tmp5_;
-	PlankAudioStreamInfo* _tmp53_;
-	GeeArrayList* result;
-	g_return_val_if_fail (self != NULL, NULL);
-	_tmp0_ = gee_array_list_new (PLANK_TYPE_AUDIO_STREAM_INFO, (GBoxedCopyFunc) g_object_ref, (GDestroyNotify) g_object_unref, NULL, NULL, NULL);
-	streams = _tmp0_;
-	_tmp2_ = plank_status_panel_window_run ("pactl list sink-inputs", &_tmp1_);
-	_g_free0 (output);
-	output = _tmp1_;
-	if (!_tmp2_) {
-		result = streams;
-		_g_free0 (output);
-		return result;
-	}
-	current = NULL;
-	_tmp3_ = output;
-	_tmp5_ = _tmp4_ = g_strsplit (_tmp3_, "\n", 0);
-	{
-		gchar** raw_line_collection = NULL;
-		gint raw_line_collection_length1 = 0;
-		gint _raw_line_collection_size_ = 0;
-		gint raw_line_it = 0;
-		raw_line_collection = _tmp5_;
-		raw_line_collection_length1 = _vala_array_length (_tmp4_);
-		for (raw_line_it = 0; raw_line_it < raw_line_collection_length1; raw_line_it = raw_line_it + 1) {
-			const gchar* raw_line = NULL;
-			raw_line = raw_line_collection[raw_line_it];
-			{
-				gchar* line = NULL;
-				const gchar* _tmp6_;
-				gchar* _tmp7_;
-				const gchar* _tmp8_;
-				_tmp6_ = raw_line;
-				_tmp7_ = string_strip (_tmp6_);
-				line = _tmp7_;
-				_tmp8_ = line;
-				if (g_str_has_prefix (_tmp8_, "Sink Input #")) {
-					PlankAudioStreamInfo* _tmp9_;
-					PlankAudioStreamInfo* _tmp12_;
-					PlankAudioStreamInfo* _tmp13_;
-					const gchar* _tmp14_;
-					gchar* _tmp15_;
-					gchar* _tmp16_;
-					_tmp9_ = current;
-					if (_tmp9_ != NULL) {
-						GeeArrayList* _tmp10_;
-						PlankAudioStreamInfo* _tmp11_;
-						_tmp10_ = streams;
-						_tmp11_ = current;
-						gee_abstract_collection_add ((GeeAbstractCollection*) _tmp10_, _tmp11_);
-					}
-					_tmp12_ = plank_audio_stream_info_new ();
-					_g_object_unref0 (current);
-					current = _tmp12_;
-					_tmp13_ = current;
-					_tmp14_ = line;
-					_tmp15_ = string_substring (_tmp14_, (glong) 12, (glong) -1);
-					_tmp16_ = _tmp15_;
-					_tmp13_->id = atoi (_tmp16_);
-					_g_free0 (_tmp16_);
-				} else {
-					gboolean _tmp17_ = FALSE;
-					gboolean _tmp18_ = FALSE;
-					PlankAudioStreamInfo* _tmp19_;
-					_tmp19_ = current;
-					if (_tmp19_ != NULL) {
-						const gchar* _tmp20_;
-						_tmp20_ = line;
-						_tmp18_ = g_str_has_prefix (_tmp20_, "Volume:");
-					} else {
-						_tmp18_ = FALSE;
-					}
-					if (_tmp18_) {
-						const gchar* _tmp21_;
-						_tmp21_ = line;
-						_tmp17_ = string_contains (_tmp21_, "%");
-					} else {
-						_tmp17_ = FALSE;
-					}
-					if (_tmp17_) {
-						gchar* before_percent = NULL;
-						const gchar* _tmp22_;
-						const gchar* _tmp23_;
-						gchar* _tmp24_;
-						gchar** parts = NULL;
-						const gchar* _tmp25_;
-						gchar** _tmp26_;
-						gchar** _tmp27_;
-						gint parts_length1;
-						gint _parts_size_;
-						gchar** _tmp28_;
-						gint _tmp28__length1;
-						_tmp22_ = line;
-						_tmp23_ = line;
-						_tmp24_ = string_substring (_tmp22_, (glong) 0, (glong) string_index_of (_tmp23_, "%", 0));
-						before_percent = _tmp24_;
-						_tmp25_ = before_percent;
-						_tmp27_ = _tmp26_ = g_strsplit (_tmp25_, "/", 0);
-						parts = _tmp27_;
-						parts_length1 = _vala_array_length (_tmp26_);
-						_parts_size_ = parts_length1;
-						_tmp28_ = parts;
-						_tmp28__length1 = parts_length1;
-						if (_tmp28__length1 > 1) {
-							PlankAudioStreamInfo* _tmp29_;
-							gchar** _tmp30_;
-							gint _tmp30__length1;
-							const gchar* _tmp31_;
-							gchar* _tmp32_;
-							gchar* _tmp33_;
-							_tmp29_ = current;
-							_tmp30_ = parts;
-							_tmp30__length1 = parts_length1;
-							_tmp31_ = _tmp30_[1];
-							_tmp32_ = string_strip (_tmp31_);
-							_tmp33_ = _tmp32_;
-							_tmp29_->volume = atoi (_tmp33_);
-							_g_free0 (_tmp33_);
-						}
-						parts = (_vala_array_free (parts, parts_length1, (GDestroyNotify) g_free), NULL);
-						_g_free0 (before_percent);
-					} else {
-						gboolean _tmp34_ = FALSE;
-						PlankAudioStreamInfo* _tmp35_;
-						_tmp35_ = current;
-						if (_tmp35_ != NULL) {
-							const gchar* _tmp36_;
-							_tmp36_ = line;
-							_tmp34_ = g_str_has_prefix (_tmp36_, "application.name = ");
-						} else {
-							_tmp34_ = FALSE;
-						}
-						if (_tmp34_) {
-							PlankAudioStreamInfo* _tmp37_;
-							const gchar* _tmp38_;
-							gchar* _tmp39_;
-							gchar* _tmp40_;
-							gchar* _tmp41_;
-							_tmp37_ = current;
-							_tmp38_ = line;
-							_tmp39_ = string_substring (_tmp38_, (glong) 19, (glong) -1);
-							_tmp40_ = _tmp39_;
-							_tmp41_ = string_replace (_tmp40_, "\"", "");
-							_g_free0 (_tmp37_->name);
-							_tmp37_->name = _tmp41_;
-							_g_free0 (_tmp40_);
-						} else {
-							gboolean _tmp42_ = FALSE;
-							gboolean _tmp43_ = FALSE;
-							PlankAudioStreamInfo* _tmp44_;
-							_tmp44_ = current;
-							if (_tmp44_ != NULL) {
-								PlankAudioStreamInfo* _tmp45_;
-								const gchar* _tmp46_;
-								_tmp45_ = current;
-								_tmp46_ = _tmp45_->name;
-								_tmp43_ = g_strcmp0 (_tmp46_, "") == 0;
-							} else {
-								_tmp43_ = FALSE;
-							}
-							if (_tmp43_) {
-								const gchar* _tmp47_;
-								_tmp47_ = line;
-								_tmp42_ = g_str_has_prefix (_tmp47_, "media.name = ");
-							} else {
-								_tmp42_ = FALSE;
-							}
-							if (_tmp42_) {
-								PlankAudioStreamInfo* _tmp48_;
-								const gchar* _tmp49_;
-								gchar* _tmp50_;
-								gchar* _tmp51_;
-								gchar* _tmp52_;
-								_tmp48_ = current;
-								_tmp49_ = line;
-								_tmp50_ = string_substring (_tmp49_, (glong) 13, (glong) -1);
-								_tmp51_ = _tmp50_;
-								_tmp52_ = string_replace (_tmp51_, "\"", "");
-								_g_free0 (_tmp48_->name);
-								_tmp48_->name = _tmp52_;
-								_g_free0 (_tmp51_);
-							}
-						}
-					}
-				}
-				_g_free0 (line);
-			}
-		}
-		raw_line_collection = (_vala_array_free (raw_line_collection, raw_line_collection_length1, (GDestroyNotify) g_free), NULL);
-	}
-	_tmp53_ = current;
-	if (_tmp53_ != NULL) {
-		GeeArrayList* _tmp54_;
-		PlankAudioStreamInfo* _tmp55_;
-		_tmp54_ = streams;
-		_tmp55_ = current;
-		gee_abstract_collection_add ((GeeAbstractCollection*) _tmp54_, _tmp55_);
-	}
-	result = streams;
-	_g_object_unref0 (current);
-	_g_free0 (output);
-	return result;
-}
-
-static Block30Data*
-block30_data_ref (Block30Data* _data30_)
-{
-	g_atomic_int_inc (&_data30_->_ref_count_);
-	return _data30_;
-}
-
 static void
-block30_data_unref (void * _userdata_)
-{
-	Block30Data* _data30_;
-	_data30_ = (Block30Data*) _userdata_;
-	if (g_atomic_int_dec_and_test (&_data30_->_ref_count_)) {
-		PlankStatusPanelWindow* self;
-		self = _data30_->self;
-		_g_object_unref0 (_data30_->value);
-		_g_object_unref0 (_data30_->scale);
-		_g_object_unref0 (_data30_->stream);
-		_g_object_unref0 (self);
-		g_slice_free (Block30Data, _data30_);
-	}
-}
-
-static void
-__lambda54_ (Block30Data* _data30_)
-{
-	PlankStatusPanelWindow* self;
-	gchar* _tmp0_;
-	gchar* _tmp1_;
-	gchar* _tmp2_;
-	gchar* _tmp3_;
-	self = _data30_->self;
-	_tmp0_ = g_strdup_printf ("pactl set-sink-input-volume %d %.0f%%", _data30_->stream->id, gtk_range_get_value ((GtkRange*) _data30_->scale));
-	_tmp1_ = _tmp0_;
-	plank_status_panel_window_run_action (_tmp1_);
-	_g_free0 (_tmp1_);
-	_tmp2_ = g_strdup_printf ("%.0f%%", gtk_range_get_value ((GtkRange*) _data30_->scale));
-	_tmp3_ = _tmp2_;
-	gtk_label_set_label (_data30_->value, _tmp3_);
-	_g_free0 (_tmp3_);
-}
-
-static void
-___lambda54__gtk_range_value_changed (GtkRange* _sender,
-                                      gpointer self)
-{
-	__lambda54_ (self);
-}
-
-static GtkWidget*
-plank_status_panel_window_application_volume_row (PlankStatusPanelWindow* self,
-                                                  PlankAudioStreamInfo* stream)
-{
-	Block30Data* _data30_;
-	PlankAudioStreamInfo* _tmp0_;
-	GtkBox* box = NULL;
-	GtkBox* _tmp1_;
-	GtkBox* _tmp2_;
-	GtkStyleContext* _tmp3_;
-	const gchar* _tmp4_ = NULL;
-	const gchar* _tmp5_;
-	GtkBox* _tmp7_;
-	GtkLabel* _tmp8_ = NULL;
-	GtkLabel* _tmp9_;
-	GtkBox* row = NULL;
-	GtkBox* _tmp10_;
-	GtkScale* _tmp11_;
-	gchar* _tmp12_;
-	gchar* _tmp13_;
-	GtkLabel* _tmp14_ = NULL;
-	GtkLabel* _tmp15_;
-	GtkBox* _tmp16_;
-	GtkWidget* result;
-	g_return_val_if_fail (self != NULL, NULL);
-	g_return_val_if_fail (stream != NULL, NULL);
-	_data30_ = g_slice_new0 (Block30Data);
-	_data30_->_ref_count_ = 1;
-	_data30_->self = g_object_ref (self);
-	_tmp0_ = _g_object_ref0 (stream);
-	_g_object_unref0 (_data30_->stream);
-	_data30_->stream = _tmp0_;
-	_tmp1_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
-	g_object_ref_sink (_tmp1_);
-	box = _tmp1_;
-	_tmp2_ = box;
-	_tmp3_ = gtk_widget_get_style_context ((GtkWidget*) _tmp2_);
-	gtk_style_context_add_class (_tmp3_, "status-row");
-	_tmp5_ = _data30_->stream->name;
-	if (g_strcmp0 (_tmp5_, "") != 0) {
-		const gchar* _tmp6_;
-		_tmp6_ = _data30_->stream->name;
-		_tmp4_ = _tmp6_;
-	} else {
-		_tmp4_ = _ ("Application");
-	}
-	_tmp7_ = box;
-	_tmp8_ = (GtkLabel*) gtk_label_new (_tmp4_);
-	gtk_label_set_xalign (_tmp8_, 0.0f);
-	g_object_ref_sink (_tmp8_);
-	_tmp9_ = _tmp8_;
-	gtk_box_pack_start (_tmp7_, (GtkWidget*) _tmp9_, FALSE, FALSE, (guint) 0);
-	_g_object_unref0 (_tmp9_);
-	_tmp10_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
-	g_object_ref_sink (_tmp10_);
-	row = _tmp10_;
-	_tmp11_ = (GtkScale*) gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL, (gdouble) 0, (gdouble) 150, (gdouble) 1);
-	g_object_ref_sink (_tmp11_);
-	_data30_->scale = _tmp11_;
-	gtk_scale_set_draw_value (_data30_->scale, FALSE);
-	gtk_range_set_value ((GtkRange*) _data30_->scale, (gdouble) _data30_->stream->volume);
-	_tmp12_ = g_strdup_printf ("%d%%", _data30_->stream->volume);
-	_tmp13_ = _tmp12_;
-	_tmp14_ = (GtkLabel*) gtk_label_new (_tmp13_);
-	g_object_set ((GtkWidget*) _tmp14_, "width-request", 44, NULL);
-	g_object_ref_sink (_tmp14_);
-	_tmp15_ = _tmp14_;
-	_g_free0 (_tmp13_);
-	_data30_->value = _tmp15_;
-	g_signal_connect_data ((GtkRange*) _data30_->scale, "value-changed", (GCallback) ___lambda54__gtk_range_value_changed, block30_data_ref (_data30_), (GClosureNotify) block30_data_unref, 0);
-	gtk_box_pack_start (row, (GtkWidget*) _data30_->scale, TRUE, TRUE, (guint) 0);
-	gtk_box_pack_end (row, (GtkWidget*) _data30_->value, FALSE, FALSE, (guint) 0);
-	_tmp16_ = box;
-	gtk_box_pack_start (_tmp16_, (GtkWidget*) row, FALSE, FALSE, (guint) 0);
-	result = (GtkWidget*) box;
-	_g_object_unref0 (row);
-	block30_data_unref (_data30_);
-	_data30_ = NULL;
-	return result;
-}
-
-static void
-__lambda57_ (PlankStatusPanelWindow* self,
+__lambda72_ (PlankStatusPanelWindow* self,
              gboolean state)
 {
 	const gchar* _tmp0_ = NULL;
@@ -2156,10 +1758,10 @@ __lambda57_ (PlankStatusPanelWindow* self,
 }
 
 static void
-___lambda57__plank_status_panel_window_switch_changed (gboolean state,
+___lambda72__plank_status_panel_window_switch_changed (gboolean state,
                                                        gpointer self)
 {
-	__lambda57_ ((PlankStatusPanelWindow*) self, state);
+	__lambda72_ ((PlankStatusPanelWindow*) self, state);
 }
 
 static void
@@ -2175,7 +1777,7 @@ plank_status_panel_window_build_bluetooth (PlankStatusPanelWindow* self)
 	g_return_if_fail (self != NULL);
 	powered = plank_status_panel_window_contains ("bluetoothctl show", "Powered: yes");
 	_tmp0_ = self->priv->content;
-	_tmp1_ = plank_status_panel_window_switch_row (self, _ ("Bluetooth"), powered, ___lambda57__plank_status_panel_window_switch_changed, g_object_ref (self), g_object_unref);
+	_tmp1_ = plank_status_panel_window_switch_row (self, _ ("Bluetooth"), powered, ___lambda72__plank_status_panel_window_switch_changed, g_object_ref (self), g_object_unref);
 	_tmp2_ = _tmp1_;
 	gtk_box_pack_start (_tmp0_, _tmp2_, FALSE, FALSE, (guint) 0);
 	_g_object_unref0 (_tmp2_);
@@ -2249,7 +1851,7 @@ plank_status_panel_window_build_bluetooth (PlankStatusPanelWindow* self)
 }
 
 static void
-__lambda58_ (PlankStatusPanelWindow* self,
+__lambda73_ (PlankStatusPanelWindow* self,
              gboolean state)
 {
 	const gchar* _tmp0_ = NULL;
@@ -2267,10 +1869,10 @@ __lambda58_ (PlankStatusPanelWindow* self,
 }
 
 static void
-___lambda58__plank_status_panel_window_switch_changed (gboolean state,
+___lambda73__plank_status_panel_window_switch_changed (gboolean state,
                                                        gpointer self)
 {
-	__lambda58_ ((PlankStatusPanelWindow*) self, state);
+	__lambda73_ ((PlankStatusPanelWindow*) self, state);
 }
 
 static void
@@ -2306,7 +1908,7 @@ plank_status_panel_window_build_wifi (PlankStatusPanelWindow* self)
 	}
 	enabled = _tmp1_;
 	_tmp7_ = self->priv->content;
-	_tmp8_ = plank_status_panel_window_switch_row (self, _ ("Wi-Fi"), enabled, ___lambda58__plank_status_panel_window_switch_changed, g_object_ref (self), g_object_unref);
+	_tmp8_ = plank_status_panel_window_switch_row (self, _ ("Wi-Fi"), enabled, ___lambda73__plank_status_panel_window_switch_changed, g_object_ref (self), g_object_unref);
 	_tmp9_ = _tmp8_;
 	gtk_box_pack_start (_tmp7_, _tmp9_, FALSE, FALSE, (guint) 0);
 	_g_object_unref0 (_tmp9_);
@@ -2595,49 +2197,49 @@ plank_status_panel_window_build_clock (PlankStatusPanelWindow* self)
 	_g_date_time_unref0 (now);
 }
 
-static Block31Data*
-block31_data_ref (Block31Data* _data31_)
+static Block30Data*
+block30_data_ref (Block30Data* _data30_)
 {
-	g_atomic_int_inc (&_data31_->_ref_count_);
-	return _data31_;
+	g_atomic_int_inc (&_data30_->_ref_count_);
+	return _data30_;
 }
 
 static void
-block31_data_unref (void * _userdata_)
+block30_data_unref (void * _userdata_)
 {
-	Block31Data* _data31_;
-	_data31_ = (Block31Data*) _userdata_;
-	if (g_atomic_int_dec_and_test (&_data31_->_ref_count_)) {
+	Block30Data* _data30_;
+	_data30_ = (Block30Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data30_->_ref_count_)) {
 		PlankStatusPanelWindow* self;
-		self = _data31_->self;
-		_g_object_unref0 (_data31_->toggle);
-		(_data31_->changed_target_destroy_notify == NULL) ? NULL : (_data31_->changed_target_destroy_notify (_data31_->changed_target), NULL);
-		_data31_->changed = NULL;
-		_data31_->changed_target = NULL;
-		_data31_->changed_target_destroy_notify = NULL;
+		self = _data30_->self;
+		_g_object_unref0 (_data30_->toggle);
+		(_data30_->changed_target_destroy_notify == NULL) ? NULL : (_data30_->changed_target_destroy_notify (_data30_->changed_target), NULL);
+		_data30_->changed = NULL;
+		_data30_->changed_target = NULL;
+		_data30_->changed_target_destroy_notify = NULL;
 		_g_object_unref0 (self);
-		g_slice_free (Block31Data, _data31_);
+		g_slice_free (Block30Data, _data30_);
 	}
 }
 
 static void
-__lambda56_ (Block31Data* _data31_)
+__lambda71_ (Block30Data* _data30_)
 {
 	PlankStatusPanelWindow* self;
 	gboolean _tmp0_;
 	gboolean _tmp1_;
-	self = _data31_->self;
-	_tmp0_ = gtk_switch_get_active (_data31_->toggle);
+	self = _data30_->self;
+	_tmp0_ = gtk_switch_get_active (_data30_->toggle);
 	_tmp1_ = _tmp0_;
-	_data31_->changed (_tmp1_, _data31_->changed_target);
+	_data30_->changed (_tmp1_, _data30_->changed_target);
 }
 
 static void
-___lambda56__g_object_notify (GObject* _sender,
+___lambda71__g_object_notify (GObject* _sender,
                               GParamSpec* pspec,
                               gpointer self)
 {
-	__lambda56_ (self);
+	__lambda71_ (self);
 }
 
 static GtkWidget*
@@ -2648,7 +2250,7 @@ plank_status_panel_window_switch_row (PlankStatusPanelWindow* self,
                                       gpointer changed_target,
                                       GDestroyNotify changed_target_destroy_notify)
 {
-	Block31Data* _data31_;
+	Block30Data* _data30_;
 	GtkBox* row = NULL;
 	GtkBox* _tmp0_;
 	GtkStyleContext* _tmp1_;
@@ -2658,16 +2260,16 @@ plank_status_panel_window_switch_row (PlankStatusPanelWindow* self,
 	GtkWidget* result;
 	g_return_val_if_fail (self != NULL, NULL);
 	g_return_val_if_fail (label != NULL, NULL);
-	_data31_ = g_slice_new0 (Block31Data);
-	_data31_->_ref_count_ = 1;
-	_data31_->self = g_object_ref (self);
-	(_data31_->changed_target_destroy_notify == NULL) ? NULL : (_data31_->changed_target_destroy_notify (_data31_->changed_target), NULL);
-	_data31_->changed = NULL;
-	_data31_->changed_target = NULL;
-	_data31_->changed_target_destroy_notify = NULL;
-	_data31_->changed = changed;
-	_data31_->changed_target = changed_target;
-	_data31_->changed_target_destroy_notify = changed_target_destroy_notify;
+	_data30_ = g_slice_new0 (Block30Data);
+	_data30_->_ref_count_ = 1;
+	_data30_->self = g_object_ref (self);
+	(_data30_->changed_target_destroy_notify == NULL) ? NULL : (_data30_->changed_target_destroy_notify (_data30_->changed_target), NULL);
+	_data30_->changed = NULL;
+	_data30_->changed_target = NULL;
+	_data30_->changed_target_destroy_notify = NULL;
+	_data30_->changed = changed;
+	_data30_->changed_target = changed_target;
+	_data30_->changed_target_destroy_notify = changed_target_destroy_notify;
 	_tmp0_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 10);
 	g_object_ref_sink (_tmp0_);
 	row = _tmp0_;
@@ -2683,12 +2285,12 @@ plank_status_panel_window_switch_row (PlankStatusPanelWindow* self,
 	gtk_switch_set_active (_tmp4_, state);
 	gtk_widget_set_valign ((GtkWidget*) _tmp4_, GTK_ALIGN_CENTER);
 	g_object_ref_sink (_tmp4_);
-	_data31_->toggle = _tmp4_;
-	g_signal_connect_data ((GObject*) _data31_->toggle, "notify::active", (GCallback) ___lambda56__g_object_notify, block31_data_ref (_data31_), (GClosureNotify) block31_data_unref, 0);
-	gtk_box_pack_end (row, (GtkWidget*) _data31_->toggle, FALSE, FALSE, (guint) 0);
+	_data30_->toggle = _tmp4_;
+	g_signal_connect_data ((GObject*) _data30_->toggle, "notify::active", (GCallback) ___lambda71__g_object_notify, block30_data_ref (_data30_), (GClosureNotify) block30_data_unref, 0);
+	gtk_box_pack_end (row, (GtkWidget*) _data30_->toggle, FALSE, FALSE, (guint) 0);
 	result = (GtkWidget*) row;
-	block31_data_unref (_data31_);
-	_data31_ = NULL;
+	block30_data_unref (_data30_);
+	_data30_ = NULL;
 	return result;
 }
 
@@ -2736,57 +2338,113 @@ static void
 plank_status_panel_window_position_over_item (PlankStatusPanelWindow* self)
 {
 	PlankStatusIndicatorItem* _tmp0_;
-	gint width = 0;
-	gint height = 0;
-	gint _tmp1_ = 0;
-	gint _tmp2_ = 0;
 	GdkRectangle item = {0};
-	PlankDockController* _tmp3_;
-	PlankPositionManager* _tmp4_;
-	PlankPositionManager* _tmp5_;
-	PlankStatusIndicatorItem* _tmp6_;
-	GdkRectangle _tmp7_ = {0};
+	PlankDockController* _tmp1_;
+	PlankPositionManager* _tmp2_;
+	PlankPositionManager* _tmp3_;
+	PlankStatusIndicatorItem* _tmp4_;
+	GdkRectangle _tmp5_ = {0};
 	GdkRectangle bar = {0};
-	PlankDockController* _tmp8_;
-	PlankPositionManager* _tmp9_;
-	PlankPositionManager* _tmp10_;
-	GdkRectangle _tmp11_ = {0};
+	PlankDockController* _tmp6_;
+	PlankPositionManager* _tmp7_;
+	PlankPositionManager* _tmp8_;
+	GdkRectangle _tmp9_ = {0};
+	GdkRectangle workarea = {0};
+	GdkRectangle _tmp10_ = {0};
+	gint actual_width = 0;
+	gint actual_height = 0;
+	gint _tmp11_ = 0;
+	gint _tmp12_ = 0;
 	gint desired_x = 0;
-	GdkRectangle _tmp12_;
 	GdkRectangle _tmp13_;
-	gint max_x = 0;
 	GdkRectangle _tmp14_;
+	gint min_x = 0;
 	GdkRectangle _tmp15_;
+	gint max_x = 0;
 	GdkRectangle _tmp16_;
 	GdkRectangle _tmp17_;
+	gint desired_y = 0;
+	GdkRectangle _tmp18_;
+	gint min_y = 0;
+	GdkRectangle _tmp19_;
+	gint max_y = 0;
+	GdkRectangle _tmp20_;
+	GdkRectangle _tmp21_;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->priv->current_item;
 	if (_tmp0_ == NULL) {
 		return;
 	}
-	gtk_window_get_size ((GtkWindow*) self, &_tmp1_, &_tmp2_);
-	width = _tmp1_;
-	height = _tmp2_;
-	_tmp3_ = self->priv->controller;
-	_tmp4_ = plank_dock_controller_get_position_manager (_tmp3_);
-	_tmp5_ = _tmp4_;
-	_tmp6_ = self->priv->current_item;
-	plank_position_manager_get_screen_region_for_item (_tmp5_, (PlankDockItem*) _tmp6_, &_tmp7_);
-	item = _tmp7_;
-	_tmp8_ = self->priv->controller;
-	_tmp9_ = plank_dock_controller_get_position_manager (_tmp8_);
-	_tmp10_ = _tmp9_;
-	plank_position_manager_get_screen_background_region (_tmp10_, &_tmp11_);
-	bar = _tmp11_;
-	_tmp12_ = item;
+	_tmp1_ = self->priv->controller;
+	_tmp2_ = plank_dock_controller_get_position_manager (_tmp1_);
+	_tmp3_ = _tmp2_;
+	_tmp4_ = self->priv->current_item;
+	plank_position_manager_get_screen_region_for_item (_tmp3_, (PlankDockItem*) _tmp4_, &_tmp5_);
+	item = _tmp5_;
+	_tmp6_ = self->priv->controller;
+	_tmp7_ = plank_dock_controller_get_position_manager (_tmp6_);
+	_tmp8_ = _tmp7_;
+	plank_position_manager_get_screen_background_region (_tmp8_, &_tmp9_);
+	bar = _tmp9_;
+	plank_status_panel_window_active_workarea (self, &_tmp10_);
+	workarea = _tmp10_;
+	gtk_window_get_size ((GtkWindow*) self, &_tmp11_, &_tmp12_);
+	actual_width = _tmp11_;
+	actual_height = _tmp12_;
 	_tmp13_ = item;
-	desired_x = (_tmp12_.x + (_tmp13_.width / 2)) - (width / 2);
-	_tmp14_ = bar;
-	_tmp15_ = bar;
-	max_x = (_tmp14_.x + _tmp15_.width) - width;
-	_tmp16_ = bar;
-	_tmp17_ = bar;
-	gtk_window_move ((GtkWindow*) self, MAX (_tmp16_.x, MIN (max_x, desired_x)), (_tmp17_.y - height) - PLANK_STATUS_PANEL_WINDOW_PANEL_GAP);
+	_tmp14_ = item;
+	desired_x = (_tmp13_.x + (_tmp14_.width / 2)) - (actual_width / 2);
+	_tmp15_ = workarea;
+	min_x = _tmp15_.x + 8;
+	_tmp16_ = workarea;
+	_tmp17_ = workarea;
+	max_x = ((_tmp16_.x + _tmp17_.width) - actual_width) - 8;
+	_tmp18_ = bar;
+	desired_y = (_tmp18_.y - actual_height) - PLANK_STATUS_PANEL_WINDOW_PANEL_GAP;
+	_tmp19_ = workarea;
+	min_y = _tmp19_.y + 8;
+	_tmp20_ = workarea;
+	_tmp21_ = workarea;
+	max_y = ((_tmp20_.y + _tmp21_.height) - actual_height) - 8;
+	gtk_window_move ((GtkWindow*) self, MAX (min_x, MIN (max_x, desired_x)), MAX (min_y, MIN (max_y, desired_y)));
+}
+
+static void
+plank_status_panel_window_active_workarea (PlankStatusPanelWindow* self,
+                                           GdkRectangle* result)
+{
+	GdkScreen* screen = NULL;
+	GdkScreen* _tmp0_;
+	GdkScreen* _tmp1_;
+	GdkRectangle bar = {0};
+	PlankDockController* _tmp2_;
+	PlankPositionManager* _tmp3_;
+	PlankPositionManager* _tmp4_;
+	GdkRectangle _tmp5_ = {0};
+	gint monitor = 0;
+	GdkRectangle _tmp6_;
+	GdkRectangle _tmp7_;
+	GdkRectangle _tmp8_;
+	GdkRectangle _tmp9_;
+	GdkRectangle _tmp10_ = {0};
+	g_return_if_fail (self != NULL);
+	_tmp0_ = gtk_window_get_screen ((GtkWindow*) self);
+	_tmp1_ = _g_object_ref0 (_tmp0_);
+	screen = _tmp1_;
+	_tmp2_ = self->priv->controller;
+	_tmp3_ = plank_dock_controller_get_position_manager (_tmp2_);
+	_tmp4_ = _tmp3_;
+	plank_position_manager_get_screen_background_region (_tmp4_, &_tmp5_);
+	bar = _tmp5_;
+	_tmp6_ = bar;
+	_tmp7_ = bar;
+	_tmp8_ = bar;
+	_tmp9_ = bar;
+	monitor = gdk_screen_get_monitor_at_point (screen, _tmp6_.x + (_tmp7_.width / 2), _tmp8_.y + (_tmp9_.height / 2));
+	gdk_screen_get_monitor_workarea (screen, monitor, &_tmp10_);
+	*result = _tmp10_;
+	_g_object_unref0 (screen);
+	return;
 }
 
 static void
@@ -2832,10 +2490,30 @@ plank_status_panel_window_apply_theme (PlankStatusPanelWindow* self)
 	gchar* _tmp35_;
 	const gchar* _tmp36_;
 	gchar* _tmp37_;
-	GtkCssProvider* _tmp38_;
-	GtkCssProvider* _tmp41_;
-	GdkScreen* _tmp46_;
-	GtkCssProvider* _tmp47_;
+	const gchar* _tmp38_;
+	gchar* _tmp39_;
+	const gchar* _tmp40_;
+	gchar* _tmp41_;
+	const gchar* _tmp42_;
+	gchar* _tmp43_;
+	const gchar* _tmp44_;
+	gchar* _tmp45_;
+	const gchar* _tmp46_;
+	gchar* _tmp47_;
+	const gchar* _tmp48_;
+	gchar* _tmp49_;
+	const gchar* _tmp50_;
+	gchar* _tmp51_;
+	const gchar* _tmp52_;
+	gchar* _tmp53_;
+	const gchar* _tmp54_;
+	gchar* _tmp55_;
+	const gchar* _tmp56_;
+	gchar* _tmp57_;
+	GtkCssProvider* _tmp58_;
+	GtkCssProvider* _tmp61_;
+	GdkScreen* _tmp66_;
+	GtkCssProvider* _tmp67_;
 	GError* _inner_error0_ = NULL;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->priv->controller;
@@ -2887,53 +2565,105 @@ plank_status_panel_window_apply_theme (PlankStatusPanelWindow* self)
 	_g_free0 (css);
 	css = _tmp25_;
 	_tmp26_ = css;
-	_tmp27_ = g_strconcat (_tmp26_, ".plank-status-panel .status-icon-toggle { color: rgba(255,255,255,0.65" \
-"); background: transparent; background-image: none; border: none; bord" \
-"er-radius: 7px; box-shadow: none; padding: 5px; }", NULL);
+	_tmp27_ = g_strconcat (_tmp26_, ".plank-status-panel .status-footer { padding-top: 4px; }", NULL);
 	_g_free0 (css);
 	css = _tmp27_;
 	_tmp28_ = css;
-	_tmp29_ = g_strconcat (_tmp28_, ".plank-status-panel .status-icon-toggle:checked { color: white; backgr" \
-"ound-color: rgba(255,255,255,0.14); }", NULL);
+	_tmp29_ = g_strconcat (_tmp28_, ".plank-status-panel .status-icon-toggle { color: rgba(255,255,255,0.65" \
+"); background: transparent; background-image: none; border: none; bord" \
+"er-radius: 7px; box-shadow: none; padding: 5px; }", NULL);
 	_g_free0 (css);
 	css = _tmp29_;
 	_tmp30_ = css;
-	_tmp31_ = g_strconcat (_tmp30_, ".plank-status-panel separator { background-color: rgba(255,255,255,0.1" \
-"0); }", NULL);
+	_tmp31_ = g_strconcat (_tmp30_, ".plank-status-panel .status-icon-toggle:checked { color: white; backgr" \
+"ound-color: rgba(255,255,255,0.14); }", NULL);
 	_g_free0 (css);
 	css = _tmp31_;
 	_tmp32_ = css;
-	_tmp33_ = g_strconcat (_tmp32_, ".plank-status-panel .status-scroll { background: transparent; border: " \
-"none; box-shadow: none; }", NULL);
+	_tmp33_ = g_strconcat (_tmp32_, ".plank-status-panel .modern-volume-bar { margin: 2px 6px 5px 6px; }", NULL);
 	_g_free0 (css);
 	css = _tmp33_;
 	_tmp34_ = css;
-	_tmp35_ = g_strconcat (_tmp34_, ".plank-status-panel scrollbar { background: transparent; border: none;" \
-" }", NULL);
+	_tmp35_ = g_strconcat (_tmp34_, ".plank-status-panel .modern-volume-scale trough { min-height: 36px; ba" \
+"ckground-color: rgba(255,255,255,0.08); border: 1px solid rgba(255,255" \
+",255,0.08); border-radius: 10px; }", NULL);
 	_g_free0 (css);
 	css = _tmp35_;
 	_tmp36_ = css;
-	_tmp37_ = g_strconcat (_tmp36_, ".plank-status-panel scrollbar slider { min-width: 4px; min-height: 28p" \
-"x; background-color: rgba(255,255,255,0.18); border-radius: 4px; }", NULL);
+	_tmp37_ = g_strconcat (_tmp36_, ".plank-status-panel .modern-volume-scale highlight { background-color:" \
+" rgba(115,210,22,0.48); border-radius: 9px; }", NULL);
 	_g_free0 (css);
 	css = _tmp37_;
-	_tmp38_ = self->priv->css_provider;
-	if (_tmp38_ != NULL) {
-		GdkScreen* _tmp39_;
-		GtkCssProvider* _tmp40_;
-		_tmp39_ = gtk_window_get_screen ((GtkWindow*) self);
-		_tmp40_ = self->priv->css_provider;
-		gtk_style_context_remove_provider_for_screen (_tmp39_, (GtkStyleProvider*) _tmp40_);
+	_tmp38_ = css;
+	_tmp39_ = g_strconcat (_tmp38_, ".plank-status-panel .modern-volume-scale slider { min-width: 0; min-he" \
+"ight: 0; margin: 0; padding: 0; background: transparent; border: none;" \
+" box-shadow: none; }", NULL);
+	_g_free0 (css);
+	css = _tmp39_;
+	_tmp40_ = css;
+	_tmp41_ = g_strconcat (_tmp40_, ".plank-status-panel .modern-volume-bar .status-icon-toggle { color: wh" \
+"ite; background: transparent; padding: 5px; }", NULL);
+	_g_free0 (css);
+	css = _tmp41_;
+	_tmp42_ = css;
+	_tmp43_ = g_strconcat (_tmp42_, ".plank-status-panel .modern-volume-value { color: white; font-size: 11" \
+"px; font-weight: bold; }", NULL);
+	_g_free0 (css);
+	css = _tmp43_;
+	_tmp44_ = css;
+	_tmp45_ = g_strconcat (_tmp44_, ".plank-status-panel .modern-device-selector { color: white; background" \
+": transparent; border: none; box-shadow: none; padding: 0; }", NULL);
+	_g_free0 (css);
+	css = _tmp45_;
+	_tmp46_ = css;
+	_tmp47_ = g_strconcat (_tmp46_, ".plank-status-panel .modern-device-selector button { color: white; bac" \
+"kground-color: rgba(255,255,255,0.07); background-image: none; border:" \
+" 1px solid rgba(255,255,255,0.09); border-radius: 9px; box-shadow: non" \
+"e; padding: 6px 9px; }", NULL);
+	_g_free0 (css);
+	css = _tmp47_;
+	_tmp48_ = css;
+	_tmp49_ = g_strconcat (_tmp48_, ".plank-status-panel .modern-device-selector button:hover { background-" \
+"color: rgba(255,255,255,0.11); }", NULL);
+	_g_free0 (css);
+	css = _tmp49_;
+	_tmp50_ = css;
+	_tmp51_ = g_strconcat (_tmp50_, ".plank-status-panel separator { background-color: rgba(255,255,255,0.1" \
+"0); }", NULL);
+	_g_free0 (css);
+	css = _tmp51_;
+	_tmp52_ = css;
+	_tmp53_ = g_strconcat (_tmp52_, ".plank-status-panel .status-scroll { background: transparent; border: " \
+"none; box-shadow: none; }", NULL);
+	_g_free0 (css);
+	css = _tmp53_;
+	_tmp54_ = css;
+	_tmp55_ = g_strconcat (_tmp54_, ".plank-status-panel scrollbar { background: transparent; border: none;" \
+" }", NULL);
+	_g_free0 (css);
+	css = _tmp55_;
+	_tmp56_ = css;
+	_tmp57_ = g_strconcat (_tmp56_, ".plank-status-panel scrollbar slider { min-width: 4px; min-height: 28p" \
+"x; background-color: rgba(255,255,255,0.18); border-radius: 4px; }", NULL);
+	_g_free0 (css);
+	css = _tmp57_;
+	_tmp58_ = self->priv->css_provider;
+	if (_tmp58_ != NULL) {
+		GdkScreen* _tmp59_;
+		GtkCssProvider* _tmp60_;
+		_tmp59_ = gtk_window_get_screen ((GtkWindow*) self);
+		_tmp60_ = self->priv->css_provider;
+		gtk_style_context_remove_provider_for_screen (_tmp59_, (GtkStyleProvider*) _tmp60_);
 	}
-	_tmp41_ = gtk_css_provider_new ();
+	_tmp61_ = gtk_css_provider_new ();
 	_g_object_unref0 (self->priv->css_provider);
-	self->priv->css_provider = _tmp41_;
+	self->priv->css_provider = _tmp61_;
 	{
-		GtkCssProvider* _tmp42_;
-		const gchar* _tmp43_;
-		_tmp42_ = self->priv->css_provider;
-		_tmp43_ = css;
-		gtk_css_provider_load_from_data (_tmp42_, _tmp43_, (gssize) -1, &_inner_error0_);
+		GtkCssProvider* _tmp62_;
+		const gchar* _tmp63_;
+		_tmp62_ = self->priv->css_provider;
+		_tmp63_ = css;
+		gtk_css_provider_load_from_data (_tmp62_, _tmp63_, (gssize) -1, &_inner_error0_);
 		if (G_UNLIKELY (_inner_error0_ != NULL)) {
 			goto __catch0_g_error;
 		}
@@ -2942,13 +2672,13 @@ plank_status_panel_window_apply_theme (PlankStatusPanelWindow* self)
 	__catch0_g_error:
 	{
 		GError* e = NULL;
-		GError* _tmp44_;
-		const gchar* _tmp45_;
+		GError* _tmp64_;
+		const gchar* _tmp65_;
 		e = _inner_error0_;
 		_inner_error0_ = NULL;
-		_tmp44_ = e;
-		_tmp45_ = _tmp44_->message;
-		g_warning ("StatusPanelWindow.vala:431: Status panel CSS: %s", _tmp45_);
+		_tmp64_ = e;
+		_tmp65_ = _tmp64_->message;
+		g_warning ("StatusPanelWindow.vala:462: Status panel CSS: %s", _tmp65_);
 		_g_error_free0 (e);
 	}
 	__finally0:
@@ -2958,9 +2688,9 @@ plank_status_panel_window_apply_theme (PlankStatusPanelWindow* self)
 		g_clear_error (&_inner_error0_);
 		return;
 	}
-	_tmp46_ = gtk_window_get_screen ((GtkWindow*) self);
-	_tmp47_ = self->priv->css_provider;
-	gtk_style_context_add_provider_for_screen (_tmp46_, (GtkStyleProvider*) _tmp47_, (guint) GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	_tmp66_ = gtk_window_get_screen ((GtkWindow*) self);
+	_tmp67_ = self->priv->css_provider;
+	gtk_style_context_add_provider_for_screen (_tmp66_, (GtkStyleProvider*) _tmp67_, (guint) GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 	_g_free0 (css);
 }
 
@@ -3211,6 +2941,9 @@ plank_status_panel_window_instance_init (PlankStatusPanelWindow * self,
                                          gpointer klass)
 {
 	self->priv = plank_status_panel_window_get_instance_private (self);
+	self->priv->active_panel_width = PLANK_STATUS_PANEL_WINDOW_PANEL_WIDTH;
+	self->priv->active_panel_height = PLANK_STATUS_PANEL_WINDOW_PANEL_HEIGHT;
+	self->priv->device_popup_open = FALSE;
 }
 
 static void
@@ -3228,6 +2961,7 @@ plank_status_panel_window_finalize (GObject * obj)
 		gtk_style_context_remove_provider_for_screen (_tmp1_, (GtkStyleProvider*) _tmp2_);
 	}
 	_g_object_unref0 (self->priv->content);
+	_g_object_unref0 (self->priv->footer);
 	_g_object_unref0 (self->priv->current_item);
 	_g_object_unref0 (self->priv->css_provider);
 	G_OBJECT_CLASS (plank_status_panel_window_parent_class)->finalize (obj);

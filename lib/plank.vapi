@@ -536,6 +536,7 @@ namespace Plank {
 	public class LauncherWindow : Gtk.Window {
 		public LauncherWindow (Plank.DockController controller);
 		public void dismiss ();
+		public void dismiss_application_context ();
 		public void show_for_item (Plank.LauncherItem item);
 		public void toggle (Plank.LauncherItem item);
 	}
@@ -801,6 +802,16 @@ namespace Plank {
 		public void add_client (Plank.UnityClient client);
 		public static unowned Plank.Unity get_default ();
 		public void remove_client (Plank.UnityClient client);
+	}
+	[CCode (cheader_filename = "plank.h")]
+	public class UpdateManagerItem : Plank.DockItem {
+		public UpdateManagerItem (string command);
+		public static string? available_command ();
+		public override bool can_be_removed ();
+		protected override void draw_icon (Plank.Surface surface);
+		public override Gee.ArrayList<Gtk.MenuItem> get_menu_items ();
+		protected override Plank.AnimationType on_clicked (Plank.PopupButton button, Gdk.ModifierType mod, uint32 event_time);
+		protected override Plank.AnimationType on_hovered ();
 	}
 	[CCode (cheader_filename = "plank.h")]
 	public class Worker : GLib.Object {

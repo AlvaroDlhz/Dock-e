@@ -21,6 +21,18 @@
 	<gresource prefix="/net/launchpad/plank">
 		<file alias="img/application-default-icon.svg" compressed="true" preprocess="xml-stripblanks">application-default-icon.svg</file>
 		<file alias="img/dock-menu.jpg" compressed="true">dock-menu.jpg</file>
+		<file alias="lucide/volume.svg" compressed="true" preprocess="xml-stripblanks">lucide/volume.svg</file>
+		<file alias="lucide/volume-1.svg" compressed="true" preprocess="xml-stripblanks">lucide/volume-1.svg</file>
+		<file alias="lucide/volume-2.svg" compressed="true" preprocess="xml-stripblanks">lucide/volume-2.svg</file>
+		<file alias="lucide/volume-x.svg" compressed="true" preprocess="xml-stripblanks">lucide/volume-x.svg</file>
+		<file alias="lucide/bluetooth.svg" compressed="true" preprocess="xml-stripblanks">lucide/bluetooth.svg</file>
+		<file alias="lucide/wifi.svg" compressed="true" preprocess="xml-stripblanks">lucide/wifi.svg</file>
+		<file alias="lucide/battery-low.svg" compressed="true" preprocess="xml-stripblanks">lucide/battery-low.svg</file>
+		<file alias="lucide/battery-medium.svg" compressed="true" preprocess="xml-stripblanks">lucide/battery-medium.svg</file>
+		<file alias="lucide/battery-full.svg" compressed="true" preprocess="xml-stripblanks">lucide/battery-full.svg</file>
+		<file alias="lucide/battery-charging.svg" compressed="true" preprocess="xml-stripblanks">lucide/battery-charging.svg</file>
+		<file alias="lucide/clock.svg" compressed="true" preprocess="xml-stripblanks">lucide/clock.svg</file>
+		<file alias="lucide/refresh-cw.svg" compressed="true" preprocess="xml-stripblanks">lucide/refresh-cw.svg</file>
 		<file alias="img/poof.svg" compressed="true" preprocess="xml-stripblanks">poof.svg</file>
 		<file compressed="true" preprocess="xml-stripblanks">ui/preferences.ui</file>
 	</gresource>

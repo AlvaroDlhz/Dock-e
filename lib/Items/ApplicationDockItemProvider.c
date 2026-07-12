@@ -118,8 +118,8 @@ static void plank_application_dock_item_provider_real_update_launcher_entry (Pla
                                                                       gboolean is_retry);
 static Block10Data* block10_data_ref (Block10Data* _data10_);
 static void block10_data_unref (void * _userdata_);
-static gboolean ___lambda79_ (Block10Data* _data10_);
-static gboolean ____lambda79__gsource_func (gpointer self);
+static gboolean ___lambda95_ (Block10Data* _data10_);
+static gboolean ____lambda95__gsource_func (gpointer self);
 static GObject * plank_application_dock_item_provider_constructor (GType type,
                                                             guint n_construct_properties,
                                                             GObjectConstructParam * construct_properties);
@@ -1344,7 +1344,7 @@ _g_object_ref0 (gpointer self)
 }
 
 static gboolean
-___lambda79_ (Block10Data* _data10_)
+___lambda95_ (Block10Data* _data10_)
 {
 	PlankApplicationDockItemProvider* self;
 	gboolean result;
@@ -1355,10 +1355,10 @@ ___lambda79_ (Block10Data* _data10_)
 }
 
 static gboolean
-____lambda79__gsource_func (gpointer self)
+____lambda95__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = ___lambda79_ (self);
+	result = ___lambda95_ (self);
 	return result;
 }
 
@@ -1532,7 +1532,7 @@ plank_application_dock_item_provider_real_update_launcher_entry (PlankUnityClien
 		return;
 	}
 	if (!is_retry) {
-		g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ____lambda79__gsource_func, block10_data_ref (_data10_), block10_data_unref);
+		g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ____lambda95__gsource_func, block10_data_ref (_data10_), block10_data_unref);
 		_g_object_unref0 (alternate_item);
 		_g_object_unref0 (current_item);
 		_g_variant_iter_free0 (prop_iter);

@@ -40,6 +40,7 @@ enum  {
 	PLANK_LAUNCHER_PROVIDER_NUM_PROPERTIES
 };
 static GParamSpec* plank_launcher_provider_properties[PLANK_LAUNCHER_PROVIDER_NUM_PROPERTIES];
+#define _g_free0(var) (var = (g_free (var), NULL))
 
 struct _PlankLauncherItemPrivate {
 	GdkPixbuf* menu_pixbuf;
@@ -57,8 +58,8 @@ static PlankAnimationType plank_launcher_item_real_on_clicked (PlankDockElement*
                                                         GdkModifierType mod,
                                                         guint32 event_time);
 static GeeArrayList* plank_launcher_item_real_get_menu_items (PlankDockElement* base);
-static void __lambda46_ (PlankLauncherItem* self);
-static void ___lambda46__gtk_menu_item_activate (GtkMenuItem* _sender,
+static void __lambda57_ (PlankLauncherItem* self);
+static void ___lambda57__gtk_menu_item_activate (GtkMenuItem* _sender,
                                           gpointer self);
 static void plank_launcher_item_finalize (GObject * obj);
 static GType plank_launcher_item_get_type_once (void);
@@ -258,7 +259,7 @@ plank_launcher_item_real_on_clicked (PlankDockElement* base,
 }
 
 static void
-__lambda46_ (PlankLauncherItem* self)
+__lambda57_ (PlankLauncherItem* self)
 {
 	PlankDockController* dock = NULL;
 	PlankDockController* _tmp0_;
@@ -278,10 +279,10 @@ __lambda46_ (PlankLauncherItem* self)
 }
 
 static void
-___lambda46__gtk_menu_item_activate (GtkMenuItem* _sender,
+___lambda57__gtk_menu_item_activate (GtkMenuItem* _sender,
                                      gpointer self)
 {
-	__lambda46_ ((PlankLauncherItem*) self);
+	__lambda57_ ((PlankLauncherItem*) self);
 }
 
 static GeeArrayList*
@@ -298,7 +299,7 @@ plank_launcher_item_real_get_menu_items (PlankDockElement* base)
 	items = _tmp0_;
 	_tmp1_ = plank_dock_element_create_menu_item (_ ("Open _Applications"), "view-app-grid-symbolic", FALSE);
 	open_item = _tmp1_;
-	g_signal_connect_object (open_item, "activate", (GCallback) ___lambda46__gtk_menu_item_activate, self, 0);
+	g_signal_connect_object (open_item, "activate", (GCallback) ___lambda57__gtk_menu_item_activate, self, 0);
 	gee_abstract_collection_add ((GeeAbstractCollection*) items, open_item);
 	result = items;
 	_g_object_unref0 (open_item);
@@ -363,11 +364,28 @@ plank_launcher_provider_construct (GType object_type)
 	PlankLauncherProvider * self = NULL;
 	PlankLauncherItem* _tmp0_;
 	PlankLauncherItem* _tmp1_;
+	gchar* update_command = NULL;
+	gchar* _tmp2_;
+	const gchar* _tmp3_;
 	self = (PlankLauncherProvider*) g_object_new (object_type, NULL);
 	_tmp0_ = plank_launcher_item_new ();
 	_tmp1_ = _tmp0_;
 	plank_dock_container_add ((PlankDockContainer*) self, (PlankDockElement*) _tmp1_, NULL);
 	_g_object_unref0 (_tmp1_);
+	_tmp2_ = plank_update_manager_item_available_command ();
+	update_command = _tmp2_;
+	_tmp3_ = update_command;
+	if (_tmp3_ != NULL) {
+		const gchar* _tmp4_;
+		PlankUpdateManagerItem* _tmp5_;
+		PlankUpdateManagerItem* _tmp6_;
+		_tmp4_ = update_command;
+		_tmp5_ = plank_update_manager_item_new (_tmp4_);
+		_tmp6_ = _tmp5_;
+		plank_dock_container_add ((PlankDockContainer*) self, (PlankDockElement*) _tmp6_, NULL);
+		_g_object_unref0 (_tmp6_);
+	}
+	_g_free0 (update_command);
 	return self;
 }
 

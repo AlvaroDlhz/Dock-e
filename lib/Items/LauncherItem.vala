@@ -82,6 +82,9 @@ namespace Plank
 		{
 			Object ();
 			add (new LauncherItem ());
+			var update_command = UpdateManagerItem.available_command ();
+			if (update_command != null)
+				add (new UpdateManagerItem (update_command));
 		}
 
 		public override bool can_accept_drop (Gee.ArrayList<string> uris)

@@ -187,15 +187,15 @@ am__objects_5 = DBusManager.lo DockController.lo DockPreferences.lo \
 	Items/DockItemPreferences.lo Items/DockElement.lo \
 	Items/Enums.lo Items/FileDockItem.lo \
 	Items/PlaceholderDockItem.lo Items/PlankDockItem.lo \
-	Items/StatusIndicatorItem.lo Items/TransientDockItem.lo \
-	Items/LauncherItem.lo Services/Environment.lo \
-	Services/EnvironmentSettings.lo Services/Logger.lo \
-	Services/Paths.lo Services/Preferences.lo Services/Settings.lo \
-	Services/System.lo Services/Unity.lo Services/Worker.lo \
-	Widgets/CompositedWindow.lo Widgets/DockWindow.lo \
-	Widgets/StatusPanelWindow.lo Widgets/HoverWindow.lo \
-	Widgets/LauncherWindow.lo Widgets/PoofWindow.lo \
-	Widgets/PreferencesWindow.lo \
+	Items/StatusIndicatorItem.lo Items/UpdateManagerItem.lo \
+	Items/TransientDockItem.lo Items/LauncherItem.lo \
+	Services/Environment.lo Services/EnvironmentSettings.lo \
+	Services/Logger.lo Services/Paths.lo Services/Preferences.lo \
+	Services/Settings.lo Services/System.lo Services/Unity.lo \
+	Services/Worker.lo Widgets/CompositedWindow.lo \
+	Widgets/DockWindow.lo Widgets/StatusPanelWindow.lo \
+	Widgets/HoverWindow.lo Widgets/LauncherWindow.lo \
+	Widgets/PoofWindow.lo Widgets/PreferencesWindow.lo \
 	Widgets/TitledSeparatorMenuItem.lo $(am__objects_1)
 nodist_libplank_la_OBJECTS = $(am__objects_3) $(am__objects_4) \
 	$(am__objects_5) $(am__objects_1)
@@ -252,6 +252,7 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Items/$(DEPDIR)/PlankDockItem.Plo \
 	Items/$(DEPDIR)/StatusIndicatorItem.Plo \
 	Items/$(DEPDIR)/TransientDockItem.Plo \
+	Items/$(DEPDIR)/UpdateManagerItem.Plo \
 	Services/$(DEPDIR)/Environment.Plo \
 	Services/$(DEPDIR)/EnvironmentSettings.Plo \
 	Services/$(DEPDIR)/Logger.Plo Services/$(DEPDIR)/Paths.Plo \
@@ -794,6 +795,7 @@ libplank_la_VALASOURCES = \
 	Items/PlaceholderDockItem.vala \
 	Items/PlankDockItem.vala \
 	Items/StatusIndicatorItem.vala \
+	Items/UpdateManagerItem.vala \
 	Items/TransientDockItem.vala \
 	Items/LauncherItem.vala \
 	Services/Environment.vala \
@@ -1081,6 +1083,8 @@ Items/PlankDockItem.lo: Items/$(am__dirstamp) \
 	Items/$(DEPDIR)/$(am__dirstamp)
 Items/StatusIndicatorItem.lo: Items/$(am__dirstamp) \
 	Items/$(DEPDIR)/$(am__dirstamp)
+Items/UpdateManagerItem.lo: Items/$(am__dirstamp) \
+	Items/$(DEPDIR)/$(am__dirstamp)
 Items/TransientDockItem.lo: Items/$(am__dirstamp) \
 	Items/$(DEPDIR)/$(am__dirstamp)
 Items/LauncherItem.lo: Items/$(am__dirstamp) \
@@ -1187,6 +1191,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/PlankDockItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/StatusIndicatorItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/TransientDockItem.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/UpdateManagerItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Environment.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/EnvironmentSettings.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Logger.Plo@am__quote@ # am--include-marker
@@ -1721,6 +1726,7 @@ distclean: distclean-am
 	-rm -f Items/$(DEPDIR)/PlankDockItem.Plo
 	-rm -f Items/$(DEPDIR)/StatusIndicatorItem.Plo
 	-rm -f Items/$(DEPDIR)/TransientDockItem.Plo
+	-rm -f Items/$(DEPDIR)/UpdateManagerItem.Plo
 	-rm -f Services/$(DEPDIR)/Environment.Plo
 	-rm -f Services/$(DEPDIR)/EnvironmentSettings.Plo
 	-rm -f Services/$(DEPDIR)/Logger.Plo
@@ -1832,6 +1838,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Items/$(DEPDIR)/PlankDockItem.Plo
 	-rm -f Items/$(DEPDIR)/StatusIndicatorItem.Plo
 	-rm -f Items/$(DEPDIR)/TransientDockItem.Plo
+	-rm -f Items/$(DEPDIR)/UpdateManagerItem.Plo
 	-rm -f Services/$(DEPDIR)/Environment.Plo
 	-rm -f Services/$(DEPDIR)/EnvironmentSettings.Plo
 	-rm -f Services/$(DEPDIR)/Logger.Plo

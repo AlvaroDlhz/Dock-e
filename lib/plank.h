@@ -601,6 +601,17 @@ typedef struct _PlankStatusIndicatorProvider PlankStatusIndicatorProvider;
 typedef struct _PlankStatusIndicatorProviderClass PlankStatusIndicatorProviderClass;
 typedef struct _PlankStatusIndicatorProviderPrivate PlankStatusIndicatorProviderPrivate;
 
+#define PLANK_TYPE_UPDATE_MANAGER_ITEM (plank_update_manager_item_get_type ())
+#define PLANK_UPDATE_MANAGER_ITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PLANK_TYPE_UPDATE_MANAGER_ITEM, PlankUpdateManagerItem))
+#define PLANK_UPDATE_MANAGER_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PLANK_TYPE_UPDATE_MANAGER_ITEM, PlankUpdateManagerItemClass))
+#define PLANK_IS_UPDATE_MANAGER_ITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PLANK_TYPE_UPDATE_MANAGER_ITEM))
+#define PLANK_IS_UPDATE_MANAGER_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), PLANK_TYPE_UPDATE_MANAGER_ITEM))
+#define PLANK_UPDATE_MANAGER_ITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), PLANK_TYPE_UPDATE_MANAGER_ITEM, PlankUpdateManagerItemClass))
+
+typedef struct _PlankUpdateManagerItem PlankUpdateManagerItem;
+typedef struct _PlankUpdateManagerItemClass PlankUpdateManagerItemClass;
+typedef struct _PlankUpdateManagerItemPrivate PlankUpdateManagerItemPrivate;
+
 #define PLANK_TYPE_TRANSIENT_DOCK_ITEM (plank_transient_dock_item_get_type ())
 #define PLANK_TRANSIENT_DOCK_ITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PLANK_TYPE_TRANSIENT_DOCK_ITEM, PlankTransientDockItem))
 #define PLANK_TRANSIENT_DOCK_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PLANK_TYPE_TRANSIENT_DOCK_ITEM, PlankTransientDockItemClass))
@@ -1176,6 +1187,15 @@ struct _PlankStatusIndicatorProvider {
 
 struct _PlankStatusIndicatorProviderClass {
 	PlankDockItemProviderClass parent_class;
+};
+
+struct _PlankUpdateManagerItem {
+	PlankDockItem parent_instance;
+	PlankUpdateManagerItemPrivate * priv;
+};
+
+struct _PlankUpdateManagerItemClass {
+	PlankDockItemClass parent_class;
 };
 
 struct _PlankTransientDockItem {
@@ -2420,6 +2440,12 @@ VALA_EXTERN GType plank_status_indicator_provider_get_type (void) G_GNUC_CONST ;
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (PlankStatusIndicatorProvider, g_object_unref)
 VALA_EXTERN PlankStatusIndicatorProvider* plank_status_indicator_provider_new (void);
 VALA_EXTERN PlankStatusIndicatorProvider* plank_status_indicator_provider_construct (GType object_type);
+VALA_EXTERN GType plank_update_manager_item_get_type (void) G_GNUC_CONST ;
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (PlankUpdateManagerItem, g_object_unref)
+VALA_EXTERN PlankUpdateManagerItem* plank_update_manager_item_new (const gchar* command);
+VALA_EXTERN PlankUpdateManagerItem* plank_update_manager_item_construct (GType object_type,
+                                                             const gchar* command);
+VALA_EXTERN gchar* plank_update_manager_item_available_command (void);
 VALA_EXTERN GType plank_transient_dock_item_get_type (void) G_GNUC_CONST ;
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (PlankTransientDockItem, g_object_unref)
 VALA_EXTERN PlankTransientDockItem* plank_transient_dock_item_new_with_launcher (const gchar* launcher_uri);
@@ -2610,6 +2636,7 @@ VALA_EXTERN PlankLauncherWindow* plank_launcher_window_construct (GType object_t
 VALA_EXTERN void plank_launcher_window_toggle (PlankLauncherWindow* self,
                                    PlankLauncherItem* item);
 VALA_EXTERN void plank_launcher_window_dismiss (PlankLauncherWindow* self);
+VALA_EXTERN void plank_launcher_window_dismiss_application_context (PlankLauncherWindow* self);
 VALA_EXTERN void plank_launcher_window_show_for_item (PlankLauncherWindow* self,
                                           PlankLauncherItem* item);
 VALA_EXTERN GType plank_poof_window_get_type (void) G_GNUC_CONST ;
