@@ -191,23 +191,23 @@ static gchar* plank_application_dock_item_shorten_window_name (PlankApplicationD
 static GeeArrayList* plank_application_dock_item_real_get_menu_items (PlankDockElement* base);
 static Block7Data* block7_data_ref (Block7Data* _data7_);
 static void block7_data_unref (void * _userdata_);
-static void ___lambda96_ (PlankApplicationDockItem* self);
-static void ____lambda96__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                           gpointer self);
-static void ___lambda97_ (Block7Data* _data7_);
-static void ____lambda97__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                           gpointer self);
+static void ___lambda101_ (PlankApplicationDockItem* self);
+static void ____lambda101__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                            gpointer self);
+static void ___lambda102_ (Block7Data* _data7_);
+static void ____lambda102__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                            gpointer self);
 static DbusmenuGtkClient* plank_application_dock_item_get_Quicklist (PlankApplicationDockItem* self);
 static Block8Data* block8_data_ref (Block8Data* _data8_);
 static void block8_data_unref (void * _userdata_);
-static void _____lambda98_ (Block8Data* _data8_);
-static void ______lambda98__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                             gpointer self);
+static void _____lambda103_ (Block8Data* _data8_);
+static void ______lambda103__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                              gpointer self);
 static Block9Data* block9_data_ref (Block9Data* _data9_);
 static void block9_data_unref (void * _userdata_);
-static void ______lambda99_ (Block9Data* _data9_);
-static void _______lambda99__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                              gpointer self);
+static void ______lambda104_ (Block9Data* _data9_);
+static void _______lambda104__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                               gpointer self);
 static gchar* plank_application_dock_item_real_get_drop_text (PlankDockElement* base);
 static gboolean plank_application_dock_item_real_can_accept_drop (PlankDockElement* base,
                                                            GeeArrayList* uris);
@@ -1084,20 +1084,20 @@ block7_data_unref (void * _userdata_)
 }
 
 static void
-___lambda96_ (PlankApplicationDockItem* self)
+___lambda101_ (PlankApplicationDockItem* self)
 {
 	g_signal_emit (self, plank_application_dock_item_signals[PLANK_APPLICATION_DOCK_ITEM_PIN_LAUNCHER_SIGNAL], 0);
 }
 
 static void
-____lambda96__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                      gpointer self)
+____lambda101__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                       gpointer self)
 {
-	___lambda96_ ((PlankApplicationDockItem*) self);
+	___lambda101_ ((PlankApplicationDockItem*) self);
 }
 
 static void
-___lambda97_ (Block7Data* _data7_)
+___lambda102_ (Block7Data* _data7_)
 {
 	PlankApplicationDockItem* self;
 	BamfApplication* _tmp0_;
@@ -1109,10 +1109,10 @@ ___lambda97_ (Block7Data* _data7_)
 }
 
 static void
-____lambda97__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                      gpointer self)
+____lambda102__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                       gpointer self)
 {
-	___lambda97_ (self);
+	___lambda102_ (self);
 }
 
 static gpointer
@@ -1144,7 +1144,7 @@ block8_data_unref (void * _userdata_)
 }
 
 static void
-_____lambda98_ (Block8Data* _data8_)
+_____lambda103_ (Block8Data* _data8_)
 {
 	Block7Data* _data7_;
 	PlankApplicationDockItem* self;
@@ -1186,10 +1186,10 @@ _____lambda98_ (Block8Data* _data8_)
 }
 
 static void
-______lambda98__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                        gpointer self)
+______lambda103__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                         gpointer self)
 {
-	_____lambda98_ (self);
+	_____lambda103_ (self);
 }
 
 static Block9Data*
@@ -1214,7 +1214,7 @@ block9_data_unref (void * _userdata_)
 }
 
 static void
-______lambda99_ (Block9Data* _data9_)
+______lambda104_ (Block9Data* _data9_)
 {
 	Block7Data* _data7_;
 	PlankApplicationDockItem* self;
@@ -1226,10 +1226,10 @@ ______lambda99_ (Block9Data* _data9_)
 }
 
 static void
-_______lambda99__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                         gpointer self)
+_______lambda104__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                          gpointer self)
 {
-	______lambda99_ (self);
+	______lambda104_ (self);
 }
 
 static GeeArrayList*
@@ -1318,7 +1318,7 @@ plank_application_dock_item_real_get_menu_items (PlankDockElement* base)
 		_tmp19_ = item;
 		gtk_check_menu_item_set_active (_tmp19_, !PLANK_IS_TRANSIENT_DOCK_ITEM (self));
 		_tmp20_ = item;
-		g_signal_connect_object ((GtkMenuItem*) _tmp20_, "activate", (GCallback) ____lambda96__gtk_menu_item_activate, self, 0);
+		g_signal_connect_object ((GtkMenuItem*) _tmp20_, "activate", (GCallback) ____lambda101__gtk_menu_item_activate, self, 0);
 		_tmp21_ = items;
 		_tmp22_ = item;
 		gee_abstract_collection_add ((GeeAbstractCollection*) _tmp21_, (GtkMenuItem*) _tmp22_);
@@ -1345,7 +1345,7 @@ plank_application_dock_item_real_get_menu_items (PlankDockElement* base)
 		_tmp25_ = plank_dock_element_create_menu_item (_tmp24_, "window-close-symbolic;;window-close", FALSE);
 		item = _tmp25_;
 		_tmp26_ = item;
-		g_signal_connect_data (_tmp26_, "activate", (GCallback) ____lambda97__gtk_menu_item_activate, block7_data_ref (_data7_), (GClosureNotify) block7_data_unref, 0);
+		g_signal_connect_data (_tmp26_, "activate", (GCallback) ____lambda102__gtk_menu_item_activate, block7_data_ref (_data7_), (GClosureNotify) block7_data_unref, 0);
 		_tmp27_ = items;
 		_tmp28_ = item;
 		gee_abstract_collection_add ((GeeAbstractCollection*) _tmp27_, _tmp28_);
@@ -1520,7 +1520,7 @@ plank_application_dock_item_real_get_menu_items (PlankDockElement* base)
 				_tmp79_ = plank_dock_element_create_menu_item (_tmp76_, _tmp78_, TRUE);
 				item = _tmp79_;
 				_tmp80_ = item;
-				g_signal_connect_data (_tmp80_, "activate", (GCallback) ______lambda98__gtk_menu_item_activate, block8_data_ref (_data8_), (GClosureNotify) block8_data_unref, 0);
+				g_signal_connect_data (_tmp80_, "activate", (GCallback) ______lambda103__gtk_menu_item_activate, block8_data_ref (_data8_), (GClosureNotify) block8_data_unref, 0);
 				_tmp81_ = items;
 				_tmp82_ = item;
 				gee_abstract_collection_add ((GeeAbstractCollection*) _tmp81_, _tmp82_);
@@ -1645,7 +1645,7 @@ plank_application_dock_item_real_get_menu_items (PlankDockElement* base)
 					} else {
 						GtkMenuItem* _tmp114_;
 						_tmp114_ = window_item;
-						g_signal_connect_data (_tmp114_, "activate", (GCallback) _______lambda99__gtk_menu_item_activate, block9_data_ref (_data9_), (GClosureNotify) block9_data_unref, 0);
+						g_signal_connect_data (_tmp114_, "activate", (GCallback) _______lambda104__gtk_menu_item_activate, block9_data_ref (_data9_), (GClosureNotify) block9_data_unref, 0);
 					}
 					_tmp115_ = items;
 					_tmp116_ = window_item;

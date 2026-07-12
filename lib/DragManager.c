@@ -197,17 +197,17 @@ static void plank_drag_manager_set_InternalDragActive (PlankDragManager* self,
                                                 gboolean value);
 static void plank_drag_manager_set_DragItem (PlankDragManager* self,
                                       PlankDockItem* value);
-static void __lambda115_ (Block3Data* _data3_);
-static void ___lambda115__plank_dock_element_needs_redraw (PlankDockElement* _sender,
+static void __lambda130_ (Block3Data* _data3_);
+static void ___lambda130__plank_dock_element_needs_redraw (PlankDockElement* _sender,
                                                     gpointer self);
 static void plank_drag_manager_set_DragNeedsCheck (PlankDragManager* self,
                                             gboolean value);
 static void plank_drag_manager_set_ExternalDragActive (PlankDragManager* self,
                                                 gboolean value);
-static gboolean ___lambda117_ (PlankDragManager* self);
-static gboolean ____lambda117__gsource_func (gpointer self);
-static gboolean ___lambda114_ (PlankDragManager* self);
-static gboolean ____lambda114__gsource_func (gpointer self);
+static gboolean ___lambda132_ (PlankDragManager* self);
+static gboolean ____lambda132__gsource_func (gpointer self);
+static gboolean ___lambda129_ (PlankDragManager* self);
+static gboolean ____lambda129__gsource_func (gpointer self);
 static GdkWindow* plank_drag_manager_best_proxy_window (PlankDragManager* self);
 static void _g_object_unref0_ (gpointer var);
 static inline void _g_list_free__g_object_unref0_ (GList* self);
@@ -715,7 +715,7 @@ _plank_drag_manager_hovered_item_changed_g_object_notify (GObject* _sender,
 }
 
 static void
-__lambda115_ (Block3Data* _data3_)
+__lambda130_ (Block3Data* _data3_)
 {
 	PlankDragManager* self;
 	PlankDockItem* _tmp0_;
@@ -725,10 +725,10 @@ __lambda115_ (Block3Data* _data3_)
 }
 
 static void
-___lambda115__plank_dock_element_needs_redraw (PlankDockElement* _sender,
+___lambda130__plank_dock_element_needs_redraw (PlankDockElement* _sender,
                                                gpointer self)
 {
-	__lambda115_ (self);
+	__lambda130_ (self);
 }
 
 static void
@@ -800,7 +800,7 @@ plank_drag_manager_drag_begin (GtkWidget* w,
 	_tmp13_ = self->priv->_DragItem;
 	plank_drag_manager_set_drag_icon (self, _data3_->context, _tmp13_, 0.8);
 	_tmp14_ = self->priv->_DragItem;
-	_tmp15_ = g_signal_connect_data ((PlankDockElement*) _tmp14_, "needs-redraw", (GCallback) ___lambda115__plank_dock_element_needs_redraw, block3_data_ref (_data3_), (GClosureNotify) block3_data_unref, 0);
+	_tmp15_ = g_signal_connect_data ((PlankDockElement*) _tmp14_, "needs-redraw", (GCallback) ___lambda130__plank_dock_element_needs_redraw, block3_data_ref (_data3_), (GClosureNotify) block3_data_unref, 0);
 	self->priv->drag_item_redraw_handler_id = _tmp15_;
 	_tmp16_ = gdk_drag_context_get_device (_data3_->context);
 	_tmp17_ = window;
@@ -1247,7 +1247,7 @@ plank_drag_manager_drag_end (GtkWidget* w,
 }
 
 static gboolean
-___lambda117_ (PlankDragManager* self)
+___lambda132_ (PlankDragManager* self)
 {
 	PlankDockController* _tmp0_;
 	PlankHoverWindow* _tmp1_;
@@ -1284,10 +1284,10 @@ ___lambda117_ (PlankDragManager* self)
 }
 
 static gboolean
-____lambda117__gsource_func (gpointer self)
+____lambda132__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = ___lambda117_ ((PlankDragManager*) self);
+	result = ___lambda132_ ((PlankDragManager*) self);
 	return result;
 }
 
@@ -1333,7 +1333,7 @@ plank_drag_manager_drag_leave (GtkWidget* w,
 		_tmp7_ = _tmp6_;
 		g_signal_parse_name ("notify::HoveredItem", G_TYPE_OBJECT, &_tmp8_, &_tmp9_, TRUE);
 		g_signal_handlers_disconnect_matched ((GObject*) _tmp7_, G_SIGNAL_MATCH_ID | G_SIGNAL_MATCH_DETAIL | G_SIGNAL_MATCH_FUNC | G_SIGNAL_MATCH_DATA, _tmp8_, _tmp9_, NULL, (GCallback) _plank_drag_manager_hovered_item_changed_g_object_notify, self);
-		gdk_threads_add_idle (____lambda117__gsource_func, self);
+		gdk_threads_add_idle (____lambda132__gsource_func, self);
 	}
 	_tmp10_ = self->priv->_DragItem;
 	if (_tmp10_ == NULL) {
@@ -1626,7 +1626,7 @@ plank_drag_manager_drag_motion (GtkWidget* w,
 }
 
 static gboolean
-___lambda114_ (PlankDragManager* self)
+___lambda129_ (PlankDragManager* self)
 {
 	PlankDockItem* item = NULL;
 	PlankDockController* _tmp0_;
@@ -1657,10 +1657,10 @@ ___lambda114_ (PlankDragManager* self)
 }
 
 static gboolean
-____lambda114__gsource_func (gpointer self)
+____lambda129__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = ___lambda114_ ((PlankDragManager*) self);
+	result = ___lambda129_ ((PlankDragManager*) self);
 	return result;
 }
 
@@ -1756,7 +1756,7 @@ plank_drag_manager_hovered_item_changed (PlankDragManager* self)
 		_tmp25_ = FALSE;
 	}
 	if (_tmp25_) {
-		self->priv->drag_hover_timer_id = gdk_threads_add_timeout ((guint) 1500, ____lambda114__gsource_func, self);
+		self->priv->drag_hover_timer_id = gdk_threads_add_timeout ((guint) 1500, ____lambda129__gsource_func, self);
 	}
 }
 

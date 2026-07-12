@@ -42,6 +42,7 @@ namespace Plank
 		public HoverWindow hover { get; protected set; }
 		public LauncherWindow launcher { get; protected set; }
 		public StatusPanelWindow status_panel { get; protected set; }
+		public WindowPreviewWindow window_previews { get; protected set; }
 		
 		public DockItemProvider? default_provider { get; private set; }
 		LauncherProvider? launcher_provider;
@@ -107,6 +108,7 @@ namespace Plank
 			renderer = new DockRenderer (this, window);
 			launcher = new LauncherWindow (this);
 			status_panel = new StatusPanelWindow (this);
+			window_previews = new WindowPreviewWindow (this);
 		}
 		
 		~DockController ()

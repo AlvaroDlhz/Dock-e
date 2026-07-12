@@ -221,6 +221,16 @@ typedef struct _PlankLauncherWindowClass PlankLauncherWindowClass;
 typedef struct _PlankStatusPanelWindow PlankStatusPanelWindow;
 typedef struct _PlankStatusPanelWindowClass PlankStatusPanelWindowClass;
 
+#define PLANK_TYPE_WINDOW_PREVIEW_WINDOW (plank_window_preview_window_get_type ())
+#define PLANK_WINDOW_PREVIEW_WINDOW(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PLANK_TYPE_WINDOW_PREVIEW_WINDOW, PlankWindowPreviewWindow))
+#define PLANK_WINDOW_PREVIEW_WINDOW_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PLANK_TYPE_WINDOW_PREVIEW_WINDOW, PlankWindowPreviewWindowClass))
+#define PLANK_IS_WINDOW_PREVIEW_WINDOW(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PLANK_TYPE_WINDOW_PREVIEW_WINDOW))
+#define PLANK_IS_WINDOW_PREVIEW_WINDOW_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), PLANK_TYPE_WINDOW_PREVIEW_WINDOW))
+#define PLANK_WINDOW_PREVIEW_WINDOW_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), PLANK_TYPE_WINDOW_PREVIEW_WINDOW, PlankWindowPreviewWindowClass))
+
+typedef struct _PlankWindowPreviewWindow PlankWindowPreviewWindow;
+typedef struct _PlankWindowPreviewWindowClass PlankWindowPreviewWindowClass;
+
 #define PLANK_TYPE_DOCK_ITEM_PROVIDER (plank_dock_item_provider_get_type ())
 #define PLANK_DOCK_ITEM_PROVIDER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PLANK_TYPE_DOCK_ITEM_PROVIDER, PlankDockItemProvider))
 #define PLANK_DOCK_ITEM_PROVIDER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PLANK_TYPE_DOCK_ITEM_PROVIDER, PlankDockItemProviderClass))
@@ -612,6 +622,39 @@ typedef struct _PlankUpdateManagerItem PlankUpdateManagerItem;
 typedef struct _PlankUpdateManagerItemClass PlankUpdateManagerItemClass;
 typedef struct _PlankUpdateManagerItemPrivate PlankUpdateManagerItemPrivate;
 
+#define PLANK_TYPE_TRAY_TOGGLE_ITEM (plank_tray_toggle_item_get_type ())
+#define PLANK_TRAY_TOGGLE_ITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PLANK_TYPE_TRAY_TOGGLE_ITEM, PlankTrayToggleItem))
+#define PLANK_TRAY_TOGGLE_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PLANK_TYPE_TRAY_TOGGLE_ITEM, PlankTrayToggleItemClass))
+#define PLANK_IS_TRAY_TOGGLE_ITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PLANK_TYPE_TRAY_TOGGLE_ITEM))
+#define PLANK_IS_TRAY_TOGGLE_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), PLANK_TYPE_TRAY_TOGGLE_ITEM))
+#define PLANK_TRAY_TOGGLE_ITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), PLANK_TYPE_TRAY_TOGGLE_ITEM, PlankTrayToggleItemClass))
+
+typedef struct _PlankTrayToggleItem PlankTrayToggleItem;
+typedef struct _PlankTrayToggleItemClass PlankTrayToggleItemClass;
+typedef struct _PlankTrayToggleItemPrivate PlankTrayToggleItemPrivate;
+
+#define PLANK_TYPE_TRAY_STATUS_ITEM (plank_tray_status_item_get_type ())
+#define PLANK_TRAY_STATUS_ITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PLANK_TYPE_TRAY_STATUS_ITEM, PlankTrayStatusItem))
+#define PLANK_TRAY_STATUS_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PLANK_TYPE_TRAY_STATUS_ITEM, PlankTrayStatusItemClass))
+#define PLANK_IS_TRAY_STATUS_ITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PLANK_TYPE_TRAY_STATUS_ITEM))
+#define PLANK_IS_TRAY_STATUS_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), PLANK_TYPE_TRAY_STATUS_ITEM))
+#define PLANK_TRAY_STATUS_ITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), PLANK_TYPE_TRAY_STATUS_ITEM, PlankTrayStatusItemClass))
+
+typedef struct _PlankTrayStatusItem PlankTrayStatusItem;
+typedef struct _PlankTrayStatusItemClass PlankTrayStatusItemClass;
+typedef struct _PlankTrayStatusItemPrivate PlankTrayStatusItemPrivate;
+
+#define PLANK_TYPE_TRAY_OVERFLOW_ITEM (plank_tray_overflow_item_get_type ())
+#define PLANK_TRAY_OVERFLOW_ITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PLANK_TYPE_TRAY_OVERFLOW_ITEM, PlankTrayOverflowItem))
+#define PLANK_TRAY_OVERFLOW_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PLANK_TYPE_TRAY_OVERFLOW_ITEM, PlankTrayOverflowItemClass))
+#define PLANK_IS_TRAY_OVERFLOW_ITEM(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), PLANK_TYPE_TRAY_OVERFLOW_ITEM))
+#define PLANK_IS_TRAY_OVERFLOW_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), PLANK_TYPE_TRAY_OVERFLOW_ITEM))
+#define PLANK_TRAY_OVERFLOW_ITEM_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), PLANK_TYPE_TRAY_OVERFLOW_ITEM, PlankTrayOverflowItemClass))
+
+typedef struct _PlankTrayOverflowItem PlankTrayOverflowItem;
+typedef struct _PlankTrayOverflowItemClass PlankTrayOverflowItemClass;
+typedef struct _PlankTrayOverflowItemPrivate PlankTrayOverflowItemPrivate;
+
 #define PLANK_TYPE_TRANSIENT_DOCK_ITEM (plank_transient_dock_item_get_type ())
 #define PLANK_TRANSIENT_DOCK_ITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), PLANK_TYPE_TRANSIENT_DOCK_ITEM, PlankTransientDockItem))
 #define PLANK_TRANSIENT_DOCK_ITEM_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), PLANK_TYPE_TRANSIENT_DOCK_ITEM, PlankTransientDockItemClass))
@@ -764,6 +807,7 @@ typedef struct _PlankWorkerPrivate PlankWorkerPrivate;
 typedef struct _PlankCompositedWindowPrivate PlankCompositedWindowPrivate;
 typedef struct _PlankDockWindowPrivate PlankDockWindowPrivate;
 typedef struct _PlankStatusPanelWindowPrivate PlankStatusPanelWindowPrivate;
+typedef struct _PlankWindowPreviewWindowPrivate PlankWindowPreviewWindowPrivate;
 typedef struct _PlankHoverWindowPrivate PlankHoverWindowPrivate;
 typedef struct _PlankLauncherWindowPrivate PlankLauncherWindowPrivate;
 
@@ -1198,6 +1242,33 @@ struct _PlankUpdateManagerItemClass {
 	PlankDockItemClass parent_class;
 };
 
+struct _PlankTrayToggleItem {
+	PlankDockItem parent_instance;
+	PlankTrayToggleItemPrivate * priv;
+};
+
+struct _PlankTrayToggleItemClass {
+	PlankDockItemClass parent_class;
+};
+
+struct _PlankTrayStatusItem {
+	PlankDockItem parent_instance;
+	PlankTrayStatusItemPrivate * priv;
+};
+
+struct _PlankTrayStatusItemClass {
+	PlankDockItemClass parent_class;
+};
+
+struct _PlankTrayOverflowItem {
+	PlankDockItem parent_instance;
+	PlankTrayOverflowItemPrivate * priv;
+};
+
+struct _PlankTrayOverflowItemClass {
+	PlankDockItemClass parent_class;
+};
+
 struct _PlankTransientDockItem {
 	PlankApplicationDockItem parent_instance;
 	PlankTransientDockItemPrivate * priv;
@@ -1300,6 +1371,15 @@ struct _PlankStatusPanelWindow {
 };
 
 struct _PlankStatusPanelWindowClass {
+	GtkWindowClass parent_class;
+};
+
+struct _PlankWindowPreviewWindow {
+	GtkWindow parent_instance;
+	PlankWindowPreviewWindowPrivate * priv;
+};
+
+struct _PlankWindowPreviewWindowClass {
 	GtkWindowClass parent_class;
 };
 
@@ -1420,6 +1500,11 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (PlankStatusPanelWindow, g_object_unref)
 VALA_EXTERN PlankStatusPanelWindow* plank_dock_controller_get_status_panel (PlankDockController* self);
 VALA_EXTERN void plank_dock_controller_set_status_panel (PlankDockController* self,
                                              PlankStatusPanelWindow* value);
+VALA_EXTERN GType plank_window_preview_window_get_type (void) G_GNUC_CONST ;
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (PlankWindowPreviewWindow, g_object_unref)
+VALA_EXTERN PlankWindowPreviewWindow* plank_dock_controller_get_window_previews (PlankDockController* self);
+VALA_EXTERN void plank_dock_controller_set_window_previews (PlankDockController* self,
+                                                PlankWindowPreviewWindow* value);
 VALA_EXTERN GType plank_dock_item_provider_get_type (void) G_GNUC_CONST ;
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (PlankDockItemProvider, g_object_unref)
 VALA_EXTERN PlankDockItemProvider* plank_dock_controller_get_default_provider (PlankDockController* self);
@@ -2446,6 +2531,26 @@ VALA_EXTERN PlankUpdateManagerItem* plank_update_manager_item_new (const gchar* 
 VALA_EXTERN PlankUpdateManagerItem* plank_update_manager_item_construct (GType object_type,
                                                              const gchar* command);
 VALA_EXTERN gchar* plank_update_manager_item_available_command (void);
+VALA_EXTERN void plank_update_manager_item_launch (PlankUpdateManagerItem* self);
+VALA_EXTERN GType plank_tray_toggle_item_get_type (void) G_GNUC_CONST ;
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (PlankTrayToggleItem, g_object_unref)
+VALA_EXTERN PlankTrayToggleItem* plank_tray_toggle_item_new (void);
+VALA_EXTERN PlankTrayToggleItem* plank_tray_toggle_item_construct (GType object_type);
+VALA_EXTERN gchar** plank_tray_toggle_item_identifiers (PlankTrayToggleItem* self,
+                                            gint* result_length1);
+VALA_EXTERN gboolean plank_tray_toggle_item_get_Expanded (PlankTrayToggleItem* self);
+VALA_EXTERN GType plank_tray_status_item_get_type (void) G_GNUC_CONST ;
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (PlankTrayStatusItem, g_object_unref)
+VALA_EXTERN PlankTrayStatusItem* plank_tray_status_item_new (const gchar* identifier,
+                                                 GError** error);
+VALA_EXTERN PlankTrayStatusItem* plank_tray_status_item_construct (GType object_type,
+                                                       const gchar* identifier,
+                                                       GError** error);
+VALA_EXTERN GType plank_tray_overflow_item_get_type (void) G_GNUC_CONST ;
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (PlankTrayOverflowItem, g_object_unref)
+VALA_EXTERN PlankTrayOverflowItem* plank_tray_overflow_item_new (gint count);
+VALA_EXTERN PlankTrayOverflowItem* plank_tray_overflow_item_construct (GType object_type,
+                                                           gint count);
 VALA_EXTERN GType plank_transient_dock_item_get_type (void) G_GNUC_CONST ;
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (PlankTransientDockItem, g_object_unref)
 VALA_EXTERN PlankTransientDockItem* plank_transient_dock_item_new_with_launcher (const gchar* launcher_uri);
@@ -2622,6 +2727,14 @@ VALA_EXTERN PlankStatusPanelWindow* plank_status_panel_window_construct (GType o
 VALA_EXTERN void plank_status_panel_window_toggle (PlankStatusPanelWindow* self,
                                        PlankStatusIndicatorItem* item);
 VALA_EXTERN void plank_status_panel_window_dismiss (PlankStatusPanelWindow* self);
+VALA_EXTERN PlankWindowPreviewWindow* plank_window_preview_window_new (PlankDockController* controller);
+VALA_EXTERN PlankWindowPreviewWindow* plank_window_preview_window_construct (GType object_type,
+                                                                 PlankDockController* controller);
+VALA_EXTERN void plank_window_preview_window_handle_dock_hover (PlankWindowPreviewWindow* self,
+                                                    PlankDockItem* item);
+VALA_EXTERN void plank_window_preview_window_handle_dock_motion (PlankWindowPreviewWindow* self,
+                                                     gdouble root_x);
+VALA_EXTERN void plank_window_preview_window_dismiss (PlankWindowPreviewWindow* self);
 VALA_EXTERN PlankHoverWindow* plank_hover_window_new (void);
 VALA_EXTERN PlankHoverWindow* plank_hover_window_construct (GType object_type);
 VALA_EXTERN void plank_hover_window_show_at (PlankHoverWindow* self,

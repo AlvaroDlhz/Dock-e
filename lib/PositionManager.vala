@@ -24,6 +24,7 @@ namespace Plank
 	 */
 	public class PositionManager : GLib.Object
 	{
+		const int BAR_SIDE_INSET = 12;
 		public DockController controller { private get; construct; }
 		
 		public bool screen_is_composited { get; private set; }
@@ -756,7 +757,7 @@ namespace Plank
 				foreach (unowned DockItem item in items)
 					if (item is StatusIndicatorItem)
 						status_item_count++;
-					else if (item is LauncherItem || item is UpdateManagerItem)
+					else if (item is UpdateManagerItem || item is TrayToggleItem || item is TrayStatusItem || item is TrayOverflowItem)
 						launcher_item_count++;
 				cursor.x -= (status_item_count - launcher_item_count)
 					* (IconSize + ItemPadding) / 2;
@@ -927,7 +928,7 @@ namespace Plank
 
 				// System indicators form a fixed status section and never participate
 				// in the launcher magnification or its displacement curve.
-				if (item is StatusIndicatorItem || item is LauncherItem || item is UpdateManagerItem) {
+				if (item is StatusIndicatorItem || item is LauncherItem || item is UpdateManagerItem || item is TrayToggleItem || item is TrayStatusItem || item is TrayOverflowItem) {
 					val.center = val.static_center;
 					val.icon_size = icon_size;
 					val.zoom = 1.0;
@@ -956,7 +957,7 @@ namespace Plank
 			DockItem? left_last = null;
 			var status_count = 0;
 			foreach (unowned DockItem item in items) {
-				if (item is LauncherItem || item is UpdateManagerItem) {
+				if (item is UpdateManagerItem || item is TrayToggleItem || item is TrayStatusItem || item is TrayOverflowItem) {
 					if (left_first == null)
 						left_first = item;
 					left_last = item;
@@ -972,6 +973,23 @@ namespace Plank
 				}
 			}
 
+			// Left-side controls share a provider with the launcher button, so their
+			// original slots sit between the launcher and application items. Compact
+			// the central sequence after classification to remove those empty slots,
+			// while move_right() preserves each item's current zoom displacement.
+			DockItem? previous_primary = null;
+			foreach (unowned DockItem item in items) {
+				if (item is StatusIndicatorItem || item is UpdateManagerItem
+					|| item is TrayToggleItem || item is TrayStatusItem || item is TrayOverflowItem)
+					continue;
+				if (previous_primary != null) {
+					var desired_x = draw_values[previous_primary].static_center.x + IconSize + ItemPadding;
+					var compact_shift = desired_x - draw_values[item].static_center.x;
+					draw_values[item].move_right (Position, compact_shift);
+				}
+				previous_primary = item;
+			}
+
 			if (primary_first != null && primary_last != null && prefs.is_horizontal_dock ()) {
 				// Center the primary section against the full bar, independently of
 				// the number and width of the controls anchored at either edge.
@@ -979,15 +997,16 @@ namespace Plank
 					+ draw_values[primary_last].static_center.x) / 2.0;
 				var primary_shift = DockWidth / 2.0 - primary_center;
 				foreach (unowned DockItem item in items) {
-					if (!(item is StatusIndicatorItem) && !(item is LauncherItem) && !(item is UpdateManagerItem))
+					if (!(item is StatusIndicatorItem) && !(item is UpdateManagerItem) && !(item is TrayToggleItem) && !(item is TrayStatusItem) && !(item is TrayOverflowItem))
 						draw_values[item].move_right (Position, primary_shift);
 				}
 			}
 
 			if (status_count > 0 && prefs.is_horizontal_dock ()) {
+				var side_inset = BAR_SIDE_INSET * window_scale_factor;
 				var background_padding = ItemPadding + 2 * HorizPadding + 4 * LineWidth;
 				var status_last_center = draw_values[status_last].center.x;
-				var desired_last_center = DockWidth - DockMargin
+				var desired_last_center = DockWidth - DockMargin - side_inset
 					- (IconSize + background_padding) / 2.0;
 				var status_shift = desired_last_center - status_last_center;
 				foreach (unowned DockItem item in items) {
@@ -997,11 +1016,12 @@ namespace Plank
 			}
 
 			if (left_first != null && left_last != null && prefs.is_horizontal_dock ()) {
+				var side_inset = BAR_SIDE_INSET * window_scale_factor;
 				var background_padding = ItemPadding + 2 * HorizPadding + 4 * LineWidth;
-				var desired_center = DockMargin + (IconSize + background_padding) / 2.0;
+				var desired_center = DockMargin + side_inset + (IconSize + background_padding) / 2.0;
 				var left_shift = desired_center - draw_values[left_first].center.x;
 				foreach (unowned DockItem item in items)
-					if (item is LauncherItem || item is UpdateManagerItem)
+					if (item is UpdateManagerItem || item is TrayToggleItem || item is TrayStatusItem || item is TrayOverflowItem)
 						draw_values[item].move_right (Position, left_shift);
 			}
 
@@ -1021,7 +1041,7 @@ namespace Plank
 			if (is_horizontal_dock () && status_background_rect.height > 0) {
 				var status_center_y = status_background_rect.y + status_background_rect.height / 2.0;
 				foreach (unowned DockItem item in items) {
-					if (!(item is StatusIndicatorItem) && !(item is LauncherItem) && !(item is UpdateManagerItem))
+					if (!(item is StatusIndicatorItem) && !(item is LauncherItem) && !(item is UpdateManagerItem) && !(item is TrayToggleItem) && !(item is TrayStatusItem) && !(item is TrayOverflowItem))
 						continue;
 
 					var value = draw_values[item];
@@ -1040,8 +1060,9 @@ namespace Plank
 			// Render one continuous bar with the theme's floating margin on every edge.
 			// Item regions remain separate so launchers stay centered and status items stay right-aligned.
 			if (is_horizontal_dock () && background_rect.height > 0) {
-				background_rect.x = DockMargin;
-				background_rect.width = int.max (1, DockWidth - 2 * DockMargin);
+				var side_inset = BAR_SIDE_INSET * window_scale_factor;
+				background_rect.x = DockMargin + side_inset;
+				background_rect.width = int.max (1, DockWidth - 2 * (DockMargin + side_inset));
 			}
 			
 			// precalculate and cache regions (for the current frame)

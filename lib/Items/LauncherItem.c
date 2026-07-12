@@ -46,8 +46,15 @@ struct _PlankLauncherItemPrivate {
 	GdkPixbuf* menu_pixbuf;
 };
 
+struct _PlankLauncherProviderPrivate {
+	PlankTrayToggleItem* tray_toggle;
+	GeeArrayList* tray_items;
+	gboolean show_all_tray_items;
+};
+
 static gint PlankLauncherItem_private_offset;
 static gpointer plank_launcher_item_parent_class = NULL;
+static gint PlankLauncherProvider_private_offset;
 static gpointer plank_launcher_provider_parent_class = NULL;
 
 static gboolean plank_launcher_item_real_can_be_removed (PlankDockElement* base);
@@ -58,17 +65,37 @@ static PlankAnimationType plank_launcher_item_real_on_clicked (PlankDockElement*
                                                         GdkModifierType mod,
                                                         guint32 event_time);
 static GeeArrayList* plank_launcher_item_real_get_menu_items (PlankDockElement* base);
-static void __lambda57_ (PlankLauncherItem* self);
-static void ___lambda57__gtk_menu_item_activate (GtkMenuItem* _sender,
+static void __lambda64_ (PlankLauncherItem* self);
+static void ___lambda64__gtk_menu_item_activate (GtkMenuItem* _sender,
                                           gpointer self);
 static void plank_launcher_item_finalize (GObject * obj);
 static GType plank_launcher_item_get_type_once (void);
+static void __lambda88_ (PlankLauncherProvider* self,
+                  gboolean expanded);
+static void plank_launcher_provider_rebuild_tray (PlankLauncherProvider* self,
+                                           gboolean expanded);
+static void ___lambda88__plank_tray_toggle_item_expansion_changed (PlankTrayToggleItem* _sender,
+                                                            gboolean expanded,
+                                                            gpointer self);
+static void __lambda90_ (PlankLauncherProvider* self);
+static void ___lambda90__plank_tray_toggle_item_tray_changed (PlankTrayToggleItem* _sender,
+                                                       gpointer self);
+static void ___lambda89_ (PlankLauncherProvider* self);
+static void ____lambda89__plank_tray_overflow_item_show_all_requested (PlankTrayOverflowItem* _sender,
+                                                                gpointer self);
 static gboolean plank_launcher_provider_real_can_accept_drop (PlankDockElement* base,
                                                        GeeArrayList* uris);
 static gboolean plank_launcher_provider_real_move_to (PlankDockContainer* base,
                                                PlankDockElement* move,
                                                PlankDockElement* target);
+static void plank_launcher_provider_finalize (GObject * obj);
 static GType plank_launcher_provider_get_type_once (void);
+static void _vala_array_destroy (gpointer array,
+                          gssize array_length,
+                          GDestroyNotify destroy_func);
+static void _vala_array_free (gpointer array,
+                       gssize array_length,
+                       GDestroyNotify destroy_func);
 
 static inline gpointer
 plank_launcher_item_get_instance_private (PlankLauncherItem* self)
@@ -186,7 +213,7 @@ plank_launcher_item_real_draw_icon (PlankDockItem* base,
 	_tmp7_ = _tmp6_;
 	_tmp8_ = plank_surface_get_Height (surface);
 	_tmp9_ = _tmp8_;
-	size = (gint) (MIN (_tmp7_, _tmp9_) * 0.92);
+	size = (gint) (MIN (_tmp7_, _tmp9_) * 0.88);
 	_tmp10_ = self->priv->menu_pixbuf;
 	_tmp11_ = gdk_pixbuf_scale_simple (_tmp10_, size, size, GDK_INTERP_BILINEAR);
 	scaled = _tmp11_;
@@ -259,7 +286,7 @@ plank_launcher_item_real_on_clicked (PlankDockElement* base,
 }
 
 static void
-__lambda57_ (PlankLauncherItem* self)
+__lambda64_ (PlankLauncherItem* self)
 {
 	PlankDockController* dock = NULL;
 	PlankDockController* _tmp0_;
@@ -279,10 +306,10 @@ __lambda57_ (PlankLauncherItem* self)
 }
 
 static void
-___lambda57__gtk_menu_item_activate (GtkMenuItem* _sender,
+___lambda64__gtk_menu_item_activate (GtkMenuItem* _sender,
                                      gpointer self)
 {
-	__lambda57_ ((PlankLauncherItem*) self);
+	__lambda64_ ((PlankLauncherItem*) self);
 }
 
 static GeeArrayList*
@@ -299,7 +326,7 @@ plank_launcher_item_real_get_menu_items (PlankDockElement* base)
 	items = _tmp0_;
 	_tmp1_ = plank_dock_element_create_menu_item (_ ("Open _Applications"), "view-app-grid-symbolic", FALSE);
 	open_item = _tmp1_;
-	g_signal_connect_object (open_item, "activate", (GCallback) ___lambda57__gtk_menu_item_activate, self, 0);
+	g_signal_connect_object (open_item, "activate", (GCallback) ___lambda64__gtk_menu_item_activate, self, 0);
 	gee_abstract_collection_add ((GeeAbstractCollection*) items, open_item);
 	result = items;
 	_g_object_unref0 (open_item);
@@ -358,6 +385,48 @@ plank_launcher_item_get_type (void)
 	return plank_launcher_item_type_id__once;
 }
 
+static inline gpointer
+plank_launcher_provider_get_instance_private (PlankLauncherProvider* self)
+{
+	return G_STRUCT_MEMBER_P (self, PlankLauncherProvider_private_offset);
+}
+
+static void
+__lambda88_ (PlankLauncherProvider* self,
+             gboolean expanded)
+{
+	plank_launcher_provider_rebuild_tray (self, expanded);
+}
+
+static void
+___lambda88__plank_tray_toggle_item_expansion_changed (PlankTrayToggleItem* _sender,
+                                                       gboolean expanded,
+                                                       gpointer self)
+{
+	__lambda88_ ((PlankLauncherProvider*) self, expanded);
+}
+
+static void
+__lambda90_ (PlankLauncherProvider* self)
+{
+	PlankTrayToggleItem* _tmp0_;
+	gboolean _tmp1_;
+	gboolean _tmp2_;
+	_tmp0_ = self->priv->tray_toggle;
+	_tmp1_ = plank_tray_toggle_item_get_Expanded (_tmp0_);
+	_tmp2_ = _tmp1_;
+	if (_tmp2_) {
+		plank_launcher_provider_rebuild_tray (self, TRUE);
+	}
+}
+
+static void
+___lambda90__plank_tray_toggle_item_tray_changed (PlankTrayToggleItem* _sender,
+                                                  gpointer self)
+{
+	__lambda90_ ((PlankLauncherProvider*) self);
+}
+
 PlankLauncherProvider*
 plank_launcher_provider_construct (GType object_type)
 {
@@ -367,6 +436,10 @@ plank_launcher_provider_construct (GType object_type)
 	gchar* update_command = NULL;
 	gchar* _tmp2_;
 	const gchar* _tmp3_;
+	PlankTrayToggleItem* _tmp7_;
+	PlankTrayToggleItem* _tmp8_;
+	PlankTrayToggleItem* _tmp9_;
+	PlankTrayToggleItem* _tmp10_;
 	self = (PlankLauncherProvider*) g_object_new (object_type, NULL);
 	_tmp0_ = plank_launcher_item_new ();
 	_tmp1_ = _tmp0_;
@@ -385,6 +458,15 @@ plank_launcher_provider_construct (GType object_type)
 		plank_dock_container_add ((PlankDockContainer*) self, (PlankDockElement*) _tmp6_, NULL);
 		_g_object_unref0 (_tmp6_);
 	}
+	_tmp7_ = plank_tray_toggle_item_new ();
+	_g_object_unref0 (self->priv->tray_toggle);
+	self->priv->tray_toggle = _tmp7_;
+	_tmp8_ = self->priv->tray_toggle;
+	plank_dock_container_add ((PlankDockContainer*) self, (PlankDockElement*) _tmp8_, NULL);
+	_tmp9_ = self->priv->tray_toggle;
+	g_signal_connect_object (_tmp9_, "expansion-changed", (GCallback) ___lambda88__plank_tray_toggle_item_expansion_changed, self, 0);
+	_tmp10_ = self->priv->tray_toggle;
+	g_signal_connect_object (_tmp10_, "tray-changed", (GCallback) ___lambda90__plank_tray_toggle_item_tray_changed, self, 0);
 	_g_free0 (update_command);
 	return self;
 }
@@ -393,6 +475,194 @@ PlankLauncherProvider*
 plank_launcher_provider_new (void)
 {
 	return plank_launcher_provider_construct (PLANK_TYPE_LAUNCHER_PROVIDER);
+}
+
+static void
+___lambda89_ (PlankLauncherProvider* self)
+{
+	self->priv->show_all_tray_items = TRUE;
+	plank_launcher_provider_rebuild_tray (self, TRUE);
+}
+
+static void
+____lambda89__plank_tray_overflow_item_show_all_requested (PlankTrayOverflowItem* _sender,
+                                                           gpointer self)
+{
+	___lambda89_ ((PlankLauncherProvider*) self);
+}
+
+static void
+plank_launcher_provider_rebuild_tray (PlankLauncherProvider* self,
+                                      gboolean expanded)
+{
+	GeeArrayList* _tmp9_;
+	gchar** identifiers = NULL;
+	PlankTrayToggleItem* _tmp10_;
+	gint _tmp11_ = 0;
+	gchar** _tmp12_;
+	gint identifiers_length1;
+	gint _identifiers_size_;
+	gint _tmp13_ = 0;
+	gint visible_count = 0;
+	gchar** _tmp28_;
+	gint _tmp28__length1;
+	GError* _inner_error0_ = NULL;
+	g_return_if_fail (self != NULL);
+	{
+		GeeArrayList* _item_list = NULL;
+		GeeArrayList* _tmp0_;
+		gint _item_size = 0;
+		GeeArrayList* _tmp1_;
+		gint _tmp2_;
+		gint _tmp3_;
+		gint _item_index = 0;
+		_tmp0_ = self->priv->tray_items;
+		_item_list = _tmp0_;
+		_tmp1_ = _item_list;
+		_tmp2_ = gee_abstract_collection_get_size ((GeeAbstractCollection*) _tmp1_);
+		_tmp3_ = _tmp2_;
+		_item_size = _tmp3_;
+		_item_index = -1;
+		while (TRUE) {
+			gint _tmp4_;
+			gint _tmp5_;
+			PlankDockElement* item = NULL;
+			GeeArrayList* _tmp6_;
+			gpointer _tmp7_;
+			PlankDockElement* _tmp8_;
+			_item_index = _item_index + 1;
+			_tmp4_ = _item_index;
+			_tmp5_ = _item_size;
+			if (!(_tmp4_ < _tmp5_)) {
+				break;
+			}
+			_tmp6_ = _item_list;
+			_tmp7_ = gee_abstract_list_get ((GeeAbstractList*) _tmp6_, _item_index);
+			item = (PlankDockElement*) _tmp7_;
+			_tmp8_ = item;
+			plank_dock_container_remove ((PlankDockContainer*) self, _tmp8_);
+			_g_object_unref0 (item);
+		}
+	}
+	_tmp9_ = self->priv->tray_items;
+	gee_abstract_collection_clear ((GeeAbstractCollection*) _tmp9_);
+	if (!expanded) {
+		self->priv->show_all_tray_items = FALSE;
+		return;
+	}
+	_tmp10_ = self->priv->tray_toggle;
+	_tmp12_ = plank_tray_toggle_item_identifiers (_tmp10_, &_tmp11_);
+	identifiers = _tmp12_;
+	identifiers_length1 = _tmp11_;
+	_identifiers_size_ = identifiers_length1;
+	if (self->priv->show_all_tray_items) {
+		gchar** _tmp14_;
+		gint _tmp14__length1;
+		_tmp14_ = identifiers;
+		_tmp14__length1 = identifiers_length1;
+		_tmp13_ = _tmp14__length1;
+	} else {
+		gchar** _tmp15_;
+		gint _tmp15__length1;
+		_tmp15_ = identifiers;
+		_tmp15__length1 = identifiers_length1;
+		_tmp13_ = MIN (4, _tmp15__length1);
+	}
+	visible_count = _tmp13_;
+	{
+		gint i = 0;
+		i = 0;
+		{
+			gboolean _tmp16_ = FALSE;
+			_tmp16_ = TRUE;
+			while (TRUE) {
+				if (!_tmp16_) {
+					gint _tmp17_;
+					_tmp17_ = i;
+					i = _tmp17_ + 1;
+				}
+				_tmp16_ = FALSE;
+				if (!(i < visible_count)) {
+					break;
+				}
+				{
+					PlankTrayStatusItem* item = NULL;
+					gchar** _tmp18_;
+					gint _tmp18__length1;
+					const gchar* _tmp19_;
+					PlankTrayStatusItem* _tmp20_;
+					GeeArrayList* _tmp21_;
+					PlankTrayStatusItem* _tmp22_;
+					PlankTrayStatusItem* _tmp23_;
+					_tmp18_ = identifiers;
+					_tmp18__length1 = identifiers_length1;
+					_tmp19_ = _tmp18_[i];
+					_tmp20_ = plank_tray_status_item_new (_tmp19_, &_inner_error0_);
+					item = _tmp20_;
+					if (G_UNLIKELY (_inner_error0_ != NULL)) {
+						goto __catch0_g_error;
+					}
+					_tmp21_ = self->priv->tray_items;
+					_tmp22_ = item;
+					gee_abstract_collection_add ((GeeAbstractCollection*) _tmp21_, (PlankDockElement*) _tmp22_);
+					_tmp23_ = item;
+					plank_dock_container_add ((PlankDockContainer*) self, (PlankDockElement*) _tmp23_, NULL);
+					_g_object_unref0 (item);
+				}
+				goto __finally0;
+				__catch0_g_error:
+				{
+					GError* e = NULL;
+					gchar** _tmp24_;
+					gint _tmp24__length1;
+					const gchar* _tmp25_;
+					GError* _tmp26_;
+					const gchar* _tmp27_;
+					e = _inner_error0_;
+					_inner_error0_ = NULL;
+					_tmp24_ = identifiers;
+					_tmp24__length1 = identifiers_length1;
+					_tmp25_ = _tmp24_[i];
+					_tmp26_ = e;
+					_tmp27_ = _tmp26_->message;
+					g_warning ("LauncherItem.vala:118: Unable to add tray item %s: %s", _tmp25_, _tmp27_);
+					_g_error_free0 (e);
+				}
+				__finally0:
+				if (G_UNLIKELY (_inner_error0_ != NULL)) {
+					identifiers = (_vala_array_free (identifiers, identifiers_length1, (GDestroyNotify) g_free), NULL);
+					g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error0_->message, g_quark_to_string (_inner_error0_->domain), _inner_error0_->code);
+					g_clear_error (&_inner_error0_);
+					return;
+				}
+			}
+		}
+	}
+	_tmp28_ = identifiers;
+	_tmp28__length1 = identifiers_length1;
+	if (_tmp28__length1 > visible_count) {
+		PlankTrayOverflowItem* overflow = NULL;
+		gchar** _tmp29_;
+		gint _tmp29__length1;
+		PlankTrayOverflowItem* _tmp30_;
+		PlankTrayOverflowItem* _tmp31_;
+		GeeArrayList* _tmp32_;
+		PlankTrayOverflowItem* _tmp33_;
+		PlankTrayOverflowItem* _tmp34_;
+		_tmp29_ = identifiers;
+		_tmp29__length1 = identifiers_length1;
+		_tmp30_ = plank_tray_overflow_item_new (_tmp29__length1 - visible_count);
+		overflow = _tmp30_;
+		_tmp31_ = overflow;
+		g_signal_connect_object (_tmp31_, "show-all-requested", (GCallback) ____lambda89__plank_tray_overflow_item_show_all_requested, self, 0);
+		_tmp32_ = self->priv->tray_items;
+		_tmp33_ = overflow;
+		gee_abstract_collection_add ((GeeAbstractCollection*) _tmp32_, (PlankDockElement*) _tmp33_);
+		_tmp34_ = overflow;
+		plank_dock_container_add ((PlankDockContainer*) self, (PlankDockElement*) _tmp34_, NULL);
+		_g_object_unref0 (overflow);
+	}
+	identifiers = (_vala_array_free (identifiers, identifiers_length1, (GDestroyNotify) g_free), NULL);
 }
 
 static gboolean
@@ -426,14 +696,31 @@ plank_launcher_provider_class_init (PlankLauncherProviderClass * klass,
                                     gpointer klass_data)
 {
 	plank_launcher_provider_parent_class = g_type_class_peek_parent (klass);
+	g_type_class_adjust_private_offset (klass, &PlankLauncherProvider_private_offset);
 	((PlankDockElementClass *) klass)->can_accept_drop = (gboolean (*) (PlankDockElement*, GeeArrayList*)) plank_launcher_provider_real_can_accept_drop;
 	((PlankDockContainerClass *) klass)->move_to = (gboolean (*) (PlankDockContainer*, PlankDockElement*, PlankDockElement*)) plank_launcher_provider_real_move_to;
+	G_OBJECT_CLASS (klass)->finalize = plank_launcher_provider_finalize;
 }
 
 static void
 plank_launcher_provider_instance_init (PlankLauncherProvider * self,
                                        gpointer klass)
 {
+	GeeArrayList* _tmp0_;
+	self->priv = plank_launcher_provider_get_instance_private (self);
+	_tmp0_ = gee_array_list_new (PLANK_TYPE_DOCK_ELEMENT, (GBoxedCopyFunc) g_object_ref, (GDestroyNotify) g_object_unref, NULL, NULL, NULL);
+	self->priv->tray_items = _tmp0_;
+	self->priv->show_all_tray_items = FALSE;
+}
+
+static void
+plank_launcher_provider_finalize (GObject * obj)
+{
+	PlankLauncherProvider * self;
+	self = G_TYPE_CHECK_INSTANCE_CAST (obj, PLANK_TYPE_LAUNCHER_PROVIDER, PlankLauncherProvider);
+	_g_object_unref0 (self->priv->tray_toggle);
+	_g_object_unref0 (self->priv->tray_items);
+	G_OBJECT_CLASS (plank_launcher_provider_parent_class)->finalize (obj);
 }
 
 static GType
@@ -442,6 +729,7 @@ plank_launcher_provider_get_type_once (void)
 	static const GTypeInfo g_define_type_info = { sizeof (PlankLauncherProviderClass), (GBaseInitFunc) NULL, (GBaseFinalizeFunc) NULL, (GClassInitFunc) plank_launcher_provider_class_init, (GClassFinalizeFunc) NULL, NULL, sizeof (PlankLauncherProvider), 0, (GInstanceInitFunc) plank_launcher_provider_instance_init, NULL };
 	GType plank_launcher_provider_type_id;
 	plank_launcher_provider_type_id = g_type_register_static (PLANK_TYPE_DOCK_ITEM_PROVIDER, "PlankLauncherProvider", &g_define_type_info, 0);
+	PlankLauncherProvider_private_offset = g_type_add_instance_private (plank_launcher_provider_type_id, sizeof (PlankLauncherProviderPrivate));
 	return plank_launcher_provider_type_id;
 }
 
@@ -455,5 +743,29 @@ plank_launcher_provider_get_type (void)
 		g_once_init_leave (&plank_launcher_provider_type_id__once, plank_launcher_provider_type_id);
 	}
 	return plank_launcher_provider_type_id__once;
+}
+
+static void
+_vala_array_destroy (gpointer array,
+                     gssize array_length,
+                     GDestroyNotify destroy_func)
+{
+	if ((array != NULL) && (destroy_func != NULL)) {
+		gssize i;
+		for (i = 0; i < array_length; i = i + 1) {
+			if (((gpointer*) array)[i] != NULL) {
+				destroy_func (((gpointer*) array)[i]);
+			}
+		}
+	}
+}
+
+static void
+_vala_array_free (gpointer array,
+                  gssize array_length,
+                  GDestroyNotify destroy_func)
+{
+	_vala_array_destroy (array, array_length, destroy_func);
+	g_free (array);
 }
 

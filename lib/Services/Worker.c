@@ -128,14 +128,14 @@ static gboolean plank_worker_add_task_with_result_co (PlankWorkerAddTaskWithResu
 static Block23Data* block23_data_ref (Block23Data* _data23_);
 static void block23_data_unref (void * _userdata_);
 static gboolean _plank_worker_add_task_with_result_co_gsource_func (gpointer self);
-static gpointer ___lambda122_ (Block23Data* _data23_);
-static gpointer ____lambda122__gthread_func (gpointer self);
+static gpointer ___lambda137_ (Block23Data* _data23_);
+static gpointer ____lambda137__gthread_func (gpointer self);
 static GObject * plank_worker_constructor (GType type,
                                     guint n_construct_properties,
                                     GObjectConstructParam * construct_properties);
-static void _plank_worker____lambda123_ (PlankWorker* self,
+static void _plank_worker____lambda138_ (PlankWorker* self,
                                   PlankTask* task);
-static void __plank_worker____lambda123__gfunc (gpointer data,
+static void __plank_worker____lambda138__gfunc (gpointer data,
                                          gpointer self);
 static void plank_worker_finalize (GObject * obj);
 static GType plank_worker_get_type_once (void);
@@ -441,7 +441,7 @@ _g_error_copy0 (gpointer self)
 }
 
 static gpointer
-___lambda122_ (Block23Data* _data23_)
+___lambda137_ (Block23Data* _data23_)
 {
 	PlankWorker* self;
 	GType g_type;
@@ -503,10 +503,10 @@ ___lambda122_ (Block23Data* _data23_)
 }
 
 static gpointer
-____lambda122__gthread_func (gpointer self)
+____lambda137__gthread_func (gpointer self)
 {
 	gpointer result;
-	result = ___lambda122_ (self);
+	result = ___lambda137_ (self);
 	block23_data_unref (self);
 	return result;
 }
@@ -543,7 +543,7 @@ plank_worker_add_task_with_result_co (PlankWorkerAddTaskWithResultData* _data_)
 	_data_->_data23_->err = NULL;
 	_data_->_data23_->_result_ = NULL;
 	{
-		_data_->tfunc = ____lambda122__gthread_func;
+		_data_->tfunc = ____lambda137__gthread_func;
 		_data_->tfunc_target = block23_data_ref (_data_->_data23_);
 		_data_->_tmp0_ = _data_->self->priv->pool;
 		_data_->_tmp1_ = _data_->tfunc;
@@ -611,7 +611,7 @@ plank_worker_add_task_with_result_co (PlankWorkerAddTaskWithResultData* _data_)
 }
 
 static void
-_plank_worker____lambda123_ (PlankWorker* self,
+_plank_worker____lambda138_ (PlankWorker* self,
                              PlankTask* task)
 {
 	g_return_if_fail (task != NULL);
@@ -620,10 +620,10 @@ _plank_worker____lambda123_ (PlankWorker* self,
 }
 
 static void
-__plank_worker____lambda123__gfunc (gpointer data,
+__plank_worker____lambda138__gfunc (gpointer data,
                                     gpointer self)
 {
-	_plank_worker____lambda123_ ((PlankWorker*) self, (PlankTask*) data);
+	_plank_worker____lambda138_ ((PlankWorker*) self, (PlankTask*) data);
 }
 
 static GObject *
@@ -647,7 +647,7 @@ plank_worker_constructor (GType type,
 		g_thread_pool_set_max_unused_threads (0);
 		thread_count = (gint) g_get_num_processors ();
 		g_message ("Worker.vala:71: Using up to %i threads.", thread_count);
-		_tmp1_ = g_thread_pool_new (__plank_worker____lambda123__gfunc, self, thread_count, FALSE, &_inner_error0_);
+		_tmp1_ = g_thread_pool_new (__plank_worker____lambda138__gfunc, self, thread_count, FALSE, &_inner_error0_);
 		_tmp0_ = _tmp1_;
 		if (G_UNLIKELY (_inner_error0_ != NULL)) {
 			if (_inner_error0_->domain == G_THREAD_ERROR) {

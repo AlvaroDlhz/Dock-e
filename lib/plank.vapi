@@ -158,6 +158,7 @@ namespace Plank {
 		public Plank.DockRenderer renderer { get; protected set; }
 		public Plank.StatusPanelWindow status_panel { get; protected set; }
 		public Plank.DockWindow window { get; protected set; }
+		public Plank.WindowPreviewWindow window_previews { get; protected set; }
 	}
 	[CCode (cheader_filename = "plank.h")]
 	public abstract class DockElement : GLib.Object {
@@ -798,6 +799,36 @@ namespace Plank {
 		public TransientDockItem.with_launcher (string launcher_uri);
 	}
 	[CCode (cheader_filename = "plank.h")]
+	public class TrayOverflowItem : Plank.DockItem {
+		public TrayOverflowItem (int count);
+		public override bool can_be_removed ();
+		protected override void draw_icon (Plank.Surface surface);
+		protected override Plank.AnimationType on_clicked (Plank.PopupButton button, Gdk.ModifierType mod, uint32 event_time);
+		protected override Plank.AnimationType on_hovered ();
+		public signal void show_all_requested ();
+	}
+	[CCode (cheader_filename = "plank.h")]
+	public class TrayStatusItem : Plank.DockItem {
+		public TrayStatusItem (string identifier) throws GLib.Error;
+		public override bool can_be_removed ();
+		protected override void draw_icon (Plank.Surface surface);
+		protected override Plank.AnimationType on_clicked (Plank.PopupButton button, Gdk.ModifierType mod, uint32 time);
+		protected override Plank.AnimationType on_hovered ();
+		protected override Plank.AnimationType on_scrolled (Gdk.ScrollDirection direction, Gdk.ModifierType mod, uint32 event_time);
+	}
+	[CCode (cheader_filename = "plank.h")]
+	public class TrayToggleItem : Plank.DockItem {
+		public TrayToggleItem ();
+		public override bool can_be_removed ();
+		protected override void draw_icon (Plank.Surface surface);
+		public string[] identifiers ();
+		protected override Plank.AnimationType on_clicked (Plank.PopupButton button, Gdk.ModifierType mod, uint32 time);
+		protected override Plank.AnimationType on_hovered ();
+		public bool Expanded { get; private set; }
+		public signal void expansion_changed (bool expanded);
+		public signal void tray_changed ();
+	}
+	[CCode (cheader_filename = "plank.h")]
 	public class Unity : GLib.Object {
 		public void add_client (Plank.UnityClient client);
 		public static unowned Plank.Unity get_default ();
@@ -810,8 +841,16 @@ namespace Plank {
 		public override bool can_be_removed ();
 		protected override void draw_icon (Plank.Surface surface);
 		public override Gee.ArrayList<Gtk.MenuItem> get_menu_items ();
+		public void launch ();
 		protected override Plank.AnimationType on_clicked (Plank.PopupButton button, Gdk.ModifierType mod, uint32 event_time);
 		protected override Plank.AnimationType on_hovered ();
+	}
+	[CCode (cheader_filename = "plank.h")]
+	public class WindowPreviewWindow : Gtk.Window {
+		public WindowPreviewWindow (Plank.DockController controller);
+		public void dismiss ();
+		public void handle_dock_hover (Plank.DockItem? item);
+		public void handle_dock_motion (double root_x);
 	}
 	[CCode (cheader_filename = "plank.h")]
 	public class Worker : GLib.Object {

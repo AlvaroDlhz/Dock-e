@@ -96,6 +96,7 @@ libplank_la_VALASOURCES = \
 	Items/PlankDockItem.vala \
 	Items/StatusIndicatorItem.vala \
 	Items/UpdateManagerItem.vala \
+	Items/TrayToggleItem.vala \
 	Items/TransientDockItem.vala \
 	Items/LauncherItem.vala \
 	Services/Environment.vala \
@@ -110,6 +111,7 @@ libplank_la_VALASOURCES = \
 	Widgets/CompositedWindow.vala \
 	Widgets/DockWindow.vala \
 	Widgets/StatusPanelWindow.vala \
+	Widgets/WindowPreviewWindow.vala \
 	Widgets/HoverWindow.vala \
 	Widgets/LauncherWindow.vala \
 	Widgets/PoofWindow.vala \

@@ -54,6 +54,7 @@ enum  {
 	PLANK_DOCK_CONTROLLER_HOVER_PROPERTY,
 	PLANK_DOCK_CONTROLLER_LAUNCHER_PROPERTY,
 	PLANK_DOCK_CONTROLLER_STATUS_PANEL_PROPERTY,
+	PLANK_DOCK_CONTROLLER_WINDOW_PREVIEWS_PROPERTY,
 	PLANK_DOCK_CONTROLLER_DEFAULT_PROVIDER_PROPERTY,
 	PLANK_DOCK_CONTROLLER_ITEMS_PROPERTY,
 	PLANK_DOCK_CONTROLLER_VISIBLE_ITEMS_PROPERTY,
@@ -76,6 +77,7 @@ struct _PlankDockControllerPrivate {
 	PlankHoverWindow* _hover;
 	PlankLauncherWindow* _launcher;
 	PlankStatusPanelWindow* _status_panel;
+	PlankWindowPreviewWindow* _window_previews;
 	PlankDockItemProvider* _default_provider;
 	PlankLauncherProvider* launcher_provider;
 	PlankStatusIndicatorProvider* status_indicator_provider;
@@ -222,7 +224,7 @@ plank_dock_controller_construct (GType object_type,
 	plank_paths_ensure_directory_exists (config_folder);
 	_tmp0_ = g_file_get_path (config_folder);
 	_tmp1_ = _tmp0_;
-	g_debug ("DockController.vala:84: Create dock '%s' (config_folder = %s)", dock_name, _tmp1_);
+	g_debug ("DockController.vala:85: Create dock '%s' (config_folder = %s)", dock_name, _tmp1_);
 	_g_free0 (_tmp1_);
 	_tmp2_ = plank_dock_preferences_new (dock_name);
 	_tmp3_ = _tmp2_;
@@ -453,10 +455,10 @@ plank_dock_controller_create_default_provider (PlankDockController* self)
 	_tmp0_ = self->priv->_launchers_folder;
 	if (plank_paths_ensure_directory_exists (_tmp0_)) {
 		PlankItemFactory* _tmp1_;
-		g_debug ("DockController.vala:203: Adding default dock items...");
+		g_debug ("DockController.vala:205: Adding default dock items...");
 		_tmp1_ = plank_factory_item_factory;
 		plank_item_factory_make_default_items (_tmp1_);
-		g_debug ("DockController.vala:205: done.");
+		g_debug ("DockController.vala:207: done.");
 	}
 	_tmp2_ = self->priv->_prefs;
 	_tmp3_ = self->priv->_launchers_folder;
@@ -1473,6 +1475,33 @@ plank_dock_controller_set_status_panel (PlankDockController* self,
 	}
 }
 
+PlankWindowPreviewWindow*
+plank_dock_controller_get_window_previews (PlankDockController* self)
+{
+	PlankWindowPreviewWindow* result;
+	PlankWindowPreviewWindow* _tmp0_;
+	g_return_val_if_fail (self != NULL, NULL);
+	_tmp0_ = self->priv->_window_previews;
+	result = _tmp0_;
+	return result;
+}
+
+void
+plank_dock_controller_set_window_previews (PlankDockController* self,
+                                           PlankWindowPreviewWindow* value)
+{
+	PlankWindowPreviewWindow* old_value;
+	g_return_if_fail (self != NULL);
+	old_value = plank_dock_controller_get_window_previews (self);
+	if (old_value != value) {
+		PlankWindowPreviewWindow* _tmp0_;
+		_tmp0_ = _g_object_ref0 (value);
+		_g_object_unref0 (self->priv->_window_previews);
+		self->priv->_window_previews = _tmp0_;
+		g_object_notify_by_pspec ((GObject *) self, plank_dock_controller_properties[PLANK_DOCK_CONTROLLER_WINDOW_PREVIEWS_PROPERTY]);
+	}
+}
+
 PlankDockItemProvider*
 plank_dock_controller_get_default_provider (PlankDockController* self)
 {
@@ -1558,6 +1587,8 @@ plank_dock_controller_constructor (GType type,
 	PlankLauncherWindow* _tmp25_;
 	PlankStatusPanelWindow* _tmp26_;
 	PlankStatusPanelWindow* _tmp27_;
+	PlankWindowPreviewWindow* _tmp28_;
+	PlankWindowPreviewWindow* _tmp29_;
 	parent_class = G_OBJECT_CLASS (plank_dock_controller_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
 	self = G_TYPE_CHECK_INSTANCE_CAST (obj, PLANK_TYPE_DOCK_CONTROLLER, PlankDockController);
@@ -1621,6 +1652,11 @@ plank_dock_controller_constructor (GType type,
 	_tmp27_ = _tmp26_;
 	plank_dock_controller_set_status_panel (self, _tmp27_);
 	_g_object_unref0 (_tmp27_);
+	_tmp28_ = plank_window_preview_window_new (self);
+	g_object_ref_sink (_tmp28_);
+	_tmp29_ = _tmp28_;
+	plank_dock_controller_set_window_previews (self, _tmp29_);
+	_g_object_unref0 (_tmp29_);
 	return obj;
 }
 
@@ -1649,6 +1685,7 @@ plank_dock_controller_class_init (PlankDockControllerClass * klass,
 	g_object_class_install_property (G_OBJECT_CLASS (klass), PLANK_DOCK_CONTROLLER_HOVER_PROPERTY, plank_dock_controller_properties[PLANK_DOCK_CONTROLLER_HOVER_PROPERTY] = g_param_spec_object ("hover", "hover", "hover", PLANK_TYPE_HOVER_WINDOW, G_PARAM_STATIC_STRINGS | G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), PLANK_DOCK_CONTROLLER_LAUNCHER_PROPERTY, plank_dock_controller_properties[PLANK_DOCK_CONTROLLER_LAUNCHER_PROPERTY] = g_param_spec_object ("launcher", "launcher", "launcher", PLANK_TYPE_LAUNCHER_WINDOW, G_PARAM_STATIC_STRINGS | G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), PLANK_DOCK_CONTROLLER_STATUS_PANEL_PROPERTY, plank_dock_controller_properties[PLANK_DOCK_CONTROLLER_STATUS_PANEL_PROPERTY] = g_param_spec_object ("status-panel", "status-panel", "status-panel", PLANK_TYPE_STATUS_PANEL_WINDOW, G_PARAM_STATIC_STRINGS | G_PARAM_READABLE | G_PARAM_WRITABLE));
+	g_object_class_install_property (G_OBJECT_CLASS (klass), PLANK_DOCK_CONTROLLER_WINDOW_PREVIEWS_PROPERTY, plank_dock_controller_properties[PLANK_DOCK_CONTROLLER_WINDOW_PREVIEWS_PROPERTY] = g_param_spec_object ("window-previews", "window-previews", "window-previews", PLANK_TYPE_WINDOW_PREVIEW_WINDOW, G_PARAM_STATIC_STRINGS | G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), PLANK_DOCK_CONTROLLER_DEFAULT_PROVIDER_PROPERTY, plank_dock_controller_properties[PLANK_DOCK_CONTROLLER_DEFAULT_PROVIDER_PROPERTY] = g_param_spec_object ("default-provider", "default-provider", "default-provider", PLANK_TYPE_DOCK_ITEM_PROVIDER, G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
 	/**
 	 * List of all items on this dock
@@ -1716,6 +1753,7 @@ plank_dock_controller_finalize (GObject * obj)
 	_g_object_unref0 (self->priv->_hover);
 	_g_object_unref0 (self->priv->_launcher);
 	_g_object_unref0 (self->priv->_status_panel);
+	_g_object_unref0 (self->priv->_window_previews);
 	_g_object_unref0 (self->priv->_default_provider);
 	_g_object_unref0 (self->priv->launcher_provider);
 	_g_object_unref0 (self->priv->status_indicator_provider);
@@ -1798,6 +1836,9 @@ _vala_plank_dock_controller_get_property (GObject * object,
 		case PLANK_DOCK_CONTROLLER_STATUS_PANEL_PROPERTY:
 		g_value_set_object (value, plank_dock_controller_get_status_panel (self));
 		break;
+		case PLANK_DOCK_CONTROLLER_WINDOW_PREVIEWS_PROPERTY:
+		g_value_set_object (value, plank_dock_controller_get_window_previews (self));
+		break;
 		case PLANK_DOCK_CONTROLLER_DEFAULT_PROVIDER_PROPERTY:
 		g_value_set_object (value, plank_dock_controller_get_default_provider (self));
 		break;
@@ -1857,6 +1898,9 @@ _vala_plank_dock_controller_set_property (GObject * object,
 		break;
 		case PLANK_DOCK_CONTROLLER_STATUS_PANEL_PROPERTY:
 		plank_dock_controller_set_status_panel (self, g_value_get_object (value));
+		break;
+		case PLANK_DOCK_CONTROLLER_WINDOW_PREVIEWS_PROPERTY:
+		plank_dock_controller_set_window_previews (self, g_value_get_object (value));
 		break;
 		case PLANK_DOCK_CONTROLLER_DEFAULT_PROVIDER_PROPERTY:
 		plank_dock_controller_set_default_provider (self, g_value_get_object (value));

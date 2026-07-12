@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Dock-e
+GenericName=Desktop Dock
+Comment=A native floating desktop dock based on Plank
+Categories=Utility;
+Type=Application
+Exec=/home/alvaro/.local/bin/start-dock-e
+TryExec=/home/alvaro/.local/bin/dock-e
+Icon=plank
+Terminal=false
+NoDisplay=false
+StartupWMClass=Plank

@@ -672,7 +672,14 @@ namespace Plank
 			
 			// animate addition/removal
 			unowned DockContainer? container = item.Container;
-			var allow_animation = (screen_is_composited && (container == null || container.AddTime < item.AddTime));
+			// Tray expansion is a compact visibility toggle, not a launcher being
+			// added to or removed from the dock.  Its icons must appear and disappear
+			// immediately instead of using the normal slide/fade transition.
+			var is_dynamic_tray_item = item is TrayStatusItem || item is TrayOverflowItem;
+			if (is_dynamic_tray_item && item.RemoveTime > 0)
+				draw_value.opacity = 0.0;
+			var allow_animation = (screen_is_composited && !is_dynamic_tray_item
+				&& (container == null || container.AddTime < item.AddTime));
 			if (allow_animation && item.AddTime > item.RemoveTime) {
 				var move_duration = theme.ItemMoveTime * 1000;
 				var move_time = int64.max (0LL, frame_time - item.AddTime);
@@ -704,7 +711,7 @@ namespace Plank
 			}
 			
 			// animate icon movement on move state
-			if ((item.State & ItemState.MOVE) != 0) {
+			if (!is_dynamic_tray_item && (item.State & ItemState.MOVE) != 0) {
 				var move_duration = theme.ItemMoveTime * 1000;
 				var move_time = int64.max (0LL, frame_time - item.LastMove);
 				if (move_time < move_duration) {

@@ -51,8 +51,8 @@ static gpointer plank_update_manager_item_parent_class = NULL;
 static gboolean plank_update_manager_item_real_can_be_removed (PlankDockElement* base);
 static void plank_update_manager_item_check_for_updates (PlankUpdateManagerItem* self);
 static void plank_update_manager_item_schedule_immediate_check (PlankUpdateManagerItem* self);
-static gboolean __lambda58_ (PlankUpdateManagerItem* self);
-static gboolean ___lambda58__gsource_func (gpointer self);
+static gboolean __lambda31_ (PlankUpdateManagerItem* self);
+static gboolean ___lambda31__gsource_func (gpointer self);
 static void plank_update_manager_item_real_draw_icon (PlankDockItem* base,
                                                PlankSurface* surface);
 static PlankAnimationType plank_update_manager_item_real_on_hovered (PlankDockElement* base);
@@ -60,37 +60,24 @@ static PlankAnimationType plank_update_manager_item_real_on_clicked (PlankDockEl
                                                               PlankPopupButton button,
                                                               GdkModifierType mod,
                                                               guint32 event_time);
-static void plank_update_manager_item_launch (PlankUpdateManagerItem* self);
-static void ___lambda59_ (PlankUpdateManagerItem* self,
-                   GPid child_pid,
-                   gint status);
-static void ____lambda59__gchild_watch_func (GPid pid,
-                                      gint wait_status,
-                                      gpointer self);
 static GeeArrayList* plank_update_manager_item_real_get_menu_items (PlankDockElement* base);
 static void _plank_update_manager_item_launch_gtk_menu_item_activate (GtkMenuItem* _sender,
                                                                gpointer self);
 static GObject * plank_update_manager_item_constructor (GType type,
                                                  guint n_construct_properties,
                                                  GObjectConstructParam * construct_properties);
-static gboolean _plank_update_manager_item___lambda60_ (PlankUpdateManagerItem* self);
-static gboolean __plank_update_manager_item___lambda60__gsource_func (gpointer self);
-static gboolean _plank_update_manager_item___lambda61_ (PlankUpdateManagerItem* self);
-static gboolean __plank_update_manager_item___lambda61__gsource_func (gpointer self);
-static void _plank_update_manager_item____lambda62_ (PlankUpdateManagerItem* self);
-static void __plank_update_manager_item____lambda62__g_file_monitor_changed (GFileMonitor* _sender,
+static gboolean _plank_update_manager_item___lambda32_ (PlankUpdateManagerItem* self);
+static gboolean __plank_update_manager_item___lambda32__gsource_func (gpointer self);
+static gboolean _plank_update_manager_item___lambda33_ (PlankUpdateManagerItem* self);
+static gboolean __plank_update_manager_item___lambda33__gsource_func (gpointer self);
+static void _plank_update_manager_item____lambda34_ (PlankUpdateManagerItem* self);
+static void __plank_update_manager_item____lambda34__g_file_monitor_changed (GFileMonitor* _sender,
                                                                       GFile* file,
                                                                       GFile* other_file,
                                                                       GFileMonitorEvent event_type,
                                                                       gpointer self);
 static void plank_update_manager_item_finalize (GObject * obj);
 static GType plank_update_manager_item_get_type_once (void);
-static void _vala_array_destroy (gpointer array,
-                          gssize array_length,
-                          GDestroyNotify destroy_func);
-static void _vala_array_free (gpointer array,
-                       gssize array_length,
-                       GDestroyNotify destroy_func);
 
 static inline gpointer
 plank_update_manager_item_get_instance_private (PlankUpdateManagerItem* self)
@@ -358,7 +345,7 @@ plank_update_manager_item_check_for_updates (PlankUpdateManagerItem* self)
 }
 
 static gboolean
-__lambda58_ (PlankUpdateManagerItem* self)
+__lambda31_ (PlankUpdateManagerItem* self)
 {
 	gboolean result;
 	self->priv->refresh_debounce_id = 0U;
@@ -368,10 +355,10 @@ __lambda58_ (PlankUpdateManagerItem* self)
 }
 
 static gboolean
-___lambda58__gsource_func (gpointer self)
+___lambda31__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = __lambda58_ ((PlankUpdateManagerItem*) self);
+	result = __lambda31_ ((PlankUpdateManagerItem*) self);
 	return result;
 }
 
@@ -382,7 +369,7 @@ plank_update_manager_item_schedule_immediate_check (PlankUpdateManagerItem* self
 	if (self->priv->refresh_debounce_id > 0U) {
 		g_source_remove (self->priv->refresh_debounce_id);
 	}
-	self->priv->refresh_debounce_id = g_timeout_add_seconds_full (G_PRIORITY_DEFAULT, (guint) 2, ___lambda58__gsource_func, g_object_ref (self), g_object_unref);
+	self->priv->refresh_debounce_id = g_timeout_add_seconds_full (G_PRIORITY_DEFAULT, (guint) 2, ___lambda31__gsource_func, g_object_ref (self), g_object_unref);
 }
 
 static void
@@ -541,71 +528,42 @@ plank_update_manager_item_real_on_clicked (PlankDockElement* base,
 	return result;
 }
 
-static void
-___lambda59_ (PlankUpdateManagerItem* self,
-              GPid child_pid,
-              gint status)
-{
-	g_spawn_close_pid (child_pid);
-	plank_update_manager_item_schedule_immediate_check (self);
-}
-
-static void
-____lambda59__gchild_watch_func (GPid pid,
-                                 gint wait_status,
-                                 gpointer self)
-{
-	___lambda59_ ((PlankUpdateManagerItem*) self, pid, wait_status);
-}
-
-static void
+void
 plank_update_manager_item_launch (PlankUpdateManagerItem* self)
 {
 	GError* _inner_error0_ = NULL;
 	g_return_if_fail (self != NULL);
 	{
-		gchar** arguments = NULL;
-		gint arguments_length1 = 0;
-		gint _arguments_size_ = 0;
+		GAppInfo* app = NULL;
 		const gchar* _tmp0_;
-		gchar** _tmp1_ = NULL;
-		gint _tmp2_ = 0;
-		GPid pid = 0;
-		gchar** _tmp3_;
-		gint _tmp3__length1;
-		GPid _tmp4_ = 0;
+		GAppInfo* _tmp1_;
+		GAppInfo* _tmp2_;
 		_tmp0_ = self->priv->command;
-		g_shell_parse_argv (_tmp0_, &_tmp2_, &_tmp1_, &_inner_error0_);
-		arguments = (_vala_array_free (arguments, arguments_length1, (GDestroyNotify) g_free), NULL);
-		arguments = _tmp1_;
-		arguments_length1 = _tmp2_;
-		_arguments_size_ = arguments_length1;
+		_tmp1_ = g_app_info_create_from_commandline (_tmp0_, _ ("Update Manager"), G_APP_INFO_CREATE_SUPPORTS_STARTUP_NOTIFICATION, &_inner_error0_);
+		app = _tmp1_;
 		if (G_UNLIKELY (_inner_error0_ != NULL)) {
-			arguments = (_vala_array_free (arguments, arguments_length1, (GDestroyNotify) g_free), NULL);
 			goto __catch0_g_error;
 		}
-		_tmp3_ = arguments;
-		_tmp3__length1 = arguments_length1;
-		g_spawn_async (NULL, _tmp3_, NULL, G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD, NULL, NULL, &_tmp4_, &_inner_error0_);
-		pid = _tmp4_;
+		_tmp2_ = app;
+		g_app_info_launch (_tmp2_, NULL, NULL, &_inner_error0_);
 		if (G_UNLIKELY (_inner_error0_ != NULL)) {
-			arguments = (_vala_array_free (arguments, arguments_length1, (GDestroyNotify) g_free), NULL);
+			_g_object_unref0 (app);
 			goto __catch0_g_error;
 		}
-		g_child_watch_add_full (G_PRIORITY_DEFAULT_IDLE, pid, ____lambda59__gchild_watch_func, g_object_ref (self), g_object_unref);
-		arguments = (_vala_array_free (arguments, arguments_length1, (GDestroyNotify) g_free), NULL);
+		plank_update_manager_item_schedule_immediate_check (self);
+		_g_object_unref0 (app);
 	}
 	goto __finally0;
 	__catch0_g_error:
 	{
 		GError* e = NULL;
-		GError* _tmp5_;
-		const gchar* _tmp6_;
+		GError* _tmp3_;
+		const gchar* _tmp4_;
 		e = _inner_error0_;
 		_inner_error0_ = NULL;
-		_tmp5_ = e;
-		_tmp6_ = _tmp5_->message;
-		g_warning ("UpdateManagerItem.vala:156: Unable to open update manager: %s", _tmp6_);
+		_tmp3_ = e;
+		_tmp4_ = _tmp3_->message;
+		g_warning ("UpdateManagerItem.vala:151: Unable to open update manager: %s", _tmp4_);
 		_g_error_free0 (e);
 	}
 	__finally0:
@@ -645,7 +603,7 @@ plank_update_manager_item_real_get_menu_items (PlankDockElement* base)
 }
 
 static gboolean
-_plank_update_manager_item___lambda60_ (PlankUpdateManagerItem* self)
+_plank_update_manager_item___lambda32_ (PlankUpdateManagerItem* self)
 {
 	gboolean result;
 	plank_update_manager_item_check_for_updates (self);
@@ -654,15 +612,15 @@ _plank_update_manager_item___lambda60_ (PlankUpdateManagerItem* self)
 }
 
 static gboolean
-__plank_update_manager_item___lambda60__gsource_func (gpointer self)
+__plank_update_manager_item___lambda32__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = _plank_update_manager_item___lambda60_ ((PlankUpdateManagerItem*) self);
+	result = _plank_update_manager_item___lambda32_ ((PlankUpdateManagerItem*) self);
 	return result;
 }
 
 static gboolean
-_plank_update_manager_item___lambda61_ (PlankUpdateManagerItem* self)
+_plank_update_manager_item___lambda33_ (PlankUpdateManagerItem* self)
 {
 	gboolean result;
 	plank_update_manager_item_check_for_updates (self);
@@ -671,27 +629,27 @@ _plank_update_manager_item___lambda61_ (PlankUpdateManagerItem* self)
 }
 
 static gboolean
-__plank_update_manager_item___lambda61__gsource_func (gpointer self)
+__plank_update_manager_item___lambda33__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = _plank_update_manager_item___lambda61_ ((PlankUpdateManagerItem*) self);
+	result = _plank_update_manager_item___lambda33_ ((PlankUpdateManagerItem*) self);
 	return result;
 }
 
 static void
-_plank_update_manager_item____lambda62_ (PlankUpdateManagerItem* self)
+_plank_update_manager_item____lambda34_ (PlankUpdateManagerItem* self)
 {
 	plank_update_manager_item_schedule_immediate_check (self);
 }
 
 static void
-__plank_update_manager_item____lambda62__g_file_monitor_changed (GFileMonitor* _sender,
+__plank_update_manager_item____lambda34__g_file_monitor_changed (GFileMonitor* _sender,
                                                                  GFile* file,
                                                                  GFile* other_file,
                                                                  GFileMonitorEvent event_type,
                                                                  gpointer self)
 {
-	_plank_update_manager_item____lambda62_ ((PlankUpdateManagerItem*) self);
+	_plank_update_manager_item____lambda34_ ((PlankUpdateManagerItem*) self);
 }
 
 static GObject *
@@ -706,8 +664,8 @@ plank_update_manager_item_constructor (GType type,
 	parent_class = G_OBJECT_CLASS (plank_update_manager_item_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
 	self = G_TYPE_CHECK_INSTANCE_CAST (obj, PLANK_TYPE_UPDATE_MANAGER_ITEM, PlankUpdateManagerItem);
-	g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, __plank_update_manager_item___lambda60__gsource_func, g_object_ref (self), g_object_unref);
-	self->priv->update_timer_id = g_timeout_add_seconds_full (G_PRIORITY_DEFAULT, (guint) 300, __plank_update_manager_item___lambda61__gsource_func, g_object_ref (self), g_object_unref);
+	g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, __plank_update_manager_item___lambda32__gsource_func, g_object_ref (self), g_object_unref);
+	self->priv->update_timer_id = g_timeout_add_seconds_full (G_PRIORITY_DEFAULT, (guint) 300, __plank_update_manager_item___lambda33__gsource_func, g_object_ref (self), g_object_unref);
 	{
 		GFileMonitor* _tmp0_ = NULL;
 		GFile* _tmp1_;
@@ -730,7 +688,7 @@ plank_update_manager_item_constructor (GType type,
 		_g_object_unref0 (self->priv->package_monitor);
 		self->priv->package_monitor = _tmp5_;
 		_tmp6_ = self->priv->package_monitor;
-		g_signal_connect_object (_tmp6_, "changed", (GCallback) __plank_update_manager_item____lambda62__g_file_monitor_changed, self, 0);
+		g_signal_connect_object (_tmp6_, "changed", (GCallback) __plank_update_manager_item____lambda34__g_file_monitor_changed, self, 0);
 		_g_object_unref0 (_tmp0_);
 	}
 	goto __finally0;
@@ -817,29 +775,5 @@ plank_update_manager_item_get_type (void)
 		g_once_init_leave (&plank_update_manager_item_type_id__once, plank_update_manager_item_type_id);
 	}
 	return plank_update_manager_item_type_id__once;
-}
-
-static void
-_vala_array_destroy (gpointer array,
-                     gssize array_length,
-                     GDestroyNotify destroy_func)
-{
-	if ((array != NULL) && (destroy_func != NULL)) {
-		gssize i;
-		for (i = 0; i < array_length; i = i + 1) {
-			if (((gpointer*) array)[i] != NULL) {
-				destroy_func (((gpointer*) array)[i]);
-			}
-		}
-	}
-}
-
-static void
-_vala_array_free (gpointer array,
-                  gssize array_length,
-                  GDestroyNotify destroy_func)
-{
-	_vala_array_destroy (array, array_length, destroy_func);
-	g_free (array);
 }
 

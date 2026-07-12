@@ -140,18 +140,13 @@ namespace Plank
 			return AnimationType.NONE;
 		}
 
-		void launch ()
+		public void launch ()
 		{
 			try {
-				string[] arguments;
-				Shell.parse_argv (command, out arguments);
-				Pid pid;
-				Process.spawn_async (null, arguments, null,
-					SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD, null, out pid);
-				ChildWatch.add (pid, (child_pid, status) => {
-					Process.close_pid (child_pid);
-					schedule_immediate_check ();
-				});
+				var app = AppInfo.create_from_commandline (command, _("Update Manager"),
+					AppInfoCreateFlags.SUPPORTS_STARTUP_NOTIFICATION);
+				app.launch (null, null);
+				schedule_immediate_check ();
 			} catch (Error e) {
 				warning ("Unable to open update manager: %s", e.message);
 			}

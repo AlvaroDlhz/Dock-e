@@ -151,9 +151,9 @@ static void _plank_renderer_animated_draw_g_object_notify (GObject* _sender,
                                                     gpointer self);
 static void plank_dock_renderer_reset_position_manager (PlankDockRenderer* self);
 static void plank_dock_renderer_load_theme (PlankDockRenderer* self);
-static gboolean __lambda101_ (PlankDockRenderer* self);
+static gboolean __lambda115_ (PlankDockRenderer* self);
 static void plank_dock_renderer_reset_item_buffers (PlankDockRenderer* self);
-static gboolean ___lambda101__gsource_func (gpointer self);
+static gboolean ___lambda115__gsource_func (gpointer self);
 static void _plank_dock_renderer_load_theme_g_object_notify (GObject* _sender,
                                                       GParamSpec* pspec,
                                                       gpointer self);
@@ -206,17 +206,17 @@ static void plank_dock_renderer_draw_item_shadow (PlankDockRenderer* self,
                                            PlankDockItem* item,
                                            PlankDockItemDrawValue* draw_value);
 static const gchar* plank_dock_renderer_cairo_surface_type_to_string (cairo_surface_type_t type);
-static gboolean ___lambda103_ (Block1Data* _data1_);
-static gboolean ____lambda103__gsource_func (gpointer self);
+static gboolean ___lambda117_ (Block1Data* _data1_);
+static gboolean ____lambda117__gsource_func (gpointer self);
 static gdouble plank_dock_renderer_easing_bounce (gdouble t,
                                            gdouble d,
                                            gdouble n);
 static Block2Data* block2_data_ref (Block2Data* _data2_);
 static void block2_data_unref (void * _userdata_);
-static gboolean __lambda102_ (Block2Data* _data2_,
+static gboolean __lambda116_ (Block2Data* _data2_,
                        PlankDockElement* i,
                        PlankDockItemDrawValue* val);
-static gboolean ___lambda102__gee_forall_map_func (gconstpointer k,
+static gboolean ___lambda116__gee_forall_map_func (gconstpointer k,
                                             gconstpointer v,
                                             gpointer self);
 static inline PlankSurface* plank_dock_renderer_get_item_surface (PlankDockRenderer* self,
@@ -440,7 +440,7 @@ plank_dock_renderer_theme_changed (PlankDockRenderer* self)
 }
 
 static gboolean
-__lambda101_ (PlankDockRenderer* self)
+__lambda115_ (PlankDockRenderer* self)
 {
 	PlankDockController* _tmp0_;
 	PlankPositionManager* _tmp1_;
@@ -460,10 +460,10 @@ __lambda101_ (PlankDockRenderer* self)
 }
 
 static gboolean
-___lambda101__gsource_func (gpointer self)
+___lambda115__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = __lambda101_ ((PlankDockRenderer*) self);
+	result = __lambda115_ ((PlankDockRenderer*) self);
 	return result;
 }
 
@@ -474,7 +474,7 @@ plank_dock_renderer_reset_position_manager (PlankDockRenderer* self)
 	if (self->priv->reset_position_manager_timer_id > 0U) {
 		g_source_remove (self->priv->reset_position_manager_timer_id);
 	}
-	self->priv->reset_position_manager_timer_id = gdk_threads_add_timeout ((guint) 50, ___lambda101__gsource_func, self);
+	self->priv->reset_position_manager_timer_id = gdk_threads_add_timeout ((guint) 50, ___lambda115__gsource_func, self);
 }
 
 static void
@@ -985,7 +985,7 @@ block1_data_unref (void * _userdata_)
 }
 
 static gboolean
-___lambda103_ (Block1Data* _data1_)
+___lambda117_ (Block1Data* _data1_)
 {
 	PlankDockRenderer* self;
 	PlankHideManager* hide_manager = NULL;
@@ -1019,10 +1019,10 @@ ___lambda103_ (Block1Data* _data1_)
 }
 
 static gboolean
-____lambda103__gsource_func (gpointer self)
+____lambda117__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = ___lambda103_ (self);
+	result = ___lambda117_ (self);
 	return result;
 }
 
@@ -1510,7 +1510,7 @@ plank_dock_renderer_real_draw (PlankRenderer* base,
 		_tmp149_ = cairo_get_target (cr);
 		_tmp150_ = plank_dock_renderer_cairo_surface_type_to_string (cairo_surface_get_type (_tmp149_));
 		g_message ("DockRenderer.vala:520: Cairo.SurfaceType: %s", _tmp150_);
-		gdk_threads_add_idle_full (G_PRIORITY_LOW, ____lambda103__gsource_func, block1_data_ref (_data1_), block1_data_unref);
+		gdk_threads_add_idle_full (G_PRIORITY_LOW, ____lambda117__gsource_func, block1_data_ref (_data1_), block1_data_unref);
 		self->priv->is_first_frame = FALSE;
 	}
 	block1_data_unref (_data1_);
@@ -1737,12 +1737,15 @@ plank_dock_renderer_animate_draw_value_for_item (PlankDockItem* item,
 	PlankDockContainer* _tmp74_;
 	PlankDockContainer* _tmp75_;
 	gboolean _tmp76_ = FALSE;
+	gboolean is_dynamic_tray_item = FALSE;
+	gboolean _tmp77_ = FALSE;
+	gboolean _tmp80_ = FALSE;
+	gboolean _tmp81_ = FALSE;
 	gboolean allow_animation = FALSE;
-	gboolean _tmp84_ = FALSE;
-	PlankItemState _tmp121_;
-	PlankItemState _tmp122_;
-	PlankItemState _tmp141_;
-	PlankItemState _tmp142_;
+	gboolean _tmp89_ = FALSE;
+	gboolean _tmp126_ = FALSE;
+	PlankItemState _tmp147_;
+	PlankItemState _tmp148_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (item != NULL);
 	g_return_if_fail (draw_value != NULL);
@@ -1992,184 +1995,214 @@ plank_dock_renderer_animate_draw_value_for_item (PlankDockItem* item,
 	_tmp74_ = plank_dock_element_get_Container ((PlankDockElement*) item);
 	_tmp75_ = _tmp74_;
 	container = _tmp75_;
+	if (PLANK_IS_TRAY_STATUS_ITEM (item)) {
+		_tmp76_ = TRUE;
+	} else {
+		_tmp76_ = PLANK_IS_TRAY_OVERFLOW_ITEM (item);
+	}
+	is_dynamic_tray_item = _tmp76_;
+	if (is_dynamic_tray_item) {
+		gint64 _tmp78_;
+		gint64 _tmp79_;
+		_tmp78_ = plank_dock_element_get_RemoveTime ((PlankDockElement*) item);
+		_tmp79_ = _tmp78_;
+		_tmp77_ = _tmp79_ > ((gint64) 0);
+	} else {
+		_tmp77_ = FALSE;
+	}
+	if (_tmp77_) {
+		draw_value->opacity = 0.0;
+	}
 	if (self->priv->screen_is_composited) {
-		gboolean _tmp77_ = FALSE;
-		PlankDockContainer* _tmp78_;
-		_tmp78_ = container;
-		if (_tmp78_ == NULL) {
-			_tmp77_ = TRUE;
+		_tmp81_ = !is_dynamic_tray_item;
+	} else {
+		_tmp81_ = FALSE;
+	}
+	if (_tmp81_) {
+		gboolean _tmp82_ = FALSE;
+		PlankDockContainer* _tmp83_;
+		_tmp83_ = container;
+		if (_tmp83_ == NULL) {
+			_tmp82_ = TRUE;
 		} else {
-			PlankDockContainer* _tmp79_;
-			gint64 _tmp80_;
-			gint64 _tmp81_;
-			gint64 _tmp82_;
-			gint64 _tmp83_;
-			_tmp79_ = container;
-			_tmp80_ = plank_dock_element_get_AddTime ((PlankDockElement*) _tmp79_);
-			_tmp81_ = _tmp80_;
-			_tmp82_ = plank_dock_element_get_AddTime ((PlankDockElement*) item);
-			_tmp83_ = _tmp82_;
-			_tmp77_ = _tmp81_ < _tmp83_;
+			PlankDockContainer* _tmp84_;
+			gint64 _tmp85_;
+			gint64 _tmp86_;
+			gint64 _tmp87_;
+			gint64 _tmp88_;
+			_tmp84_ = container;
+			_tmp85_ = plank_dock_element_get_AddTime ((PlankDockElement*) _tmp84_);
+			_tmp86_ = _tmp85_;
+			_tmp87_ = plank_dock_element_get_AddTime ((PlankDockElement*) item);
+			_tmp88_ = _tmp87_;
+			_tmp82_ = _tmp86_ < _tmp88_;
 		}
-		_tmp76_ = _tmp77_;
+		_tmp80_ = _tmp82_;
 	} else {
-		_tmp76_ = FALSE;
+		_tmp80_ = FALSE;
 	}
-	allow_animation = _tmp76_;
+	allow_animation = _tmp80_;
 	if (allow_animation) {
-		gint64 _tmp85_;
-		gint64 _tmp86_;
-		gint64 _tmp87_;
-		gint64 _tmp88_;
-		_tmp85_ = plank_dock_element_get_AddTime ((PlankDockElement*) item);
-		_tmp86_ = _tmp85_;
-		_tmp87_ = plank_dock_element_get_RemoveTime ((PlankDockElement*) item);
-		_tmp88_ = _tmp87_;
-		_tmp84_ = _tmp86_ > _tmp88_;
-	} else {
-		_tmp84_ = FALSE;
-	}
-	if (_tmp84_) {
-		gint move_duration = 0;
-		PlankDockTheme* _tmp89_;
-		gint _tmp90_;
-		gint _tmp91_;
-		gint64 move_time = 0LL;
+		gint64 _tmp90_;
+		gint64 _tmp91_;
 		gint64 _tmp92_;
 		gint64 _tmp93_;
-		gint64 _tmp94_;
-		gint64 _tmp95_;
-		_tmp89_ = self->priv->_theme;
-		_tmp90_ = plank_dock_theme_get_ItemMoveTime (_tmp89_);
+		_tmp90_ = plank_dock_element_get_AddTime ((PlankDockElement*) item);
 		_tmp91_ = _tmp90_;
-		move_duration = _tmp91_ * 1000;
-		_tmp92_ = plank_renderer_get_frame_time ((PlankRenderer*) self);
+		_tmp92_ = plank_dock_element_get_RemoveTime ((PlankDockElement*) item);
 		_tmp93_ = _tmp92_;
-		_tmp94_ = plank_dock_element_get_AddTime ((PlankDockElement*) item);
-		_tmp95_ = _tmp94_;
-		move_time = MAX (0LL, _tmp93_ - _tmp95_);
+		_tmp89_ = _tmp91_ > _tmp93_;
+	} else {
+		_tmp89_ = FALSE;
+	}
+	if (_tmp89_) {
+		gint move_duration = 0;
+		PlankDockTheme* _tmp94_;
+		gint _tmp95_;
+		gint _tmp96_;
+		gint64 move_time = 0LL;
+		gint64 _tmp97_;
+		gint64 _tmp98_;
+		gint64 _tmp99_;
+		gint64 _tmp100_;
+		_tmp94_ = self->priv->_theme;
+		_tmp95_ = plank_dock_theme_get_ItemMoveTime (_tmp94_);
+		_tmp96_ = _tmp95_;
+		move_duration = _tmp96_ * 1000;
+		_tmp97_ = plank_renderer_get_frame_time ((PlankRenderer*) self);
+		_tmp98_ = _tmp97_;
+		_tmp99_ = plank_dock_element_get_AddTime ((PlankDockElement*) item);
+		_tmp100_ = _tmp99_;
+		move_time = MAX (0LL, _tmp98_ - _tmp100_);
 		if (move_time < ((gint64) move_duration)) {
 			gdouble move_animation_progress = 0.0;
-			PlankPositionManager* _tmp96_;
-			gint _tmp97_;
-			gint _tmp98_;
-			PlankPositionManager* _tmp99_;
-			gint _tmp100_;
-			gint _tmp101_;
+			PlankPositionManager* _tmp101_;
+			gint _tmp102_;
+			gint _tmp103_;
+			PlankPositionManager* _tmp104_;
+			gint _tmp105_;
+			gint _tmp106_;
 			move_animation_progress = 1.0 - plank_easing_for_mode (PLANK_ANIMATION_MODE_LINEAR, (gdouble) move_time, (gdouble) move_duration);
 			draw_value->opacity = plank_easing_for_mode (PLANK_ANIMATION_MODE_EASE_IN_EXPO, (gdouble) move_time, (gdouble) move_duration);
-			_tmp96_ = position_manager;
-			_tmp97_ = plank_position_manager_get_BottomPadding (_tmp96_);
-			_tmp98_ = _tmp97_;
-			y_offset -= move_animation_progress * (icon_size + _tmp98_);
+			_tmp101_ = position_manager;
+			_tmp102_ = plank_position_manager_get_BottomPadding (_tmp101_);
+			_tmp103_ = _tmp102_;
+			y_offset -= move_animation_progress * (icon_size + _tmp103_);
 			draw_value->show_indicator = FALSE;
 			move_animation_progress = 1.0 - plank_easing_for_mode (PLANK_ANIMATION_MODE_EASE_OUT_QUINT, (gdouble) move_time, (gdouble) move_duration);
-			_tmp99_ = position_manager;
-			_tmp100_ = plank_position_manager_get_ItemPadding (_tmp99_);
-			_tmp101_ = _tmp100_;
-			self->priv->dynamic_animation_offset = self->priv->dynamic_animation_offset - (move_animation_progress * (icon_size + _tmp101_));
+			_tmp104_ = position_manager;
+			_tmp105_ = plank_position_manager_get_ItemPadding (_tmp104_);
+			_tmp106_ = _tmp105_;
+			self->priv->dynamic_animation_offset = self->priv->dynamic_animation_offset - (move_animation_progress * (icon_size + _tmp106_));
 			x_offset += self->priv->dynamic_animation_offset;
 		}
 	} else {
-		gboolean _tmp102_ = FALSE;
+		gboolean _tmp107_ = FALSE;
 		if (allow_animation) {
-			gint64 _tmp103_;
-			gint64 _tmp104_;
-			_tmp103_ = plank_dock_element_get_RemoveTime ((PlankDockElement*) item);
-			_tmp104_ = _tmp103_;
-			_tmp102_ = _tmp104_ > ((gint64) 0);
-		} else {
-			_tmp102_ = FALSE;
-		}
-		if (_tmp102_) {
-			gint move_duration = 0;
-			PlankDockTheme* _tmp105_;
-			gint _tmp106_;
-			gint _tmp107_;
-			gint64 move_time = 0LL;
 			gint64 _tmp108_;
 			gint64 _tmp109_;
-			gint64 _tmp110_;
-			gint64 _tmp111_;
-			_tmp105_ = self->priv->_theme;
-			_tmp106_ = plank_dock_theme_get_ItemMoveTime (_tmp105_);
-			_tmp107_ = _tmp106_;
-			move_duration = _tmp107_ * 1000;
-			_tmp108_ = plank_renderer_get_frame_time ((PlankRenderer*) self);
+			_tmp108_ = plank_dock_element_get_RemoveTime ((PlankDockElement*) item);
 			_tmp109_ = _tmp108_;
-			_tmp110_ = plank_dock_element_get_RemoveTime ((PlankDockElement*) item);
-			_tmp111_ = _tmp110_;
-			move_time = MAX (0LL, _tmp109_ - _tmp111_);
+			_tmp107_ = _tmp109_ > ((gint64) 0);
+		} else {
+			_tmp107_ = FALSE;
+		}
+		if (_tmp107_) {
+			gint move_duration = 0;
+			PlankDockTheme* _tmp110_;
+			gint _tmp111_;
+			gint _tmp112_;
+			gint64 move_time = 0LL;
+			gint64 _tmp113_;
+			gint64 _tmp114_;
+			gint64 _tmp115_;
+			gint64 _tmp116_;
+			_tmp110_ = self->priv->_theme;
+			_tmp111_ = plank_dock_theme_get_ItemMoveTime (_tmp110_);
+			_tmp112_ = _tmp111_;
+			move_duration = _tmp112_ * 1000;
+			_tmp113_ = plank_renderer_get_frame_time ((PlankRenderer*) self);
+			_tmp114_ = _tmp113_;
+			_tmp115_ = plank_dock_element_get_RemoveTime ((PlankDockElement*) item);
+			_tmp116_ = _tmp115_;
+			move_time = MAX (0LL, _tmp114_ - _tmp116_);
 			if (move_time < ((gint64) move_duration)) {
 				gdouble move_animation_progress = 0.0;
-				PlankPositionManager* _tmp112_;
-				gint _tmp113_;
-				gint _tmp114_;
-				PlankPositionManager* _tmp115_;
-				gint _tmp116_;
-				gint _tmp117_;
-				PlankPositionManager* _tmp118_;
+				PlankPositionManager* _tmp117_;
+				gint _tmp118_;
 				gint _tmp119_;
-				gint _tmp120_;
+				PlankPositionManager* _tmp120_;
+				gint _tmp121_;
+				gint _tmp122_;
+				PlankPositionManager* _tmp123_;
+				gint _tmp124_;
+				gint _tmp125_;
 				move_animation_progress = plank_easing_for_mode (PLANK_ANIMATION_MODE_LINEAR, (gdouble) move_time, (gdouble) move_duration);
 				draw_value->opacity = 1.0 - plank_easing_for_mode (PLANK_ANIMATION_MODE_EASE_OUT_EXPO, (gdouble) move_time, (gdouble) move_duration);
-				_tmp112_ = position_manager;
-				_tmp113_ = plank_position_manager_get_BottomPadding (_tmp112_);
-				_tmp114_ = _tmp113_;
-				y_offset -= move_animation_progress * (icon_size + _tmp114_);
+				_tmp117_ = position_manager;
+				_tmp118_ = plank_position_manager_get_BottomPadding (_tmp117_);
+				_tmp119_ = _tmp118_;
+				y_offset -= move_animation_progress * (icon_size + _tmp119_);
 				draw_value->show_indicator = FALSE;
 				move_animation_progress = 1.0 - plank_easing_for_mode (PLANK_ANIMATION_MODE_EASE_IN_QUINT, (gdouble) move_time, (gdouble) move_duration);
-				_tmp115_ = position_manager;
-				_tmp116_ = plank_position_manager_get_ItemPadding (_tmp115_);
-				_tmp117_ = _tmp116_;
-				self->priv->dynamic_animation_offset = self->priv->dynamic_animation_offset + (move_animation_progress * (icon_size + _tmp117_));
-				_tmp118_ = position_manager;
-				_tmp119_ = plank_position_manager_get_ItemPadding (_tmp118_);
-				_tmp120_ = _tmp119_;
-				x_offset += self->priv->dynamic_animation_offset - (icon_size + _tmp120_);
+				_tmp120_ = position_manager;
+				_tmp121_ = plank_position_manager_get_ItemPadding (_tmp120_);
+				_tmp122_ = _tmp121_;
+				self->priv->dynamic_animation_offset = self->priv->dynamic_animation_offset + (move_animation_progress * (icon_size + _tmp122_));
+				_tmp123_ = position_manager;
+				_tmp124_ = plank_position_manager_get_ItemPadding (_tmp123_);
+				_tmp125_ = _tmp124_;
+				x_offset += self->priv->dynamic_animation_offset - (icon_size + _tmp125_);
 			}
 		}
 	}
-	_tmp121_ = plank_dock_item_get_State (item);
-	_tmp122_ = _tmp121_;
-	if ((_tmp122_ & PLANK_ITEM_STATE_MOVE) != 0) {
+	if (!is_dynamic_tray_item) {
+		PlankItemState _tmp127_;
+		PlankItemState _tmp128_;
+		_tmp127_ = plank_dock_item_get_State (item);
+		_tmp128_ = _tmp127_;
+		_tmp126_ = (_tmp128_ & PLANK_ITEM_STATE_MOVE) != 0;
+	} else {
+		_tmp126_ = FALSE;
+	}
+	if (_tmp126_) {
 		gint move_duration = 0;
-		PlankDockTheme* _tmp123_;
-		gint _tmp124_;
-		gint _tmp125_;
+		PlankDockTheme* _tmp129_;
+		gint _tmp130_;
+		gint _tmp131_;
 		gint64 move_time = 0LL;
-		gint64 _tmp126_;
-		gint64 _tmp127_;
-		gint64 _tmp128_;
-		gint64 _tmp129_;
-		_tmp123_ = self->priv->_theme;
-		_tmp124_ = plank_dock_theme_get_ItemMoveTime (_tmp123_);
-		_tmp125_ = _tmp124_;
-		move_duration = _tmp125_ * 1000;
-		_tmp126_ = plank_renderer_get_frame_time ((PlankRenderer*) self);
-		_tmp127_ = _tmp126_;
-		_tmp128_ = plank_dock_element_get_LastMove ((PlankDockElement*) item);
-		_tmp129_ = _tmp128_;
-		move_time = MAX (0LL, _tmp127_ - _tmp129_);
+		gint64 _tmp132_;
+		gint64 _tmp133_;
+		gint64 _tmp134_;
+		gint64 _tmp135_;
+		_tmp129_ = self->priv->_theme;
+		_tmp130_ = plank_dock_theme_get_ItemMoveTime (_tmp129_);
+		_tmp131_ = _tmp130_;
+		move_duration = _tmp131_ * 1000;
+		_tmp132_ = plank_renderer_get_frame_time ((PlankRenderer*) self);
+		_tmp133_ = _tmp132_;
+		_tmp134_ = plank_dock_element_get_LastMove ((PlankDockElement*) item);
+		_tmp135_ = _tmp134_;
+		move_time = MAX (0LL, _tmp133_ - _tmp135_);
 		if (move_time < ((gint64) move_duration)) {
 			gdouble move_animation_progress = 0.0;
-			GeeHashSet* _tmp130_;
-			gint _tmp131_;
-			gint _tmp132_;
-			gdouble change = 0.0;
-			PlankPositionManager* _tmp133_;
-			gint _tmp134_;
-			gint _tmp135_;
-			gdouble _tmp136_ = 0.0;
+			GeeHashSet* _tmp136_;
 			gint _tmp137_;
 			gint _tmp138_;
-			gint _tmp139_;
+			gdouble change = 0.0;
+			PlankPositionManager* _tmp139_;
 			gint _tmp140_;
+			gint _tmp141_;
+			gdouble _tmp142_ = 0.0;
+			gint _tmp143_;
+			gint _tmp144_;
+			gint _tmp145_;
+			gint _tmp146_;
 			move_animation_progress = 0.0;
-			_tmp130_ = self->priv->transient_items;
-			_tmp131_ = gee_abstract_collection_get_size ((GeeAbstractCollection*) _tmp130_);
-			_tmp132_ = _tmp131_;
-			if (_tmp132_ > 0) {
+			_tmp136_ = self->priv->transient_items;
+			_tmp137_ = gee_abstract_collection_get_size ((GeeAbstractCollection*) _tmp136_);
+			_tmp138_ = _tmp137_;
+			if (_tmp138_ > 0) {
 				if (self->priv->dynamic_animation_offset > ((gdouble) 0)) {
 					move_animation_progress = 1.0 - plank_easing_for_mode (PLANK_ANIMATION_MODE_EASE_IN_QUINT, (gdouble) move_time, (gdouble) move_duration);
 				} else {
@@ -2178,39 +2211,39 @@ plank_dock_renderer_animate_draw_value_for_item (PlankDockItem* item,
 			} else {
 				move_animation_progress = 1.0 - plank_easing_for_mode (PLANK_ANIMATION_MODE_EASE_OUT_CIRC, (gdouble) move_time, (gdouble) move_duration);
 			}
-			_tmp133_ = position_manager;
-			_tmp134_ = plank_position_manager_get_ItemPadding (_tmp133_);
-			_tmp135_ = _tmp134_;
-			change = move_animation_progress * (icon_size + _tmp135_);
-			_tmp137_ = plank_dock_item_get_Position (item);
-			_tmp138_ = _tmp137_;
-			_tmp139_ = plank_dock_item_get_LastPosition (item);
-			_tmp140_ = _tmp139_;
-			if (_tmp138_ < _tmp140_) {
-				_tmp136_ = change;
+			_tmp139_ = position_manager;
+			_tmp140_ = plank_position_manager_get_ItemPadding (_tmp139_);
+			_tmp141_ = _tmp140_;
+			change = move_animation_progress * (icon_size + _tmp141_);
+			_tmp143_ = plank_dock_item_get_Position (item);
+			_tmp144_ = _tmp143_;
+			_tmp145_ = plank_dock_item_get_LastPosition (item);
+			_tmp146_ = _tmp145_;
+			if (_tmp144_ < _tmp146_) {
+				_tmp142_ = change;
 			} else {
-				_tmp136_ = -change;
+				_tmp142_ = -change;
 			}
-			x_offset += _tmp136_;
+			x_offset += _tmp142_;
 		} else {
 			plank_dock_item_unset_move_state (item);
 		}
 	}
-	_tmp141_ = plank_dock_item_get_State (item);
-	_tmp142_ = _tmp141_;
-	if ((_tmp142_ & PLANK_ITEM_STATE_INVALID) != 0) {
+	_tmp147_ = plank_dock_item_get_State (item);
+	_tmp148_ = _tmp147_;
+	if ((_tmp148_ & PLANK_ITEM_STATE_INVALID) != 0) {
 		guint invalid_duration = 0U;
 		gint64 invalid_time = 0LL;
-		gint64 _tmp143_;
-		gint64 _tmp144_;
-		gint64 _tmp145_;
-		gint64 _tmp146_;
+		gint64 _tmp149_;
+		gint64 _tmp150_;
+		gint64 _tmp151_;
+		gint64 _tmp152_;
 		invalid_duration = PLANK_ITEM_INVALID_DURATION * 1000;
-		_tmp143_ = plank_renderer_get_frame_time ((PlankRenderer*) self);
-		_tmp144_ = _tmp143_;
-		_tmp145_ = plank_dock_element_get_LastValid ((PlankDockElement*) item);
-		_tmp146_ = _tmp145_;
-		invalid_time = MAX (0LL, _tmp144_ - _tmp146_);
+		_tmp149_ = plank_renderer_get_frame_time ((PlankRenderer*) self);
+		_tmp150_ = _tmp149_;
+		_tmp151_ = plank_dock_element_get_LastValid ((PlankDockElement*) item);
+		_tmp152_ = _tmp151_;
+		invalid_time = MAX (0LL, _tmp150_ - _tmp152_);
 		if (invalid_time < ((gint64) invalid_duration)) {
 			draw_value->opacity = 0.10 + ((0.90 * (cos (((invalid_time / ((gdouble) invalid_duration)) * 4.5) * G_PI) + 1)) / 2);
 		} else {
@@ -2246,7 +2279,7 @@ block2_data_unref (void * _userdata_)
 }
 
 static gboolean
-__lambda102_ (Block2Data* _data2_,
+__lambda116_ (Block2Data* _data2_,
               PlankDockElement* i,
               PlankDockItemDrawValue* val)
 {
@@ -2260,12 +2293,12 @@ __lambda102_ (Block2Data* _data2_,
 }
 
 static gboolean
-___lambda102__gee_forall_map_func (gconstpointer k,
+___lambda116__gee_forall_map_func (gconstpointer k,
                                    gconstpointer v,
                                    gpointer self)
 {
 	gboolean result;
-	result = __lambda102_ (self, (PlankDockElement*) k, (PlankDockItemDrawValue*) v);
+	result = __lambda116_ (self, (PlankDockElement*) k, (PlankDockItemDrawValue*) v);
 	return result;
 }
 
@@ -2360,7 +2393,7 @@ plank_dock_renderer_post_process_draw_values (GeeHashMap* draw_values,
 	}
 	_tmp12_ = gee_abstract_map_map_iterator ((GeeAbstractMap*) draw_values);
 	_tmp13_ = _tmp12_;
-	gee_map_iterator_foreach (_tmp13_, ___lambda102__gee_forall_map_func, _data2_);
+	gee_map_iterator_foreach (_tmp13_, ___lambda116__gee_forall_map_func, _data2_);
 	_g_object_unref0 (_tmp13_);
 	block2_data_unref (_data2_);
 	_data2_ = NULL;

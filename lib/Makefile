@@ -188,12 +188,13 @@ am__objects_5 = DBusManager.lo DockController.lo DockPreferences.lo \
 	Items/Enums.lo Items/FileDockItem.lo \
 	Items/PlaceholderDockItem.lo Items/PlankDockItem.lo \
 	Items/StatusIndicatorItem.lo Items/UpdateManagerItem.lo \
-	Items/TransientDockItem.lo Items/LauncherItem.lo \
-	Services/Environment.lo Services/EnvironmentSettings.lo \
-	Services/Logger.lo Services/Paths.lo Services/Preferences.lo \
-	Services/Settings.lo Services/System.lo Services/Unity.lo \
-	Services/Worker.lo Widgets/CompositedWindow.lo \
-	Widgets/DockWindow.lo Widgets/StatusPanelWindow.lo \
+	Items/TrayToggleItem.lo Items/TransientDockItem.lo \
+	Items/LauncherItem.lo Services/Environment.lo \
+	Services/EnvironmentSettings.lo Services/Logger.lo \
+	Services/Paths.lo Services/Preferences.lo Services/Settings.lo \
+	Services/System.lo Services/Unity.lo Services/Worker.lo \
+	Widgets/CompositedWindow.lo Widgets/DockWindow.lo \
+	Widgets/StatusPanelWindow.lo Widgets/WindowPreviewWindow.lo \
 	Widgets/HoverWindow.lo Widgets/LauncherWindow.lo \
 	Widgets/PoofWindow.lo Widgets/PreferencesWindow.lo \
 	Widgets/TitledSeparatorMenuItem.lo $(am__objects_1)
@@ -252,6 +253,7 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Items/$(DEPDIR)/PlankDockItem.Plo \
 	Items/$(DEPDIR)/StatusIndicatorItem.Plo \
 	Items/$(DEPDIR)/TransientDockItem.Plo \
+	Items/$(DEPDIR)/TrayToggleItem.Plo \
 	Items/$(DEPDIR)/UpdateManagerItem.Plo \
 	Services/$(DEPDIR)/Environment.Plo \
 	Services/$(DEPDIR)/EnvironmentSettings.Plo \
@@ -270,6 +272,7 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Widgets/$(DEPDIR)/PreferencesWindow.Plo \
 	Widgets/$(DEPDIR)/StatusPanelWindow.Plo \
 	Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo \
+	Widgets/$(DEPDIR)/WindowPreviewWindow.Plo \
 	Widgets/$(DEPDIR)/libplank_internal_la-DockletViewModel.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
@@ -796,6 +799,7 @@ libplank_la_VALASOURCES = \
 	Items/PlankDockItem.vala \
 	Items/StatusIndicatorItem.vala \
 	Items/UpdateManagerItem.vala \
+	Items/TrayToggleItem.vala \
 	Items/TransientDockItem.vala \
 	Items/LauncherItem.vala \
 	Services/Environment.vala \
@@ -810,6 +814,7 @@ libplank_la_VALASOURCES = \
 	Widgets/CompositedWindow.vala \
 	Widgets/DockWindow.vala \
 	Widgets/StatusPanelWindow.vala \
+	Widgets/WindowPreviewWindow.vala \
 	Widgets/HoverWindow.vala \
 	Widgets/LauncherWindow.vala \
 	Widgets/PoofWindow.vala \
@@ -1085,6 +1090,8 @@ Items/StatusIndicatorItem.lo: Items/$(am__dirstamp) \
 	Items/$(DEPDIR)/$(am__dirstamp)
 Items/UpdateManagerItem.lo: Items/$(am__dirstamp) \
 	Items/$(DEPDIR)/$(am__dirstamp)
+Items/TrayToggleItem.lo: Items/$(am__dirstamp) \
+	Items/$(DEPDIR)/$(am__dirstamp)
 Items/TransientDockItem.lo: Items/$(am__dirstamp) \
 	Items/$(DEPDIR)/$(am__dirstamp)
 Items/LauncherItem.lo: Items/$(am__dirstamp) \
@@ -1112,6 +1119,8 @@ Widgets/CompositedWindow.lo: Widgets/$(am__dirstamp) \
 Widgets/DockWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
 Widgets/StatusPanelWindow.lo: Widgets/$(am__dirstamp) \
+	Widgets/$(DEPDIR)/$(am__dirstamp)
+Widgets/WindowPreviewWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
 Widgets/HoverWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
@@ -1191,6 +1200,7 @@ include Items/$(DEPDIR)/PlaceholderDockItem.Plo # am--include-marker
 include Items/$(DEPDIR)/PlankDockItem.Plo # am--include-marker
 include Items/$(DEPDIR)/StatusIndicatorItem.Plo # am--include-marker
 include Items/$(DEPDIR)/TransientDockItem.Plo # am--include-marker
+include Items/$(DEPDIR)/TrayToggleItem.Plo # am--include-marker
 include Items/$(DEPDIR)/UpdateManagerItem.Plo # am--include-marker
 include Services/$(DEPDIR)/Environment.Plo # am--include-marker
 include Services/$(DEPDIR)/EnvironmentSettings.Plo # am--include-marker
@@ -1212,6 +1222,7 @@ include Widgets/$(DEPDIR)/PoofWindow.Plo # am--include-marker
 include Widgets/$(DEPDIR)/PreferencesWindow.Plo # am--include-marker
 include Widgets/$(DEPDIR)/StatusPanelWindow.Plo # am--include-marker
 include Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo # am--include-marker
+include Widgets/$(DEPDIR)/WindowPreviewWindow.Plo # am--include-marker
 include Widgets/$(DEPDIR)/libplank_internal_la-DockletViewModel.Plo # am--include-marker
 
 $(am__depfiles_remade):
@@ -1726,6 +1737,7 @@ distclean: distclean-am
 	-rm -f Items/$(DEPDIR)/PlankDockItem.Plo
 	-rm -f Items/$(DEPDIR)/StatusIndicatorItem.Plo
 	-rm -f Items/$(DEPDIR)/TransientDockItem.Plo
+	-rm -f Items/$(DEPDIR)/TrayToggleItem.Plo
 	-rm -f Items/$(DEPDIR)/UpdateManagerItem.Plo
 	-rm -f Services/$(DEPDIR)/Environment.Plo
 	-rm -f Services/$(DEPDIR)/EnvironmentSettings.Plo
@@ -1747,6 +1759,7 @@ distclean: distclean-am
 	-rm -f Widgets/$(DEPDIR)/PreferencesWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/StatusPanelWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo
+	-rm -f Widgets/$(DEPDIR)/WindowPreviewWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/libplank_internal_la-DockletViewModel.Plo
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -1838,6 +1851,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Items/$(DEPDIR)/PlankDockItem.Plo
 	-rm -f Items/$(DEPDIR)/StatusIndicatorItem.Plo
 	-rm -f Items/$(DEPDIR)/TransientDockItem.Plo
+	-rm -f Items/$(DEPDIR)/TrayToggleItem.Plo
 	-rm -f Items/$(DEPDIR)/UpdateManagerItem.Plo
 	-rm -f Services/$(DEPDIR)/Environment.Plo
 	-rm -f Services/$(DEPDIR)/EnvironmentSettings.Plo
@@ -1859,6 +1873,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Widgets/$(DEPDIR)/PreferencesWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/StatusPanelWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo
+	-rm -f Widgets/$(DEPDIR)/WindowPreviewWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/libplank_internal_la-DockletViewModel.Plo
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic

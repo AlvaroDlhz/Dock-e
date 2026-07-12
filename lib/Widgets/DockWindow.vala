@@ -152,6 +152,19 @@ namespace Plank
 				});
 				return Gdk.EVENT_STOP;
 			}
+
+			// Fixed controls can be repositioned independently of the central dock
+			// items.  Activate the update manager on press so a layout/hover refresh
+			// between press and release cannot discard the click.
+			if (HoveredItem is UpdateManagerItem && event.button == 1U) {
+				var update_item = (UpdateManagerItem) HoveredItem;
+				ClickedItem = null;
+				Idle.add (() => {
+					update_item.launch ();
+					return false;
+				});
+				return Gdk.EVENT_STOP;
+			}
 			
 			// Check and try to show the menu
 			if (show_menu (HoveredItem, event))
@@ -248,6 +261,7 @@ namespace Plank
 			if (menu_is_visible ())
 				return Gdk.EVENT_STOP;
 			
+			controller.window_previews.handle_dock_motion (event.x_root);
 			controller.renderer.update_local_cursor ((int) event.x, (int) event.y);
 			update_hovered ((int) event.x, (int) event.y);
 			
@@ -373,6 +387,7 @@ namespace Plank
 				item.hovered ();
 			
 			HoveredItem = item;
+			controller.window_previews.handle_dock_hover (item);
 			
 			// if HoveredItem changed always stop scheduled popup and hide the tooltip
 			if (hover_reposition_timer_id > 0U) {
@@ -388,6 +403,8 @@ namespace Plank
 			if (HoveredItem == null
 				|| !controller.prefs.TooltipsEnabled
 				|| controller.drag_manager.InternalDragActive)
+				return;
+			if (HoveredItem is ApplicationDockItem && ((ApplicationDockItem) HoveredItem).is_running ())
 				return;
 			
 			// don't be that demanding this delay is still fast enough
@@ -457,6 +474,25 @@ namespace Plank
 				set_hovered_provider (null);
 				set_hovered (null);
 				return false;
+			}
+
+			// The launcher provider contains both the central menu button and controls
+			// anchored independently at the left edge.  Its aggregate first/last-child
+			// region is therefore not a reliable gate for those displaced controls.
+			// Hit-test each fixed left control directly before walking the container
+			// hierarchy so hover and clicks follow the icon's actual draw position.
+			foreach (unowned DockItem fixed_item in controller.VisibleItems) {
+				if (!(fixed_item is UpdateManagerItem) && !(fixed_item is TrayToggleItem)
+					&& !(fixed_item is TrayStatusItem) && !(fixed_item is TrayOverflowItem))
+					continue;
+				rect = position_manager.get_hover_region_for_element (fixed_item);
+				if (y < rect.y || y >= rect.y + rect.height || x < rect.x || x >= rect.x + rect.width)
+					continue;
+				if (drag_item == fixed_item)
+					break;
+				set_hovered_provider (fixed_item.Container as DockItemProvider);
+				set_hovered (fixed_item);
+				return true;
 			}
 			
 			bool found_hovered_provider = false;

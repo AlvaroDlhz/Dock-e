@@ -149,9 +149,9 @@ static void plank_hide_manager_set_Hovered (PlankHideManager* self,
 static void plank_hide_manager_set_Disabled (PlankHideManager* self,
                                       gboolean value);
 static void plank_hide_manager_update_hidden (PlankHideManager* self);
-static gboolean ___lambda106_ (PlankHideManager* self);
+static gboolean ___lambda120_ (PlankHideManager* self);
 static void plank_hide_manager_update_window_intersect (PlankHideManager* self);
-static gboolean ____lambda106__gsource_func (gpointer self);
+static gboolean ____lambda120__gsource_func (gpointer self);
 static void plank_hide_manager_set_Hidden (PlankHideManager* self,
                                     gboolean value);
 static void plank_hide_manager_show (PlankHideManager* self);
@@ -164,8 +164,8 @@ static inline gboolean plank_hide_manager_device_supports_pressure (PlankHideMan
                                                       GdkDevice* device);
 static void plank_hide_manager_window_geometry (WnckWindow* window,
                                          GdkRectangle* result);
-static gboolean __lambda104_ (PlankHideManager* self);
-static gboolean ___lambda104__gsource_func (gpointer self);
+static gboolean __lambda118_ (PlankHideManager* self);
+static gboolean ___lambda118__gsource_func (gpointer self);
 static void plank_hide_manager_handle_geometry_changed (WnckWindow* window,
                                                  PlankHideManager* self);
 static void _plank_hide_manager_handle_geometry_changed_wnck_window_geometry_changed (WnckWindow* _sender,
@@ -180,8 +180,8 @@ static void _plank_hide_manager_handle_state_changed_wnck_window_state_changed (
                                                                          gpointer self);
 static gboolean _cairo_rectangle_int_equal (const cairo_rectangle_int_t * s1,
                                      const cairo_rectangle_int_t * s2);
-static gboolean __lambda105_ (PlankHideManager* self);
-static gboolean ___lambda105__gsource_func (gpointer self);
+static gboolean __lambda119_ (PlankHideManager* self);
+static gboolean ___lambda119__gsource_func (gpointer self);
 static gboolean ____lambda13_ (PlankHideManager* self);
 static gboolean _____lambda13__gsource_func (gpointer self);
 static void xinput_event_mask_destroy (XIEventMask * self);
@@ -424,17 +424,15 @@ plank_hide_manager_update_hovered_with_coords (PlankHideManager* self,
 	PlankPositionManager* _tmp9_;
 	GdkRectangle _tmp10_ = {0};
 	gboolean _tmp11_ = FALSE;
-	gboolean _tmp12_ = FALSE;
-	gboolean _tmp13_ = FALSE;
-	GdkRectangle _tmp14_;
+	gboolean _tmp12_;
 	gboolean hovered = FALSE;
-	gboolean _tmp20_;
-	gboolean _tmp21_ = FALSE;
-	gboolean _tmp22_ = FALSE;
+	gboolean _tmp22_;
 	gboolean _tmp23_ = FALSE;
-	PlankDockWindow* _tmp24_;
+	gboolean _tmp24_ = FALSE;
+	gboolean _tmp25_ = FALSE;
+	PlankDockWindow* _tmp26_;
 	gboolean disabled = FALSE;
-	gboolean _tmp32_;
+	gboolean _tmp34_;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->priv->_controller;
 	_tmp1_ = plank_dock_controller_get_position_manager (_tmp0_);
@@ -453,71 +451,81 @@ plank_hide_manager_update_hovered_with_coords (PlankHideManager* self,
 	_tmp9_ = position_manager;
 	plank_position_manager_get_cursor_region (_tmp9_, &_tmp10_);
 	dock_rect = _tmp10_;
-	_tmp14_ = dock_rect;
-	if (x >= _tmp14_.x) {
-		GdkRectangle _tmp15_;
-		GdkRectangle _tmp16_;
-		_tmp15_ = dock_rect;
-		_tmp16_ = dock_rect;
-		_tmp13_ = x < (_tmp15_.x + _tmp16_.width);
-	} else {
-		_tmp13_ = FALSE;
-	}
-	if (_tmp13_) {
-		GdkRectangle _tmp17_;
-		_tmp17_ = dock_rect;
-		_tmp12_ = y >= _tmp17_.y;
-	} else {
-		_tmp12_ = FALSE;
-	}
+	_tmp12_ = self->priv->_ExternalMenuVisible;
 	if (_tmp12_) {
-		GdkRectangle _tmp18_;
-		GdkRectangle _tmp19_;
-		_tmp18_ = dock_rect;
-		_tmp19_ = dock_rect;
-		_tmp11_ = y < (_tmp18_.y + _tmp19_.height);
+		_tmp11_ = TRUE;
 	} else {
-		_tmp11_ = FALSE;
+		gboolean _tmp13_ = FALSE;
+		gboolean _tmp14_ = FALSE;
+		gboolean _tmp15_ = FALSE;
+		GdkRectangle _tmp16_;
+		_tmp16_ = dock_rect;
+		if (x >= _tmp16_.x) {
+			GdkRectangle _tmp17_;
+			GdkRectangle _tmp18_;
+			_tmp17_ = dock_rect;
+			_tmp18_ = dock_rect;
+			_tmp15_ = x < (_tmp17_.x + _tmp18_.width);
+		} else {
+			_tmp15_ = FALSE;
+		}
+		if (_tmp15_) {
+			GdkRectangle _tmp19_;
+			_tmp19_ = dock_rect;
+			_tmp14_ = y >= _tmp19_.y;
+		} else {
+			_tmp14_ = FALSE;
+		}
+		if (_tmp14_) {
+			GdkRectangle _tmp20_;
+			GdkRectangle _tmp21_;
+			_tmp20_ = dock_rect;
+			_tmp21_ = dock_rect;
+			_tmp13_ = y < (_tmp20_.y + _tmp21_.height);
+		} else {
+			_tmp13_ = FALSE;
+		}
+		_tmp11_ = _tmp13_;
 	}
 	hovered = _tmp11_;
-	_tmp20_ = self->priv->_Hovered;
-	if (_tmp20_ != hovered) {
+	_tmp22_ = self->priv->_Hovered;
+	if (_tmp22_ != hovered) {
 		plank_hide_manager_set_Hovered (self, hovered);
 		update_needed = TRUE;
 	}
-	_tmp24_ = window;
-	if (plank_dock_window_menu_is_visible (_tmp24_)) {
+	_tmp26_ = window;
+	if (plank_dock_window_menu_is_visible (_tmp26_)) {
+		_tmp25_ = TRUE;
+	} else {
+		gboolean _tmp27_;
+		_tmp27_ = self->priv->_ExternalMenuVisible;
+		_tmp25_ = _tmp27_;
+	}
+	if (_tmp25_) {
+		_tmp24_ = TRUE;
+	} else {
+		PlankDragManager* _tmp28_;
+		gboolean _tmp29_;
+		gboolean _tmp30_;
+		_tmp28_ = drag_manager;
+		_tmp29_ = plank_drag_manager_get_InternalDragActive (_tmp28_);
+		_tmp30_ = _tmp29_;
+		_tmp24_ = _tmp30_;
+	}
+	if (_tmp24_) {
 		_tmp23_ = TRUE;
 	} else {
-		gboolean _tmp25_;
-		_tmp25_ = self->priv->_ExternalMenuVisible;
-		_tmp23_ = _tmp25_;
+		PlankDragManager* _tmp31_;
+		gboolean _tmp32_;
+		gboolean _tmp33_;
+		_tmp31_ = drag_manager;
+		_tmp32_ = plank_drag_manager_get_ExternalDragActive (_tmp31_);
+		_tmp33_ = _tmp32_;
+		_tmp23_ = _tmp33_;
 	}
-	if (_tmp23_) {
-		_tmp22_ = TRUE;
-	} else {
-		PlankDragManager* _tmp26_;
-		gboolean _tmp27_;
-		gboolean _tmp28_;
-		_tmp26_ = drag_manager;
-		_tmp27_ = plank_drag_manager_get_InternalDragActive (_tmp26_);
-		_tmp28_ = _tmp27_;
-		_tmp22_ = _tmp28_;
-	}
-	if (_tmp22_) {
-		_tmp21_ = TRUE;
-	} else {
-		PlankDragManager* _tmp29_;
-		gboolean _tmp30_;
-		gboolean _tmp31_;
-		_tmp29_ = drag_manager;
-		_tmp30_ = plank_drag_manager_get_ExternalDragActive (_tmp29_);
-		_tmp31_ = _tmp30_;
-		_tmp21_ = _tmp31_;
-	}
-	disabled = _tmp21_;
-	_tmp32_ = self->priv->_Disabled;
-	if (_tmp32_ != disabled) {
+	disabled = _tmp23_;
+	_tmp34_ = self->priv->_Disabled;
+	if (_tmp34_ != disabled) {
 		plank_hide_manager_set_Disabled (self, disabled);
 		update_needed = TRUE;
 	}
@@ -528,7 +536,7 @@ plank_hide_manager_update_hovered_with_coords (PlankHideManager* self,
 }
 
 static gboolean
-___lambda106_ (PlankHideManager* self)
+___lambda120_ (PlankHideManager* self)
 {
 	gboolean result;
 	plank_hide_manager_update_window_intersect (self);
@@ -539,10 +547,10 @@ ___lambda106_ (PlankHideManager* self)
 }
 
 static gboolean
-____lambda106__gsource_func (gpointer self)
+____lambda120__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = ___lambda106_ ((PlankHideManager*) self);
+	result = ___lambda120_ ((PlankHideManager*) self);
 	return result;
 }
 
@@ -571,7 +579,7 @@ plank_hide_manager_prefs_changed (PlankHideManager* self,
 					g_source_remove (self->priv->prefs_changed_timer_id);
 					self->priv->prefs_changed_timer_id = 0U;
 				}
-				self->priv->prefs_changed_timer_id = gdk_threads_add_timeout (PLANK_HIDE_MANAGER_UPDATE_TIMEOUT, ____lambda106__gsource_func, self);
+				self->priv->prefs_changed_timer_id = gdk_threads_add_timeout (PLANK_HIDE_MANAGER_UPDATE_TIMEOUT, ____lambda120__gsource_func, self);
 				break;
 			}
 		}
@@ -1203,7 +1211,7 @@ plank_hide_manager_update_window_intersect (PlankHideManager* self)
 }
 
 static gboolean
-__lambda104_ (PlankHideManager* self)
+__lambda118_ (PlankHideManager* self)
 {
 	gboolean result;
 	plank_hide_manager_update_window_intersect (self);
@@ -1213,10 +1221,10 @@ __lambda104_ (PlankHideManager* self)
 }
 
 static gboolean
-___lambda104__gsource_func (gpointer self)
+___lambda118__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = __lambda104_ ((PlankHideManager*) self);
+	result = __lambda118_ ((PlankHideManager*) self);
 	return result;
 }
 
@@ -1227,7 +1235,7 @@ plank_hide_manager_schedule_update (PlankHideManager* self)
 	if (self->priv->window_changed_timer_id > 0U) {
 		return;
 	}
-	self->priv->window_changed_timer_id = gdk_threads_add_timeout (PLANK_HIDE_MANAGER_UPDATE_TIMEOUT, ___lambda104__gsource_func, self);
+	self->priv->window_changed_timer_id = gdk_threads_add_timeout (PLANK_HIDE_MANAGER_UPDATE_TIMEOUT, ___lambda118__gsource_func, self);
 }
 
 static void
@@ -1348,7 +1356,7 @@ _cairo_rectangle_int_equal (const cairo_rectangle_int_t * s1,
 }
 
 static gboolean
-__lambda105_ (PlankHideManager* self)
+__lambda119_ (PlankHideManager* self)
 {
 	gboolean result;
 	plank_hide_manager_update_window_intersect (self);
@@ -1358,10 +1366,10 @@ __lambda105_ (PlankHideManager* self)
 }
 
 static gboolean
-___lambda105__gsource_func (gpointer self)
+___lambda119__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = __lambda105_ ((PlankHideManager*) self);
+	result = __lambda119_ ((PlankHideManager*) self);
 	return result;
 }
 
@@ -1388,7 +1396,7 @@ plank_hide_manager_handle_geometry_changed (WnckWindow* window,
 	if (self->priv->geometry_timer_id > 0U) {
 		return;
 	}
-	self->priv->geometry_timer_id = gdk_threads_add_timeout (PLANK_HIDE_MANAGER_UPDATE_TIMEOUT, ___lambda105__gsource_func, self);
+	self->priv->geometry_timer_id = gdk_threads_add_timeout (PLANK_HIDE_MANAGER_UPDATE_TIMEOUT, ___lambda119__gsource_func, self);
 }
 
 static void
@@ -1472,7 +1480,7 @@ plank_hide_manager_initialize_barriers_support (PlankHideManager* self)
 	first_event_return = _tmp8_;
 	error_base = _tmp9_;
 	if (!_tmp10_) {
-		g_debug ("HideManager.vala:614: Barriers disabled (XInput needed)");
+		g_debug ("HideManager.vala:618: Barriers disabled (XInput needed)");
 		self->priv->barriers_supported = FALSE;
 	} else {
 		gint major = 0;
@@ -1498,11 +1506,11 @@ plank_hide_manager_initialize_barriers_support (PlankHideManager* self)
 			_tmp13_ = FALSE;
 		}
 		if (_tmp13_) {
-			g_message ("HideManager.vala:620: Barriers enabled (XInput %i.%i support)\n", major, minor);
+			g_message ("HideManager.vala:624: Barriers enabled (XInput %i.%i support)\n", major, minor);
 			self->priv->barriers_supported = TRUE;
 			gdk_window_add_filter (NULL, (GdkFilterFunc) plank_hide_manager_xevent_filter, self);
 		} else {
-			g_debug ("HideManager.vala:624: Barriers disabled (XInput %i.%i not sufficient)", major, minor);
+			g_debug ("HideManager.vala:628: Barriers disabled (XInput %i.%i not sufficient)", major, minor);
 			self->priv->barriers_supported = FALSE;
 		}
 	}
@@ -1833,7 +1841,7 @@ plank_hide_manager_update_barrier (PlankHideManager* self)
 	_tmp34_ = barrier_area;
 	_tmp35_ = barrier_area;
 	_tmp36_ = barrier_area;
-	g_debug ("HideManager.vala:748: Barrier: %i,%i - %i,%i\n", _tmp31_.x, _tmp32_.y, _tmp33_.x + _tmp34_.width, _tmp35_.y + _tmp36_.height);
+	g_debug ("HideManager.vala:752: Barrier: %i,%i - %i,%i\n", _tmp31_.x, _tmp32_.y, _tmp33_.x + _tmp34_.width, _tmp35_.y + _tmp36_.height);
 	_tmp37_ = display;
 	_tmp38_ = barrier_area;
 	_tmp39_ = barrier_area;

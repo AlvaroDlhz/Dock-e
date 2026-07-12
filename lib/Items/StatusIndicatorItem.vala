@@ -434,7 +434,9 @@ namespace Plank
 
 			switch (Kind) {
 			case StatusIndicatorKind.CLOCK:
-				draw_text (cr, surface, new DateTime.now_local ().format ("%H:%M"), size * 0.26);
+				var now = new DateTime.now_local ();
+				draw_text_right_at (cr, surface, now.format ("%H:%M"), size * 0.245, size * 0.34);
+				draw_text_right_at (cr, surface, now.format ("%d/%m/%y"), size * 0.245, size * 0.70);
 				break;
 			case StatusIndicatorKind.DATE:
 				draw_text (cr, surface, new DateTime.now_local ().format ("%d/%m"), size * 0.24);
@@ -488,6 +490,30 @@ namespace Plank
 			cr.move_to ((surface.Width - extents.width) / 2.0 - extents.x_bearing,
 				(surface.Height - extents.height) / 2.0 - extents.y_bearing);
 			cr.show_text (text);
+		}
+
+		void draw_text_right_at (Cairo.Context cr, Surface surface, string text,
+			double font_size, double center_y)
+		{
+			Cairo.TextExtents extents;
+			cr.select_font_face ("Sans Condensed", Cairo.FontSlant.NORMAL, Cairo.FontWeight.BOLD);
+			cr.set_font_size (font_size);
+			cr.text_extents (text, out extents);
+			var padding = size_for_text_padding (surface);
+			var available_width = surface.Width - 2.0 * padding;
+			var horizontal_scale = double.min (1.0, available_width / extents.width);
+			cr.save ();
+			cr.translate (surface.Width - padding, 0.0);
+			cr.scale (horizontal_scale, 1.0);
+			cr.move_to (-extents.width - extents.x_bearing,
+				center_y - extents.height / 2.0 - extents.y_bearing);
+			cr.show_text (text);
+			cr.restore ();
+		}
+
+		double size_for_text_padding (Surface surface)
+		{
+			return double.min (surface.Width, surface.Height) * 0.04;
 		}
 
 		void draw_wifi (Cairo.Context cr, double size)

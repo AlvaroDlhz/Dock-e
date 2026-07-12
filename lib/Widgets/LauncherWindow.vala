@@ -761,9 +761,8 @@ namespace Plank
 				return;
 			int width, height;
 			get_size (out width, out height);
-			var item_rect = controller.position_manager.get_screen_region_for_item (anchor_item);
 			var bar_rect = controller.position_manager.get_screen_background_region ();
-			panel_x = int.max (bar_rect.x, item_rect.x - 10);
+			panel_x = bar_rect.x + (bar_rect.width - width) / 2;
 			panel_y = bar_rect.y - height - PANEL_GAP;
 			move (panel_x, panel_y);
 		}
@@ -771,9 +770,12 @@ namespace Plank
 		void apply_theme ()
 		{
 			var color = controller.renderer.theme.FillStartColor;
+			// Keep floating menus on the bar's RGB color.  Avoid formatting a
+			// floating-point alpha here: printf follows the current locale and can
+			// emit a decimal comma, which makes the entire GTK CSS invalid.
 			var css = ".plank-native-launcher { background-color: transparent; }";
-			css += ".plank-native-launcher .launcher-panel { background-color: rgba(%d,%d,%d,%.3f); border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; padding: 5px; box-shadow: none; }"
-				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255), color.alpha);
+			css += ".plank-native-launcher .launcher-panel { background-color: rgb(%d,%d,%d); border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; padding: 5px; box-shadow: none; }"
+				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255));
 			css += ".plank-native-launcher .launcher-tabs { margin: 7px 7px 5px 7px; }";
 			css += ".plank-native-launcher .launcher-navbar { min-height: 34px; margin: 6px 7px 0 7px; }";
 			css += ".plank-native-launcher .launcher-power-button { color: rgba(255,255,255,0.68); background: transparent; background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 7px; }";
@@ -787,8 +789,8 @@ namespace Plank
 			css += ".plank-native-launcher .launcher-alpha-header { margin: 8px 12px 4px 12px; }";
 			css += ".plank-native-launcher .launcher-alpha-letter { color: rgba(255,255,255,0.58); font-size: 11px; font-weight: bold; }";
 			css += ".plank-native-launcher .launcher-alpha-divider { min-height: 1px; background-color: rgba(255,255,255,0.10); border: none; }";
-			css += ".plank-native-launcher .launcher-panel list, .plank-native-launcher .launcher-panel row, .plank-native-launcher .launcher-search { background-color: rgba(%d,%d,%d,%.3f); background-image: none; border: none; }"
-				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255), color.alpha);
+			css += ".plank-native-launcher .launcher-panel list, .plank-native-launcher .launcher-panel row, .plank-native-launcher .launcher-search { background-color: rgb(%d,%d,%d); background-image: none; border: none; }"
+				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255));
 			css += ".plank-native-launcher .launcher-search { padding: 7px 12px; margin: 4px 7px 7px 7px; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; }";
 			css += ".plank-native-launcher entry, .plank-native-launcher entry:focus { color: white; background: transparent; background-image: none; border: none; border-radius: 0; box-shadow: none; outline: none; font-size: 14px; }";
 			css += ".plank-native-launcher .launcher-search.launcher-search-focused { border-color: #73d216; box-shadow: 0 0 0 1px rgba(115,210,22,0.28); }";
@@ -799,15 +801,15 @@ namespace Plank
 			css += ".plank-native-launcher .launcher-enter { color: rgba(255,255,255,0.28); font-size: 16px; }";
 			css += ".plank-native-launcher row:selected .launcher-enter { color: rgba(255,255,255,0.85); }";
 			css += ".plank-native-launcher .launcher-empty { color: rgba(255,255,255,0.55); }";
-			css += ".launcher-app-context { background-color: rgba(%d,%d,%d,%.3f); border: 1px solid rgba(255,255,255,0.10); border-radius: 11px; padding: 5px; }"
-				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255), color.alpha);
+			css += ".launcher-app-context { background-color: rgb(%d,%d,%d); border: 1px solid rgba(255,255,255,0.10); border-radius: 11px; padding: 5px; }"
+				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255));
 			css += ".launcher-app-context .app-context-header { color: white; padding: 7px; min-width: 250px; }";
 			css += ".launcher-app-context .app-context-title { font-weight: bold; font-size: 14px; }";
 			css += ".launcher-app-context .app-context-action { color: white; background: transparent; background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 7px 9px; }";
 			css += ".launcher-app-context .app-context-action:hover { background-color: rgba(255,255,255,0.10); }";
 			css += ".launcher-app-context .destructive-action { color: #ff7b73; }";
-			css += ".plank-power-menu { background-color: rgba(%d,%d,%d,%.3f); border: 1px solid rgba(255,255,255,0.10); border-radius: 10px; padding: 5px; }"
-				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255), color.alpha);
+			css += ".plank-power-menu { background-color: rgb(%d,%d,%d); border: 1px solid rgba(255,255,255,0.10); border-radius: 10px; padding: 5px; }"
+				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255));
 			css += ".plank-power-menu menuitem { color: white; border-radius: 10px; padding: 7px 10px; margin: 2px; }";
 			css += ".plank-power-menu menuitem:hover { background-color: rgba(255,255,255,0.11); }";
 			if (theme_provider != null)

@@ -136,41 +136,41 @@ static gchar** _vala_array_dup2 (gchar** self,
 static void plank_abstract_main_remove_dock (PlankAbstractMain* self,
                                       PlankDockController* dock);
 static void plank_abstract_main_real_create_actions (PlankAbstractMain* self);
-static void __lambda86_ (PlankAbstractMain* self);
-static void ___lambda86__g_simple_action_activate (GSimpleAction* _sender,
-                                            GVariant* parameter,
-                                            gpointer self);
-static void __lambda87_ (PlankAbstractMain* self);
-static void ___lambda87__g_simple_action_activate (GSimpleAction* _sender,
-                                            GVariant* parameter,
-                                            gpointer self);
-static void __lambda88_ (PlankAbstractMain* self);
-static void plank_abstract_main_show_preferences (PlankAbstractMain* self,
-                                           PlankDockController* controller);
-static void ___lambda88__g_simple_action_activate (GSimpleAction* _sender,
-                                            GVariant* parameter,
-                                            gpointer self);
 static void __lambda91_ (PlankAbstractMain* self);
-static void plank_abstract_main_show_about (PlankAbstractMain* self);
 static void ___lambda91__g_simple_action_activate (GSimpleAction* _sender,
                                             GVariant* parameter,
                                             gpointer self);
-static void __lambda94_ (PlankAbstractMain* self);
-static void ___lambda94__g_simple_action_activate (GSimpleAction* _sender,
+static void __lambda92_ (PlankAbstractMain* self);
+static void ___lambda92__g_simple_action_activate (GSimpleAction* _sender,
                                             GVariant* parameter,
                                             gpointer self);
-static void __lambda92_ (PlankAbstractMain* self);
-static void ___lambda92__gtk_dialog_response (GtkDialog* _sender,
+static void __lambda93_ (PlankAbstractMain* self);
+static void plank_abstract_main_show_preferences (PlankAbstractMain* self,
+                                           PlankDockController* controller);
+static void ___lambda93__g_simple_action_activate (GSimpleAction* _sender,
+                                            GVariant* parameter,
+                                            gpointer self);
+static void __lambda96_ (PlankAbstractMain* self);
+static void plank_abstract_main_show_about (PlankAbstractMain* self);
+static void ___lambda96__g_simple_action_activate (GSimpleAction* _sender,
+                                            GVariant* parameter,
+                                            gpointer self);
+static void __lambda99_ (PlankAbstractMain* self);
+static void ___lambda99__g_simple_action_activate (GSimpleAction* _sender,
+                                            GVariant* parameter,
+                                            gpointer self);
+static void __lambda97_ (PlankAbstractMain* self);
+static void ___lambda97__gtk_dialog_response (GtkDialog* _sender,
                                        gint response_id,
                                        gpointer self);
-static void __lambda93_ (PlankAbstractMain* self);
-static void ___lambda93__gtk_widget_hide (GtkWidget* _sender,
+static void __lambda98_ (PlankAbstractMain* self);
+static void ___lambda98__gtk_widget_hide (GtkWidget* _sender,
                                    gpointer self);
-static void __lambda89_ (PlankAbstractMain* self);
-static void ___lambda89__gtk_widget_destroy (GtkWidget* _sender,
+static void __lambda94_ (PlankAbstractMain* self);
+static void ___lambda94__gtk_widget_destroy (GtkWidget* _sender,
                                       gpointer self);
-static void __lambda90_ (PlankAbstractMain* self);
-static void ___lambda90__gtk_widget_hide (GtkWidget* _sender,
+static void __lambda95_ (PlankAbstractMain* self);
+static void ___lambda95__gtk_widget_hide (GtkWidget* _sender,
                                    gpointer self);
 static gchar** _vala_array_dup3 (gchar** self,
                           gssize length);
@@ -877,61 +877,13 @@ plank_abstract_main_remove_dock (PlankAbstractMain* self,
  * Creates the actions and adds them to this {@link GLib.Application}.
  */
 static void
-__lambda86_ (PlankAbstractMain* self)
+__lambda91_ (PlankAbstractMain* self)
 {
 	PlankSystem* _tmp0_;
 	const gchar* _tmp1_;
 	_tmp0_ = plank_system_get_default ();
 	_tmp1_ = self->priv->_help_url;
 	plank_system_open_uri (_tmp0_, _tmp1_);
-}
-
-static void
-___lambda86__g_simple_action_activate (GSimpleAction* _sender,
-                                       GVariant* parameter,
-                                       gpointer self)
-{
-	__lambda86_ ((PlankAbstractMain*) self);
-}
-
-static void
-__lambda87_ (PlankAbstractMain* self)
-{
-	PlankSystem* _tmp0_;
-	const gchar* _tmp1_;
-	_tmp0_ = plank_system_get_default ();
-	_tmp1_ = self->priv->_translate_url;
-	plank_system_open_uri (_tmp0_, _tmp1_);
-}
-
-static void
-___lambda87__g_simple_action_activate (GSimpleAction* _sender,
-                                       GVariant* parameter,
-                                       gpointer self)
-{
-	__lambda87_ ((PlankAbstractMain*) self);
-}
-
-static void
-__lambda88_ (PlankAbstractMain* self)
-{
-	PlankDockController* _tmp0_;
-	_tmp0_ = self->priv->primary_dock;
-	plank_abstract_main_show_preferences (self, _tmp0_);
-}
-
-static void
-___lambda88__g_simple_action_activate (GSimpleAction* _sender,
-                                       GVariant* parameter,
-                                       gpointer self)
-{
-	__lambda88_ ((PlankAbstractMain*) self);
-}
-
-static void
-__lambda91_ (PlankAbstractMain* self)
-{
-	plank_abstract_main_show_about (self);
 }
 
 static void
@@ -943,17 +895,65 @@ ___lambda91__g_simple_action_activate (GSimpleAction* _sender,
 }
 
 static void
-__lambda94_ (PlankAbstractMain* self)
+__lambda92_ (PlankAbstractMain* self)
+{
+	PlankSystem* _tmp0_;
+	const gchar* _tmp1_;
+	_tmp0_ = plank_system_get_default ();
+	_tmp1_ = self->priv->_translate_url;
+	plank_system_open_uri (_tmp0_, _tmp1_);
+}
+
+static void
+___lambda92__g_simple_action_activate (GSimpleAction* _sender,
+                                       GVariant* parameter,
+                                       gpointer self)
+{
+	__lambda92_ ((PlankAbstractMain*) self);
+}
+
+static void
+__lambda93_ (PlankAbstractMain* self)
+{
+	PlankDockController* _tmp0_;
+	_tmp0_ = self->priv->primary_dock;
+	plank_abstract_main_show_preferences (self, _tmp0_);
+}
+
+static void
+___lambda93__g_simple_action_activate (GSimpleAction* _sender,
+                                       GVariant* parameter,
+                                       gpointer self)
+{
+	__lambda93_ ((PlankAbstractMain*) self);
+}
+
+static void
+__lambda96_ (PlankAbstractMain* self)
+{
+	plank_abstract_main_show_about (self);
+}
+
+static void
+___lambda96__g_simple_action_activate (GSimpleAction* _sender,
+                                       GVariant* parameter,
+                                       gpointer self)
+{
+	__lambda96_ ((PlankAbstractMain*) self);
+}
+
+static void
+__lambda99_ (PlankAbstractMain* self)
 {
 	g_application_quit ((GApplication*) self);
 }
 
 static void
-___lambda94__g_simple_action_activate (GSimpleAction* _sender,
+___lambda99__g_simple_action_activate (GSimpleAction* _sender,
                                        GVariant* parameter,
                                        gpointer self)
 {
-	__lambda94_ ((PlankAbstractMain*) self);
+	__lambda99_ ((PlankAbstractMain*) self);
 }
 
 static void
@@ -979,35 +979,35 @@ plank_abstract_main_real_create_actions (PlankAbstractMain* self)
 	_g_object_unref0 (action);
 	action = _tmp0_;
 	_tmp1_ = action;
-	g_signal_connect_object (_tmp1_, "activate", (GCallback) ___lambda86__g_simple_action_activate, self, 0);
+	g_signal_connect_object (_tmp1_, "activate", (GCallback) ___lambda91__g_simple_action_activate, self, 0);
 	_tmp2_ = action;
 	g_action_map_add_action ((GActionMap*) self, (GAction*) _tmp2_);
 	_tmp3_ = g_simple_action_new ("translate", NULL);
 	_g_object_unref0 (action);
 	action = _tmp3_;
 	_tmp4_ = action;
-	g_signal_connect_object (_tmp4_, "activate", (GCallback) ___lambda87__g_simple_action_activate, self, 0);
+	g_signal_connect_object (_tmp4_, "activate", (GCallback) ___lambda92__g_simple_action_activate, self, 0);
 	_tmp5_ = action;
 	g_action_map_add_action ((GActionMap*) self, (GAction*) _tmp5_);
 	_tmp6_ = g_simple_action_new ("preferences", NULL);
 	_g_object_unref0 (action);
 	action = _tmp6_;
 	_tmp7_ = action;
-	g_signal_connect_object (_tmp7_, "activate", (GCallback) ___lambda88__g_simple_action_activate, self, 0);
+	g_signal_connect_object (_tmp7_, "activate", (GCallback) ___lambda93__g_simple_action_activate, self, 0);
 	_tmp8_ = action;
 	g_action_map_add_action ((GActionMap*) self, (GAction*) _tmp8_);
 	_tmp9_ = g_simple_action_new ("about", NULL);
 	_g_object_unref0 (action);
 	action = _tmp9_;
 	_tmp10_ = action;
-	g_signal_connect_object (_tmp10_, "activate", (GCallback) ___lambda91__g_simple_action_activate, self, 0);
+	g_signal_connect_object (_tmp10_, "activate", (GCallback) ___lambda96__g_simple_action_activate, self, 0);
 	_tmp11_ = action;
 	g_action_map_add_action ((GActionMap*) self, (GAction*) _tmp11_);
 	_tmp12_ = g_simple_action_new ("quit", NULL);
 	_g_object_unref0 (action);
 	action = _tmp12_;
 	_tmp13_ = action;
-	g_signal_connect_object (_tmp13_, "activate", (GCallback) ___lambda94__g_simple_action_activate, self, 0);
+	g_signal_connect_object (_tmp13_, "activate", (GCallback) ___lambda99__g_simple_action_activate, self, 0);
 	_tmp14_ = action;
 	g_action_map_add_action ((GActionMap*) self, (GAction*) _tmp14_);
 	_g_object_unref0 (action);
@@ -1046,7 +1046,7 @@ plank_abstract_main_is_launcher_for_dock (PlankAbstractMain* self,
  * Displays the about dialog.
  */
 static void
-__lambda92_ (PlankAbstractMain* self)
+__lambda97_ (PlankAbstractMain* self)
 {
 	GtkAboutDialog* _tmp0_;
 	_tmp0_ = self->priv->about_dlg;
@@ -1054,15 +1054,15 @@ __lambda92_ (PlankAbstractMain* self)
 }
 
 static void
-___lambda92__gtk_dialog_response (GtkDialog* _sender,
+___lambda97__gtk_dialog_response (GtkDialog* _sender,
                                   gint response_id,
                                   gpointer self)
 {
-	__lambda92_ ((PlankAbstractMain*) self);
+	__lambda97_ ((PlankAbstractMain*) self);
 }
 
 static void
-__lambda93_ (PlankAbstractMain* self)
+__lambda98_ (PlankAbstractMain* self)
 {
 	GtkAboutDialog* _tmp0_;
 	_tmp0_ = self->priv->about_dlg;
@@ -1072,10 +1072,10 @@ __lambda93_ (PlankAbstractMain* self)
 }
 
 static void
-___lambda93__gtk_widget_hide (GtkWidget* _sender,
+___lambda98__gtk_widget_hide (GtkWidget* _sender,
                               gpointer self)
 {
-	__lambda93_ ((PlankAbstractMain*) self);
+	__lambda98_ ((PlankAbstractMain*) self);
 }
 
 static void
@@ -1308,9 +1308,9 @@ plank_abstract_main_show_about (PlankAbstractMain* self)
 	_tmp71_ = self->priv->_about_license_type;
 	gtk_about_dialog_set_license_type (_tmp70_, _tmp71_);
 	_tmp72_ = self->priv->about_dlg;
-	g_signal_connect_object ((GtkDialog*) _tmp72_, "response", (GCallback) ___lambda92__gtk_dialog_response, self, 0);
+	g_signal_connect_object ((GtkDialog*) _tmp72_, "response", (GCallback) ___lambda97__gtk_dialog_response, self, 0);
 	_tmp73_ = self->priv->about_dlg;
-	g_signal_connect_object ((GtkWidget*) _tmp73_, "hide", (GCallback) ___lambda93__gtk_widget_hide, self, 0);
+	g_signal_connect_object ((GtkWidget*) _tmp73_, "hide", (GCallback) ___lambda98__gtk_widget_hide, self, 0);
 	_tmp74_ = self->priv->about_dlg;
 	gtk_widget_show_all ((GtkWidget*) _tmp74_);
 }
@@ -1321,21 +1321,21 @@ plank_abstract_main_show_about (PlankAbstractMain* self)
  * @param controller the dock to show preferences for
  */
 static void
-__lambda89_ (PlankAbstractMain* self)
+__lambda94_ (PlankAbstractMain* self)
 {
 	_g_object_unref0 (self->priv->preferences_dlg);
 	self->priv->preferences_dlg = NULL;
 }
 
 static void
-___lambda89__gtk_widget_destroy (GtkWidget* _sender,
+___lambda94__gtk_widget_destroy (GtkWidget* _sender,
                                  gpointer self)
 {
-	__lambda89_ ((PlankAbstractMain*) self);
+	__lambda94_ ((PlankAbstractMain*) self);
 }
 
 static void
-__lambda90_ (PlankAbstractMain* self)
+__lambda95_ (PlankAbstractMain* self)
 {
 	PlankPreferencesWindow* _tmp0_;
 	_tmp0_ = self->priv->preferences_dlg;
@@ -1345,10 +1345,10 @@ __lambda90_ (PlankAbstractMain* self)
 }
 
 static void
-___lambda90__gtk_widget_hide (GtkWidget* _sender,
+___lambda95__gtk_widget_hide (GtkWidget* _sender,
                               gpointer self)
 {
-	__lambda90_ ((PlankAbstractMain*) self);
+	__lambda95_ ((PlankAbstractMain*) self);
 }
 
 static void
@@ -1391,9 +1391,9 @@ plank_abstract_main_show_preferences (PlankAbstractMain* self,
 	_tmp9_ = _tmp8_;
 	gtk_window_set_transient_for ((GtkWindow*) _tmp7_, (GtkWindow*) _tmp9_);
 	_tmp10_ = self->priv->preferences_dlg;
-	g_signal_connect_object ((GtkWidget*) _tmp10_, "destroy", (GCallback) ___lambda89__gtk_widget_destroy, self, 0);
+	g_signal_connect_object ((GtkWidget*) _tmp10_, "destroy", (GCallback) ___lambda94__gtk_widget_destroy, self, 0);
 	_tmp11_ = self->priv->preferences_dlg;
-	g_signal_connect_object ((GtkWidget*) _tmp11_, "hide", (GCallback) ___lambda90__gtk_widget_hide, self, 0);
+	g_signal_connect_object ((GtkWidget*) _tmp11_, "hide", (GCallback) ___lambda95__gtk_widget_hide, self, 0);
 	_tmp12_ = self->priv->preferences_dlg;
 	gtk_widget_show ((GtkWidget*) _tmp12_);
 }

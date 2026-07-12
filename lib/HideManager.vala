@@ -227,7 +227,11 @@ namespace Plank
 			var dock_rect = position_manager.get_cursor_region ();
 			
 			// use the dock rect and cursor location to determine if dock is hovered
-			var hovered = (x >= dock_rect.x && x < dock_rect.x + dock_rect.width
+			// Native interactive panels are an extension of the dock's hover area.
+			// Keep both reveal and zoom states alive while the pointer moves from
+			// the bar into previews, launcher, or status controls.
+			var hovered = ExternalMenuVisible
+				|| (x >= dock_rect.x && x < dock_rect.x + dock_rect.width
 				&& y >= dock_rect.y && y < dock_rect.y + dock_rect.height);
 			
 			if (Hovered != hovered) {

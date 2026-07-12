@@ -1,0 +1,27 @@
+#!/usr/bin/env sh
+
+DOCK_E="$HOME/.local/bin/dock-e"
+LIB_DIR="$HOME/.local/lib"
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
+LOG_FILE="$LOG_DIR/dock-e-autostart.log"
+
+mkdir -p "$LOG_DIR"
+
+{
+  printf '\n[%s] Dock-e autostart invoked\n' "$(date -Is)"
+
+  if pgrep -u "$(id -u)" -f "$DOCK_E" >/dev/null 2>&1; then
+    echo "Dock-e is already running"
+    exit 0
+  fi
+
+  sleep 5
+
+  if [ ! -x "$DOCK_E" ]; then
+    echo "Dock-e is not installed: $DOCK_E"
+    exit 1
+  fi
+
+  export LD_LIBRARY_PATH="$LIB_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+  exec "$DOCK_E" -n dev -d
+} >>"$LOG_FILE" 2>&1
