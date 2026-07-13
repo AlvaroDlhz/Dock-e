@@ -44,6 +44,7 @@ namespace PlankTests
 		register_command_runner_tests ();
 		register_network_service_tests ();
 		register_power_service_tests ();
+		register_update_service_tests ();
 		register_drawing_tests ();
 		register_items_tests ();
 		register_preferences_tests ();

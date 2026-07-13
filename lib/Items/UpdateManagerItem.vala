@@ -6,10 +6,9 @@ namespace Plank
 	{
 		string command;
 		bool updates_available = false;
-		uint update_timer_id = 0U;
-		uint refresh_debounce_id = 0U;
-		FileMonitor? package_monitor;
 		Gdk.Pixbuf? update_pixbuf;
+		unowned UpdateService update_service;
+		ulong update_state_changed_id = 0UL;
 
 		public UpdateManagerItem (string command)
 		{
@@ -20,28 +19,15 @@ namespace Plank
 
 		construct
 		{
-			Idle.add (() => { check_for_updates (); return false; });
-			update_timer_id = Timeout.add_seconds (300, () => {
-				check_for_updates ();
-				return true;
-			});
-			try {
-				package_monitor = File.new_for_path ("/var/lib/dpkg/status").monitor_file (
-					FileMonitorFlags.NONE, null);
-				package_monitor.changed.connect (() => schedule_immediate_check ());
-			} catch (Error e) {
-				package_monitor = null;
-			}
+			update_service = UpdateService.get_default ();
+			update_state_changed_id = update_service.state_changed.connect (sync_update_state);
+			sync_update_state ();
 		}
 
 		~UpdateManagerItem ()
 		{
-			if (update_timer_id > 0U)
-				Source.remove (update_timer_id);
-			if (refresh_debounce_id > 0U)
-				Source.remove (refresh_debounce_id);
-			if (package_monitor != null)
-				package_monitor.cancel ();
+			if (update_state_changed_id > 0UL)
+				SignalHandler.disconnect (update_service, update_state_changed_id);
 		}
 
 		public static string? available_command ()
@@ -62,38 +48,12 @@ namespace Plank
 			return false;
 		}
 
-		void check_for_updates ()
+		void sync_update_state ()
 		{
-			string output = "";
-			string error_output = "";
-			int status = 1;
-			try {
-				if (Environment.find_program_in_path ("mintupdate-cli") != null)
-					Process.spawn_command_line_sync ("mintupdate-cli list", out output, out error_output, out status);
-				else if (Environment.find_program_in_path ("apt") != null)
-					Process.spawn_command_line_sync ("apt list --upgradable", out output, out error_output, out status);
-				else if (Environment.find_program_in_path ("pkcon") != null)
-					Process.spawn_command_line_sync ("pkcon get-updates", out output, out error_output, out status);
-			} catch (SpawnError e) {
-				status = 1;
-			}
-			var available = status == 0 && (output.contains ("package         ")
-				|| output.contains ("[upgradable from:") || output.contains ("Available"));
-			if (available != updates_available) {
-				updates_available = available;
+			if (updates_available != update_service.updates_available) {
+				updates_available = update_service.updates_available;
 				reset_icon_buffer ();
 			}
-		}
-
-		void schedule_immediate_check ()
-		{
-			if (refresh_debounce_id > 0U)
-				Source.remove (refresh_debounce_id);
-			refresh_debounce_id = Timeout.add_seconds (2, () => {
-				refresh_debounce_id = 0U;
-				check_for_updates ();
-				return false;
-			});
 		}
 
 		protected override void draw_icon (Surface surface)
@@ -146,7 +106,7 @@ namespace Plank
 				var app = AppInfo.create_from_commandline (command, _("Update Manager"),
 					AppInfoCreateFlags.SUPPORTS_STARTUP_NOTIFICATION);
 				app.launch (null, null);
-				schedule_immediate_check ();
+				update_service.schedule_refresh (2);
 			} catch (Error e) {
 				warning ("Unable to open update manager: %s", e.message);
 			}

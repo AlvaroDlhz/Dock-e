@@ -147,10 +147,11 @@ gmock_tests_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 am__objects_3 = tests-AudioService.$(OBJEXT) \
 	tests-BluetoothService.$(OBJEXT) tests-CommandRunner.$(OBJEXT) \
 	tests-NetworkService.$(OBJEXT) tests-PowerService.$(OBJEXT) \
-	tests-Controller.$(OBJEXT) tests-Drawing.$(OBJEXT) \
-	tests-Items.$(OBJEXT) tests-Preferences.$(OBJEXT) \
-	tests-Widgets.$(OBJEXT) tests-Main.$(OBJEXT) \
-	tests-TestHelper.$(OBJEXT) $(am__objects_1)
+	tests-UpdateService.$(OBJEXT) tests-Controller.$(OBJEXT) \
+	tests-Drawing.$(OBJEXT) tests-Items.$(OBJEXT) \
+	tests-Preferences.$(OBJEXT) tests-Widgets.$(OBJEXT) \
+	tests-Main.$(OBJEXT) tests-TestHelper.$(OBJEXT) \
+	$(am__objects_1)
 nodist_tests_OBJECTS = $(am__objects_3) $(am__objects_1)
 tests_OBJECTS = $(nodist_tests_OBJECTS)
 tests_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -183,8 +184,10 @@ am__depfiles_remade = ./$(DEPDIR)/dock-Dock.Po \
 	./$(DEPDIR)/tests-NetworkService.Po \
 	./$(DEPDIR)/tests-PowerService.Po \
 	./$(DEPDIR)/tests-Preferences.Po \
-	./$(DEPDIR)/tests-TestHelper.Po ./$(DEPDIR)/tests-Widgets.Po \
-	gmock/$(DEPDIR)/tests-color.Po gmock/$(DEPDIR)/tests-main.Po
+	./$(DEPDIR)/tests-TestHelper.Po \
+	./$(DEPDIR)/tests-UpdateService.Po \
+	./$(DEPDIR)/tests-Widgets.Po gmock/$(DEPDIR)/tests-color.Po \
+	gmock/$(DEPDIR)/tests-main.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -489,6 +492,7 @@ tests_VALASOURCES = \
 	CommandRunner.vala \
 	NetworkService.vala \
 	PowerService.vala \
+	UpdateService.vala \
 	Controller.vala \
 	Drawing.vala \
 	Items.vala \
@@ -651,6 +655,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-PowerService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Preferences.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-TestHelper.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-UpdateService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Widgets.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@gmock/$(DEPDIR)/tests-color.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@gmock/$(DEPDIR)/tests-main.Po@am__quote@ # am--include-marker
@@ -768,6 +773,20 @@ tests-PowerService.obj: PowerService.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='PowerService.c' object='tests-PowerService.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-PowerService.obj `if test -f 'PowerService.c'; then $(CYGPATH_W) 'PowerService.c'; else $(CYGPATH_W) '$(srcdir)/PowerService.c'; fi`
+
+tests-UpdateService.o: UpdateService.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-UpdateService.o -MD -MP -MF $(DEPDIR)/tests-UpdateService.Tpo -c -o tests-UpdateService.o `test -f 'UpdateService.c' || echo '$(srcdir)/'`UpdateService.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-UpdateService.Tpo $(DEPDIR)/tests-UpdateService.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='UpdateService.c' object='tests-UpdateService.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-UpdateService.o `test -f 'UpdateService.c' || echo '$(srcdir)/'`UpdateService.c
+
+tests-UpdateService.obj: UpdateService.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-UpdateService.obj -MD -MP -MF $(DEPDIR)/tests-UpdateService.Tpo -c -o tests-UpdateService.obj `if test -f 'UpdateService.c'; then $(CYGPATH_W) 'UpdateService.c'; else $(CYGPATH_W) '$(srcdir)/UpdateService.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-UpdateService.Tpo $(DEPDIR)/tests-UpdateService.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='UpdateService.c' object='tests-UpdateService.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-UpdateService.obj `if test -f 'UpdateService.c'; then $(CYGPATH_W) 'UpdateService.c'; else $(CYGPATH_W) '$(srcdir)/UpdateService.c'; fi`
 
 tests-Controller.o: Controller.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-Controller.o -MD -MP -MF $(DEPDIR)/tests-Controller.Tpo -c -o tests-Controller.o `test -f 'Controller.c' || echo '$(srcdir)/'`Controller.c
@@ -1070,6 +1089,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/tests-PowerService.Po
 	-rm -f ./$(DEPDIR)/tests-Preferences.Po
 	-rm -f ./$(DEPDIR)/tests-TestHelper.Po
+	-rm -f ./$(DEPDIR)/tests-UpdateService.Po
 	-rm -f ./$(DEPDIR)/tests-Widgets.Po
 	-rm -f gmock/$(DEPDIR)/tests-color.Po
 	-rm -f gmock/$(DEPDIR)/tests-main.Po
@@ -1130,6 +1150,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/tests-PowerService.Po
 	-rm -f ./$(DEPDIR)/tests-Preferences.Po
 	-rm -f ./$(DEPDIR)/tests-TestHelper.Po
+	-rm -f ./$(DEPDIR)/tests-UpdateService.Po
 	-rm -f ./$(DEPDIR)/tests-Widgets.Po
 	-rm -f gmock/$(DEPDIR)/tests-color.Po
 	-rm -f gmock/$(DEPDIR)/tests-main.Po

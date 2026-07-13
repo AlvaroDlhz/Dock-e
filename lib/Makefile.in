@@ -153,6 +153,7 @@ am__objects_2 = libplank_internal_la-InternalConsts.lo \
 	Services/libplank_internal_la-CommandRunner.lo \
 	Services/libplank_internal_la-NetworkService.lo \
 	Services/libplank_internal_la-PowerService.lo \
+	Services/libplank_internal_la-UpdateService.lo \
 	Services/libplank_internal_la-Matcher.lo \
 	Services/libplank_internal_la-WindowControl.lo \
 	Services/libplank_internal_la-Utils.lo \
@@ -272,6 +273,7 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-NetworkService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-PowerService.Plo \
+	Services/$(DEPDIR)/libplank_internal_la-UpdateService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-Utils.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo \
 	Widgets/$(DEPDIR)/CompositedWindow.Plo \
@@ -867,6 +869,7 @@ libplank_internal_la_VALASOURCES = \
 	Services/CommandRunner.vala \
 	Services/NetworkService.vala \
 	Services/PowerService.vala \
+	Services/UpdateService.vala \
 	Services/Matcher.vala \
 	Services/WindowControl.vala \
 	Services/Utils.vala \
@@ -1007,6 +1010,8 @@ Services/libplank_internal_la-CommandRunner.lo:  \
 Services/libplank_internal_la-NetworkService.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-PowerService.lo:  \
+	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
+Services/libplank_internal_la-UpdateService.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-Matcher.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
@@ -1242,6 +1247,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-NetworkService.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-PowerService.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-UpdateService.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-Utils.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/CompositedWindow.Plo@am__quote@ # am--include-marker
@@ -1340,6 +1346,13 @@ Services/libplank_internal_la-PowerService.lo: Services/PowerService.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/PowerService.c' object='Services/libplank_internal_la-PowerService.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-PowerService.lo `test -f 'Services/PowerService.c' || echo '$(srcdir)/'`Services/PowerService.c
+
+Services/libplank_internal_la-UpdateService.lo: Services/UpdateService.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-UpdateService.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-UpdateService.Tpo -c -o Services/libplank_internal_la-UpdateService.lo `test -f 'Services/UpdateService.c' || echo '$(srcdir)/'`Services/UpdateService.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-UpdateService.Tpo Services/$(DEPDIR)/libplank_internal_la-UpdateService.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/UpdateService.c' object='Services/libplank_internal_la-UpdateService.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-UpdateService.lo `test -f 'Services/UpdateService.c' || echo '$(srcdir)/'`Services/UpdateService.c
 
 Services/libplank_internal_la-Matcher.lo: Services/Matcher.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-Matcher.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-Matcher.Tpo -c -o Services/libplank_internal_la-Matcher.lo `test -f 'Services/Matcher.c' || echo '$(srcdir)/'`Services/Matcher.c
@@ -1819,6 +1832,7 @@ distclean: distclean-am
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-NetworkService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-PowerService.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-UpdateService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Utils.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo
 	-rm -f Widgets/$(DEPDIR)/CompositedWindow.Plo
@@ -1938,6 +1952,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-NetworkService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-PowerService.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-UpdateService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Utils.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo
 	-rm -f Widgets/$(DEPDIR)/CompositedWindow.Plo
