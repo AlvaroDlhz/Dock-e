@@ -144,7 +144,8 @@ gmock_tests_OBJECTS = $(am_gmock_tests_OBJECTS)
 gmock_tests_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(gmock_tests_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-am__objects_3 = tests-Controller.$(OBJEXT) tests-Drawing.$(OBJEXT) \
+am__objects_3 = tests-CommandRunner.$(OBJEXT) \
+	tests-Controller.$(OBJEXT) tests-Drawing.$(OBJEXT) \
 	tests-Items.$(OBJEXT) tests-Preferences.$(OBJEXT) \
 	tests-Widgets.$(OBJEXT) tests-Main.$(OBJEXT) \
 	tests-TestHelper.$(OBJEXT) $(am__objects_1)
@@ -172,6 +173,7 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/dock-Dock.Po \
+	./$(DEPDIR)/tests-CommandRunner.Po \
 	./$(DEPDIR)/tests-Controller.Po ./$(DEPDIR)/tests-Drawing.Po \
 	./$(DEPDIR)/tests-Items.Po ./$(DEPDIR)/tests-Main.Po \
 	./$(DEPDIR)/tests-Preferences.Po \
@@ -476,6 +478,7 @@ tests_LDADD = \
 	$(NULL)
 
 tests_VALASOURCES = \
+	CommandRunner.vala \
 	Controller.vala \
 	Drawing.vala \
 	Items.vala \
@@ -627,6 +630,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dock-Dock.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-CommandRunner.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Controller.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Drawing.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Items.Po@am__quote@ # am--include-marker
@@ -680,6 +684,20 @@ dock-Dock.obj: Dock.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Dock.c' object='dock-Dock.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dock_CFLAGS) $(CFLAGS) -c -o dock-Dock.obj `if test -f 'Dock.c'; then $(CYGPATH_W) 'Dock.c'; else $(CYGPATH_W) '$(srcdir)/Dock.c'; fi`
+
+tests-CommandRunner.o: CommandRunner.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-CommandRunner.o -MD -MP -MF $(DEPDIR)/tests-CommandRunner.Tpo -c -o tests-CommandRunner.o `test -f 'CommandRunner.c' || echo '$(srcdir)/'`CommandRunner.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-CommandRunner.Tpo $(DEPDIR)/tests-CommandRunner.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='CommandRunner.c' object='tests-CommandRunner.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-CommandRunner.o `test -f 'CommandRunner.c' || echo '$(srcdir)/'`CommandRunner.c
+
+tests-CommandRunner.obj: CommandRunner.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-CommandRunner.obj -MD -MP -MF $(DEPDIR)/tests-CommandRunner.Tpo -c -o tests-CommandRunner.obj `if test -f 'CommandRunner.c'; then $(CYGPATH_W) 'CommandRunner.c'; else $(CYGPATH_W) '$(srcdir)/CommandRunner.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-CommandRunner.Tpo $(DEPDIR)/tests-CommandRunner.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='CommandRunner.c' object='tests-CommandRunner.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-CommandRunner.obj `if test -f 'CommandRunner.c'; then $(CYGPATH_W) 'CommandRunner.c'; else $(CYGPATH_W) '$(srcdir)/CommandRunner.c'; fi`
 
 tests-Controller.o: Controller.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-Controller.o -MD -MP -MF $(DEPDIR)/tests-Controller.Tpo -c -o tests-Controller.o `test -f 'Controller.c' || echo '$(srcdir)/'`Controller.c
@@ -971,6 +989,7 @@ clean-am: clean-checkPROGRAMS clean-generic clean-libtool clean-local \
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/dock-Dock.Po
+	-rm -f ./$(DEPDIR)/tests-CommandRunner.Po
 	-rm -f ./$(DEPDIR)/tests-Controller.Po
 	-rm -f ./$(DEPDIR)/tests-Drawing.Po
 	-rm -f ./$(DEPDIR)/tests-Items.Po
@@ -1026,6 +1045,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/dock-Dock.Po
+	-rm -f ./$(DEPDIR)/tests-CommandRunner.Po
 	-rm -f ./$(DEPDIR)/tests-Controller.Po
 	-rm -f ./$(DEPDIR)/tests-Drawing.Po
 	-rm -f ./$(DEPDIR)/tests-Items.Po

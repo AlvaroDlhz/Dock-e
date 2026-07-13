@@ -34,6 +34,7 @@ tests_LDADD = \
 	$(NULL)
 
 tests_VALASOURCES = \
+	CommandRunner.vala \
 	Controller.vala \
 	Drawing.vala \
 	Items.vala \
