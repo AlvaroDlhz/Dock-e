@@ -24,6 +24,8 @@ namespace Plank
 		int battery_percent = 0;
 		bool battery_charging = false;
 		uint update_timer_id = 0U;
+		AudioService? audio_service;
+		ulong audio_state_changed_id = 0UL;
 
 		public StatusIndicatorItem (StatusIndicatorKind kind)
 		{
@@ -33,6 +35,12 @@ namespace Plank
 		construct
 		{
 			Button = PopupButton.LEFT | PopupButton.RIGHT;
+			if (Kind == StatusIndicatorKind.VOLUME) {
+				audio_service = AudioService.get_default ();
+				audio_state_changed_id = audio_service.state_changed.connect (sync_audio_state);
+				sync_audio_state ();
+				return;
+			}
 			update_state ();
 			update_timer_id = Timeout.add_seconds (1, () => {
 				update_state ();
@@ -42,6 +50,8 @@ namespace Plank
 
 		~StatusIndicatorItem ()
 		{
+			if (audio_service != null && audio_state_changed_id > 0UL)
+				SignalHandler.disconnect (audio_service, audio_state_changed_id);
 			if (update_timer_id > 0U)
 				Source.remove (update_timer_id);
 		}
@@ -70,9 +80,6 @@ namespace Plank
 			switch (Kind) {
 			case StatusIndicatorKind.WIFI:
 				active = NetworkMonitor.get_default ().network_available;
-				break;
-			case StatusIndicatorKind.VOLUME:
-				update_volume_state ();
 				break;
 			case StatusIndicatorKind.BLUETOOTH:
 				active = command_output_contains ("bluetoothctl show", "Powered: yes");
@@ -117,17 +124,18 @@ namespace Plank
 			}
 		}
 
-		void update_volume_state ()
+		void sync_audio_state ()
 		{
-			string output = "";
-			active = run_command ("wpctl get-volume @DEFAULT_AUDIO_SINK@", out output);
-			muted = active && output.contains ("[MUTED]");
-			volume_level = 0.0;
-			if (active) {
-				var fields = output.split (" ");
-				if (fields.length > 1)
-					volume_level = double.parse (fields[1]);
-			}
+			if (audio_service == null)
+				return;
+			var changed = active != audio_service.output_available
+				|| muted != audio_service.output_muted
+				|| Math.fabs (volume_level - audio_service.output_volume) > 0.005;
+			active = audio_service.output_available;
+			muted = audio_service.output_muted;
+			volume_level = audio_service.output_volume;
+			if (changed)
+				reset_icon_buffer ();
 		}
 
 		static bool command_output_contains (string command, string needle)
@@ -185,8 +193,8 @@ namespace Plank
 				return AnimationType.DARKEN;
 			}
 			if (Kind == StatusIndicatorKind.VOLUME && button == PopupButton.MIDDLE) {
-				run_action ("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle");
-				update_state ();
+				if (audio_service != null)
+					audio_service.set_muted.begin (AudioTarget.OUTPUT, !audio_service.output_muted);
 			}
 
 			return AnimationType.NONE;
@@ -196,11 +204,10 @@ namespace Plank
 			Gdk.ModifierType mod, uint32 event_time)
 		{
 			if (Kind == StatusIndicatorKind.VOLUME) {
-				if (direction == Gdk.ScrollDirection.UP)
-					run_action ("wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+");
-				else if (direction == Gdk.ScrollDirection.DOWN)
-					run_action ("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-");
-				update_state ();
+				if (audio_service != null && direction == Gdk.ScrollDirection.UP)
+					audio_service.adjust_volume (AudioTarget.OUTPUT, 0.05, 1.0);
+				else if (audio_service != null && direction == Gdk.ScrollDirection.DOWN)
+					audio_service.adjust_volume (AudioTarget.OUTPUT, -0.05, 1.0);
 			}
 
 			return AnimationType.NONE;
@@ -245,12 +252,12 @@ namespace Plank
 			var scale = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 0.0, 100.0, 1.0);
 			scale.width_request = 190;
 			scale.draw_value = false;
-			scale.set_value (get_volume_percent ());
+			scale.set_value (audio_service != null ? audio_service.output_volume * 100.0 : 0.0);
 			var percent = new Gtk.Label ("%.0f%%".printf (scale.get_value ())) { width_request = 42, xalign = 1.0f };
 			scale.value_changed.connect (() => {
-				run_action ("wpctl set-volume @DEFAULT_AUDIO_SINK@ %.0f%%".printf (scale.get_value ()));
+				if (audio_service != null)
+					audio_service.set_volume (AudioTarget.OUTPUT, scale.get_value () / 100.0);
 				percent.label = "%.0f%%".printf (scale.get_value ());
-				update_state ();
 			});
 			scale_box.pack_start (volume_icon, false, false, 0);
 			scale_box.pack_start (scale, true, true, 0);
@@ -261,8 +268,8 @@ namespace Plank
 			var mute_item = new Gtk.CheckMenuItem.with_mnemonic (_("_Mute"));
 			mute_item.active = muted;
 			mute_item.activate.connect (() => {
-				run_action ("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle");
-				update_state ();
+				if (audio_service != null)
+					audio_service.set_muted.begin (AudioTarget.OUTPUT, mute_item.active);
 			});
 			items.add (mute_item);
 			items.add (settings_item (_("Sound _Settings"), "sound"));
@@ -409,17 +416,6 @@ namespace Plank
 			var item = create_menu_item (label, "preferences-system-symbolic");
 			item.activate.connect (() => launch_command ("gnome-control-center " + panel));
 			return item;
-		}
-
-		double get_volume_percent ()
-		{
-			string output;
-			if (!run_command ("wpctl get-volume @DEFAULT_AUDIO_SINK@", out output))
-				return 0.0;
-			var fields = output.split (" ");
-			if (fields.length < 2)
-				return 0.0;
-			return double.parse (fields[1]) * 100.0;
 		}
 
 		protected override void draw_icon (Surface surface)

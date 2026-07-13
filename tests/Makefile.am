@@ -34,6 +34,7 @@ tests_LDADD = \
 	$(NULL)
 
 tests_VALASOURCES = \
+	AudioService.vala \
 	CommandRunner.vala \
 	Controller.vala \
 	Drawing.vala \

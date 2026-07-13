@@ -144,11 +144,12 @@ gmock_tests_OBJECTS = $(am_gmock_tests_OBJECTS)
 gmock_tests_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(gmock_tests_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-am__objects_3 = tests-CommandRunner.$(OBJEXT) \
-	tests-Controller.$(OBJEXT) tests-Drawing.$(OBJEXT) \
-	tests-Items.$(OBJEXT) tests-Preferences.$(OBJEXT) \
-	tests-Widgets.$(OBJEXT) tests-Main.$(OBJEXT) \
-	tests-TestHelper.$(OBJEXT) $(am__objects_1)
+am__objects_3 = tests-AudioService.$(OBJEXT) \
+	tests-CommandRunner.$(OBJEXT) tests-Controller.$(OBJEXT) \
+	tests-Drawing.$(OBJEXT) tests-Items.$(OBJEXT) \
+	tests-Preferences.$(OBJEXT) tests-Widgets.$(OBJEXT) \
+	tests-Main.$(OBJEXT) tests-TestHelper.$(OBJEXT) \
+	$(am__objects_1)
 nodist_tests_OBJECTS = $(am__objects_3) $(am__objects_1)
 tests_OBJECTS = $(nodist_tests_OBJECTS)
 tests_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -173,6 +174,7 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/dock-Dock.Po \
+	./$(DEPDIR)/tests-AudioService.Po \
 	./$(DEPDIR)/tests-CommandRunner.Po \
 	./$(DEPDIR)/tests-Controller.Po ./$(DEPDIR)/tests-Drawing.Po \
 	./$(DEPDIR)/tests-Items.Po ./$(DEPDIR)/tests-Main.Po \
@@ -478,6 +480,7 @@ tests_LDADD = \
 	$(NULL)
 
 tests_VALASOURCES = \
+	AudioService.vala \
 	CommandRunner.vala \
 	Controller.vala \
 	Drawing.vala \
@@ -630,6 +633,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dock-Dock.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-AudioService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-CommandRunner.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Controller.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Drawing.Po@am__quote@ # am--include-marker
@@ -684,6 +688,20 @@ dock-Dock.obj: Dock.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Dock.c' object='dock-Dock.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dock_CFLAGS) $(CFLAGS) -c -o dock-Dock.obj `if test -f 'Dock.c'; then $(CYGPATH_W) 'Dock.c'; else $(CYGPATH_W) '$(srcdir)/Dock.c'; fi`
+
+tests-AudioService.o: AudioService.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-AudioService.o -MD -MP -MF $(DEPDIR)/tests-AudioService.Tpo -c -o tests-AudioService.o `test -f 'AudioService.c' || echo '$(srcdir)/'`AudioService.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-AudioService.Tpo $(DEPDIR)/tests-AudioService.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='AudioService.c' object='tests-AudioService.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-AudioService.o `test -f 'AudioService.c' || echo '$(srcdir)/'`AudioService.c
+
+tests-AudioService.obj: AudioService.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-AudioService.obj -MD -MP -MF $(DEPDIR)/tests-AudioService.Tpo -c -o tests-AudioService.obj `if test -f 'AudioService.c'; then $(CYGPATH_W) 'AudioService.c'; else $(CYGPATH_W) '$(srcdir)/AudioService.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-AudioService.Tpo $(DEPDIR)/tests-AudioService.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='AudioService.c' object='tests-AudioService.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-AudioService.obj `if test -f 'AudioService.c'; then $(CYGPATH_W) 'AudioService.c'; else $(CYGPATH_W) '$(srcdir)/AudioService.c'; fi`
 
 tests-CommandRunner.o: CommandRunner.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-CommandRunner.o -MD -MP -MF $(DEPDIR)/tests-CommandRunner.Tpo -c -o tests-CommandRunner.o `test -f 'CommandRunner.c' || echo '$(srcdir)/'`CommandRunner.c
@@ -989,6 +1007,7 @@ clean-am: clean-checkPROGRAMS clean-generic clean-libtool clean-local \
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/dock-Dock.Po
+	-rm -f ./$(DEPDIR)/tests-AudioService.Po
 	-rm -f ./$(DEPDIR)/tests-CommandRunner.Po
 	-rm -f ./$(DEPDIR)/tests-Controller.Po
 	-rm -f ./$(DEPDIR)/tests-Drawing.Po
@@ -1045,6 +1064,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/dock-Dock.Po
+	-rm -f ./$(DEPDIR)/tests-AudioService.Po
 	-rm -f ./$(DEPDIR)/tests-CommandRunner.Po
 	-rm -f ./$(DEPDIR)/tests-Controller.Po
 	-rm -f ./$(DEPDIR)/tests-Drawing.Po

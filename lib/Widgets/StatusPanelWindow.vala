@@ -38,11 +38,26 @@ namespace Plank
 		Gtk.Label? countdown_label;
 		Gtk.Label? stopwatch_label;
 		Gtk.Button? countdown_button;
+		unowned AudioService audio_service;
+		ulong audio_state_changed_id = 0UL;
+		ulong audio_devices_changed_id = 0UL;
+		Gtk.Scale? output_volume_scale;
+		Gtk.Scale? input_volume_scale;
+		Gtk.ToggleButton? output_mute_button;
+		Gtk.ToggleButton? input_mute_button;
+		Gtk.Label? output_volume_label;
+		Gtk.Label? input_volume_label;
+		Gtk.ComboBoxText? output_device_combo;
+		Gtk.ComboBoxText? input_device_combo;
+		bool updating_audio_controls = false;
 
 		public StatusPanelWindow (DockController controller)
 		{
 			Object (type: Gtk.WindowType.TOPLEVEL);
 			this.controller = controller;
+			audio_service = AudioService.get_default ();
+			audio_state_changed_id = audio_service.state_changed.connect (sync_audio_controls);
+			audio_devices_changed_id = audio_service.devices_changed.connect (sync_audio_devices);
 			decorated = false;
 			resizable = false;
 			skip_taskbar_hint = true;
@@ -97,6 +112,10 @@ namespace Plank
 
 		~StatusPanelWindow ()
 		{
+			if (audio_state_changed_id > 0UL)
+				SignalHandler.disconnect (audio_service, audio_state_changed_id);
+			if (audio_devices_changed_id > 0UL)
+				SignalHandler.disconnect (audio_service, audio_devices_changed_id);
 			if (bluetooth_refresh_id > 0U)
 				Source.remove (bluetooth_refresh_id);
 			stop_bluetooth_discovery ();
@@ -192,6 +211,14 @@ namespace Plank
 
 		void rebuild (StatusIndicatorKind kind)
 		{
+			output_volume_scale = null;
+			input_volume_scale = null;
+			output_mute_button = null;
+			input_mute_button = null;
+			output_volume_label = null;
+			input_volume_label = null;
+			output_device_combo = null;
+			input_device_combo = null;
 			clock_time_label = null;
 			clock_date_label = null;
 			clock_zone_label = null;
@@ -227,35 +254,27 @@ namespace Plank
 
 		void build_volume ()
 		{
-			string output;
-			var percent = 0.0;
-			var muted = false;
-			if (run ("wpctl get-volume @DEFAULT_AUDIO_SINK@", out output)) {
-				var fields = output.split (" ");
-				if (fields.length > 1)
-					percent = double.parse (fields[1]) * 100.0;
-				muted = output.contains ("[MUTED]");
-			}
 			content.pack_start (section_label (_("Output")), false, false, 0);
-			content.pack_start (device_selector (false), false, false, 0);
-			content.pack_start (modern_volume_bar ("@DEFAULT_AUDIO_SINK@", percent, 150,
-				"audio-volume-high-symbolic", muted), false, false, 0);
+			content.pack_start (device_selector (AudioTarget.OUTPUT), false, false, 0);
+			content.pack_start (modern_volume_bar (AudioTarget.OUTPUT, 150,
+				"audio-volume-high-symbolic"), false, false, 0);
 
 			content.pack_start (section_label (_("Microphone")), false, false, 0);
-			content.pack_start (device_selector (true), false, false, 0);
-			var mic_percent = get_wpctl_volume ("@DEFAULT_AUDIO_SOURCE@");
-			content.pack_start (modern_volume_bar ("@DEFAULT_AUDIO_SOURCE@", mic_percent, 100,
-				"audio-input-microphone-symbolic", wpctl_muted ("@DEFAULT_AUDIO_SOURCE@")), false, false, 0);
+			content.pack_start (device_selector (AudioTarget.INPUT), false, false, 0);
+			content.pack_start (modern_volume_bar (AudioTarget.INPUT, 100,
+				"audio-input-microphone-symbolic"), false, false, 0);
 
 			var settings = new Gtk.Button.with_label (_("Advanced sound settings"));
 			settings.get_style_context ().add_class ("status-action-button");
 			settings.clicked.connect (() => launch ("pavucontrol"));
 			footer.pack_start (settings, false, false, 0);
+			audio_service.refresh.begin ();
+			audio_service.refresh_devices.begin ();
 		}
 
-		Gtk.Widget modern_volume_bar (string target, double percent, double maximum,
-			string icon_name, bool muted)
+		Gtk.Widget modern_volume_bar (AudioTarget target, double maximum, string icon_name)
 		{
+			var percent = audio_service.get_volume (target) * 100.0;
 			var overlay = new Gtk.Overlay ();
 			overlay.get_style_context ().add_class ("modern-volume-bar");
 			var scale = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 0, maximum, 1);
@@ -266,12 +285,14 @@ namespace Plank
 			scale.get_style_context ().add_class ("modern-volume-scale");
 			overlay.add (scale);
 
-			var icon = icon_toggle_button (icon_name, muted);
+			var icon = icon_toggle_button (icon_name, audio_service.is_muted (target));
 			icon.halign = Gtk.Align.START;
 			icon.valign = Gtk.Align.CENTER;
 			icon.margin_start = 5;
-			icon.toggled.connect (() => run_action ("wpctl set-mute %s %s".printf (target,
-				icon.active ? "1" : "0")));
+			icon.toggled.connect (() => {
+				if (!updating_audio_controls)
+					audio_service.set_muted.begin (target, icon.active);
+			});
 			overlay.add_overlay (icon);
 
 			var value = new Gtk.Label ("%.0f%%".printf (percent));
@@ -282,9 +303,19 @@ namespace Plank
 			overlay.add_overlay (value);
 			overlay.set_overlay_pass_through (value, true);
 			scale.value_changed.connect (() => {
-				run_action ("wpctl set-volume %s %.0f%%".printf (target, scale.get_value ()));
 				value.label = "%.0f%%".printf (scale.get_value ());
+				if (!updating_audio_controls)
+					audio_service.set_volume (target, scale.get_value () / 100.0);
 			});
+			if (target == AudioTarget.OUTPUT) {
+				output_volume_scale = scale;
+				output_mute_button = icon;
+				output_volume_label = value;
+			} else {
+				input_volume_scale = scale;
+				input_mute_button = icon;
+				input_volume_label = value;
+			}
 			return overlay;
 		}
 
@@ -304,7 +335,7 @@ namespace Plank
 			return label;
 		}
 
-		Gtk.Widget device_selector (bool source)
+		Gtk.Widget device_selector (AudioTarget target)
 		{
 			var row = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
 			row.get_style_context ().add_class ("status-row");
@@ -317,46 +348,32 @@ namespace Plank
 					text_renderer.width_chars = 14;
 				}
 			}
-			string current = "";
-			string output = "";
-			run (source ? "pactl get-default-source" : "pactl get-default-sink", out current);
-			if (run (source ? "pactl list short sources" : "pactl list short sinks", out output)) {
-				foreach (unowned string line in output.split ("\n")) {
-					var fields = line.split ("\t");
-					if (fields.length < 2 || (source && fields[1].has_suffix (".monitor")))
-						continue;
-					combo.append (fields[1], friendly_device_name (fields[1]));
-				}
-			}
-			combo.active_id = current.strip ();
+			populate_audio_combo (combo, target);
 			combo.notify["popup-shown"].connect (() => {
 				device_popup_open = combo.popup_shown;
-				if (!device_popup_open && visible)
+				if (!device_popup_open && visible) {
+					sync_audio_devices ();
 					Idle.add (() => { present (); return false; });
-			});
-			combo.changed.connect (() => {
-				if (combo.active_id != null) {
-					run_action ((source ? "pactl set-default-source " : "pactl set-default-sink ") + Shell.quote (combo.active_id));
-					move_active_streams (source, combo.active_id);
 				}
 			});
+			combo.changed.connect (() => {
+				if (!updating_audio_controls && combo.active_id != null)
+					audio_service.set_default_device.begin (target, combo.active_id);
+			});
+			if (target == AudioTarget.OUTPUT)
+				output_device_combo = combo;
+			else
+				input_device_combo = combo;
 			row.pack_start (combo, true, true, 0);
 			return row;
 		}
 
-		void move_active_streams (bool source, string device)
+		void populate_audio_combo (Gtk.ComboBoxText combo, AudioTarget target)
 		{
-			string output;
-			var list_command = source ? "pactl list short source-outputs" : "pactl list short sink-inputs";
-			if (!run (list_command, out output))
-				return;
-			foreach (unowned string line in output.split ("\n")) {
-				var fields = line.split ("\t");
-				if (fields.length < 1 || fields[0] == "")
-					continue;
-				run_action ((source ? "pactl move-source-output " : "pactl move-sink-input ")
-					+ fields[0] + " " + Shell.quote (device));
-			}
+			combo.remove_all ();
+			foreach (AudioDevice device in audio_service.get_devices (target))
+				combo.append (device.id, friendly_device_name (device.name));
+			combo.active_id = audio_service.get_default_device (target);
 		}
 
 		string friendly_device_name (string name)
@@ -367,19 +384,41 @@ namespace Plank
 			return result;
 		}
 
-		double get_wpctl_volume (string target)
+		void sync_audio_controls ()
 		{
-			string output;
-			if (!run ("wpctl get-volume " + target, out output))
-				return 0.0;
-			var fields = output.split (" ");
-			return fields.length > 1 ? double.parse (fields[1]) * 100.0 : 0.0;
+			if (current_item == null || current_item.Kind != StatusIndicatorKind.VOLUME)
+				return;
+			updating_audio_controls = true;
+			update_audio_control (AudioTarget.OUTPUT, output_volume_scale,
+				output_mute_button, output_volume_label);
+			update_audio_control (AudioTarget.INPUT, input_volume_scale,
+				input_mute_button, input_volume_label);
+			updating_audio_controls = false;
 		}
 
-		bool wpctl_muted (string target)
+		void update_audio_control (AudioTarget target, Gtk.Scale? scale,
+			Gtk.ToggleButton? mute_button, Gtk.Label? value_label)
 		{
-			string output;
-			return run ("wpctl get-volume " + target, out output) && output.contains ("[MUTED]");
+			var percent = audio_service.get_volume (target) * 100.0;
+			if (scale != null && Math.fabs (scale.get_value () - percent) > 0.5)
+				scale.set_value (percent);
+			if (mute_button != null)
+				mute_button.active = audio_service.is_muted (target);
+			if (value_label != null)
+				value_label.label = "%.0f%%".printf (percent);
+		}
+
+		void sync_audio_devices ()
+		{
+			if (device_popup_open || current_item == null
+				|| current_item.Kind != StatusIndicatorKind.VOLUME)
+				return;
+			updating_audio_controls = true;
+			if (output_device_combo != null)
+				populate_audio_combo (output_device_combo, AudioTarget.OUTPUT);
+			if (input_device_combo != null)
+				populate_audio_combo (input_device_combo, AudioTarget.INPUT);
+			updating_audio_controls = false;
 		}
 
 		void build_bluetooth ()
