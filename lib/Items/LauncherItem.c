@@ -70,19 +70,19 @@ static void ___lambda64__gtk_menu_item_activate (GtkMenuItem* _sender,
                                           gpointer self);
 static void plank_launcher_item_finalize (GObject * obj);
 static GType plank_launcher_item_get_type_once (void);
-static void __lambda88_ (PlankLauncherProvider* self,
-                  gboolean expanded);
+static void __lambda112_ (PlankLauncherProvider* self,
+                   gboolean expanded);
 static void plank_launcher_provider_rebuild_tray (PlankLauncherProvider* self,
                                            gboolean expanded);
-static void ___lambda88__plank_tray_toggle_item_expansion_changed (PlankTrayToggleItem* _sender,
-                                                            gboolean expanded,
-                                                            gpointer self);
-static void __lambda90_ (PlankLauncherProvider* self);
-static void ___lambda90__plank_tray_toggle_item_tray_changed (PlankTrayToggleItem* _sender,
-                                                       gpointer self);
-static void ___lambda89_ (PlankLauncherProvider* self);
-static void ____lambda89__plank_tray_overflow_item_show_all_requested (PlankTrayOverflowItem* _sender,
-                                                                gpointer self);
+static void ___lambda112__plank_tray_toggle_item_expansion_changed (PlankTrayToggleItem* _sender,
+                                                             gboolean expanded,
+                                                             gpointer self);
+static void __lambda114_ (PlankLauncherProvider* self);
+static void ___lambda114__plank_tray_toggle_item_tray_changed (PlankTrayToggleItem* _sender,
+                                                        gpointer self);
+static void ___lambda113_ (PlankLauncherProvider* self);
+static void ____lambda113__plank_tray_overflow_item_show_all_requested (PlankTrayOverflowItem* _sender,
+                                                                 gpointer self);
 static gboolean plank_launcher_provider_real_can_accept_drop (PlankDockElement* base,
                                                        GeeArrayList* uris);
 static gboolean plank_launcher_provider_real_move_to (PlankDockContainer* base,
@@ -177,7 +177,7 @@ plank_launcher_item_real_draw_icon (PlankDockItem* base,
 			GdkPixbuf* _tmp1_ = NULL;
 			GdkPixbuf* _tmp2_;
 			GdkPixbuf* _tmp3_;
-			_tmp2_ = gdk_pixbuf_new_from_resource (PLANK_G_RESOURCE_PATH "/img/dock-menu.jpg", &_inner_error0_);
+			_tmp2_ = gdk_pixbuf_new_from_resource (PLANK_G_RESOURCE_PATH "/img/menu.svg", &_inner_error0_);
 			_tmp1_ = _tmp2_;
 			if (G_UNLIKELY (_inner_error0_ != NULL)) {
 				goto __catch0_g_error;
@@ -392,22 +392,22 @@ plank_launcher_provider_get_instance_private (PlankLauncherProvider* self)
 }
 
 static void
-__lambda88_ (PlankLauncherProvider* self,
-             gboolean expanded)
+__lambda112_ (PlankLauncherProvider* self,
+              gboolean expanded)
 {
 	plank_launcher_provider_rebuild_tray (self, expanded);
 }
 
 static void
-___lambda88__plank_tray_toggle_item_expansion_changed (PlankTrayToggleItem* _sender,
-                                                       gboolean expanded,
-                                                       gpointer self)
+___lambda112__plank_tray_toggle_item_expansion_changed (PlankTrayToggleItem* _sender,
+                                                        gboolean expanded,
+                                                        gpointer self)
 {
-	__lambda88_ ((PlankLauncherProvider*) self, expanded);
+	__lambda112_ ((PlankLauncherProvider*) self, expanded);
 }
 
 static void
-__lambda90_ (PlankLauncherProvider* self)
+__lambda114_ (PlankLauncherProvider* self)
 {
 	PlankTrayToggleItem* _tmp0_;
 	gboolean _tmp1_;
@@ -421,10 +421,10 @@ __lambda90_ (PlankLauncherProvider* self)
 }
 
 static void
-___lambda90__plank_tray_toggle_item_tray_changed (PlankTrayToggleItem* _sender,
-                                                  gpointer self)
+___lambda114__plank_tray_toggle_item_tray_changed (PlankTrayToggleItem* _sender,
+                                                   gpointer self)
 {
-	__lambda90_ ((PlankLauncherProvider*) self);
+	__lambda114_ ((PlankLauncherProvider*) self);
 }
 
 PlankLauncherProvider*
@@ -464,9 +464,9 @@ plank_launcher_provider_construct (GType object_type)
 	_tmp8_ = self->priv->tray_toggle;
 	plank_dock_container_add ((PlankDockContainer*) self, (PlankDockElement*) _tmp8_, NULL);
 	_tmp9_ = self->priv->tray_toggle;
-	g_signal_connect_object (_tmp9_, "expansion-changed", (GCallback) ___lambda88__plank_tray_toggle_item_expansion_changed, self, 0);
+	g_signal_connect_object (_tmp9_, "expansion-changed", (GCallback) ___lambda112__plank_tray_toggle_item_expansion_changed, self, 0);
 	_tmp10_ = self->priv->tray_toggle;
-	g_signal_connect_object (_tmp10_, "tray-changed", (GCallback) ___lambda90__plank_tray_toggle_item_tray_changed, self, 0);
+	g_signal_connect_object (_tmp10_, "tray-changed", (GCallback) ___lambda114__plank_tray_toggle_item_tray_changed, self, 0);
 	_g_free0 (update_command);
 	return self;
 }
@@ -478,17 +478,17 @@ plank_launcher_provider_new (void)
 }
 
 static void
-___lambda89_ (PlankLauncherProvider* self)
+___lambda113_ (PlankLauncherProvider* self)
 {
 	self->priv->show_all_tray_items = TRUE;
 	plank_launcher_provider_rebuild_tray (self, TRUE);
 }
 
 static void
-____lambda89__plank_tray_overflow_item_show_all_requested (PlankTrayOverflowItem* _sender,
-                                                           gpointer self)
+____lambda113__plank_tray_overflow_item_show_all_requested (PlankTrayOverflowItem* _sender,
+                                                            gpointer self)
 {
-	___lambda89_ ((PlankLauncherProvider*) self);
+	___lambda113_ ((PlankLauncherProvider*) self);
 }
 
 static void
@@ -654,7 +654,7 @@ plank_launcher_provider_rebuild_tray (PlankLauncherProvider* self,
 		_tmp30_ = plank_tray_overflow_item_new (_tmp29__length1 - visible_count);
 		overflow = _tmp30_;
 		_tmp31_ = overflow;
-		g_signal_connect_object (_tmp31_, "show-all-requested", (GCallback) ____lambda89__plank_tray_overflow_item_show_all_requested, self, 0);
+		g_signal_connect_object (_tmp31_, "show-all-requested", (GCallback) ____lambda113__plank_tray_overflow_item_show_all_requested, self, 0);
 		_tmp32_ = self->priv->tray_items;
 		_tmp33_ = overflow;
 		gee_abstract_collection_add ((GeeAbstractCollection*) _tmp32_, (PlankDockElement*) _tmp33_);

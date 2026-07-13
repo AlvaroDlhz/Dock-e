@@ -24,9 +24,9 @@
 #include <gio/gdesktopappinfo.h>
 #include <cairo-gobject.h>
 
-#define PLANK_LAUNCHER_WINDOW_RESULT_LIMIT 7
-#define PLANK_LAUNCHER_WINDOW_PANEL_WIDTH 420
-#define PLANK_LAUNCHER_WINDOW_PANEL_HEIGHT 510
+#define PLANK_LAUNCHER_WINDOW_RESULT_LIMIT 9
+#define PLANK_LAUNCHER_WINDOW_PANEL_WIDTH 480
+#define PLANK_LAUNCHER_WINDOW_PANEL_HEIGHT 580
 #define PLANK_LAUNCHER_WINDOW_PANEL_GAP 10
 #define PLANK_LAUNCHER_WINDOW_ANIMATION_TIME 140
 #if !defined(VALA_STRICT_C)
@@ -60,17 +60,17 @@ enum  {
 };
 static GParamSpec* plank_launcher_window_properties[PLANK_LAUNCHER_WINDOW_NUM_PROPERTIES];
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
-typedef struct _Block35Data Block35Data;
-typedef struct _Block36Data Block36Data;
+typedef struct _Block41Data Block41Data;
+typedef struct _Block42Data Block42Data;
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
-typedef struct _Block37Data Block37Data;
+typedef struct _Block43Data Block43Data;
 #define _g_key_file_unref0(var) ((var == NULL) ? NULL : (var = (g_key_file_unref (var), NULL)))
 #define __vala_GdkEventButton_free0(var) ((var == NULL) ? NULL : (var = (_vala_GdkEventButton_free (var), NULL)))
-typedef struct _Block38Data Block38Data;
+typedef struct _Block44Data Block44Data;
 typedef void (*PlankLauncherWindowContextAction) (gpointer user_data);
-typedef struct _Block39Data Block39Data;
-typedef struct _Block40Data Block40Data;
-typedef struct _Block41Data Block41Data;
+typedef struct _Block45Data Block45Data;
+typedef struct _Block46Data Block46Data;
+typedef struct _Block47Data Block47Data;
 
 struct _PlankUninstallTarget {
 	GObject parent_instance;
@@ -106,7 +106,7 @@ struct _PlankLauncherWindowPrivate {
 	GtkWindow* application_context;
 };
 
-struct _Block35Data {
+struct _Block41Data {
 	int _ref_count_;
 	PlankLauncherWindow* self;
 	GtkButton* power_button;
@@ -114,19 +114,19 @@ struct _Block35Data {
 	PlankDockController* controller;
 };
 
-struct _Block36Data {
+struct _Block42Data {
 	int _ref_count_;
 	PlankLauncherWindow* self;
 	gchar* command;
 };
 
-struct _Block37Data {
+struct _Block43Data {
 	int _ref_count_;
 	PlankLauncherWindow* self;
 	gchar* query;
 };
 
-struct _Block38Data {
+struct _Block44Data {
 	int _ref_count_;
 	PlankLauncherWindow* self;
 	PlankUninstallTarget* target;
@@ -135,13 +135,13 @@ struct _Block38Data {
 	GdkEventButton* event;
 };
 
-struct _Block39Data {
+struct _Block45Data {
 	int _ref_count_;
-	Block38Data * _data38_;
+	Block44Data * _data44_;
 	gchar* action_id;
 };
 
-struct _Block40Data {
+struct _Block46Data {
 	int _ref_count_;
 	PlankLauncherWindow* self;
 	PlankLauncherWindowContextAction action;
@@ -149,7 +149,7 @@ struct _Block40Data {
 	GDestroyNotify action_target_destroy_notify;
 };
 
-struct _Block41Data {
+struct _Block47Data {
 	int _ref_count_;
 	PlankLauncherWindow* self;
 	gdouble start;
@@ -181,16 +181,16 @@ static void _plank_launcher_window_track_active_application_plank_matcher_active
                                                                                                BamfApplication* old_app,
                                                                                                BamfApplication* new_app,
                                                                                                gpointer self);
-static Block35Data* block35_data_ref (Block35Data* _data35_);
-static void block35_data_unref (void * _userdata_);
+static Block41Data* block41_data_ref (Block41Data* _data41_);
+static void block41_data_unref (void * _userdata_);
 static GtkMenu* plank_launcher_window_create_power_menu (PlankLauncherWindow* self);
-static void __lambda39_ (Block35Data* _data35_);
+static void __lambda39_ (Block41Data* _data41_);
 static void ___lambda39__gtk_widget_show (GtkWidget* _sender,
                                    gpointer self);
-static void __lambda40_ (Block35Data* _data35_);
+static void __lambda40_ (Block41Data* _data41_);
 static void ___lambda40__gtk_widget_hide (GtkWidget* _sender,
                                    gpointer self);
-static void __lambda41_ (Block35Data* _data35_);
+static void __lambda41_ (Block41Data* _data41_);
 static void ___lambda41__gtk_button_clicked (GtkButton* _sender,
                                       gpointer self);
 static void __lambda42_ (PlankLauncherWindow* self);
@@ -219,11 +219,11 @@ static gboolean ___lambda48__gtk_widget_button_press_event (GtkWidget* _sender,
 static void plank_launcher_window_refresh_results (PlankLauncherWindow* self);
 static void _plank_launcher_window_refresh_results_gtk_editable_changed (GtkEditable* _sender,
                                                                   gpointer self);
-static gboolean __lambda60_ (Block35Data* _data35_);
+static gboolean __lambda60_ (Block41Data* _data41_);
 static gboolean ___lambda60__gtk_widget_focus_in_event (GtkWidget* _sender,
                                                  GdkEventFocus* event,
                                                  gpointer self);
-static gboolean __lambda61_ (Block35Data* _data35_);
+static gboolean __lambda61_ (Block41Data* _data41_);
 static gboolean ___lambda61__gtk_widget_focus_out_event (GtkWidget* _sender,
                                                   GdkEventFocus* event,
                                                   gpointer self);
@@ -243,9 +243,9 @@ static GtkMenuItem* plank_launcher_window_create_power_item (PlankLauncherWindow
                                                       const gchar* title,
                                                       const gchar* icon_name,
                                                       const gchar* command);
-static Block36Data* block36_data_ref (Block36Data* _data36_);
-static void block36_data_unref (void * _userdata_);
-static void __lambda38_ (Block36Data* _data36_);
+static Block42Data* block42_data_ref (Block42Data* _data42_);
+static void block42_data_unref (void * _userdata_);
+static void __lambda38_ (Block42Data* _data42_);
 static void plank_launcher_window_run_session_action (PlankLauncherWindow* self,
                                                const gchar* command);
 static void ___lambda38__gtk_menu_item_activate (GtkMenuItem* _sender,
@@ -267,8 +267,8 @@ static void plank_launcher_window_animate_to (PlankLauncherWindow* self,
                                        gdouble target,
                                        gboolean hide_when_done);
 static gboolean ___lambda63__gsource_func (gpointer self);
-static Block37Data* block37_data_ref (Block37Data* _data37_);
-static void block37_data_unref (void * _userdata_);
+static Block43Data* block43_data_ref (Block43Data* _data43_);
+static void block43_data_unref (void * _userdata_);
 static gint plank_launcher_window_usage_count (PlankLauncherWindow* self,
                                         GAppInfo* app);
 static gint plank_launcher_window_fuzzy_score (PlankLauncherWindow* self,
@@ -276,7 +276,7 @@ static gint plank_launcher_window_fuzzy_score (PlankLauncherWindow* self,
                                         const gchar* query);
 static gchar* plank_launcher_window_searchable_text (PlankLauncherWindow* self,
                                               GAppInfo* app);
-static gint __lambda43_ (Block37Data* _data37_,
+static gint __lambda43_ (Block43Data* _data43_,
                   GAppInfo* a,
                   GAppInfo* b);
 static gint plank_launcher_window_compare_results (PlankLauncherWindow* self,
@@ -296,8 +296,8 @@ static gchar* plank_launcher_window_usage_path (PlankLauncherWindow* self);
 static void plank_launcher_window_save_usage (PlankLauncherWindow* self);
 static GdkEventButton* _vala_GdkEventButton_copy (GdkEventButton* self);
 static void _vala_GdkEventButton_free (GdkEventButton* self);
-static Block38Data* block38_data_ref (Block38Data* _data38_);
-static void block38_data_unref (void * _userdata_);
+static Block44Data* block44_data_ref (Block44Data* _data44_);
+static void block44_data_unref (void * _userdata_);
 static PlankUninstallTarget* plank_launcher_window_detect_uninstall_target (PlankLauncherWindow* self,
                                                                      GAppInfo* app);
 static GtkButton* plank_launcher_window_context_action_button (PlankLauncherWindow* self,
@@ -306,13 +306,13 @@ static GtkButton* plank_launcher_window_context_action_button (PlankLauncherWind
                                                         PlankLauncherWindowContextAction action,
                                                         gpointer action_target,
                                                         GDestroyNotify action_target_destroy_notify);
-static void __lambda50_ (Block38Data* _data38_);
+static void __lambda50_ (Block44Data* _data44_);
 static void ___lambda50__plank_launcher_window_context_action (gpointer self);
-static Block39Data* block39_data_ref (Block39Data* _data39_);
-static void block39_data_unref (void * _userdata_);
-static void _____lambda51_ (Block39Data* _data39_);
+static Block45Data* block45_data_ref (Block45Data* _data45_);
+static void block45_data_unref (void * _userdata_);
+static void _____lambda51_ (Block45Data* _data45_);
 static void ______lambda51__plank_launcher_window_context_action (gpointer self);
-static void ___lambda52_ (Block38Data* _data38_);
+static void ___lambda52_ (Block44Data* _data44_);
 static void plank_launcher_window_confirm_uninstall (PlankLauncherWindow* self,
                                               GAppInfo* app,
                                               PlankUninstallTarget* target);
@@ -331,11 +331,11 @@ static gboolean __lambda58_ (PlankLauncherWindow* self,
 static gboolean ___lambda58__gtk_widget_key_press_event (GtkWidget* _sender,
                                                   GdkEventKey* event,
                                                   gpointer self);
-static gboolean __lambda59_ (Block38Data* _data38_);
+static gboolean __lambda59_ (Block44Data* _data44_);
 static gboolean ___lambda59__gsource_func (gpointer self);
-static Block40Data* block40_data_ref (Block40Data* _data40_);
-static void block40_data_unref (void * _userdata_);
-static void __lambda49_ (Block40Data* _data40_);
+static Block46Data* block46_data_ref (Block46Data* _data46_);
+static void block46_data_unref (void * _userdata_);
+static void __lambda49_ (Block46Data* _data46_);
 static void ___lambda49__gtk_button_clicked (GtkButton* _sender,
                                       gpointer self);
 static gboolean plank_launcher_window_run_sync (const gchar* command,
@@ -350,9 +350,9 @@ static void ____lambda53__gchild_watch_func (GPid pid,
                                       gpointer self);
 static void plank_launcher_window_move_selection (PlankLauncherWindow* self,
                                            gint delta);
-static Block41Data* block41_data_ref (Block41Data* _data41_);
-static void block41_data_unref (void * _userdata_);
-static gboolean __lambda47_ (Block41Data* _data41_);
+static Block47Data* block47_data_ref (Block47Data* _data47_);
+static void block47_data_unref (void * _userdata_);
+static gboolean __lambda47_ (Block47Data* _data47_);
 static gboolean ___lambda47__gsource_func (gpointer self);
 static void plank_launcher_window_finalize (GObject * obj);
 static GType plank_launcher_window_get_type_once (void);
@@ -465,42 +465,42 @@ _g_object_ref0 (gpointer self)
 	return self ? g_object_ref (self) : NULL;
 }
 
-static Block35Data*
-block35_data_ref (Block35Data* _data35_)
+static Block41Data*
+block41_data_ref (Block41Data* _data41_)
 {
-	g_atomic_int_inc (&_data35_->_ref_count_);
-	return _data35_;
+	g_atomic_int_inc (&_data41_->_ref_count_);
+	return _data41_;
 }
 
 static void
-block35_data_unref (void * _userdata_)
+block41_data_unref (void * _userdata_)
 {
-	Block35Data* _data35_;
-	_data35_ = (Block35Data*) _userdata_;
-	if (g_atomic_int_dec_and_test (&_data35_->_ref_count_)) {
+	Block41Data* _data41_;
+	_data41_ = (Block41Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data41_->_ref_count_)) {
 		PlankLauncherWindow* self;
-		self = _data35_->self;
-		_g_object_unref0 (_data35_->search_box);
-		_g_object_unref0 (_data35_->power_button);
-		_g_object_unref0 (_data35_->controller);
+		self = _data41_->self;
+		_g_object_unref0 (_data41_->search_box);
+		_g_object_unref0 (_data41_->power_button);
+		_g_object_unref0 (_data41_->controller);
 		_g_object_unref0 (self);
-		g_slice_free (Block35Data, _data35_);
+		g_slice_free (Block41Data, _data41_);
 	}
 }
 
 static void
-__lambda39_ (Block35Data* _data35_)
+__lambda39_ (Block41Data* _data41_)
 {
 	PlankLauncherWindow* self;
 	PlankHideManager* _tmp0_;
 	PlankHideManager* _tmp1_;
 	PlankHideManager* _tmp2_;
 	PlankHideManager* _tmp3_;
-	self = _data35_->self;
-	_tmp0_ = plank_dock_controller_get_hide_manager (_data35_->controller);
+	self = _data41_->self;
+	_tmp0_ = plank_dock_controller_get_hide_manager (_data41_->controller);
 	_tmp1_ = _tmp0_;
 	plank_hide_manager_set_ExternalMenuVisible (_tmp1_, TRUE);
-	_tmp2_ = plank_dock_controller_get_hide_manager (_data35_->controller);
+	_tmp2_ = plank_dock_controller_get_hide_manager (_data41_->controller);
 	_tmp3_ = _tmp2_;
 	plank_hide_manager_update_hovered (_tmp3_);
 }
@@ -513,18 +513,18 @@ ___lambda39__gtk_widget_show (GtkWidget* _sender,
 }
 
 static void
-__lambda40_ (Block35Data* _data35_)
+__lambda40_ (Block41Data* _data41_)
 {
 	PlankLauncherWindow* self;
 	PlankHideManager* _tmp0_;
 	PlankHideManager* _tmp1_;
 	PlankHideManager* _tmp2_;
 	PlankHideManager* _tmp3_;
-	self = _data35_->self;
-	_tmp0_ = plank_dock_controller_get_hide_manager (_data35_->controller);
+	self = _data41_->self;
+	_tmp0_ = plank_dock_controller_get_hide_manager (_data41_->controller);
 	_tmp1_ = _tmp0_;
 	plank_hide_manager_set_ExternalMenuVisible (_tmp1_, FALSE);
-	_tmp2_ = plank_dock_controller_get_hide_manager (_data35_->controller);
+	_tmp2_ = plank_dock_controller_get_hide_manager (_data41_->controller);
 	_tmp3_ = _tmp2_;
 	plank_hide_manager_update_hovered (_tmp3_);
 }
@@ -537,13 +537,13 @@ ___lambda40__gtk_widget_hide (GtkWidget* _sender,
 }
 
 static void
-__lambda41_ (Block35Data* _data35_)
+__lambda41_ (Block41Data* _data41_)
 {
 	PlankLauncherWindow* self;
 	GtkMenu* _tmp0_;
-	self = _data35_->self;
+	self = _data41_->self;
 	_tmp0_ = self->priv->power_menu;
-	gtk_menu_popup_at_widget (_tmp0_, (GtkWidget*) _data35_->power_button, GDK_GRAVITY_SOUTH_EAST, GDK_GRAVITY_NORTH_EAST, NULL);
+	gtk_menu_popup_at_widget (_tmp0_, (GtkWidget*) _data41_->power_button, GDK_GRAVITY_SOUTH_EAST, GDK_GRAVITY_NORTH_EAST, NULL);
 }
 
 static void
@@ -680,13 +680,13 @@ _plank_launcher_window_refresh_results_gtk_editable_changed (GtkEditable* _sende
 }
 
 static gboolean
-__lambda60_ (Block35Data* _data35_)
+__lambda60_ (Block41Data* _data41_)
 {
 	PlankLauncherWindow* self;
 	GtkStyleContext* _tmp0_;
 	gboolean result;
-	self = _data35_->self;
-	_tmp0_ = gtk_widget_get_style_context ((GtkWidget*) _data35_->search_box);
+	self = _data41_->self;
+	_tmp0_ = gtk_widget_get_style_context ((GtkWidget*) _data41_->search_box);
 	gtk_style_context_add_class (_tmp0_, "launcher-search-focused");
 	result = FALSE;
 	return result;
@@ -703,13 +703,13 @@ ___lambda60__gtk_widget_focus_in_event (GtkWidget* _sender,
 }
 
 static gboolean
-__lambda61_ (Block35Data* _data35_)
+__lambda61_ (Block41Data* _data41_)
 {
 	PlankLauncherWindow* self;
 	GtkStyleContext* _tmp0_;
 	gboolean result;
-	self = _data35_->self;
-	_tmp0_ = gtk_widget_get_style_context ((GtkWidget*) _data35_->search_box);
+	self = _data41_->self;
+	_tmp0_ = gtk_widget_get_style_context ((GtkWidget*) _data41_->search_box);
 	gtk_style_context_remove_class (_tmp0_, "launcher-search-focused");
 	result = FALSE;
 	return result;
@@ -773,7 +773,7 @@ plank_launcher_window_construct (GType object_type,
                                  PlankDockController* controller)
 {
 	PlankLauncherWindow * self = NULL;
-	Block35Data* _data35_;
+	Block41Data* _data41_;
 	PlankDockController* _tmp0_;
 	GeeArrayList* _tmp1_;
 	GeeArrayList* _tmp2_;
@@ -831,14 +831,14 @@ plank_launcher_window_construct (GType object_type,
 	PlankMatcher* _tmp49_;
 	PlankMatcher* _tmp50_;
 	g_return_val_if_fail (controller != NULL, NULL);
-	_data35_ = g_slice_new0 (Block35Data);
-	_data35_->_ref_count_ = 1;
+	_data41_ = g_slice_new0 (Block41Data);
+	_data41_->_ref_count_ = 1;
 	_tmp0_ = _g_object_ref0 (controller);
-	_g_object_unref0 (_data35_->controller);
-	_data35_->controller = _tmp0_;
+	_g_object_unref0 (_data41_->controller);
+	_data41_->controller = _tmp0_;
 	self = (PlankLauncherWindow*) g_object_new (object_type, "type", GTK_WINDOW_TOPLEVEL, NULL);
-	_data35_->self = g_object_ref (self);
-	self->priv->controller = _data35_->controller;
+	_data41_->self = g_object_ref (self);
+	self->priv->controller = _data41_->controller;
 	_tmp1_ = gee_array_list_new (g_app_info_get_type (), (GBoxedCopyFunc) g_object_ref, (GDestroyNotify) g_object_unref, NULL, NULL, NULL);
 	_g_object_unref0 (self->priv->applications);
 	self->priv->applications = _tmp1_;
@@ -889,24 +889,24 @@ plank_launcher_window_construct (GType object_type,
 	gtk_style_context_add_class (_tmp15_, "launcher-navbar");
 	_tmp16_ = (GtkButton*) gtk_button_new ();
 	g_object_ref_sink (_tmp16_);
-	_data35_->power_button = _tmp16_;
-	gtk_widget_set_tooltip_text ((GtkWidget*) _data35_->power_button, _ ("Session and power options"));
-	_tmp17_ = gtk_widget_get_style_context ((GtkWidget*) _data35_->power_button);
+	_data41_->power_button = _tmp16_;
+	gtk_widget_set_tooltip_text ((GtkWidget*) _data41_->power_button, _ ("Session and power options"));
+	_tmp17_ = gtk_widget_get_style_context ((GtkWidget*) _data41_->power_button);
 	gtk_style_context_add_class (_tmp17_, "launcher-power-button");
 	_tmp18_ = (GtkImage*) gtk_image_new_from_icon_name ("system-shutdown-symbolic", (GtkIconSize) GTK_ICON_SIZE_BUTTON);
 	g_object_ref_sink (_tmp18_);
 	_tmp19_ = _tmp18_;
-	gtk_container_add ((GtkContainer*) _data35_->power_button, (GtkWidget*) _tmp19_);
+	gtk_container_add ((GtkContainer*) _data41_->power_button, (GtkWidget*) _tmp19_);
 	_g_object_unref0 (_tmp19_);
 	_tmp20_ = plank_launcher_window_create_power_menu (self);
 	_g_object_unref0 (self->priv->power_menu);
 	self->priv->power_menu = _tmp20_;
 	_tmp21_ = self->priv->power_menu;
-	g_signal_connect_data ((GtkWidget*) _tmp21_, "show", (GCallback) ___lambda39__gtk_widget_show, block35_data_ref (_data35_), (GClosureNotify) block35_data_unref, 0);
+	g_signal_connect_data ((GtkWidget*) _tmp21_, "show", (GCallback) ___lambda39__gtk_widget_show, block41_data_ref (_data41_), (GClosureNotify) block41_data_unref, 0);
 	_tmp22_ = self->priv->power_menu;
-	g_signal_connect_data ((GtkWidget*) _tmp22_, "hide", (GCallback) ___lambda40__gtk_widget_hide, block35_data_ref (_data35_), (GClosureNotify) block35_data_unref, 0);
-	g_signal_connect_data (_data35_->power_button, "clicked", (GCallback) ___lambda41__gtk_button_clicked, block35_data_ref (_data35_), (GClosureNotify) block35_data_unref, 0);
-	gtk_box_pack_end (navbar, (GtkWidget*) _data35_->power_button, FALSE, FALSE, (guint) 0);
+	g_signal_connect_data ((GtkWidget*) _tmp22_, "hide", (GCallback) ___lambda40__gtk_widget_hide, block41_data_ref (_data41_), (GClosureNotify) block41_data_unref, 0);
+	g_signal_connect_data (_data41_->power_button, "clicked", (GCallback) ___lambda41__gtk_button_clicked, block41_data_ref (_data41_), (GClosureNotify) block41_data_unref, 0);
+	gtk_box_pack_end (navbar, (GtkWidget*) _data41_->power_button, FALSE, FALSE, (guint) 0);
 	gtk_box_pack_start (panel, (GtkWidget*) navbar, FALSE, FALSE, (guint) 0);
 	_tmp23_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
 	g_object_ref_sink (_tmp23_);
@@ -957,9 +957,9 @@ plank_launcher_window_construct (GType object_type,
 	gtk_box_pack_start (panel, (GtkWidget*) result_scroll, TRUE, TRUE, (guint) 0);
 	_tmp40_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 10);
 	g_object_ref_sink (_tmp40_);
-	_data35_->search_box = _tmp40_;
-	g_object_set ((GtkWidget*) _data35_->search_box, "margin", 10, NULL);
-	_tmp41_ = gtk_widget_get_style_context ((GtkWidget*) _data35_->search_box);
+	_data41_->search_box = _tmp40_;
+	g_object_set ((GtkWidget*) _data41_->search_box, "margin", 10, NULL);
+	_tmp41_ = gtk_widget_get_style_context ((GtkWidget*) _data41_->search_box);
 	gtk_style_context_add_class (_tmp41_, "launcher-search");
 	_tmp42_ = (GtkEntry*) gtk_entry_new ();
 	g_object_ref_sink (_tmp42_);
@@ -972,12 +972,12 @@ plank_launcher_window_construct (GType object_type,
 	_tmp45_ = self->priv->search_entry;
 	g_signal_connect_object ((GtkEditable*) _tmp45_, "changed", (GCallback) _plank_launcher_window_refresh_results_gtk_editable_changed, self, 0);
 	_tmp46_ = self->priv->search_entry;
-	g_signal_connect_data ((GtkWidget*) _tmp46_, "focus-in-event", (GCallback) ___lambda60__gtk_widget_focus_in_event, block35_data_ref (_data35_), (GClosureNotify) block35_data_unref, 0);
+	g_signal_connect_data ((GtkWidget*) _tmp46_, "focus-in-event", (GCallback) ___lambda60__gtk_widget_focus_in_event, block41_data_ref (_data41_), (GClosureNotify) block41_data_unref, 0);
 	_tmp47_ = self->priv->search_entry;
-	g_signal_connect_data ((GtkWidget*) _tmp47_, "focus-out-event", (GCallback) ___lambda61__gtk_widget_focus_out_event, block35_data_ref (_data35_), (GClosureNotify) block35_data_unref, 0);
+	g_signal_connect_data ((GtkWidget*) _tmp47_, "focus-out-event", (GCallback) ___lambda61__gtk_widget_focus_out_event, block41_data_ref (_data41_), (GClosureNotify) block41_data_unref, 0);
 	_tmp48_ = self->priv->search_entry;
-	gtk_box_pack_start (_data35_->search_box, (GtkWidget*) _tmp48_, TRUE, TRUE, (guint) 0);
-	gtk_box_pack_end (panel, (GtkWidget*) _data35_->search_box, FALSE, FALSE, (guint) 0);
+	gtk_box_pack_start (_data41_->search_box, (GtkWidget*) _tmp48_, TRUE, TRUE, (guint) 0);
+	gtk_box_pack_end (panel, (GtkWidget*) _data41_->search_box, FALSE, FALSE, (guint) 0);
 	g_signal_connect_object ((GtkWidget*) self, "key-press-event", (GCallback) _plank_launcher_window_handle_key_press_gtk_widget_key_press_event, self, 0);
 	g_signal_connect_object ((GtkWidget*) self, "focus-out-event", (GCallback) ___lambda62__gtk_widget_focus_out_event, self, 0);
 	plank_launcher_window_index_applications (self);
@@ -991,8 +991,8 @@ plank_launcher_window_construct (GType object_type,
 	_g_object_unref0 (navbar);
 	_g_object_unref0 (panel);
 	_g_object_unref0 (rgba_visual);
-	block35_data_unref (_data35_);
-	_data35_ = NULL;
+	block41_data_unref (_data41_);
+	_data41_ = NULL;
 	return self;
 }
 
@@ -1077,33 +1077,33 @@ plank_launcher_window_create_power_menu (PlankLauncherWindow* self)
 	return result;
 }
 
-static Block36Data*
-block36_data_ref (Block36Data* _data36_)
+static Block42Data*
+block42_data_ref (Block42Data* _data42_)
 {
-	g_atomic_int_inc (&_data36_->_ref_count_);
-	return _data36_;
+	g_atomic_int_inc (&_data42_->_ref_count_);
+	return _data42_;
 }
 
 static void
-block36_data_unref (void * _userdata_)
+block42_data_unref (void * _userdata_)
 {
-	Block36Data* _data36_;
-	_data36_ = (Block36Data*) _userdata_;
-	if (g_atomic_int_dec_and_test (&_data36_->_ref_count_)) {
+	Block42Data* _data42_;
+	_data42_ = (Block42Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data42_->_ref_count_)) {
 		PlankLauncherWindow* self;
-		self = _data36_->self;
-		_g_free0 (_data36_->command);
+		self = _data42_->self;
+		_g_free0 (_data42_->command);
 		_g_object_unref0 (self);
-		g_slice_free (Block36Data, _data36_);
+		g_slice_free (Block42Data, _data42_);
 	}
 }
 
 static void
-__lambda38_ (Block36Data* _data36_)
+__lambda38_ (Block42Data* _data42_)
 {
 	PlankLauncherWindow* self;
-	self = _data36_->self;
-	plank_launcher_window_run_session_action (self, _data36_->command);
+	self = _data42_->self;
+	plank_launcher_window_run_session_action (self, _data42_->command);
 }
 
 static void
@@ -1119,7 +1119,7 @@ plank_launcher_window_create_power_item (PlankLauncherWindow* self,
                                          const gchar* icon_name,
                                          const gchar* command)
 {
-	Block36Data* _data36_;
+	Block42Data* _data42_;
 	gchar* _tmp0_;
 	GtkMenuItem* item = NULL;
 	GtkMenuItem* _tmp1_;
@@ -1134,12 +1134,12 @@ plank_launcher_window_create_power_item (PlankLauncherWindow* self,
 	g_return_val_if_fail (title != NULL, NULL);
 	g_return_val_if_fail (icon_name != NULL, NULL);
 	g_return_val_if_fail (command != NULL, NULL);
-	_data36_ = g_slice_new0 (Block36Data);
-	_data36_->_ref_count_ = 1;
-	_data36_->self = g_object_ref (self);
+	_data42_ = g_slice_new0 (Block42Data);
+	_data42_->_ref_count_ = 1;
+	_data42_->self = g_object_ref (self);
 	_tmp0_ = g_strdup (command);
-	_g_free0 (_data36_->command);
-	_data36_->command = _tmp0_;
+	_g_free0 (_data42_->command);
+	_data42_->command = _tmp0_;
 	_tmp1_ = (GtkMenuItem*) gtk_menu_item_new ();
 	g_object_ref_sink (_tmp1_);
 	item = _tmp1_;
@@ -1158,11 +1158,11 @@ plank_launcher_window_create_power_item (PlankLauncherWindow* self,
 	gtk_box_pack_start (box, (GtkWidget*) _tmp6_, TRUE, TRUE, (guint) 0);
 	_g_object_unref0 (_tmp6_);
 	gtk_container_add ((GtkContainer*) item, (GtkWidget*) box);
-	g_signal_connect_data (item, "activate", (GCallback) ___lambda38__gtk_menu_item_activate, block36_data_ref (_data36_), (GClosureNotify) block36_data_unref, 0);
+	g_signal_connect_data (item, "activate", (GCallback) ___lambda38__gtk_menu_item_activate, block42_data_ref (_data42_), (GClosureNotify) block42_data_unref, 0);
 	result = item;
 	_g_object_unref0 (box);
-	block36_data_unref (_data36_);
-	_data36_ = NULL;
+	block42_data_unref (_data42_);
+	_data42_ = NULL;
 	return result;
 }
 
@@ -1561,39 +1561,39 @@ plank_launcher_window_show_for_item (PlankLauncherWindow* self,
 	g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ___lambda63__gsource_func, g_object_ref (self), g_object_unref);
 }
 
-static Block37Data*
-block37_data_ref (Block37Data* _data37_)
+static Block43Data*
+block43_data_ref (Block43Data* _data43_)
 {
-	g_atomic_int_inc (&_data37_->_ref_count_);
-	return _data37_;
+	g_atomic_int_inc (&_data43_->_ref_count_);
+	return _data43_;
 }
 
 static void
-block37_data_unref (void * _userdata_)
+block43_data_unref (void * _userdata_)
 {
-	Block37Data* _data37_;
-	_data37_ = (Block37Data*) _userdata_;
-	if (g_atomic_int_dec_and_test (&_data37_->_ref_count_)) {
+	Block43Data* _data43_;
+	_data43_ = (Block43Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data43_->_ref_count_)) {
 		PlankLauncherWindow* self;
-		self = _data37_->self;
-		_g_free0 (_data37_->query);
+		self = _data43_->self;
+		_g_free0 (_data43_->query);
 		_g_object_unref0 (self);
-		g_slice_free (Block37Data, _data37_);
+		g_slice_free (Block43Data, _data43_);
 	}
 }
 
 static gint
-__lambda43_ (Block37Data* _data37_,
+__lambda43_ (Block43Data* _data43_,
              GAppInfo* a,
              GAppInfo* b)
 {
 	PlankLauncherWindow* self;
 	const gchar* _tmp0_;
 	gint result;
-	self = _data37_->self;
+	self = _data43_->self;
 	g_return_val_if_fail (a != NULL, 0);
 	g_return_val_if_fail (b != NULL, 0);
-	_tmp0_ = _data37_->query;
+	_tmp0_ = _data43_->query;
 	result = plank_launcher_window_compare_results (self, a, b, _tmp0_);
 	return result;
 }
@@ -1689,7 +1689,7 @@ ____lambda44__gsource_func (gpointer self)
 static void
 plank_launcher_window_refresh_results (PlankLauncherWindow* self)
 {
-	Block37Data* _data37_;
+	Block43Data* _data43_;
 	GtkListBox* _tmp0_;
 	GList* _tmp1_;
 	GeeArrayList* _tmp4_;
@@ -1717,9 +1717,9 @@ plank_launcher_window_refresh_results (PlankLauncherWindow* self)
 	gboolean _tmp89_;
 	gboolean _tmp90_;
 	g_return_if_fail (self != NULL);
-	_data37_ = g_slice_new0 (Block37Data);
-	_data37_->_ref_count_ = 1;
-	_data37_->self = g_object_ref (self);
+	_data43_ = g_slice_new0 (Block43Data);
+	_data43_->_ref_count_ = 1;
+	_data43_->self = g_object_ref (self);
 	_tmp0_ = self->priv->result_list;
 	_tmp1_ = gtk_container_get_children ((GtkContainer*) _tmp0_);
 	{
@@ -1749,7 +1749,7 @@ plank_launcher_window_refresh_results (PlankLauncherWindow* self)
 	_tmp10_ = g_utf8_strdown (_tmp9_, (gssize) -1);
 	_tmp11_ = _tmp10_;
 	_g_free0 (_tmp9_);
-	_data37_->query = _tmp11_;
+	_data43_->query = _tmp11_;
 	_tmp12_ = gee_array_list_new (g_app_info_get_type (), (GBoxedCopyFunc) g_object_ref, (GDestroyNotify) g_object_unref, NULL, NULL, NULL);
 	matches = _tmp12_;
 	{
@@ -1786,7 +1786,7 @@ plank_launcher_window_refresh_results (PlankLauncherWindow* self)
 			_tmp19_ = _app_list;
 			_tmp20_ = gee_abstract_list_get ((GeeAbstractList*) _tmp19_, _app_index);
 			app = (GAppInfo*) _tmp20_;
-			_tmp24_ = _data37_->query;
+			_tmp24_ = _data43_->query;
 			if (g_strcmp0 (_tmp24_, "") != 0) {
 				_tmp23_ = TRUE;
 			} else {
@@ -1802,7 +1802,7 @@ plank_launcher_window_refresh_results (PlankLauncherWindow* self)
 			if (_tmp22_) {
 				gboolean _tmp26_ = FALSE;
 				const gchar* _tmp27_;
-				_tmp27_ = _data37_->query;
+				_tmp27_ = _data43_->query;
 				if (g_strcmp0 (_tmp27_, "") == 0) {
 					_tmp26_ = TRUE;
 				} else {
@@ -1813,7 +1813,7 @@ plank_launcher_window_refresh_results (PlankLauncherWindow* self)
 					_tmp28_ = app;
 					_tmp29_ = plank_launcher_window_searchable_text (self, _tmp28_);
 					_tmp30_ = _tmp29_;
-					_tmp31_ = _data37_->query;
+					_tmp31_ = _data43_->query;
 					_tmp26_ = plank_launcher_window_fuzzy_score (self, _tmp30_, _tmp31_) >= 0;
 					_g_free0 (_tmp30_);
 				}
@@ -1832,12 +1832,12 @@ plank_launcher_window_refresh_results (PlankLauncherWindow* self)
 		}
 	}
 	_tmp34_ = matches;
-	gee_list_sort ((GeeList*) _tmp34_, ___lambda43__gcompare_data_func, block37_data_ref (_data37_), block37_data_unref);
+	gee_list_sort ((GeeList*) _tmp34_, ___lambda43__gcompare_data_func, block43_data_ref (_data43_), block43_data_unref);
 	if (self->priv->showing_all) {
 		_tmp36_ = TRUE;
 	} else {
 		const gchar* _tmp37_;
-		_tmp37_ = _data37_->query;
+		_tmp37_ = _data43_->query;
 		_tmp36_ = g_strcmp0 (_tmp37_, "") != 0;
 	}
 	if (_tmp36_) {
@@ -1898,7 +1898,7 @@ plank_launcher_window_refresh_results (PlankLauncherWindow* self)
 				row = _tmp52_;
 				if (self->priv->showing_all) {
 					const gchar* _tmp54_;
-					_tmp54_ = _data37_->query;
+					_tmp54_ = _data43_->query;
 					_tmp53_ = g_strcmp0 (_tmp54_, "") == 0;
 				} else {
 					_tmp53_ = FALSE;
@@ -2008,8 +2008,8 @@ plank_launcher_window_refresh_results (PlankLauncherWindow* self)
 	}
 	_g_free0 (previous_initial);
 	_g_object_unref0 (matches);
-	block37_data_unref (_data37_);
-	_data37_ = NULL;
+	block43_data_unref (_data43_);
+	_data43_ = NULL;
 }
 
 static gchar*
@@ -2792,39 +2792,39 @@ _vala_GdkEventButton_free (GdkEventButton* self)
 	g_boxed_free (gdk_event_get_type (), self);
 }
 
-static Block38Data*
-block38_data_ref (Block38Data* _data38_)
+static Block44Data*
+block44_data_ref (Block44Data* _data44_)
 {
-	g_atomic_int_inc (&_data38_->_ref_count_);
-	return _data38_;
+	g_atomic_int_inc (&_data44_->_ref_count_);
+	return _data44_;
 }
 
 static void
-block38_data_unref (void * _userdata_)
+block44_data_unref (void * _userdata_)
 {
-	Block38Data* _data38_;
-	_data38_ = (Block38Data*) _userdata_;
-	if (g_atomic_int_dec_and_test (&_data38_->_ref_count_)) {
+	Block44Data* _data44_;
+	_data44_ = (Block44Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data44_->_ref_count_)) {
 		PlankLauncherWindow* self;
-		self = _data38_->self;
-		_g_object_unref0 (_data38_->desktop);
-		_g_object_unref0 (_data38_->target);
-		_g_object_unref0 (_data38_->app);
-		__vala_GdkEventButton_free0 (_data38_->event);
+		self = _data44_->self;
+		_g_object_unref0 (_data44_->desktop);
+		_g_object_unref0 (_data44_->target);
+		_g_object_unref0 (_data44_->app);
+		__vala_GdkEventButton_free0 (_data44_->event);
 		_g_object_unref0 (self);
-		g_slice_free (Block38Data, _data38_);
+		g_slice_free (Block44Data, _data44_);
 	}
 }
 
 static void
-__lambda50_ (Block38Data* _data38_)
+__lambda50_ (Block44Data* _data44_)
 {
 	PlankLauncherWindow* self;
 	GtkWindow* _tmp2_;
 	GError* _inner_error0_ = NULL;
-	self = _data38_->self;
+	self = _data44_->self;
 	{
-		g_app_info_launch (_data38_->app, NULL, NULL, &_inner_error0_);
+		g_app_info_launch (_data44_->app, NULL, NULL, &_inner_error0_);
 		if (G_UNLIKELY (_inner_error0_ != NULL)) {
 			goto __catch0_g_error;
 		}
@@ -2859,40 +2859,40 @@ ___lambda50__plank_launcher_window_context_action (gpointer self)
 	__lambda50_ (self);
 }
 
-static Block39Data*
-block39_data_ref (Block39Data* _data39_)
+static Block45Data*
+block45_data_ref (Block45Data* _data45_)
 {
-	g_atomic_int_inc (&_data39_->_ref_count_);
-	return _data39_;
+	g_atomic_int_inc (&_data45_->_ref_count_);
+	return _data45_;
 }
 
 static void
-block39_data_unref (void * _userdata_)
+block45_data_unref (void * _userdata_)
 {
-	Block39Data* _data39_;
-	_data39_ = (Block39Data*) _userdata_;
-	if (g_atomic_int_dec_and_test (&_data39_->_ref_count_)) {
+	Block45Data* _data45_;
+	_data45_ = (Block45Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data45_->_ref_count_)) {
 		PlankLauncherWindow* self;
-		self = _data39_->_data38_->self;
-		_g_free0 (_data39_->action_id);
-		block38_data_unref (_data39_->_data38_);
-		_data39_->_data38_ = NULL;
-		g_slice_free (Block39Data, _data39_);
+		self = _data45_->_data44_->self;
+		_g_free0 (_data45_->action_id);
+		block44_data_unref (_data45_->_data44_);
+		_data45_->_data44_ = NULL;
+		g_slice_free (Block45Data, _data45_);
 	}
 }
 
 static void
-_____lambda51_ (Block39Data* _data39_)
+_____lambda51_ (Block45Data* _data45_)
 {
-	Block38Data* _data38_;
+	Block44Data* _data44_;
 	PlankLauncherWindow* self;
 	GDesktopAppInfo* _tmp0_;
 	const gchar* _tmp1_;
 	GtkWindow* _tmp2_;
-	_data38_ = _data39_->_data38_;
-	self = _data38_->self;
-	_tmp0_ = _data38_->desktop;
-	_tmp1_ = _data39_->action_id;
+	_data44_ = _data45_->_data44_;
+	self = _data44_->self;
+	_tmp0_ = _data44_->desktop;
+	_tmp1_ = _data45_->action_id;
 	g_desktop_app_info_launch_action (_tmp0_, _tmp1_, NULL);
 	_tmp2_ = self->priv->application_context;
 	gtk_widget_hide ((GtkWidget*) _tmp2_);
@@ -2906,14 +2906,17 @@ ______lambda51__plank_launcher_window_context_action (gpointer self)
 }
 
 static void
-___lambda52_ (Block38Data* _data38_)
+___lambda52_ (Block44Data* _data44_)
 {
 	PlankLauncherWindow* self;
-	PlankUninstallTarget* _tmp0_;
-	self = _data38_->self;
+	GtkWindow* _tmp0_;
+	PlankUninstallTarget* _tmp1_;
+	self = _data44_->self;
 	self->priv->context_dialog_open = TRUE;
-	_tmp0_ = _data38_->target;
-	plank_launcher_window_confirm_uninstall (self, _data38_->app, _tmp0_);
+	_tmp0_ = self->priv->application_context;
+	gtk_widget_hide ((GtkWidget*) _tmp0_);
+	_tmp1_ = _data44_->target;
+	plank_launcher_window_confirm_uninstall (self, _data44_->app, _tmp1_);
 	self->priv->context_dialog_open = FALSE;
 }
 
@@ -3011,7 +3014,7 @@ ___lambda58__gtk_widget_key_press_event (GtkWidget* _sender,
 }
 
 static gboolean
-__lambda59_ (Block38Data* _data38_)
+__lambda59_ (Block44Data* _data44_)
 {
 	PlankLauncherWindow* self;
 	gint width = 0;
@@ -3036,7 +3039,7 @@ __lambda59_ (Block38Data* _data38_)
 	GdkRectangle _tmp12_;
 	GtkWindow* _tmp13_;
 	gboolean result;
-	self = _data38_->self;
+	self = _data44_->self;
 	_tmp0_ = self->priv->application_context;
 	gtk_window_get_size (_tmp0_, &_tmp1_, &_tmp2_);
 	width = _tmp1_;
@@ -3045,17 +3048,17 @@ __lambda59_ (Block38Data* _data38_)
 	_tmp4_ = gtk_window_get_screen (_tmp3_);
 	_tmp5_ = _g_object_ref0 (_tmp4_);
 	screen = _tmp5_;
-	monitor = gdk_screen_get_monitor_at_point (screen, (gint) _data38_->event->x_root, (gint) _data38_->event->y_root);
+	monitor = gdk_screen_get_monitor_at_point (screen, (gint) _data44_->event->x_root, (gint) _data44_->event->y_root);
 	gdk_screen_get_monitor_workarea (screen, monitor, &_tmp6_);
 	workarea = _tmp6_;
 	_tmp7_ = workarea;
 	_tmp8_ = workarea;
 	_tmp9_ = workarea;
-	x = MAX (_tmp7_.x + 8, MIN (((_tmp8_.x + _tmp9_.width) - width) - 8, (gint) _data38_->event->x_root));
+	x = MAX (_tmp7_.x + 8, MIN (((_tmp8_.x + _tmp9_.width) - width) - 8, (gint) _data44_->event->x_root));
 	_tmp10_ = workarea;
 	_tmp11_ = workarea;
 	_tmp12_ = workarea;
-	y = MAX (_tmp10_.y + 8, MIN (((_tmp11_.y + _tmp12_.height) - height) - 8, (gint) _data38_->event->y_root));
+	y = MAX (_tmp10_.y + 8, MIN (((_tmp11_.y + _tmp12_.height) - height) - 8, (gint) _data44_->event->y_root));
 	_tmp13_ = self->priv->application_context;
 	gtk_window_move (_tmp13_, x, y);
 	result = FALSE;
@@ -3076,7 +3079,7 @@ plank_launcher_window_show_application_context_menu (PlankLauncherWindow* self,
                                                      GAppInfo* app,
                                                      GdkEventButton* event)
 {
-	Block38Data* _data38_;
+	Block44Data* _data44_;
 	GAppInfo* _tmp0_;
 	GdkEventButton* _tmp1_;
 	PlankUninstallTarget* _tmp2_;
@@ -3143,17 +3146,17 @@ plank_launcher_window_show_application_context_menu (PlankLauncherWindow* self,
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (app != NULL);
 	g_return_if_fail (event != NULL);
-	_data38_ = g_slice_new0 (Block38Data);
-	_data38_->_ref_count_ = 1;
-	_data38_->self = g_object_ref (self);
+	_data44_ = g_slice_new0 (Block44Data);
+	_data44_->_ref_count_ = 1;
+	_data44_->self = g_object_ref (self);
 	_tmp0_ = _g_object_ref0 (app);
-	_g_object_unref0 (_data38_->app);
-	_data38_->app = _tmp0_;
+	_g_object_unref0 (_data44_->app);
+	_data44_->app = _tmp0_;
 	_tmp1_ = __vala_GdkEventButton_copy0 (event);
-	__vala_GdkEventButton_free0 (_data38_->event);
-	_data38_->event = _tmp1_;
-	_tmp2_ = plank_launcher_window_detect_uninstall_target (self, _data38_->app);
-	_data38_->target = _tmp2_;
+	__vala_GdkEventButton_free0 (_data44_->event);
+	_data44_->event = _tmp1_;
+	_tmp2_ = plank_launcher_window_detect_uninstall_target (self, _data44_->app);
+	_data44_->target = _tmp2_;
 	_tmp3_ = self->priv->application_context;
 	if (_tmp3_ != NULL) {
 		GtkWindow* _tmp4_;
@@ -3195,11 +3198,11 @@ plank_launcher_window_show_application_context_menu (PlankLauncherWindow* self,
 	_tmp20_ = header;
 	_tmp21_ = gtk_widget_get_style_context ((GtkWidget*) _tmp20_);
 	gtk_style_context_add_class (_tmp21_, "app-context-header");
-	_tmp22_ = g_app_info_get_icon (_data38_->app);
+	_tmp22_ = g_app_info_get_icon (_data44_->app);
 	if (_tmp22_ != NULL) {
 		GIcon* _tmp23_;
 		GtkImage* _tmp24_;
-		_tmp23_ = g_app_info_get_icon (_data38_->app);
+		_tmp23_ = g_app_info_get_icon (_data44_->app);
 		_tmp24_ = (GtkImage*) gtk_image_new_from_gicon (_tmp23_, (GtkIconSize) GTK_ICON_SIZE_DIALOG);
 		g_object_ref_sink (_tmp24_);
 		_g_object_unref0 (app_icon);
@@ -3219,7 +3222,7 @@ plank_launcher_window_show_application_context_menu (PlankLauncherWindow* self,
 	_tmp29_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_VERTICAL, 1);
 	g_object_ref_sink (_tmp29_);
 	heading = _tmp29_;
-	_tmp30_ = g_app_info_get_display_name (_data38_->app);
+	_tmp30_ = g_app_info_get_display_name (_data44_->app);
 	_tmp31_ = (GtkLabel*) gtk_label_new (_tmp30_);
 	gtk_label_set_xalign (_tmp31_, 0.0f);
 	g_object_ref_sink (_tmp31_);
@@ -3230,12 +3233,12 @@ plank_launcher_window_show_application_context_menu (PlankLauncherWindow* self,
 	_tmp34_ = heading;
 	_tmp35_ = name;
 	gtk_box_pack_start (_tmp34_, (GtkWidget*) _tmp35_, FALSE, FALSE, (guint) 0);
-	_tmp37_ = _data38_->target;
+	_tmp37_ = _data44_->target;
 	if (_tmp37_ != NULL) {
 		PlankUninstallTarget* _tmp38_;
 		const gchar* _tmp39_;
 		gchar* _tmp40_;
-		_tmp38_ = _data38_->target;
+		_tmp38_ = _data44_->target;
 		_tmp39_ = _tmp38_->source;
 		_tmp40_ = g_strdup_printf (_ ("Installed via %s"), _tmp39_);
 		_g_free0 (_tmp36_);
@@ -3269,18 +3272,18 @@ plank_launcher_window_show_application_context_menu (PlankLauncherWindow* self,
 	gtk_box_pack_start (_tmp51_, (GtkWidget*) _tmp53_, FALSE, FALSE, (guint) 2);
 	_g_object_unref0 (_tmp53_);
 	_tmp54_ = card;
-	_tmp55_ = plank_launcher_window_context_action_button (self, _ ("Open"), "media-playback-start-symbolic", ___lambda50__plank_launcher_window_context_action, block38_data_ref (_data38_), block38_data_unref);
+	_tmp55_ = plank_launcher_window_context_action_button (self, _ ("Open"), "media-playback-start-symbolic", ___lambda50__plank_launcher_window_context_action, block44_data_ref (_data44_), block44_data_unref);
 	_tmp56_ = _tmp55_;
 	gtk_box_pack_start (_tmp54_, (GtkWidget*) _tmp56_, FALSE, FALSE, (guint) 0);
 	_g_object_unref0 (_tmp56_);
-	_tmp57_ = _g_object_ref0 (G_TYPE_CHECK_INSTANCE_TYPE (_data38_->app, G_TYPE_DESKTOP_APP_INFO) ? ((GDesktopAppInfo*) _data38_->app) : NULL);
-	_data38_->desktop = _tmp57_;
-	_tmp58_ = _data38_->desktop;
+	_tmp57_ = _g_object_ref0 (G_TYPE_CHECK_INSTANCE_TYPE (_data44_->app, G_TYPE_DESKTOP_APP_INFO) ? ((GDesktopAppInfo*) _data44_->app) : NULL);
+	_data44_->desktop = _tmp57_;
+	_tmp58_ = _data44_->desktop;
 	if (_tmp58_ != NULL) {
 		GDesktopAppInfo* _tmp59_;
 		gchar** _tmp60_;
 		gchar** _tmp61_;
-		_tmp59_ = _data38_->desktop;
+		_tmp59_ = _data44_->desktop;
 		_tmp61_ = _tmp60_ = g_desktop_app_info_list_actions (_tmp59_);
 		{
 			gchar** action_collection = NULL;
@@ -3293,7 +3296,7 @@ plank_launcher_window_show_application_context_menu (PlankLauncherWindow* self,
 				const gchar* action = NULL;
 				action = action_collection[action_it];
 				{
-					Block39Data* _data39_;
+					Block45Data* _data45_;
 					gchar* action_name = NULL;
 					GDesktopAppInfo* _tmp62_;
 					const gchar* _tmp63_;
@@ -3306,10 +3309,10 @@ plank_launcher_window_show_application_context_menu (PlankLauncherWindow* self,
 					const gchar* _tmp71_;
 					GtkButton* _tmp72_;
 					GtkButton* _tmp73_;
-					_data39_ = g_slice_new0 (Block39Data);
-					_data39_->_ref_count_ = 1;
-					_data39_->_data38_ = block38_data_ref (_data38_);
-					_tmp62_ = _data38_->desktop;
+					_data45_ = g_slice_new0 (Block45Data);
+					_data45_->_ref_count_ = 1;
+					_data45_->_data44_ = block44_data_ref (_data44_);
+					_tmp62_ = _data44_->desktop;
 					_tmp63_ = action;
 					_tmp64_ = g_desktop_app_info_get_action_name (_tmp62_, _tmp63_);
 					action_name = _tmp64_;
@@ -3323,27 +3326,27 @@ plank_launcher_window_show_application_context_menu (PlankLauncherWindow* self,
 					}
 					if (_tmp65_) {
 						_g_free0 (action_name);
-						block39_data_unref (_data39_);
-						_data39_ = NULL;
+						block45_data_unref (_data45_);
+						_data45_ = NULL;
 						continue;
 					}
 					_tmp68_ = action;
 					_tmp69_ = g_strdup (_tmp68_);
-					_data39_->action_id = _tmp69_;
+					_data45_->action_id = _tmp69_;
 					_tmp70_ = card;
 					_tmp71_ = action_name;
-					_tmp72_ = plank_launcher_window_context_action_button (self, _tmp71_, "list-add-symbolic", ______lambda51__plank_launcher_window_context_action, block39_data_ref (_data39_), block39_data_unref);
+					_tmp72_ = plank_launcher_window_context_action_button (self, _tmp71_, "list-add-symbolic", ______lambda51__plank_launcher_window_context_action, block45_data_ref (_data45_), block45_data_unref);
 					_tmp73_ = _tmp72_;
 					gtk_box_pack_start (_tmp70_, (GtkWidget*) _tmp73_, FALSE, FALSE, (guint) 0);
 					_g_object_unref0 (_tmp73_);
 					_g_free0 (action_name);
-					block39_data_unref (_data39_);
-					_data39_ = NULL;
+					block45_data_unref (_data45_);
+					_data45_ = NULL;
 				}
 			}
 		}
 	}
-	_tmp74_ = _data38_->target;
+	_tmp74_ = _data44_->target;
 	if (_tmp74_ != NULL) {
 		GtkBox* _tmp75_;
 		GtkSeparator* _tmp76_;
@@ -3360,7 +3363,7 @@ plank_launcher_window_show_application_context_menu (PlankLauncherWindow* self,
 		_tmp77_ = _tmp76_;
 		gtk_box_pack_start (_tmp75_, (GtkWidget*) _tmp77_, FALSE, FALSE, (guint) 2);
 		_g_object_unref0 (_tmp77_);
-		_tmp78_ = plank_launcher_window_context_action_button (self, _ ("Uninstall…"), "user-trash-symbolic", ____lambda52__plank_launcher_window_context_action, block38_data_ref (_data38_), block38_data_unref);
+		_tmp78_ = plank_launcher_window_context_action_button (self, _ ("Uninstall…"), "user-trash-symbolic", ____lambda52__plank_launcher_window_context_action, block44_data_ref (_data44_), block44_data_unref);
 		uninstall = _tmp78_;
 		_tmp79_ = uninstall;
 		_tmp80_ = gtk_widget_get_style_context ((GtkWidget*) _tmp79_);
@@ -3381,7 +3384,7 @@ plank_launcher_window_show_application_context_menu (PlankLauncherWindow* self,
 	gtk_widget_show_all ((GtkWidget*) _tmp86_);
 	_tmp87_ = self->priv->application_context;
 	gtk_window_present (_tmp87_);
-	g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ___lambda59__gsource_func, block38_data_ref (_data38_), block38_data_unref);
+	g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ___lambda59__gsource_func, block44_data_ref (_data44_), block44_data_unref);
 	_g_object_unref0 (origin);
 	_g_free0 (_tmp36_);
 	_g_object_unref0 (name);
@@ -3389,40 +3392,40 @@ plank_launcher_window_show_application_context_menu (PlankLauncherWindow* self,
 	_g_object_unref0 (app_icon);
 	_g_object_unref0 (header);
 	_g_object_unref0 (card);
-	block38_data_unref (_data38_);
-	_data38_ = NULL;
+	block44_data_unref (_data44_);
+	_data44_ = NULL;
 }
 
-static Block40Data*
-block40_data_ref (Block40Data* _data40_)
+static Block46Data*
+block46_data_ref (Block46Data* _data46_)
 {
-	g_atomic_int_inc (&_data40_->_ref_count_);
-	return _data40_;
+	g_atomic_int_inc (&_data46_->_ref_count_);
+	return _data46_;
 }
 
 static void
-block40_data_unref (void * _userdata_)
+block46_data_unref (void * _userdata_)
 {
-	Block40Data* _data40_;
-	_data40_ = (Block40Data*) _userdata_;
-	if (g_atomic_int_dec_and_test (&_data40_->_ref_count_)) {
+	Block46Data* _data46_;
+	_data46_ = (Block46Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data46_->_ref_count_)) {
 		PlankLauncherWindow* self;
-		self = _data40_->self;
-		(_data40_->action_target_destroy_notify == NULL) ? NULL : (_data40_->action_target_destroy_notify (_data40_->action_target), NULL);
-		_data40_->action = NULL;
-		_data40_->action_target = NULL;
-		_data40_->action_target_destroy_notify = NULL;
+		self = _data46_->self;
+		(_data46_->action_target_destroy_notify == NULL) ? NULL : (_data46_->action_target_destroy_notify (_data46_->action_target), NULL);
+		_data46_->action = NULL;
+		_data46_->action_target = NULL;
+		_data46_->action_target_destroy_notify = NULL;
 		_g_object_unref0 (self);
-		g_slice_free (Block40Data, _data40_);
+		g_slice_free (Block46Data, _data46_);
 	}
 }
 
 static void
-__lambda49_ (Block40Data* _data40_)
+__lambda49_ (Block46Data* _data46_)
 {
 	PlankLauncherWindow* self;
-	self = _data40_->self;
-	_data40_->action (_data40_->action_target);
+	self = _data46_->self;
+	_data46_->action (_data46_->action_target);
 }
 
 static void
@@ -3440,7 +3443,7 @@ plank_launcher_window_context_action_button (PlankLauncherWindow* self,
                                              gpointer action_target,
                                              GDestroyNotify action_target_destroy_notify)
 {
-	Block40Data* _data40_;
+	Block46Data* _data46_;
 	GtkButton* button = NULL;
 	GtkButton* _tmp0_;
 	GtkStyleContext* _tmp1_;
@@ -3454,16 +3457,16 @@ plank_launcher_window_context_action_button (PlankLauncherWindow* self,
 	g_return_val_if_fail (self != NULL, NULL);
 	g_return_val_if_fail (label != NULL, NULL);
 	g_return_val_if_fail (icon != NULL, NULL);
-	_data40_ = g_slice_new0 (Block40Data);
-	_data40_->_ref_count_ = 1;
-	_data40_->self = g_object_ref (self);
-	(_data40_->action_target_destroy_notify == NULL) ? NULL : (_data40_->action_target_destroy_notify (_data40_->action_target), NULL);
-	_data40_->action = NULL;
-	_data40_->action_target = NULL;
-	_data40_->action_target_destroy_notify = NULL;
-	_data40_->action = action;
-	_data40_->action_target = action_target;
-	_data40_->action_target_destroy_notify = action_target_destroy_notify;
+	_data46_ = g_slice_new0 (Block46Data);
+	_data46_->_ref_count_ = 1;
+	_data46_->self = g_object_ref (self);
+	(_data46_->action_target_destroy_notify == NULL) ? NULL : (_data46_->action_target_destroy_notify (_data46_->action_target), NULL);
+	_data46_->action = NULL;
+	_data46_->action_target = NULL;
+	_data46_->action_target_destroy_notify = NULL;
+	_data46_->action = action;
+	_data46_->action_target = action_target;
+	_data46_->action_target_destroy_notify = action_target_destroy_notify;
 	_tmp0_ = (GtkButton*) gtk_button_new ();
 	g_object_ref_sink (_tmp0_);
 	button = _tmp0_;
@@ -3484,11 +3487,11 @@ plank_launcher_window_context_action_button (PlankLauncherWindow* self,
 	gtk_box_pack_start (box, (GtkWidget*) _tmp6_, TRUE, TRUE, (guint) 0);
 	_g_object_unref0 (_tmp6_);
 	gtk_container_add ((GtkContainer*) button, (GtkWidget*) box);
-	g_signal_connect_data (button, "clicked", (GCallback) ___lambda49__gtk_button_clicked, block40_data_ref (_data40_), (GClosureNotify) block40_data_unref, 0);
+	g_signal_connect_data (button, "clicked", (GCallback) ___lambda49__gtk_button_clicked, block46_data_ref (_data46_), (GClosureNotify) block46_data_unref, 0);
 	result = button;
 	_g_object_unref0 (box);
-	block40_data_unref (_data40_);
-	_data40_ = NULL;
+	block46_data_unref (_data46_);
+	_data46_ = NULL;
 	return result;
 }
 
@@ -4017,7 +4020,7 @@ plank_launcher_window_run_uninstall (PlankLauncherWindow* self,
 		_tmp5_ = target->package_id;
 		_tmp6_ = e;
 		_tmp7_ = _tmp6_->message;
-		g_warning ("LauncherWindow.vala:675: Unable to uninstall '%s': %s", _tmp5_, _tmp7_);
+		g_warning ("LauncherWindow.vala:676: Unable to uninstall '%s': %s", _tmp5_, _tmp7_);
 		_g_error_free0 (e);
 	}
 	__finally0:
@@ -4342,7 +4345,7 @@ plank_launcher_window_activate_row (PlankLauncherWindow* self,
 		_tmp19_ = g_app_info_get_name (_tmp18_);
 		_tmp20_ = e;
 		_tmp21_ = _tmp20_->message;
-		g_warning ("LauncherWindow.vala:753: Unable to launch '%s': %s", _tmp19_, _tmp21_);
+		g_warning ("LauncherWindow.vala:754: Unable to launch '%s': %s", _tmp19_, _tmp21_);
 		_g_object_unref0 (_tmp18_);
 		_g_error_free0 (e);
 	}
@@ -4740,7 +4743,7 @@ plank_launcher_window_apply_theme (PlankLauncherWindow* self)
 		_inner_error0_ = NULL;
 		_tmp102_ = e;
 		_tmp103_ = _tmp102_->message;
-		g_warning ("LauncherWindow.vala:818: Launcher CSS: %s", _tmp103_);
+		g_warning ("LauncherWindow.vala:819: Launcher CSS: %s", _tmp103_);
 		_g_error_free0 (e);
 	}
 	__finally0:
@@ -4770,44 +4773,44 @@ plank_launcher_window_hide_animated (PlankLauncherWindow* self)
 	plank_launcher_window_animate_to (self, 0.0, TRUE);
 }
 
-static Block41Data*
-block41_data_ref (Block41Data* _data41_)
+static Block47Data*
+block47_data_ref (Block47Data* _data47_)
 {
-	g_atomic_int_inc (&_data41_->_ref_count_);
-	return _data41_;
+	g_atomic_int_inc (&_data47_->_ref_count_);
+	return _data47_;
 }
 
 static void
-block41_data_unref (void * _userdata_)
+block47_data_unref (void * _userdata_)
 {
-	Block41Data* _data41_;
-	_data41_ = (Block41Data*) _userdata_;
-	if (g_atomic_int_dec_and_test (&_data41_->_ref_count_)) {
+	Block47Data* _data47_;
+	_data47_ = (Block47Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data47_->_ref_count_)) {
 		PlankLauncherWindow* self;
-		self = _data41_->self;
+		self = _data47_->self;
 		_g_object_unref0 (self);
-		g_slice_free (Block41Data, _data41_);
+		g_slice_free (Block47Data, _data47_);
 	}
 }
 
 static gboolean
-__lambda47_ (Block41Data* _data41_)
+__lambda47_ (Block47Data* _data47_)
 {
 	PlankLauncherWindow* self;
 	gdouble progress = 0.0;
 	gdouble eased = 0.0;
 	gboolean result;
-	self = _data41_->self;
-	progress = MIN (1.0, (g_get_monotonic_time () - _data41_->started) / (PLANK_LAUNCHER_WINDOW_ANIMATION_TIME * 1000.0));
+	self = _data47_->self;
+	progress = MIN (1.0, (g_get_monotonic_time () - _data47_->started) / (PLANK_LAUNCHER_WINDOW_ANIMATION_TIME * 1000.0));
 	eased = 1.0 - pow (1.0 - progress, 3.0);
-	gtk_widget_set_opacity ((GtkWidget*) self, _data41_->start + ((_data41_->target - _data41_->start) * eased));
-	gtk_window_move ((GtkWindow*) self, self->priv->panel_x, (gint) round (_data41_->start_y + ((_data41_->end_y - _data41_->start_y) * eased)));
+	gtk_widget_set_opacity ((GtkWidget*) self, _data47_->start + ((_data47_->target - _data47_->start) * eased));
+	gtk_window_move ((GtkWindow*) self, self->priv->panel_x, (gint) round (_data47_->start_y + ((_data47_->end_y - _data47_->start_y) * eased)));
 	if (progress < 1.0) {
 		result = TRUE;
 		return result;
 	}
 	self->priv->animation_timer_id = 0U;
-	if (_data41_->hide_when_done) {
+	if (_data47_->hide_when_done) {
 		PlankDockController* _tmp0_;
 		PlankDockRenderer* _tmp1_;
 		PlankDockRenderer* _tmp2_;
@@ -4834,7 +4837,7 @@ plank_launcher_window_animate_to (PlankLauncherWindow* self,
                                   gdouble target,
                                   gboolean hide_when_done)
 {
-	Block41Data* _data41_;
+	Block47Data* _data47_;
 	gdouble _tmp0_;
 	gdouble _tmp1_;
 	gint current_x = 0;
@@ -4842,30 +4845,30 @@ plank_launcher_window_animate_to (PlankLauncherWindow* self,
 	gint _tmp3_ = 0;
 	gint _tmp4_ = 0;
 	g_return_if_fail (self != NULL);
-	_data41_ = g_slice_new0 (Block41Data);
-	_data41_->_ref_count_ = 1;
-	_data41_->self = g_object_ref (self);
-	_data41_->target = target;
-	_data41_->hide_when_done = hide_when_done;
+	_data47_ = g_slice_new0 (Block47Data);
+	_data47_->_ref_count_ = 1;
+	_data47_->self = g_object_ref (self);
+	_data47_->target = target;
+	_data47_->hide_when_done = hide_when_done;
 	if (self->priv->animation_timer_id > 0U) {
 		g_source_remove (self->priv->animation_timer_id);
 	}
 	_tmp0_ = gtk_widget_get_opacity ((GtkWidget*) self);
 	_tmp1_ = _tmp0_;
-	_data41_->start = _tmp1_;
+	_data47_->start = _tmp1_;
 	gtk_window_get_position ((GtkWindow*) self, &_tmp2_, &_tmp3_);
 	current_x = _tmp2_;
-	_data41_->start_y = _tmp3_;
-	if (_data41_->hide_when_done) {
+	_data47_->start_y = _tmp3_;
+	if (_data47_->hide_when_done) {
 		_tmp4_ = self->priv->panel_y + 7;
 	} else {
 		_tmp4_ = self->priv->panel_y;
 	}
-	_data41_->end_y = _tmp4_;
-	_data41_->started = g_get_monotonic_time ();
-	self->priv->animation_timer_id = g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 16, ___lambda47__gsource_func, block41_data_ref (_data41_), block41_data_unref);
-	block41_data_unref (_data41_);
-	_data41_ = NULL;
+	_data47_->end_y = _tmp4_;
+	_data47_->started = g_get_monotonic_time ();
+	self->priv->animation_timer_id = g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 16, ___lambda47__gsource_func, block47_data_ref (_data47_), block47_data_unref);
+	block47_data_unref (_data47_);
+	_data47_ = NULL;
 }
 
 static void

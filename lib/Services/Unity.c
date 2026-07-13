@@ -171,25 +171,25 @@ static void plank_unity_handle_name_owner_changed (GDBusConnection* connection,
                                             PlankUnity* self);
 static Block20Data* block20_data_ref (Block20Data* _data20_);
 static void block20_data_unref (void * _userdata_);
-static gboolean __lambda135_ (Block20Data* _data20_,
+static gboolean __lambda159_ (Block20Data* _data20_,
                        PlankUnityClient* client);
-static gboolean ___lambda135__gee_forall_func (gpointer g,
+static gboolean ___lambda159__gee_forall_func (gpointer g,
                                         gpointer self);
 static Block21Data* block21_data_ref (Block21Data* _data21_);
 static void block21_data_unref (void * _userdata_);
-static gboolean _____lambda133_ (Block21Data* _data21_);
+static gboolean _____lambda157_ (Block21Data* _data21_);
 static void plank_unity_perform_update (PlankUnity* self,
                                  const gchar* sender_name,
                                  GVariant* parameters);
-static gboolean ______lambda133__gsource_func (gpointer self);
+static gboolean ______lambda157__gsource_func (gpointer self);
 static PlankUnityLauncherEntry* plank_unity_launcher_entry_new (void);
 static PlankUnityLauncherEntry* plank_unity_launcher_entry_construct (GType object_type);
 static gboolean plank_unity_clean_up_launcher_entries (PlankUnity* self);
 static Block22Data* block22_data_ref (Block22Data* _data22_);
 static void block22_data_unref (void * _userdata_);
-static gboolean __lambda134_ (Block22Data* _data22_,
+static gboolean __lambda158_ (Block22Data* _data22_,
                        PlankUnityClient* client);
-static gboolean ___lambda134__gee_forall_func (gpointer g,
+static gboolean ___lambda158__gee_forall_func (gpointer g,
                                         gpointer self);
 static void plank_unity_launcher_entry_finalize (PlankUnityLauncherEntry * obj);
 static GType plank_unity_launcher_entry_get_type_once (void);
@@ -532,7 +532,7 @@ block20_data_unref (void * _userdata_)
 }
 
 static gboolean
-__lambda135_ (Block20Data* _data20_,
+__lambda159_ (Block20Data* _data20_,
               PlankUnityClient* client)
 {
 	PlankUnity* self;
@@ -548,11 +548,11 @@ __lambda135_ (Block20Data* _data20_,
 }
 
 static gboolean
-___lambda135__gee_forall_func (gpointer g,
+___lambda159__gee_forall_func (gpointer g,
                                gpointer self)
 {
 	gboolean result;
-	result = __lambda135_ (self, (PlankUnityClient*) g);
+	result = __lambda159_ (self, (PlankUnityClient*) g);
 	return result;
 }
 
@@ -607,7 +607,7 @@ plank_unity_handle_name_owner_changed (GDBusConnection* connection,
 		return;
 	}
 	_tmp6_ = self->priv->clients;
-	gee_abstract_collection_foreach ((GeeAbstractCollection*) _tmp6_, ___lambda135__gee_forall_func, _data20_);
+	gee_abstract_collection_foreach ((GeeAbstractCollection*) _tmp6_, ___lambda159__gee_forall_func, _data20_);
 	_g_free0 (after);
 	_g_free0 (before);
 	block20_data_unref (_data20_);
@@ -642,7 +642,7 @@ _g_variant_ref0 (gpointer self)
 }
 
 static gboolean
-_____lambda133_ (Block21Data* _data21_)
+_____lambda157_ (Block21Data* _data21_)
 {
 	PlankUnity* self;
 	PlankUnityLauncherEntry* _tmp0_;
@@ -667,10 +667,10 @@ _____lambda133_ (Block21Data* _data21_)
 }
 
 static gboolean
-______lambda133__gsource_func (gpointer self)
+______lambda157__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = _____lambda133_ (self);
+	result = _____lambda157_ (self);
 	return result;
 }
 
@@ -728,7 +728,7 @@ plank_unity_handle_update_request (PlankUnity* self,
 					_tmp10_->warned = TRUE;
 				}
 				_tmp11_ = _data21_->entry;
-				_tmp11_->timer_id = g_timeout_add_full (G_PRIORITY_DEFAULT, PLANK_UNITY_UPDATE_THRESHOLD_DURATION, ______lambda133__gsource_func, block21_data_ref (_data21_), block21_data_unref);
+				_tmp11_->timer_id = g_timeout_add_full (G_PRIORITY_DEFAULT, PLANK_UNITY_UPDATE_THRESHOLD_DURATION, ______lambda157__gsource_func, block21_data_ref (_data21_), block21_data_unref);
 			}
 		} else {
 			PlankUnityLauncherEntry* _tmp12_;
@@ -868,7 +868,7 @@ block22_data_unref (void * _userdata_)
 }
 
 static gboolean
-__lambda134_ (Block22Data* _data22_,
+__lambda158_ (Block22Data* _data22_,
               PlankUnityClient* client)
 {
 	PlankUnity* self;
@@ -882,11 +882,11 @@ __lambda134_ (Block22Data* _data22_,
 }
 
 static gboolean
-___lambda134__gee_forall_func (gpointer g,
+___lambda158__gee_forall_func (gpointer g,
                                gpointer self)
 {
 	gboolean result;
-	result = __lambda134_ (self, (PlankUnityClient*) g);
+	result = __lambda158_ (self, (PlankUnityClient*) g);
 	return result;
 }
 
@@ -923,7 +923,7 @@ plank_unity_perform_update (PlankUnity* self,
 		return;
 	}
 	_tmp4_ = self->priv->clients;
-	gee_abstract_collection_foreach ((GeeAbstractCollection*) _tmp4_, ___lambda134__gee_forall_func, _data22_);
+	gee_abstract_collection_foreach ((GeeAbstractCollection*) _tmp4_, ___lambda158__gee_forall_func, _data22_);
 	block22_data_unref (_data22_);
 	_data22_ = NULL;
 }

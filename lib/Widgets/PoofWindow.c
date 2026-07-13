@@ -65,8 +65,8 @@ static gpointer plank_poof_window_parent_class = NULL;
 static PlankPoofWindow* plank_poof_window_instance;
 static PlankPoofWindow* plank_poof_window_instance = NULL;
 
-static gboolean __lambda131_ (PlankPoofWindow* self);
-static gboolean ___lambda131__gsource_func (gpointer self);
+static gboolean __lambda155_ (PlankPoofWindow* self);
+static gboolean ___lambda155__gsource_func (gpointer self);
 static gboolean plank_poof_window_real_draw (GtkWidget* base,
                                       cairo_t* cr);
 static GObject * plank_poof_window_constructor (GType type,
@@ -124,7 +124,7 @@ plank_poof_window_new (void)
  * @param y the y position of the poof window
  */
 static gboolean
-__lambda131_ (PlankPoofWindow* self)
+__lambda155_ (PlankPoofWindow* self)
 {
 	gboolean result;
 	self->priv->frame_time = g_get_monotonic_time ();
@@ -140,10 +140,10 @@ __lambda131_ (PlankPoofWindow* self)
 }
 
 static gboolean
-___lambda131__gsource_func (gpointer self)
+___lambda155__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = __lambda131_ ((PlankPoofWindow*) self);
+	result = __lambda155_ ((PlankPoofWindow*) self);
 	return result;
 }
 
@@ -172,7 +172,7 @@ plank_poof_window_show_at (PlankPoofWindow* self,
 	self->priv->frame_time = self->priv->start_time;
 	gtk_widget_show ((GtkWidget*) self);
 	gtk_window_move ((GtkWindow*) self, x - (self->priv->poof_size / 2), y - (self->priv->poof_size / 2));
-	self->priv->animation_timer_id = gdk_threads_add_timeout ((guint) 30, ___lambda131__gsource_func, self);
+	self->priv->animation_timer_id = gdk_threads_add_timeout ((guint) 30, ___lambda155__gsource_func, self);
 }
 
 static gboolean

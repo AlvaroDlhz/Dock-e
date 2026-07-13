@@ -20,9 +20,9 @@ namespace Plank
 
 	public class LauncherWindow : Gtk.Window
 	{
-		const int RESULT_LIMIT = 7;
-		const int PANEL_WIDTH = 420;
-		const int PANEL_HEIGHT = 510;
+		const int RESULT_LIMIT = 9;
+		const int PANEL_WIDTH = 480;
+		const int PANEL_HEIGHT = 580;
 		const int PANEL_GAP = 10;
 		const int ANIMATION_TIME = 140;
 
@@ -545,6 +545,7 @@ namespace Plank
 				card.pack_start (new Gtk.Separator (Gtk.Orientation.HORIZONTAL), false, false, 2);
 				var uninstall = context_action_button (_("Uninstall…"), "user-trash-symbolic", () => {
 					context_dialog_open = true;
+					application_context.hide ();
 					confirm_uninstall (app, target);
 					context_dialog_open = false;
 				});

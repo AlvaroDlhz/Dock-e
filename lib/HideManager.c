@@ -149,9 +149,9 @@ static void plank_hide_manager_set_Hovered (PlankHideManager* self,
 static void plank_hide_manager_set_Disabled (PlankHideManager* self,
                                       gboolean value);
 static void plank_hide_manager_update_hidden (PlankHideManager* self);
-static gboolean ___lambda120_ (PlankHideManager* self);
+static gboolean ___lambda144_ (PlankHideManager* self);
 static void plank_hide_manager_update_window_intersect (PlankHideManager* self);
-static gboolean ____lambda120__gsource_func (gpointer self);
+static gboolean ____lambda144__gsource_func (gpointer self);
 static void plank_hide_manager_set_Hidden (PlankHideManager* self,
                                     gboolean value);
 static void plank_hide_manager_show (PlankHideManager* self);
@@ -164,8 +164,8 @@ static inline gboolean plank_hide_manager_device_supports_pressure (PlankHideMan
                                                       GdkDevice* device);
 static void plank_hide_manager_window_geometry (WnckWindow* window,
                                          GdkRectangle* result);
-static gboolean __lambda118_ (PlankHideManager* self);
-static gboolean ___lambda118__gsource_func (gpointer self);
+static gboolean __lambda142_ (PlankHideManager* self);
+static gboolean ___lambda142__gsource_func (gpointer self);
 static void plank_hide_manager_handle_geometry_changed (WnckWindow* window,
                                                  PlankHideManager* self);
 static void _plank_hide_manager_handle_geometry_changed_wnck_window_geometry_changed (WnckWindow* _sender,
@@ -180,8 +180,8 @@ static void _plank_hide_manager_handle_state_changed_wnck_window_state_changed (
                                                                          gpointer self);
 static gboolean _cairo_rectangle_int_equal (const cairo_rectangle_int_t * s1,
                                      const cairo_rectangle_int_t * s2);
-static gboolean __lambda119_ (PlankHideManager* self);
-static gboolean ___lambda119__gsource_func (gpointer self);
+static gboolean __lambda143_ (PlankHideManager* self);
+static gboolean ___lambda143__gsource_func (gpointer self);
 static gboolean ____lambda13_ (PlankHideManager* self);
 static gboolean _____lambda13__gsource_func (gpointer self);
 static void xinput_event_mask_destroy (XIEventMask * self);
@@ -536,7 +536,7 @@ plank_hide_manager_update_hovered_with_coords (PlankHideManager* self,
 }
 
 static gboolean
-___lambda120_ (PlankHideManager* self)
+___lambda144_ (PlankHideManager* self)
 {
 	gboolean result;
 	plank_hide_manager_update_window_intersect (self);
@@ -547,10 +547,10 @@ ___lambda120_ (PlankHideManager* self)
 }
 
 static gboolean
-____lambda120__gsource_func (gpointer self)
+____lambda144__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = ___lambda120_ ((PlankHideManager*) self);
+	result = ___lambda144_ ((PlankHideManager*) self);
 	return result;
 }
 
@@ -579,7 +579,7 @@ plank_hide_manager_prefs_changed (PlankHideManager* self,
 					g_source_remove (self->priv->prefs_changed_timer_id);
 					self->priv->prefs_changed_timer_id = 0U;
 				}
-				self->priv->prefs_changed_timer_id = gdk_threads_add_timeout (PLANK_HIDE_MANAGER_UPDATE_TIMEOUT, ____lambda120__gsource_func, self);
+				self->priv->prefs_changed_timer_id = gdk_threads_add_timeout (PLANK_HIDE_MANAGER_UPDATE_TIMEOUT, ____lambda144__gsource_func, self);
 				break;
 			}
 		}
@@ -1211,7 +1211,7 @@ plank_hide_manager_update_window_intersect (PlankHideManager* self)
 }
 
 static gboolean
-__lambda118_ (PlankHideManager* self)
+__lambda142_ (PlankHideManager* self)
 {
 	gboolean result;
 	plank_hide_manager_update_window_intersect (self);
@@ -1221,10 +1221,10 @@ __lambda118_ (PlankHideManager* self)
 }
 
 static gboolean
-___lambda118__gsource_func (gpointer self)
+___lambda142__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = __lambda118_ ((PlankHideManager*) self);
+	result = __lambda142_ ((PlankHideManager*) self);
 	return result;
 }
 
@@ -1235,7 +1235,7 @@ plank_hide_manager_schedule_update (PlankHideManager* self)
 	if (self->priv->window_changed_timer_id > 0U) {
 		return;
 	}
-	self->priv->window_changed_timer_id = gdk_threads_add_timeout (PLANK_HIDE_MANAGER_UPDATE_TIMEOUT, ___lambda118__gsource_func, self);
+	self->priv->window_changed_timer_id = gdk_threads_add_timeout (PLANK_HIDE_MANAGER_UPDATE_TIMEOUT, ___lambda142__gsource_func, self);
 }
 
 static void
@@ -1356,7 +1356,7 @@ _cairo_rectangle_int_equal (const cairo_rectangle_int_t * s1,
 }
 
 static gboolean
-__lambda119_ (PlankHideManager* self)
+__lambda143_ (PlankHideManager* self)
 {
 	gboolean result;
 	plank_hide_manager_update_window_intersect (self);
@@ -1366,10 +1366,10 @@ __lambda119_ (PlankHideManager* self)
 }
 
 static gboolean
-___lambda119__gsource_func (gpointer self)
+___lambda143__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = __lambda119_ ((PlankHideManager*) self);
+	result = __lambda143_ ((PlankHideManager*) self);
 	return result;
 }
 
@@ -1396,7 +1396,7 @@ plank_hide_manager_handle_geometry_changed (WnckWindow* window,
 	if (self->priv->geometry_timer_id > 0U) {
 		return;
 	}
-	self->priv->geometry_timer_id = gdk_threads_add_timeout (PLANK_HIDE_MANAGER_UPDATE_TIMEOUT, ___lambda119__gsource_func, self);
+	self->priv->geometry_timer_id = gdk_threads_add_timeout (PLANK_HIDE_MANAGER_UPDATE_TIMEOUT, ___lambda143__gsource_func, self);
 }
 
 static void

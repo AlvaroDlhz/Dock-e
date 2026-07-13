@@ -127,17 +127,17 @@ static void plank_dock_window_set_ClickedItem (PlankDockWindow* self,
                                         PlankDockItem* value);
 static Block24Data* block24_data_ref (Block24Data* _data24_);
 static void block24_data_unref (void * _userdata_);
-static gboolean ___lambda121_ (Block24Data* _data24_);
-static gboolean ____lambda121__gsource_func (gpointer self);
+static gboolean ___lambda145_ (Block24Data* _data24_);
+static gboolean ____lambda145__gsource_func (gpointer self);
 static Block25Data* block25_data_ref (Block25Data* _data25_);
 static void block25_data_unref (void * _userdata_);
-static gboolean ___lambda122_ (Block25Data* _data25_);
-static gboolean ____lambda122__gsource_func (gpointer self);
+static gboolean ___lambda146_ (Block25Data* _data25_);
+static gboolean ____lambda146__gsource_func (gpointer self);
 static gboolean plank_dock_window_show_menu (PlankDockWindow* self,
                                       PlankDockItem* item,
                                       GdkEventButton* event);
-static gboolean __lambda128_ (PlankDockWindow* self);
-static gboolean ___lambda128__gsource_func (gpointer self);
+static gboolean __lambda152_ (PlankDockWindow* self);
+static gboolean ___lambda152__gsource_func (gpointer self);
 static gboolean plank_dock_window_real_button_release_event (GtkWidget* base,
                                                       GdkEventButton* event);
 static PlankDockItem* plank_dock_window_get_ClickedItem (PlankDockWindow* self);
@@ -166,8 +166,8 @@ static void plank_dock_window_set_HoveredItemProvider (PlankDockWindow* self,
                                                 PlankDockItemProvider* value);
 static void plank_dock_window_set_HoveredItem (PlankDockWindow* self,
                                         PlankDockItem* value);
-static gboolean __lambda114_ (PlankDockWindow* self);
-static gboolean ___lambda114__gsource_func (gpointer self);
+static gboolean __lambda138_ (PlankDockWindow* self);
+static gboolean ___lambda138__gsource_func (gpointer self);
 VALA_EXTERN BamfApplication* plank_application_dock_item_get_App (PlankApplicationDockItem* self);
 static GeeArrayList* plank_dock_window_get_dock_debug_menu_items (PlankDockController* controller);
 static GeeArrayList* plank_dock_window_get_item_debug_menu_items (PlankDockItem* item);
@@ -178,22 +178,22 @@ static void plank_dock_window_position_menu (GtkMenu* menu,
                                       PlankDockWindow* self);
 static Block26Data* block26_data_ref (Block26Data* _data26_);
 static void block26_data_unref (void * _userdata_);
-static void __lambda123_ (Block26Data* _data26_);
-static void ___lambda123__gtk_menu_item_activate (GtkMenuItem* _sender,
+static void __lambda147_ (Block26Data* _data26_);
+static void ___lambda147__gtk_menu_item_activate (GtkMenuItem* _sender,
                                            gpointer self);
-static void __lambda124_ (Block26Data* _data26_);
-static void ___lambda124__gtk_menu_item_activate (GtkMenuItem* _sender,
+static void __lambda148_ (Block26Data* _data26_);
+static void ___lambda148__gtk_menu_item_activate (GtkMenuItem* _sender,
                                            gpointer self);
 static Block27Data* block27_data_ref (Block27Data* _data27_);
 static void block27_data_unref (void * _userdata_);
-static void __lambda125_ (Block27Data* _data27_);
-static void ___lambda125__gtk_menu_item_activate (GtkMenuItem* _sender,
+static void __lambda149_ (Block27Data* _data27_);
+static void ___lambda149__gtk_menu_item_activate (GtkMenuItem* _sender,
                                            gpointer self);
-static void __lambda126_ (Block27Data* _data27_);
-static void ___lambda126__gtk_menu_item_activate (GtkMenuItem* _sender,
+static void __lambda150_ (Block27Data* _data27_);
+static void ___lambda150__gtk_menu_item_activate (GtkMenuItem* _sender,
                                            gpointer self);
-static void __lambda127_ (Block27Data* _data27_);
-static void ___lambda127__gtk_menu_item_activate (GtkMenuItem* _sender,
+static void __lambda151_ (Block27Data* _data27_);
+static void ___lambda151__gtk_menu_item_activate (GtkMenuItem* _sender,
                                            gpointer self);
 static gboolean _cairo_rectangle_int_equal (const cairo_rectangle_int_t * s1,
                                      const cairo_rectangle_int_t * s2);
@@ -289,7 +289,7 @@ _g_object_ref0 (gpointer self)
 }
 
 static gboolean
-___lambda121_ (Block24Data* _data24_)
+___lambda145_ (Block24Data* _data24_)
 {
 	PlankDockWindow* self;
 	PlankDockController* _tmp0_;
@@ -308,10 +308,10 @@ ___lambda121_ (Block24Data* _data24_)
 }
 
 static gboolean
-____lambda121__gsource_func (gpointer self)
+____lambda145__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = ___lambda121_ (self);
+	result = ___lambda145_ (self);
 	return result;
 }
 
@@ -337,7 +337,7 @@ block25_data_unref (void * _userdata_)
 }
 
 static gboolean
-___lambda122_ (Block25Data* _data25_)
+___lambda146_ (Block25Data* _data25_)
 {
 	PlankDockWindow* self;
 	PlankUpdateManagerItem* _tmp0_;
@@ -350,15 +350,15 @@ ___lambda122_ (Block25Data* _data25_)
 }
 
 static gboolean
-____lambda122__gsource_func (gpointer self)
+____lambda146__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = ___lambda122_ (self);
+	result = ___lambda146_ (self);
 	return result;
 }
 
 static gboolean
-__lambda128_ (PlankDockWindow* self)
+__lambda152_ (PlankDockWindow* self)
 {
 	gboolean result;
 	self->priv->long_press_active = TRUE;
@@ -368,10 +368,10 @@ __lambda128_ (PlankDockWindow* self)
 }
 
 static gboolean
-___lambda128__gsource_func (gpointer self)
+___lambda152__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = __lambda128_ ((PlankDockWindow*) self);
+	result = __lambda152_ ((PlankDockWindow*) self);
 	return result;
 }
 
@@ -506,7 +506,7 @@ plank_dock_window_real_button_press_event (GtkWidget* base,
 		_tmp38_ = _g_object_ref0 (G_TYPE_CHECK_INSTANCE_CAST (_tmp37_, PLANK_TYPE_STATUS_INDICATOR_ITEM, PlankStatusIndicatorItem));
 		_data24_->status_item = _tmp38_;
 		plank_dock_window_set_ClickedItem (self, NULL);
-		g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ____lambda121__gsource_func, block24_data_ref (_data24_), block24_data_unref);
+		g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ____lambda145__gsource_func, block24_data_ref (_data24_), block24_data_unref);
 		result = GDK_EVENT_STOP;
 		block24_data_unref (_data24_);
 		_data24_ = NULL;
@@ -529,7 +529,7 @@ plank_dock_window_real_button_press_event (GtkWidget* base,
 		_tmp42_ = _g_object_ref0 (G_TYPE_CHECK_INSTANCE_CAST (_tmp41_, PLANK_TYPE_UPDATE_MANAGER_ITEM, PlankUpdateManagerItem));
 		_data25_->update_item = _tmp42_;
 		plank_dock_window_set_ClickedItem (self, NULL);
-		g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ____lambda122__gsource_func, block25_data_ref (_data25_), block25_data_unref);
+		g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ____lambda146__gsource_func, block25_data_ref (_data25_), block25_data_unref);
 		result = GDK_EVENT_STOP;
 		block25_data_unref (_data25_);
 		_data25_ = NULL;
@@ -545,7 +545,7 @@ plank_dock_window_real_button_press_event (GtkWidget* base,
 	if (self->priv->long_press_timer_id > 0U) {
 		g_source_remove (self->priv->long_press_timer_id);
 	}
-	self->priv->long_press_timer_id = gdk_threads_add_timeout (PLANK_DOCK_WINDOW_LONG_PRESS_TIME, ___lambda128__gsource_func, self);
+	self->priv->long_press_timer_id = gdk_threads_add_timeout (PLANK_DOCK_WINDOW_LONG_PRESS_TIME, ___lambda152__gsource_func, self);
 	result = GDK_EVENT_PROPAGATE;
 	return result;
 }
@@ -978,7 +978,7 @@ plank_dock_window_set_hovered_provider (PlankDockWindow* self,
  * @param item the hovered item (if any) for this dock
  */
 static gboolean
-__lambda114_ (PlankDockWindow* self)
+__lambda138_ (PlankDockWindow* self)
 {
 	PlankDockItem* _tmp0_;
 	gboolean _tmp1_ = FALSE;
@@ -1074,10 +1074,10 @@ __lambda114_ (PlankDockWindow* self)
 }
 
 static gboolean
-___lambda114__gsource_func (gpointer self)
+___lambda138__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = __lambda114_ ((PlankDockWindow*) self);
+	result = __lambda138_ ((PlankDockWindow*) self);
 	return result;
 }
 
@@ -1183,7 +1183,7 @@ plank_dock_window_set_hovered (PlankDockWindow* self,
 	if (_tmp27_) {
 		return;
 	}
-	self->priv->hover_reposition_timer_id = gdk_threads_add_timeout (PLANK_DOCK_WINDOW_HOVER_DELAY_TIME, ___lambda114__gsource_func, self);
+	self->priv->hover_reposition_timer_id = gdk_threads_add_timeout (PLANK_DOCK_WINDOW_HOVER_DELAY_TIME, ___lambda138__gsource_func, self);
 }
 
 /**
@@ -2344,7 +2344,7 @@ block26_data_unref (void * _userdata_)
 }
 
 static void
-__lambda123_ (Block26Data* _data26_)
+__lambda147_ (Block26Data* _data26_)
 {
 	PlankSystem* _tmp0_;
 	GFile* _tmp1_;
@@ -2356,14 +2356,14 @@ __lambda123_ (Block26Data* _data26_)
 }
 
 static void
-___lambda123__gtk_menu_item_activate (GtkMenuItem* _sender,
+___lambda147__gtk_menu_item_activate (GtkMenuItem* _sender,
                                       gpointer self)
 {
-	__lambda123_ (self);
+	__lambda147_ (self);
 }
 
 static void
-__lambda124_ (Block26Data* _data26_)
+__lambda148_ (Block26Data* _data26_)
 {
 	PlankSystem* _tmp0_;
 	PlankDockRenderer* _tmp1_;
@@ -2381,10 +2381,10 @@ __lambda124_ (Block26Data* _data26_)
 }
 
 static void
-___lambda124__gtk_menu_item_activate (GtkMenuItem* _sender,
+___lambda148__gtk_menu_item_activate (GtkMenuItem* _sender,
                                       gpointer self)
 {
-	__lambda124_ (self);
+	__lambda148_ (self);
 }
 
 static GeeArrayList*
@@ -2429,7 +2429,7 @@ plank_dock_window_get_dock_debug_menu_items (PlankDockController* controller)
 	_g_object_unref0 (menu_item);
 	menu_item = _tmp6_;
 	_tmp7_ = menu_item;
-	g_signal_connect_data (_tmp7_, "activate", (GCallback) ___lambda123__gtk_menu_item_activate, block26_data_ref (_data26_), (GClosureNotify) block26_data_unref, 0);
+	g_signal_connect_data (_tmp7_, "activate", (GCallback) ___lambda147__gtk_menu_item_activate, block26_data_ref (_data26_), (GClosureNotify) block26_data_unref, 0);
 	_tmp8_ = menu_item;
 	gee_abstract_collection_add ((GeeAbstractCollection*) debug_items, _tmp8_);
 	_tmp9_ = (GtkMenuItem*) gtk_menu_item_new_with_mnemonic ("Open current theme file");
@@ -2437,7 +2437,7 @@ plank_dock_window_get_dock_debug_menu_items (PlankDockController* controller)
 	_g_object_unref0 (menu_item);
 	menu_item = _tmp9_;
 	_tmp10_ = menu_item;
-	g_signal_connect_data (_tmp10_, "activate", (GCallback) ___lambda124__gtk_menu_item_activate, block26_data_ref (_data26_), (GClosureNotify) block26_data_unref, 0);
+	g_signal_connect_data (_tmp10_, "activate", (GCallback) ___lambda148__gtk_menu_item_activate, block26_data_ref (_data26_), (GClosureNotify) block26_data_unref, 0);
 	_tmp11_ = menu_item;
 	gee_abstract_collection_add ((GeeAbstractCollection*) debug_items, _tmp11_);
 	result = debug_items;
@@ -2467,7 +2467,7 @@ block27_data_unref (void * _userdata_)
 }
 
 static void
-__lambda125_ (Block27Data* _data27_)
+__lambda149_ (Block27Data* _data27_)
 {
 	gchar* _tmp0_ = NULL;
 	GFile* _tmp1_;
@@ -2502,14 +2502,14 @@ __lambda125_ (Block27Data* _data27_)
 }
 
 static void
-___lambda125__gtk_menu_item_activate (GtkMenuItem* _sender,
+___lambda149__gtk_menu_item_activate (GtkMenuItem* _sender,
                                       gpointer self)
 {
-	__lambda125_ (self);
+	__lambda149_ (self);
 }
 
 static void
-__lambda126_ (Block27Data* _data27_)
+__lambda150_ (Block27Data* _data27_)
 {
 	PlankSystem* _tmp0_;
 	GFile* _tmp1_;
@@ -2519,14 +2519,14 @@ __lambda126_ (Block27Data* _data27_)
 }
 
 static void
-___lambda126__gtk_menu_item_activate (GtkMenuItem* _sender,
+___lambda150__gtk_menu_item_activate (GtkMenuItem* _sender,
                                       gpointer self)
 {
-	__lambda126_ (self);
+	__lambda150_ (self);
 }
 
 static void
-__lambda127_ (Block27Data* _data27_)
+__lambda151_ (Block27Data* _data27_)
 {
 	PlankSystem* _tmp0_;
 	const gchar* _tmp1_;
@@ -2543,10 +2543,10 @@ __lambda127_ (Block27Data* _data27_)
 }
 
 static void
-___lambda127__gtk_menu_item_activate (GtkMenuItem* _sender,
+___lambda151__gtk_menu_item_activate (GtkMenuItem* _sender,
                                       gpointer self)
 {
-	__lambda127_ (self);
+	__lambda151_ (self);
 }
 
 static GeeArrayList*
@@ -2616,7 +2616,7 @@ plank_dock_window_get_item_debug_menu_items (PlankDockItem* item)
 	_g_object_unref0 (menu_item);
 	menu_item = _tmp12_;
 	_tmp13_ = menu_item;
-	g_signal_connect_data (_tmp13_, "activate", (GCallback) ___lambda125__gtk_menu_item_activate, block27_data_ref (_data27_), (GClosureNotify) block27_data_unref, 0);
+	g_signal_connect_data (_tmp13_, "activate", (GCallback) ___lambda149__gtk_menu_item_activate, block27_data_ref (_data27_), (GClosureNotify) block27_data_unref, 0);
 	_tmp14_ = debug_items;
 	_tmp15_ = menu_item;
 	gee_abstract_collection_add ((GeeAbstractCollection*) _tmp14_, _tmp15_);
@@ -2625,7 +2625,7 @@ plank_dock_window_get_item_debug_menu_items (PlankDockItem* item)
 	_g_object_unref0 (menu_item);
 	menu_item = _tmp16_;
 	_tmp17_ = menu_item;
-	g_signal_connect_data (_tmp17_, "activate", (GCallback) ___lambda126__gtk_menu_item_activate, block27_data_ref (_data27_), (GClosureNotify) block27_data_unref, 0);
+	g_signal_connect_data (_tmp17_, "activate", (GCallback) ___lambda150__gtk_menu_item_activate, block27_data_ref (_data27_), (GClosureNotify) block27_data_unref, 0);
 	_tmp19_ = _data27_->dock_item_file;
 	if (_tmp19_ != NULL) {
 		GFile* _tmp20_;
@@ -2644,7 +2644,7 @@ plank_dock_window_get_item_debug_menu_items (PlankDockItem* item)
 	_g_object_unref0 (menu_item);
 	menu_item = _tmp24_;
 	_tmp25_ = menu_item;
-	g_signal_connect_data (_tmp25_, "activate", (GCallback) ___lambda127__gtk_menu_item_activate, block27_data_ref (_data27_), (GClosureNotify) block27_data_unref, 0);
+	g_signal_connect_data (_tmp25_, "activate", (GCallback) ___lambda151__gtk_menu_item_activate, block27_data_ref (_data27_), (GClosureNotify) block27_data_unref, 0);
 	_tmp26_ = menu_item;
 	_tmp27_ = plank_dock_item_get_Launcher (_data27_->item);
 	_tmp28_ = _tmp27_;

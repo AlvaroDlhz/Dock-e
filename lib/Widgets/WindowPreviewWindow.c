@@ -45,9 +45,9 @@ enum  {
 };
 static GParamSpec* plank_window_preview_window_properties[PLANK_WINDOW_PREVIEW_WINDOW_NUM_PROPERTIES];
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
-typedef struct _Block32Data Block32Data;
-typedef struct _Block33Data Block33Data;
-typedef struct _Block34Data Block34Data;
+typedef struct _Block38Data Block38Data;
+typedef struct _Block39Data Block39Data;
+typedef struct _Block40Data Block40Data;
 #define _g_free0(var) (var = (g_free (var), NULL))
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 
@@ -62,19 +62,19 @@ struct _PlankWindowPreviewWindowPrivate {
 	GtkCssProvider* css_provider;
 };
 
-struct _Block32Data {
+struct _Block38Data {
 	int _ref_count_;
 	PlankWindowPreviewWindow* self;
 	PlankDockController* controller;
 };
 
-struct _Block33Data {
+struct _Block39Data {
 	int _ref_count_;
 	PlankWindowPreviewWindow* self;
 	PlankApplicationDockItem* item;
 };
 
-struct _Block34Data {
+struct _Block40Data {
 	int _ref_count_;
 	PlankWindowPreviewWindow* self;
 	BamfWindow* window;
@@ -86,57 +86,57 @@ static gpointer plank_window_preview_window_parent_class = NULL;
 static void plank_window_preview_window_cancel_open (PlankWindowPreviewWindow* self);
 static void plank_window_preview_window_cancel_close (PlankWindowPreviewWindow* self);
 static void plank_window_preview_window_stop_refresh (PlankWindowPreviewWindow* self);
-static Block32Data* block32_data_ref (Block32Data* _data32_);
-static void block32_data_unref (void * _userdata_);
-static gboolean __lambda105_ (PlankWindowPreviewWindow* self);
-static gboolean ___lambda105__gtk_widget_enter_notify_event (GtkWidget* _sender,
+static Block38Data* block38_data_ref (Block38Data* _data38_);
+static void block38_data_unref (void * _userdata_);
+static gboolean __lambda129_ (PlankWindowPreviewWindow* self);
+static gboolean ___lambda129__gtk_widget_enter_notify_event (GtkWidget* _sender,
                                                       GdkEventCrossing* event,
                                                       gpointer self);
-static gboolean __lambda106_ (PlankWindowPreviewWindow* self,
+static gboolean __lambda130_ (PlankWindowPreviewWindow* self,
                        GdkEventCrossing* event);
 static void plank_window_preview_window_schedule_close (PlankWindowPreviewWindow* self);
-static gboolean ___lambda106__gtk_widget_leave_notify_event (GtkWidget* _sender,
+static gboolean ___lambda130__gtk_widget_leave_notify_event (GtkWidget* _sender,
                                                       GdkEventCrossing* event,
                                                       gpointer self);
-static void __lambda108_ (Block32Data* _data32_);
-static void ___lambda108__gtk_widget_show (GtkWidget* _sender,
+static void __lambda132_ (Block38Data* _data38_);
+static void ___lambda132__gtk_widget_show (GtkWidget* _sender,
                                     gpointer self);
-static void __lambda109_ (Block32Data* _data32_);
-static void ___lambda109__gtk_widget_hide (GtkWidget* _sender,
+static void __lambda133_ (Block38Data* _data38_);
+static void ___lambda133__gtk_widget_hide (GtkWidget* _sender,
                                     gpointer self);
 static void plank_window_preview_window_apply_theme (PlankWindowPreviewWindow* self);
 VALA_EXTERN BamfApplication* plank_application_dock_item_get_App (PlankApplicationDockItem* self);
 static void plank_window_preview_window_schedule_open (PlankWindowPreviewWindow* self,
                                                 PlankApplicationDockItem* item);
-static Block33Data* block33_data_ref (Block33Data* _data33_);
-static void block33_data_unref (void * _userdata_);
-static gboolean __lambda110_ (Block33Data* _data33_);
+static Block39Data* block39_data_ref (Block39Data* _data39_);
+static void block39_data_unref (void * _userdata_);
+static gboolean __lambda134_ (Block39Data* _data39_);
 static void plank_window_preview_window_show_for_item (PlankWindowPreviewWindow* self,
                                                 PlankApplicationDockItem* item);
-static gboolean ___lambda110__gsource_func (gpointer self);
+static gboolean ___lambda134__gsource_func (gpointer self);
 static void plank_window_preview_window_rebuild (PlankWindowPreviewWindow* self);
 static void plank_window_preview_window_position_over_item (PlankWindowPreviewWindow* self);
 static void plank_window_preview_window_start_refresh (PlankWindowPreviewWindow* self);
 static GtkWidget* plank_window_preview_window_create_card (PlankWindowPreviewWindow* self,
                                                     BamfWindow* window);
-static Block34Data* block34_data_ref (Block34Data* _data34_);
-static void block34_data_unref (void * _userdata_);
+static Block40Data* block40_data_ref (Block40Data* _data40_);
+static void block40_data_unref (void * _userdata_);
 static void plank_window_preview_window_update_image (PlankWindowPreviewWindow* self,
                                                GtkImage* image,
                                                guint32 xid);
-static void __lambda111_ (Block34Data* _data34_);
-static void ___lambda111__gtk_button_clicked (GtkButton* _sender,
+static void __lambda135_ (Block40Data* _data40_);
+static void ___lambda135__gtk_button_clicked (GtkButton* _sender,
                                        gpointer self);
-static gboolean __lambda112_ (Block34Data* _data34_,
+static gboolean __lambda136_ (Block40Data* _data40_,
                        GdkEventButton* event);
-static gboolean ___lambda112__gtk_widget_button_release_event (GtkWidget* _sender,
+static gboolean ___lambda136__gtk_widget_button_release_event (GtkWidget* _sender,
                                                         GdkEventButton* event,
                                                         gpointer self);
 static void plank_window_preview_window_refresh_images (PlankWindowPreviewWindow* self);
-static gboolean __lambda113_ (PlankWindowPreviewWindow* self);
-static gboolean ___lambda113__gsource_func (gpointer self);
-static gboolean __lambda107_ (PlankWindowPreviewWindow* self);
-static gboolean ___lambda107__gsource_func (gpointer self);
+static gboolean __lambda137_ (PlankWindowPreviewWindow* self);
+static gboolean ___lambda137__gsource_func (gpointer self);
+static gboolean __lambda131_ (PlankWindowPreviewWindow* self);
+static gboolean ___lambda131__gsource_func (gpointer self);
 static void plank_window_preview_window_finalize (GObject * obj);
 static GType plank_window_preview_window_get_type_once (void);
 
@@ -152,29 +152,29 @@ _g_object_ref0 (gpointer self)
 	return self ? g_object_ref (self) : NULL;
 }
 
-static Block32Data*
-block32_data_ref (Block32Data* _data32_)
+static Block38Data*
+block38_data_ref (Block38Data* _data38_)
 {
-	g_atomic_int_inc (&_data32_->_ref_count_);
-	return _data32_;
+	g_atomic_int_inc (&_data38_->_ref_count_);
+	return _data38_;
 }
 
 static void
-block32_data_unref (void * _userdata_)
+block38_data_unref (void * _userdata_)
 {
-	Block32Data* _data32_;
-	_data32_ = (Block32Data*) _userdata_;
-	if (g_atomic_int_dec_and_test (&_data32_->_ref_count_)) {
+	Block38Data* _data38_;
+	_data38_ = (Block38Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data38_->_ref_count_)) {
 		PlankWindowPreviewWindow* self;
-		self = _data32_->self;
-		_g_object_unref0 (_data32_->controller);
+		self = _data38_->self;
+		_g_object_unref0 (_data38_->controller);
 		_g_object_unref0 (self);
-		g_slice_free (Block32Data, _data32_);
+		g_slice_free (Block38Data, _data38_);
 	}
 }
 
 static gboolean
-__lambda105_ (PlankWindowPreviewWindow* self)
+__lambda129_ (PlankWindowPreviewWindow* self)
 {
 	gboolean result;
 	self->priv->pointer_inside = TRUE;
@@ -184,17 +184,17 @@ __lambda105_ (PlankWindowPreviewWindow* self)
 }
 
 static gboolean
-___lambda105__gtk_widget_enter_notify_event (GtkWidget* _sender,
+___lambda129__gtk_widget_enter_notify_event (GtkWidget* _sender,
                                              GdkEventCrossing* event,
                                              gpointer self)
 {
 	gboolean result;
-	result = __lambda105_ ((PlankWindowPreviewWindow*) self);
+	result = __lambda129_ ((PlankWindowPreviewWindow*) self);
 	return result;
 }
 
 static gboolean
-__lambda106_ (PlankWindowPreviewWindow* self,
+__lambda130_ (PlankWindowPreviewWindow* self,
               GdkEventCrossing* event)
 {
 	gint wx = 0;
@@ -236,61 +236,61 @@ __lambda106_ (PlankWindowPreviewWindow* self,
 }
 
 static gboolean
-___lambda106__gtk_widget_leave_notify_event (GtkWidget* _sender,
+___lambda130__gtk_widget_leave_notify_event (GtkWidget* _sender,
                                              GdkEventCrossing* event,
                                              gpointer self)
 {
 	gboolean result;
-	result = __lambda106_ ((PlankWindowPreviewWindow*) self, event);
+	result = __lambda130_ ((PlankWindowPreviewWindow*) self, event);
 	return result;
 }
 
 static void
-__lambda108_ (Block32Data* _data32_)
+__lambda132_ (Block38Data* _data38_)
 {
 	PlankWindowPreviewWindow* self;
 	PlankHideManager* _tmp0_;
 	PlankHideManager* _tmp1_;
 	PlankHideManager* _tmp2_;
 	PlankHideManager* _tmp3_;
-	self = _data32_->self;
-	_tmp0_ = plank_dock_controller_get_hide_manager (_data32_->controller);
+	self = _data38_->self;
+	_tmp0_ = plank_dock_controller_get_hide_manager (_data38_->controller);
 	_tmp1_ = _tmp0_;
 	plank_hide_manager_set_ExternalMenuVisible (_tmp1_, TRUE);
-	_tmp2_ = plank_dock_controller_get_hide_manager (_data32_->controller);
+	_tmp2_ = plank_dock_controller_get_hide_manager (_data38_->controller);
 	_tmp3_ = _tmp2_;
 	plank_hide_manager_update_hovered (_tmp3_);
 }
 
 static void
-___lambda108__gtk_widget_show (GtkWidget* _sender,
+___lambda132__gtk_widget_show (GtkWidget* _sender,
                                gpointer self)
 {
-	__lambda108_ (self);
+	__lambda132_ (self);
 }
 
 static void
-__lambda109_ (Block32Data* _data32_)
+__lambda133_ (Block38Data* _data38_)
 {
 	PlankWindowPreviewWindow* self;
 	PlankHideManager* _tmp0_;
 	PlankHideManager* _tmp1_;
 	PlankHideManager* _tmp2_;
 	PlankHideManager* _tmp3_;
-	self = _data32_->self;
-	_tmp0_ = plank_dock_controller_get_hide_manager (_data32_->controller);
+	self = _data38_->self;
+	_tmp0_ = plank_dock_controller_get_hide_manager (_data38_->controller);
 	_tmp1_ = _tmp0_;
 	plank_hide_manager_set_ExternalMenuVisible (_tmp1_, FALSE);
-	_tmp2_ = plank_dock_controller_get_hide_manager (_data32_->controller);
+	_tmp2_ = plank_dock_controller_get_hide_manager (_data38_->controller);
 	_tmp3_ = _tmp2_;
 	plank_hide_manager_update_hovered (_tmp3_);
 }
 
 static void
-___lambda109__gtk_widget_hide (GtkWidget* _sender,
+___lambda133__gtk_widget_hide (GtkWidget* _sender,
                                gpointer self)
 {
-	__lambda109_ (self);
+	__lambda133_ (self);
 }
 
 PlankWindowPreviewWindow*
@@ -298,7 +298,7 @@ plank_window_preview_window_construct (GType object_type,
                                        PlankDockController* controller)
 {
 	PlankWindowPreviewWindow * self = NULL;
-	Block32Data* _data32_;
+	Block38Data* _data38_;
 	PlankDockController* _tmp0_;
 	PlankDockWindow* _tmp1_;
 	PlankDockWindow* _tmp2_;
@@ -316,21 +316,21 @@ plank_window_preview_window_construct (GType object_type,
 	GtkFlowBox* _tmp14_;
 	GtkFlowBox* _tmp15_;
 	g_return_val_if_fail (controller != NULL, NULL);
-	_data32_ = g_slice_new0 (Block32Data);
-	_data32_->_ref_count_ = 1;
+	_data38_ = g_slice_new0 (Block38Data);
+	_data38_->_ref_count_ = 1;
 	_tmp0_ = _g_object_ref0 (controller);
-	_g_object_unref0 (_data32_->controller);
-	_data32_->controller = _tmp0_;
+	_g_object_unref0 (_data38_->controller);
+	_data38_->controller = _tmp0_;
 	self = (PlankWindowPreviewWindow*) g_object_new (object_type, "type", GTK_WINDOW_TOPLEVEL, NULL);
-	_data32_->self = g_object_ref (self);
-	self->priv->controller = _data32_->controller;
+	_data38_->self = g_object_ref (self);
+	self->priv->controller = _data38_->controller;
 	gtk_window_set_decorated ((GtkWindow*) self, FALSE);
 	gtk_window_set_resizable ((GtkWindow*) self, FALSE);
 	gtk_window_set_skip_taskbar_hint ((GtkWindow*) self, TRUE);
 	gtk_window_set_skip_pager_hint ((GtkWindow*) self, TRUE);
 	gtk_window_set_keep_above ((GtkWindow*) self, TRUE);
 	gtk_window_set_type_hint ((GtkWindow*) self, GDK_WINDOW_TYPE_HINT_POPUP_MENU);
-	_tmp1_ = plank_dock_controller_get_window (_data32_->controller);
+	_tmp1_ = plank_dock_controller_get_window (_data38_->controller);
 	_tmp2_ = _tmp1_;
 	gtk_window_set_transient_for ((GtkWindow*) self, (GtkWindow*) _tmp2_);
 	gtk_window_set_destroy_with_parent ((GtkWindow*) self, TRUE);
@@ -364,14 +364,14 @@ plank_window_preview_window_construct (GType object_type,
 	_tmp15_ = self->priv->flow;
 	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp15_);
 	gtk_widget_add_events ((GtkWidget*) self, (gint) (GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK));
-	g_signal_connect_object ((GtkWidget*) self, "enter-notify-event", (GCallback) ___lambda105__gtk_widget_enter_notify_event, self, 0);
-	g_signal_connect_object ((GtkWidget*) self, "leave-notify-event", (GCallback) ___lambda106__gtk_widget_leave_notify_event, self, 0);
-	g_signal_connect_data ((GtkWidget*) self, "show", (GCallback) ___lambda108__gtk_widget_show, block32_data_ref (_data32_), (GClosureNotify) block32_data_unref, 0);
-	g_signal_connect_data ((GtkWidget*) self, "hide", (GCallback) ___lambda109__gtk_widget_hide, block32_data_ref (_data32_), (GClosureNotify) block32_data_unref, 0);
+	g_signal_connect_object ((GtkWidget*) self, "enter-notify-event", (GCallback) ___lambda129__gtk_widget_enter_notify_event, self, 0);
+	g_signal_connect_object ((GtkWidget*) self, "leave-notify-event", (GCallback) ___lambda130__gtk_widget_leave_notify_event, self, 0);
+	g_signal_connect_data ((GtkWidget*) self, "show", (GCallback) ___lambda132__gtk_widget_show, block38_data_ref (_data38_), (GClosureNotify) block38_data_unref, 0);
+	g_signal_connect_data ((GtkWidget*) self, "hide", (GCallback) ___lambda133__gtk_widget_hide, block38_data_ref (_data38_), (GClosureNotify) block38_data_unref, 0);
 	plank_window_preview_window_apply_theme (self);
 	_g_object_unref0 (visual);
-	block32_data_unref (_data32_);
-	_data32_ = NULL;
+	block38_data_unref (_data38_);
+	_data38_ = NULL;
 	return self;
 }
 
@@ -557,48 +557,48 @@ plank_window_preview_window_handle_dock_motion (PlankWindowPreviewWindow* self,
 	}
 }
 
-static Block33Data*
-block33_data_ref (Block33Data* _data33_)
+static Block39Data*
+block39_data_ref (Block39Data* _data39_)
 {
-	g_atomic_int_inc (&_data33_->_ref_count_);
-	return _data33_;
+	g_atomic_int_inc (&_data39_->_ref_count_);
+	return _data39_;
 }
 
 static void
-block33_data_unref (void * _userdata_)
+block39_data_unref (void * _userdata_)
 {
-	Block33Data* _data33_;
-	_data33_ = (Block33Data*) _userdata_;
-	if (g_atomic_int_dec_and_test (&_data33_->_ref_count_)) {
+	Block39Data* _data39_;
+	_data39_ = (Block39Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data39_->_ref_count_)) {
 		PlankWindowPreviewWindow* self;
-		self = _data33_->self;
-		_g_object_unref0 (_data33_->item);
+		self = _data39_->self;
+		_g_object_unref0 (_data39_->item);
 		_g_object_unref0 (self);
-		g_slice_free (Block33Data, _data33_);
+		g_slice_free (Block39Data, _data39_);
 	}
 }
 
 static gboolean
-__lambda110_ (Block33Data* _data33_)
+__lambda134_ (Block39Data* _data39_)
 {
 	PlankWindowPreviewWindow* self;
 	PlankApplicationDockItem* _tmp0_;
 	gboolean result;
-	self = _data33_->self;
+	self = _data39_->self;
 	self->priv->open_timer = 0U;
 	_tmp0_ = self->priv->current_item;
-	if (_tmp0_ == _data33_->item) {
-		plank_window_preview_window_show_for_item (self, _data33_->item);
+	if (_tmp0_ == _data39_->item) {
+		plank_window_preview_window_show_for_item (self, _data39_->item);
 	}
 	result = FALSE;
 	return result;
 }
 
 static gboolean
-___lambda110__gsource_func (gpointer self)
+___lambda134__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = __lambda110_ (self);
+	result = __lambda134_ (self);
 	return result;
 }
 
@@ -606,24 +606,24 @@ static void
 plank_window_preview_window_schedule_open (PlankWindowPreviewWindow* self,
                                            PlankApplicationDockItem* item)
 {
-	Block33Data* _data33_;
+	Block39Data* _data39_;
 	PlankApplicationDockItem* _tmp0_;
 	PlankApplicationDockItem* _tmp1_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (item != NULL);
-	_data33_ = g_slice_new0 (Block33Data);
-	_data33_->_ref_count_ = 1;
-	_data33_->self = g_object_ref (self);
+	_data39_ = g_slice_new0 (Block39Data);
+	_data39_->_ref_count_ = 1;
+	_data39_->self = g_object_ref (self);
 	_tmp0_ = _g_object_ref0 (item);
-	_g_object_unref0 (_data33_->item);
-	_data33_->item = _tmp0_;
+	_g_object_unref0 (_data39_->item);
+	_data39_->item = _tmp0_;
 	plank_window_preview_window_cancel_open (self);
-	_tmp1_ = _g_object_ref0 (_data33_->item);
+	_tmp1_ = _g_object_ref0 (_data39_->item);
 	_g_object_unref0 (self->priv->current_item);
 	self->priv->current_item = _tmp1_;
-	self->priv->open_timer = g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) PLANK_WINDOW_PREVIEW_WINDOW_OPEN_DELAY, ___lambda110__gsource_func, block33_data_ref (_data33_), block33_data_unref);
-	block33_data_unref (_data33_);
-	_data33_ = NULL;
+	self->priv->open_timer = g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) PLANK_WINDOW_PREVIEW_WINDOW_OPEN_DELAY, ___lambda134__gsource_func, block39_data_ref (_data39_), block39_data_unref);
+	block39_data_unref (_data39_);
+	_data39_ = NULL;
 }
 
 static void
@@ -773,36 +773,36 @@ plank_window_preview_window_rebuild (PlankWindowPreviewWindow* self)
 	gtk_flow_box_set_min_children_per_line (_tmp26_, (guint) _tmp25_);
 }
 
-static Block34Data*
-block34_data_ref (Block34Data* _data34_)
+static Block40Data*
+block40_data_ref (Block40Data* _data40_)
 {
-	g_atomic_int_inc (&_data34_->_ref_count_);
-	return _data34_;
+	g_atomic_int_inc (&_data40_->_ref_count_);
+	return _data40_;
 }
 
 static void
-block34_data_unref (void * _userdata_)
+block40_data_unref (void * _userdata_)
 {
-	Block34Data* _data34_;
-	_data34_ = (Block34Data*) _userdata_;
-	if (g_atomic_int_dec_and_test (&_data34_->_ref_count_)) {
+	Block40Data* _data40_;
+	_data40_ = (Block40Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data40_->_ref_count_)) {
 		PlankWindowPreviewWindow* self;
-		self = _data34_->self;
-		_g_object_unref0 (_data34_->window);
+		self = _data40_->self;
+		_g_object_unref0 (_data40_->window);
 		_g_object_unref0 (self);
-		g_slice_free (Block34Data, _data34_);
+		g_slice_free (Block40Data, _data40_);
 	}
 }
 
 static void
-__lambda111_ (Block34Data* _data34_)
+__lambda135_ (Block40Data* _data40_)
 {
 	PlankWindowPreviewWindow* self;
 	WnckWindow* wnck = NULL;
 	WnckWindow* _tmp0_;
 	WnckWindow* _tmp1_;
-	self = _data34_->self;
-	_tmp0_ = wnck_window_get ((gulong) bamf_window_get_xid (_data34_->window));
+	self = _data40_->self;
+	_tmp0_ = wnck_window_get ((gulong) bamf_window_get_xid (_data40_->window));
 	wnck = _tmp0_;
 	_tmp1_ = wnck;
 	if (_tmp1_ != NULL) {
@@ -813,22 +813,22 @@ __lambda111_ (Block34Data* _data34_)
 }
 
 static void
-___lambda111__gtk_button_clicked (GtkButton* _sender,
+___lambda135__gtk_button_clicked (GtkButton* _sender,
                                   gpointer self)
 {
-	__lambda111_ (self);
+	__lambda135_ (self);
 }
 
 static gboolean
-__lambda112_ (Block34Data* _data34_,
+__lambda136_ (Block40Data* _data40_,
               GdkEventButton* event)
 {
 	PlankWindowPreviewWindow* self;
 	gboolean result;
-	self = _data34_->self;
+	self = _data40_->self;
 	g_return_val_if_fail (event != NULL, FALSE);
 	if (event->button == 1U) {
-		plank_window_control_focus_window (_data34_->window, event->time);
+		plank_window_control_focus_window (_data40_->window, event->time);
 		plank_window_preview_window_dismiss (self);
 		result = TRUE;
 		return result;
@@ -837,7 +837,7 @@ __lambda112_ (Block34Data* _data34_,
 		WnckWindow* wnck = NULL;
 		WnckWindow* _tmp0_;
 		WnckWindow* _tmp1_;
-		_tmp0_ = wnck_window_get ((gulong) bamf_window_get_xid (_data34_->window));
+		_tmp0_ = wnck_window_get ((gulong) bamf_window_get_xid (_data40_->window));
 		wnck = _tmp0_;
 		_tmp1_ = wnck;
 		if (_tmp1_ != NULL) {
@@ -853,12 +853,12 @@ __lambda112_ (Block34Data* _data34_,
 }
 
 static gboolean
-___lambda112__gtk_widget_button_release_event (GtkWidget* _sender,
+___lambda136__gtk_widget_button_release_event (GtkWidget* _sender,
                                                GdkEventButton* event,
                                                gpointer self)
 {
 	gboolean result;
-	result = __lambda112_ (self, event);
+	result = __lambda136_ (self, event);
 	return result;
 }
 
@@ -866,7 +866,7 @@ static GtkWidget*
 plank_window_preview_window_create_card (PlankWindowPreviewWindow* self,
                                          BamfWindow* window)
 {
-	Block34Data* _data34_;
+	Block40Data* _data40_;
 	BamfWindow* _tmp0_;
 	GtkEventBox* event_box = NULL;
 	GtkEventBox* _tmp1_;
@@ -889,12 +889,12 @@ plank_window_preview_window_create_card (PlankWindowPreviewWindow* self,
 	GtkWidget* result;
 	g_return_val_if_fail (self != NULL, NULL);
 	g_return_val_if_fail (window != NULL, NULL);
-	_data34_ = g_slice_new0 (Block34Data);
-	_data34_->_ref_count_ = 1;
-	_data34_->self = g_object_ref (self);
+	_data40_ = g_slice_new0 (Block40Data);
+	_data40_->_ref_count_ = 1;
+	_data40_->self = g_object_ref (self);
 	_tmp0_ = _g_object_ref0 (window);
-	_g_object_unref0 (_data34_->window);
-	_data34_->window = _tmp0_;
+	_g_object_unref0 (_data40_->window);
+	_data40_->window = _tmp0_;
 	_tmp1_ = (GtkEventBox*) gtk_event_box_new ();
 	g_object_ref_sink (_tmp1_);
 	event_box = _tmp1_;
@@ -910,13 +910,13 @@ plank_window_preview_window_create_card (PlankWindowPreviewWindow* self,
 	g_object_ref_sink (_tmp4_);
 	image = _tmp4_;
 	gtk_widget_set_size_request ((GtkWidget*) image, PLANK_WINDOW_PREVIEW_WINDOW_CARD_WIDTH - 10, PLANK_WINDOW_PREVIEW_WINDOW_PREVIEW_HEIGHT);
-	g_object_set_data_full ((GObject*) image, "preview-xid", (gpointer) ((guintptr) bamf_window_get_xid (_data34_->window)), NULL);
-	plank_window_preview_window_update_image (self, image, bamf_window_get_xid (_data34_->window));
+	g_object_set_data_full ((GObject*) image, "preview-xid", (gpointer) ((guintptr) bamf_window_get_xid (_data40_->window)), NULL);
+	plank_window_preview_window_update_image (self, image, bamf_window_get_xid (_data40_->window));
 	gtk_box_pack_start (box, (GtkWidget*) image, TRUE, TRUE, (guint) 0);
 	_tmp5_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
 	g_object_ref_sink (_tmp5_);
 	footer = _tmp5_;
-	_tmp6_ = bamf_view_get_name ((BamfView*) _data34_->window);
+	_tmp6_ = bamf_view_get_name ((BamfView*) _data40_->window);
 	_tmp7_ = _tmp6_;
 	_tmp8_ = (GtkLabel*) gtk_label_new (_tmp7_);
 	gtk_label_set_xalign (_tmp8_, 0.0f);
@@ -938,19 +938,19 @@ plank_window_preview_window_create_card (PlankWindowPreviewWindow* self,
 	gtk_widget_set_tooltip_text ((GtkWidget*) close, _ ("Close window"));
 	_tmp12_ = gtk_widget_get_style_context ((GtkWidget*) close);
 	gtk_style_context_add_class (_tmp12_, "preview-close");
-	g_signal_connect_data (close, "clicked", (GCallback) ___lambda111__gtk_button_clicked, block34_data_ref (_data34_), (GClosureNotify) block34_data_unref, 0);
+	g_signal_connect_data (close, "clicked", (GCallback) ___lambda135__gtk_button_clicked, block40_data_ref (_data40_), (GClosureNotify) block40_data_unref, 0);
 	gtk_box_pack_end (footer, (GtkWidget*) close, FALSE, FALSE, (guint) 0);
 	gtk_box_pack_end (box, (GtkWidget*) footer, FALSE, FALSE, (guint) 0);
 	gtk_container_add ((GtkContainer*) event_box, (GtkWidget*) box);
-	g_signal_connect_data ((GtkWidget*) event_box, "button-release-event", (GCallback) ___lambda112__gtk_widget_button_release_event, block34_data_ref (_data34_), (GClosureNotify) block34_data_unref, 0);
+	g_signal_connect_data ((GtkWidget*) event_box, "button-release-event", (GCallback) ___lambda136__gtk_widget_button_release_event, block40_data_ref (_data40_), (GClosureNotify) block40_data_unref, 0);
 	result = (GtkWidget*) event_box;
 	_g_object_unref0 (close);
 	_g_object_unref0 (title);
 	_g_object_unref0 (footer);
 	_g_object_unref0 (image);
 	_g_object_unref0 (box);
-	block34_data_unref (_data34_);
-	_data34_ = NULL;
+	block40_data_unref (_data40_);
+	_data40_ = NULL;
 	return result;
 }
 
@@ -1150,7 +1150,7 @@ plank_window_preview_window_refresh_images (PlankWindowPreviewWindow* self)
 }
 
 static gboolean
-__lambda113_ (PlankWindowPreviewWindow* self)
+__lambda137_ (PlankWindowPreviewWindow* self)
 {
 	gboolean _tmp0_;
 	gboolean _tmp1_;
@@ -1168,10 +1168,10 @@ __lambda113_ (PlankWindowPreviewWindow* self)
 }
 
 static gboolean
-___lambda113__gsource_func (gpointer self)
+___lambda137__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = __lambda113_ ((PlankWindowPreviewWindow*) self);
+	result = __lambda137_ ((PlankWindowPreviewWindow*) self);
 	return result;
 }
 
@@ -1180,7 +1180,7 @@ plank_window_preview_window_start_refresh (PlankWindowPreviewWindow* self)
 {
 	g_return_if_fail (self != NULL);
 	plank_window_preview_window_stop_refresh (self);
-	self->priv->refresh_timer = g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 500, ___lambda113__gsource_func, g_object_ref (self), g_object_unref);
+	self->priv->refresh_timer = g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 500, ___lambda137__gsource_func, g_object_ref (self), g_object_unref);
 }
 
 static void
@@ -1194,7 +1194,7 @@ plank_window_preview_window_stop_refresh (PlankWindowPreviewWindow* self)
 }
 
 static gboolean
-__lambda107_ (PlankWindowPreviewWindow* self)
+__lambda131_ (PlankWindowPreviewWindow* self)
 {
 	gint pointer_x = 0;
 	gint pointer_y = 0;
@@ -1307,10 +1307,10 @@ __lambda107_ (PlankWindowPreviewWindow* self)
 }
 
 static gboolean
-___lambda107__gsource_func (gpointer self)
+___lambda131__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = __lambda107_ ((PlankWindowPreviewWindow*) self);
+	result = __lambda131_ ((PlankWindowPreviewWindow*) self);
 	return result;
 }
 
@@ -1319,7 +1319,7 @@ plank_window_preview_window_schedule_close (PlankWindowPreviewWindow* self)
 {
 	g_return_if_fail (self != NULL);
 	plank_window_preview_window_cancel_close (self);
-	self->priv->close_timer = g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) PLANK_WINDOW_PREVIEW_WINDOW_CLOSE_DELAY, ___lambda107__gsource_func, g_object_ref (self), g_object_unref);
+	self->priv->close_timer = g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) PLANK_WINDOW_PREVIEW_WINDOW_CLOSE_DELAY, ___lambda131__gsource_func, g_object_ref (self), g_object_unref);
 }
 
 static void

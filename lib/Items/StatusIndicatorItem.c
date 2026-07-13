@@ -136,18 +136,18 @@ static GtkMenuItem* plank_status_indicator_item_create_status_item (PlankStatusI
                                                              const gchar* subtitle,
                                                              const gchar* icon,
                                                              gboolean selected);
-static void __lambda86_ (PlankStatusIndicatorItem* self);
-static void ___lambda86__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                          gpointer self);
+static void __lambda110_ (PlankStatusIndicatorItem* self);
+static void ___lambda110__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                           gpointer self);
 static Block14Data* block14_data_ref (Block14Data* _data14_);
 static void block14_data_unref (void * _userdata_);
 static gdouble plank_status_indicator_item_get_volume_percent (PlankStatusIndicatorItem* self);
-static void __lambda78_ (Block14Data* _data14_);
-static void ___lambda78__gtk_range_value_changed (GtkRange* _sender,
+static void __lambda102_ (Block14Data* _data14_);
+static void ___lambda102__gtk_range_value_changed (GtkRange* _sender,
+                                            gpointer self);
+static void __lambda103_ (PlankStatusIndicatorItem* self);
+static void ___lambda103__gtk_menu_item_activate (GtkMenuItem* _sender,
                                            gpointer self);
-static void __lambda79_ (PlankStatusIndicatorItem* self);
-static void ___lambda79__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                          gpointer self);
 static GtkMenuItem* plank_status_indicator_item_settings_item (PlankStatusIndicatorItem* self,
                                                         const gchar* label,
                                                         const gchar* panel);
@@ -158,36 +158,36 @@ static GtkMenuItem* plank_status_indicator_item_create_switch_item (PlankStatusI
                                                              const gchar* icon,
                                                              gboolean state,
                                                              GtkSwitch** toggle);
-static void __lambda83_ (Block15Data* _data15_);
-static void ___lambda83__g_object_notify (GObject* _sender,
-                                   GParamSpec* pspec,
-                                   gpointer self);
+static void __lambda107_ (Block15Data* _data15_);
+static void ___lambda107__g_object_notify (GObject* _sender,
+                                    GParamSpec* pspec,
+                                    gpointer self);
 static Block16Data* block16_data_ref (Block16Data* _data16_);
 static void block16_data_unref (void * _userdata_);
 static gchar* plank_status_indicator_item_wifi_icon_for_signal (PlankStatusIndicatorItem* self,
                                                          const gchar* signal_text);
-static void _____lambda84_ (Block16Data* _data16_);
-static void ______lambda84__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                             gpointer self);
+static void _____lambda108_ (Block16Data* _data16_);
+static void ______lambda108__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                              gpointer self);
 static Block17Data* block17_data_ref (Block17Data* _data17_);
 static void block17_data_unref (void * _userdata_);
-static void __lambda81_ (Block17Data* _data17_);
-static void ___lambda81__g_object_notify (GObject* _sender,
-                                   GParamSpec* pspec,
-                                   gpointer self);
+static void __lambda105_ (Block17Data* _data17_);
+static void ___lambda105__g_object_notify (GObject* _sender,
+                                    GParamSpec* pspec,
+                                    gpointer self);
 static Block18Data* block18_data_ref (Block18Data* _data18_);
 static void block18_data_unref (void * _userdata_);
-static void _____lambda82_ (Block18Data* _data18_);
-static void ______lambda82__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                             gpointer self);
-static void __lambda85_ (PlankStatusIndicatorItem* self);
-static void ___lambda85__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                          gpointer self);
+static void _____lambda106_ (Block18Data* _data18_);
+static void ______lambda106__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                              gpointer self);
+static void __lambda109_ (PlankStatusIndicatorItem* self);
+static void ___lambda109__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                           gpointer self);
 static Block19Data* block19_data_ref (Block19Data* _data19_);
 static void block19_data_unref (void * _userdata_);
-static void __lambda80_ (Block19Data* _data19_);
-static void ___lambda80__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                          gpointer self);
+static void __lambda104_ (Block19Data* _data19_);
+static void ___lambda104__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                           gpointer self);
 static void plank_status_indicator_item_real_draw_icon (PlankDockItem* base,
                                                  PlankSurface* surface);
 static void plank_status_indicator_item_draw_text_right_at (PlankStatusIndicatorItem* self,
@@ -224,8 +224,8 @@ static void plank_status_indicator_item_draw_battery (PlankStatusIndicatorItem* 
 static GObject * plank_status_indicator_item_constructor (GType type,
                                                    guint n_construct_properties,
                                                    GObjectConstructParam * construct_properties);
-static gboolean _plank_status_indicator_item___lambda87_ (PlankStatusIndicatorItem* self);
-static gboolean __plank_status_indicator_item___lambda87__gsource_func (gpointer self);
+static gboolean _plank_status_indicator_item___lambda111_ (PlankStatusIndicatorItem* self);
+static gboolean __plank_status_indicator_item___lambda111__gsource_func (gpointer self);
 static void plank_status_indicator_item_finalize (GObject * obj);
 static GType plank_status_indicator_item_get_type_once (void);
 static void _vala_plank_status_indicator_item_get_property (GObject * object,
@@ -997,16 +997,16 @@ plank_status_indicator_item_real_get_menu_items (PlankDockElement* base)
 }
 
 static void
-__lambda86_ (PlankStatusIndicatorItem* self)
+__lambda110_ (PlankStatusIndicatorItem* self)
 {
 	plank_status_indicator_item_launch_command ("xfce4-power-manager-settings");
 }
 
 static void
-___lambda86__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                     gpointer self)
+___lambda110__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                      gpointer self)
 {
-	__lambda86_ ((PlankStatusIndicatorItem*) self);
+	__lambda110_ ((PlankStatusIndicatorItem*) self);
 }
 
 static GeeArrayList*
@@ -1069,7 +1069,7 @@ plank_status_indicator_item_get_battery_menu_items (PlankStatusIndicatorItem* se
 	_g_object_unref0 (_tmp13_);
 	_tmp14_ = plank_dock_element_create_menu_item (_ ("Power _Settings"), "preferences-system-power-symbolic", FALSE);
 	settings = _tmp14_;
-	g_signal_connect_object (settings, "activate", (GCallback) ___lambda86__gtk_menu_item_activate, self, 0);
+	g_signal_connect_object (settings, "activate", (GCallback) ___lambda110__gtk_menu_item_activate, self, 0);
 	_tmp15_ = items;
 	gee_abstract_collection_add ((GeeAbstractCollection*) _tmp15_, settings);
 	result = items;
@@ -1101,7 +1101,7 @@ block14_data_unref (void * _userdata_)
 }
 
 static void
-__lambda78_ (Block14Data* _data14_)
+__lambda102_ (Block14Data* _data14_)
 {
 	PlankStatusIndicatorItem* self;
 	gchar* _tmp0_;
@@ -1121,24 +1121,24 @@ __lambda78_ (Block14Data* _data14_)
 }
 
 static void
-___lambda78__gtk_range_value_changed (GtkRange* _sender,
-                                      gpointer self)
+___lambda102__gtk_range_value_changed (GtkRange* _sender,
+                                       gpointer self)
 {
-	__lambda78_ (self);
+	__lambda102_ (self);
 }
 
 static void
-__lambda79_ (PlankStatusIndicatorItem* self)
+__lambda103_ (PlankStatusIndicatorItem* self)
 {
 	plank_status_indicator_item_run_action ("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle");
 	plank_status_indicator_item_update_state (self);
 }
 
 static void
-___lambda79__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                     gpointer self)
+___lambda103__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                      gpointer self)
 {
-	__lambda79_ ((PlankStatusIndicatorItem*) self);
+	__lambda103_ ((PlankStatusIndicatorItem*) self);
 }
 
 static GeeArrayList*
@@ -1220,7 +1220,7 @@ plank_status_indicator_item_get_volume_menu_items (PlankStatusIndicatorItem* sel
 	_tmp13_ = _tmp12_;
 	_g_free0 (_tmp11_);
 	_data14_->percent = _tmp13_;
-	g_signal_connect_data ((GtkRange*) _data14_->scale, "value-changed", (GCallback) ___lambda78__gtk_range_value_changed, block14_data_ref (_data14_), (GClosureNotify) block14_data_unref, 0);
+	g_signal_connect_data ((GtkRange*) _data14_->scale, "value-changed", (GCallback) ___lambda102__gtk_range_value_changed, block14_data_ref (_data14_), (GClosureNotify) block14_data_unref, 0);
 	_tmp14_ = scale_box;
 	gtk_box_pack_start (_tmp14_, (GtkWidget*) volume_icon, FALSE, FALSE, (guint) 0);
 	_tmp15_ = scale_box;
@@ -1237,7 +1237,7 @@ plank_status_indicator_item_get_volume_menu_items (PlankStatusIndicatorItem* sel
 	g_object_ref_sink (_tmp21_);
 	mute_item = _tmp21_;
 	gtk_check_menu_item_set_active (mute_item, self->priv->muted);
-	g_signal_connect_object ((GtkMenuItem*) mute_item, "activate", (GCallback) ___lambda79__gtk_menu_item_activate, self, 0);
+	g_signal_connect_object ((GtkMenuItem*) mute_item, "activate", (GCallback) ___lambda103__gtk_menu_item_activate, self, 0);
 	_tmp22_ = items;
 	gee_abstract_collection_add ((GeeAbstractCollection*) _tmp22_, (GtkMenuItem*) mute_item);
 	_tmp23_ = items;
@@ -1277,7 +1277,7 @@ block15_data_unref (void * _userdata_)
 }
 
 static void
-__lambda83_ (Block15Data* _data15_)
+__lambda107_ (Block15Data* _data15_)
 {
 	PlankStatusIndicatorItem* self;
 	const gchar* _tmp0_ = NULL;
@@ -1303,11 +1303,11 @@ __lambda83_ (Block15Data* _data15_)
 }
 
 static void
-___lambda83__g_object_notify (GObject* _sender,
-                              GParamSpec* pspec,
-                              gpointer self)
+___lambda107__g_object_notify (GObject* _sender,
+                               GParamSpec* pspec,
+                               gpointer self)
 {
-	__lambda83_ (self);
+	__lambda107_ (self);
 }
 
 static Block16Data*
@@ -1333,7 +1333,7 @@ block16_data_unref (void * _userdata_)
 }
 
 static void
-_____lambda84_ (Block16Data* _data16_)
+_____lambda108_ (Block16Data* _data16_)
 {
 	Block15Data* _data15_;
 	PlankStatusIndicatorItem* self;
@@ -1355,10 +1355,10 @@ _____lambda84_ (Block16Data* _data16_)
 }
 
 static void
-______lambda84__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                        gpointer self)
+______lambda108__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                         gpointer self)
 {
-	_____lambda84_ (self);
+	_____lambda108_ (self);
 }
 
 static GeeArrayList*
@@ -1418,7 +1418,7 @@ plank_status_indicator_item_get_wifi_menu_items (PlankStatusIndicatorItem* self)
 	gee_abstract_collection_add ((GeeAbstractCollection*) _tmp8_, _tmp11_);
 	_g_object_unref0 (_tmp11_);
 	_tmp12_ = _data15_->toggle;
-	g_signal_connect_data ((GObject*) _tmp12_, "notify::active", (GCallback) ___lambda83__g_object_notify, block15_data_ref (_data15_), (GClosureNotify) block15_data_unref, 0);
+	g_signal_connect_data ((GObject*) _tmp12_, "notify::active", (GCallback) ___lambda107__g_object_notify, block15_data_ref (_data15_), (GClosureNotify) block15_data_unref, 0);
 	if (enabled) {
 		gchar* _tmp14_ = NULL;
 		gboolean _tmp15_;
@@ -1581,7 +1581,7 @@ plank_status_indicator_item_get_wifi_menu_items (PlankStatusIndicatorItem* self)
 					_tmp56_ = g_strdup (_tmp55_);
 					_data16_->ssid = _tmp56_;
 					_tmp57_ = network_item;
-					g_signal_connect_data (_tmp57_, "activate", (GCallback) ______lambda84__gtk_menu_item_activate, block16_data_ref (_data16_), (GClosureNotify) block16_data_unref, 0);
+					g_signal_connect_data (_tmp57_, "activate", (GCallback) ______lambda108__gtk_menu_item_activate, block16_data_ref (_data16_), (GClosureNotify) block16_data_unref, 0);
 					_tmp58_ = items;
 					_tmp59_ = network_item;
 					gee_abstract_collection_add ((GeeAbstractCollection*) _tmp58_, _tmp59_);
@@ -1635,7 +1635,7 @@ block17_data_unref (void * _userdata_)
 }
 
 static void
-__lambda81_ (Block17Data* _data17_)
+__lambda105_ (Block17Data* _data17_)
 {
 	PlankStatusIndicatorItem* self;
 	const gchar* _tmp0_ = NULL;
@@ -1661,11 +1661,11 @@ __lambda81_ (Block17Data* _data17_)
 }
 
 static void
-___lambda81__g_object_notify (GObject* _sender,
-                              GParamSpec* pspec,
-                              gpointer self)
+___lambda105__g_object_notify (GObject* _sender,
+                               GParamSpec* pspec,
+                               gpointer self)
 {
-	__lambda81_ (self);
+	__lambda105_ (self);
 }
 
 static Block18Data*
@@ -1691,7 +1691,7 @@ block18_data_unref (void * _userdata_)
 }
 
 static void
-_____lambda82_ (Block18Data* _data18_)
+_____lambda106_ (Block18Data* _data18_)
 {
 	Block17Data* _data17_;
 	PlankStatusIndicatorItem* self;
@@ -1725,10 +1725,10 @@ _____lambda82_ (Block18Data* _data18_)
 }
 
 static void
-______lambda82__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                        gpointer self)
+______lambda106__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                         gpointer self)
 {
-	_____lambda82_ (self);
+	_____lambda106_ (self);
 }
 
 static GeeArrayList*
@@ -1770,7 +1770,7 @@ plank_status_indicator_item_get_bluetooth_menu_items (PlankStatusIndicatorItem* 
 	gee_abstract_collection_add ((GeeAbstractCollection*) _tmp2_, _tmp5_);
 	_g_object_unref0 (_tmp5_);
 	_tmp6_ = _data17_->toggle;
-	g_signal_connect_data ((GObject*) _tmp6_, "notify::active", (GCallback) ___lambda81__g_object_notify, block17_data_ref (_data17_), (GClosureNotify) block17_data_unref, 0);
+	g_signal_connect_data ((GObject*) _tmp6_, "notify::active", (GCallback) ___lambda105__g_object_notify, block17_data_ref (_data17_), (GClosureNotify) block17_data_unref, 0);
 	if (powered) {
 		gchar* _tmp8_ = NULL;
 		gboolean _tmp9_;
@@ -1885,7 +1885,7 @@ plank_status_indicator_item_get_bluetooth_menu_items (PlankStatusIndicatorItem* 
 					_tmp35_ = plank_status_indicator_item_create_status_item (self, _tmp34_, _tmp32_, "bluetooth-symbolic", _data18_->connected);
 					device_item = _tmp35_;
 					_tmp36_ = device_item;
-					g_signal_connect_data (_tmp36_, "activate", (GCallback) ______lambda82__gtk_menu_item_activate, block18_data_ref (_data18_), (GClosureNotify) block18_data_unref, 0);
+					g_signal_connect_data (_tmp36_, "activate", (GCallback) ______lambda106__gtk_menu_item_activate, block18_data_ref (_data18_), (GClosureNotify) block18_data_unref, 0);
 					_tmp37_ = items;
 					_tmp38_ = device_item;
 					gee_abstract_collection_add ((GeeAbstractCollection*) _tmp37_, _tmp38_);
@@ -1917,16 +1917,16 @@ plank_status_indicator_item_get_bluetooth_menu_items (PlankStatusIndicatorItem* 
 }
 
 static void
-__lambda85_ (PlankStatusIndicatorItem* self)
+__lambda109_ (PlankStatusIndicatorItem* self)
 {
 	plank_status_indicator_item_launch_command ("gnome-calendar");
 }
 
 static void
-___lambda85__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                     gpointer self)
+___lambda109__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                      gpointer self)
 {
-	__lambda85_ ((PlankStatusIndicatorItem*) self);
+	__lambda109_ ((PlankStatusIndicatorItem*) self);
 }
 
 static GeeArrayList*
@@ -1983,7 +1983,7 @@ plank_status_indicator_item_get_clock_menu_items (PlankStatusIndicatorItem* self
 	_g_object_unref0 (_tmp9_);
 	_tmp10_ = plank_dock_element_create_menu_item (_ ("Open _Calendar"), "x-office-calendar-symbolic", FALSE);
 	calendar = _tmp10_;
-	g_signal_connect_object (calendar, "activate", (GCallback) ___lambda85__gtk_menu_item_activate, self, 0);
+	g_signal_connect_object (calendar, "activate", (GCallback) ___lambda109__gtk_menu_item_activate, self, 0);
 	gee_abstract_collection_add ((GeeAbstractCollection*) items, calendar);
 	_tmp11_ = plank_status_indicator_item_settings_item (self, _ ("Date & Time _Settings"), "datetime");
 	_tmp12_ = _tmp11_;
@@ -2225,7 +2225,7 @@ block19_data_unref (void * _userdata_)
 }
 
 static void
-__lambda80_ (Block19Data* _data19_)
+__lambda104_ (Block19Data* _data19_)
 {
 	PlankStatusIndicatorItem* self;
 	gchar* _tmp0_;
@@ -2238,10 +2238,10 @@ __lambda80_ (Block19Data* _data19_)
 }
 
 static void
-___lambda80__gtk_menu_item_activate (GtkMenuItem* _sender,
-                                     gpointer self)
+___lambda104__gtk_menu_item_activate (GtkMenuItem* _sender,
+                                      gpointer self)
 {
-	__lambda80_ (self);
+	__lambda104_ (self);
 }
 
 static GtkMenuItem*
@@ -2265,7 +2265,7 @@ plank_status_indicator_item_settings_item (PlankStatusIndicatorItem* self,
 	_data19_->panel = _tmp0_;
 	_tmp1_ = plank_dock_element_create_menu_item (label, "preferences-system-symbolic", FALSE);
 	item = _tmp1_;
-	g_signal_connect_data (item, "activate", (GCallback) ___lambda80__gtk_menu_item_activate, block19_data_ref (_data19_), (GClosureNotify) block19_data_unref, 0);
+	g_signal_connect_data (item, "activate", (GCallback) ___lambda104__gtk_menu_item_activate, block19_data_ref (_data19_), (GClosureNotify) block19_data_unref, 0);
 	result = item;
 	block19_data_unref (_data19_);
 	_data19_ = NULL;
@@ -2907,7 +2907,7 @@ plank_status_indicator_item_set_Kind (PlankStatusIndicatorItem* self,
 }
 
 static gboolean
-_plank_status_indicator_item___lambda87_ (PlankStatusIndicatorItem* self)
+_plank_status_indicator_item___lambda111_ (PlankStatusIndicatorItem* self)
 {
 	gboolean result;
 	plank_status_indicator_item_update_state (self);
@@ -2916,10 +2916,10 @@ _plank_status_indicator_item___lambda87_ (PlankStatusIndicatorItem* self)
 }
 
 static gboolean
-__plank_status_indicator_item___lambda87__gsource_func (gpointer self)
+__plank_status_indicator_item___lambda111__gsource_func (gpointer self)
 {
 	gboolean result;
-	result = _plank_status_indicator_item___lambda87_ ((PlankStatusIndicatorItem*) self);
+	result = _plank_status_indicator_item___lambda111_ ((PlankStatusIndicatorItem*) self);
 	return result;
 }
 
@@ -2936,7 +2936,7 @@ plank_status_indicator_item_constructor (GType type,
 	self = G_TYPE_CHECK_INSTANCE_CAST (obj, PLANK_TYPE_STATUS_INDICATOR_ITEM, PlankStatusIndicatorItem);
 	plank_dock_element_set_Button ((PlankDockElement*) self, PLANK_POPUP_BUTTON_LEFT | PLANK_POPUP_BUTTON_RIGHT);
 	plank_status_indicator_item_update_state (self);
-	self->priv->update_timer_id = g_timeout_add_seconds_full (G_PRIORITY_DEFAULT, (guint) 1, __plank_status_indicator_item___lambda87__gsource_func, g_object_ref (self), g_object_unref);
+	self->priv->update_timer_id = g_timeout_add_seconds_full (G_PRIORITY_DEFAULT, (guint) 1, __plank_status_indicator_item___lambda111__gsource_func, g_object_ref (self), g_object_unref);
 	return obj;
 }
 

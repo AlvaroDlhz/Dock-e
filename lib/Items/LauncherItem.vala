@@ -23,7 +23,7 @@ namespace Plank
 		{
 			if (menu_pixbuf == null) {
 				try {
-					menu_pixbuf = new Gdk.Pixbuf.from_resource (G_RESOURCE_PATH + "/img/dock-menu.jpg");
+					menu_pixbuf = new Gdk.Pixbuf.from_resource (G_RESOURCE_PATH + "/img/menu.svg");
 				} catch (Error e) {
 					warning ("Unable to load dock menu image: %s", e.message);
 					return;
