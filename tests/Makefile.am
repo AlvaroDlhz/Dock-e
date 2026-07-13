@@ -37,6 +37,7 @@ tests_VALASOURCES = \
 	ApplicationUninstallService.vala \
 	AudioService.vala \
 	BluetoothService.vala \
+	BrightnessService.vala \
 	CommandRunner.vala \
 	NetworkService.vala \
 	PowerService.vala \

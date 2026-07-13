@@ -42,6 +42,7 @@ namespace PlankTests
 		register_audio_service_tests ();
 		register_application_uninstall_service_tests ();
 		register_bluetooth_service_tests ();
+		register_brightness_service_tests ();
 		register_command_runner_tests ();
 		register_network_service_tests ();
 		register_power_service_tests ();

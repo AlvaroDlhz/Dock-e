@@ -57,6 +57,11 @@ namespace Plank
 		ulong network_networks_changed_id = 0UL;
 		unowned PowerService power_service;
 		ulong power_state_changed_id = 0UL;
+		unowned BrightnessService brightness_service;
+		ulong brightness_state_changed_id = 0UL;
+		Gtk.Scale? brightness_scale;
+		Gtk.Label? brightness_value_label;
+		bool updating_brightness_control = false;
 		uint power_rebuild_id = 0U;
 
 		public StatusPanelWindow (DockController controller)
@@ -74,6 +79,8 @@ namespace Plank
 			network_networks_changed_id = network_service.networks_changed.connect (network_service_changed);
 			power_service = PowerService.get_default ();
 			power_state_changed_id = power_service.state_changed.connect (power_service_changed);
+			brightness_service = BrightnessService.get_default ();
+			brightness_state_changed_id = brightness_service.state_changed.connect (brightness_service_changed);
 			decorated = false;
 			resizable = false;
 			skip_taskbar_hint = true;
@@ -142,6 +149,8 @@ namespace Plank
 				SignalHandler.disconnect (network_service, network_networks_changed_id);
 			if (power_state_changed_id > 0UL)
 				SignalHandler.disconnect (power_service, power_state_changed_id);
+			if (brightness_state_changed_id > 0UL)
+				SignalHandler.disconnect (brightness_service, brightness_state_changed_id);
 			if (bluetooth_rebuild_id > 0U)
 				Source.remove (bluetooth_rebuild_id);
 			stop_bluetooth_discovery ();
@@ -174,6 +183,8 @@ namespace Plank
 				start_bluetooth_discovery ();
 			if (item.Kind == StatusIndicatorKind.WIFI)
 				network_service.request_scan.begin ();
+			if (item.Kind == StatusIndicatorKind.BATTERY)
+				brightness_service.refresh.begin ();
 			rebuild (item.Kind);
 			if (item.Kind == StatusIndicatorKind.CLOCK)
 				start_clock_display ();
@@ -249,6 +260,8 @@ namespace Plank
 			countdown_label = null;
 			stopwatch_label = null;
 			countdown_button = null;
+			brightness_scale = null;
+			brightness_value_label = null;
 			foreach (unowned Gtk.Widget child in content.get_children ())
 				content.remove (child);
 			foreach (unowned Gtk.Widget child in footer.get_children ())
@@ -741,6 +754,21 @@ namespace Plank
 			});
 		}
 
+		void brightness_service_changed ()
+		{
+			if (!visible || current_item == null || current_item.Kind != StatusIndicatorKind.BATTERY)
+				return;
+			if (brightness_scale == null || !brightness_service.available) {
+				power_service_changed ();
+				return;
+			}
+			updating_brightness_control = true;
+			brightness_scale.set_value (brightness_service.percentage);
+			if (brightness_value_label != null)
+				brightness_value_label.label = "%.0f%%".printf (brightness_service.percentage);
+			updating_brightness_control = false;
+		}
+
 		void add_wifi_settings_button ()
 		{
 			var settings = new Gtk.Button.with_label (_("Advanced network settings"));
@@ -825,24 +853,21 @@ namespace Plank
 
 		void build_brightness_control ()
 		{
-			var backlight = first_directory ("/sys/class/backlight");
-			if (backlight == "") return;
-			var brightness = read_sys_int (backlight + "/brightness");
-			var maximum = read_sys_int (backlight + "/max_brightness");
-			if (maximum <= 0) return;
+			if (!brightness_service.available) return;
 			content.pack_start (section_label (_("Screen brightness")), false, false, 0);
 			var overlay = new Gtk.Overlay ();
 			overlay.get_style_context ().add_class ("modern-volume-bar");
 			var scale = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 5, 100, 1);
+			brightness_scale = scale;
 			scale.draw_value = false;
 			scale.has_origin = true;
 			scale.height_request = 36;
-			scale.set_value (100.0 * brightness / maximum);
+			scale.set_value (brightness_service.percentage);
 			scale.get_style_context ().add_class ("modern-volume-scale");
 			overlay.add (scale);
 			scale.button_release_event.connect (() => {
-				var target = (int) (maximum * scale.get_value () / 100.0);
-				launch ("pkexec /usr/sbin/xfpm-power-backlight-helper --set-brightness " + target.to_string ());
+				if (!updating_brightness_control)
+					brightness_service.request_percentage (scale.get_value ());
 				return false;
 			});
 			var icon = new Gtk.Image.from_icon_name ("display-brightness-symbolic", Gtk.IconSize.MENU);
@@ -852,6 +877,7 @@ namespace Plank
 			overlay.add_overlay (icon);
 			overlay.set_overlay_pass_through (icon, true);
 			var value = new Gtk.Label ("%.0f%%".printf (scale.get_value ())) { width_request = 38, xalign = 1.0f };
+			brightness_value_label = value;
 			value.halign = Gtk.Align.END;
 			value.valign = Gtk.Align.CENTER;
 			value.margin_end = 10;
@@ -898,30 +924,6 @@ namespace Plank
 			settings.get_style_context ().add_class ("status-action-button");
 			settings.clicked.connect (() => launch ("xfce4-power-manager-settings"));
 			footer.pack_start (settings, false, false, 0);
-		}
-
-		static string first_directory (string path)
-		{
-			try {
-				var directory = Dir.open (path);
-				string? name;
-				while ((name = directory.read_name ()) != null)
-					if (!name.has_prefix (".")) return path + "/" + name;
-			} catch (FileError e) {}
-			return "";
-		}
-
-		static string read_sys (string path)
-		{
-			string value = "";
-			try { FileUtils.get_contents (path, out value); } catch (FileError e) {}
-			return value.strip ();
-		}
-
-		static int read_sys_int (string path)
-		{
-			var value = read_sys (path);
-			return value == "" ? -1 : int.parse (value);
 		}
 
 		void build_clock ()

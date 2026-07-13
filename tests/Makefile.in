@@ -146,6 +146,7 @@ gmock_tests_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 am__objects_3 = tests-ApplicationUninstallService.$(OBJEXT) \
 	tests-AudioService.$(OBJEXT) tests-BluetoothService.$(OBJEXT) \
+	tests-BrightnessService.$(OBJEXT) \
 	tests-CommandRunner.$(OBJEXT) tests-NetworkService.$(OBJEXT) \
 	tests-PowerService.$(OBJEXT) tests-UpdateService.$(OBJEXT) \
 	tests-Controller.$(OBJEXT) tests-Drawing.$(OBJEXT) \
@@ -179,6 +180,7 @@ am__depfiles_remade = ./$(DEPDIR)/dock-Dock.Po \
 	./$(DEPDIR)/tests-ApplicationUninstallService.Po \
 	./$(DEPDIR)/tests-AudioService.Po \
 	./$(DEPDIR)/tests-BluetoothService.Po \
+	./$(DEPDIR)/tests-BrightnessService.Po \
 	./$(DEPDIR)/tests-CommandRunner.Po \
 	./$(DEPDIR)/tests-Controller.Po ./$(DEPDIR)/tests-Drawing.Po \
 	./$(DEPDIR)/tests-Items.Po ./$(DEPDIR)/tests-Main.Po \
@@ -491,6 +493,7 @@ tests_VALASOURCES = \
 	ApplicationUninstallService.vala \
 	AudioService.vala \
 	BluetoothService.vala \
+	BrightnessService.vala \
 	CommandRunner.vala \
 	NetworkService.vala \
 	PowerService.vala \
@@ -649,6 +652,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-ApplicationUninstallService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-AudioService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-BluetoothService.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-BrightnessService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-CommandRunner.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Controller.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Drawing.Po@am__quote@ # am--include-marker
@@ -748,6 +752,20 @@ tests-BluetoothService.obj: BluetoothService.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='BluetoothService.c' object='tests-BluetoothService.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-BluetoothService.obj `if test -f 'BluetoothService.c'; then $(CYGPATH_W) 'BluetoothService.c'; else $(CYGPATH_W) '$(srcdir)/BluetoothService.c'; fi`
+
+tests-BrightnessService.o: BrightnessService.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-BrightnessService.o -MD -MP -MF $(DEPDIR)/tests-BrightnessService.Tpo -c -o tests-BrightnessService.o `test -f 'BrightnessService.c' || echo '$(srcdir)/'`BrightnessService.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-BrightnessService.Tpo $(DEPDIR)/tests-BrightnessService.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='BrightnessService.c' object='tests-BrightnessService.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-BrightnessService.o `test -f 'BrightnessService.c' || echo '$(srcdir)/'`BrightnessService.c
+
+tests-BrightnessService.obj: BrightnessService.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-BrightnessService.obj -MD -MP -MF $(DEPDIR)/tests-BrightnessService.Tpo -c -o tests-BrightnessService.obj `if test -f 'BrightnessService.c'; then $(CYGPATH_W) 'BrightnessService.c'; else $(CYGPATH_W) '$(srcdir)/BrightnessService.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-BrightnessService.Tpo $(DEPDIR)/tests-BrightnessService.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='BrightnessService.c' object='tests-BrightnessService.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-BrightnessService.obj `if test -f 'BrightnessService.c'; then $(CYGPATH_W) 'BrightnessService.c'; else $(CYGPATH_W) '$(srcdir)/BrightnessService.c'; fi`
 
 tests-CommandRunner.o: CommandRunner.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-CommandRunner.o -MD -MP -MF $(DEPDIR)/tests-CommandRunner.Tpo -c -o tests-CommandRunner.o `test -f 'CommandRunner.c' || echo '$(srcdir)/'`CommandRunner.c
@@ -1098,6 +1116,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/tests-ApplicationUninstallService.Po
 	-rm -f ./$(DEPDIR)/tests-AudioService.Po
 	-rm -f ./$(DEPDIR)/tests-BluetoothService.Po
+	-rm -f ./$(DEPDIR)/tests-BrightnessService.Po
 	-rm -f ./$(DEPDIR)/tests-CommandRunner.Po
 	-rm -f ./$(DEPDIR)/tests-Controller.Po
 	-rm -f ./$(DEPDIR)/tests-Drawing.Po
@@ -1160,6 +1179,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/tests-ApplicationUninstallService.Po
 	-rm -f ./$(DEPDIR)/tests-AudioService.Po
 	-rm -f ./$(DEPDIR)/tests-BluetoothService.Po
+	-rm -f ./$(DEPDIR)/tests-BrightnessService.Po
 	-rm -f ./$(DEPDIR)/tests-CommandRunner.Po
 	-rm -f ./$(DEPDIR)/tests-Controller.Po
 	-rm -f ./$(DEPDIR)/tests-Drawing.Po
