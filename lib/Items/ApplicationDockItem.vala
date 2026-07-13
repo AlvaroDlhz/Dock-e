@@ -448,7 +448,9 @@ namespace Plank
 					item.activate.connect (() => {
 						try {
 							AppInfo.create_from_commandline (values[0], null, AppInfoCreateFlags.NONE).launch (null, null);
-						} catch { }
+						} catch (Error e) {
+							System.get_default ().report_launch_failure (e.message);
+						}
 					});
 					items.add (item);
 				}

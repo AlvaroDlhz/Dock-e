@@ -177,12 +177,13 @@ namespace Plank
 			}
 		}
 
-		static void launch_command (string command)
+		void launch_command (string command)
 		{
 			try {
 				AppInfo.create_from_commandline (command, null, AppInfoCreateFlags.NONE).launch (null, null);
 			} catch (Error e) {
-				warning ("Unable to launch '%s': %s", command, e.message);
+				System.get_default ().report_launch_failure (
+					"Unable to launch '%s': %s".printf (command, e.message));
 			}
 		}
 

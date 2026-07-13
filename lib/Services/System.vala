@@ -25,6 +25,7 @@ namespace Plank
 	public class System : GLib.Object
 	{
 		static System? instance = null;
+		Gtk.MessageDialog? launch_error_dialog;
 		
 		public static unowned System get_default ()
 		{
@@ -51,11 +52,38 @@ namespace Plank
 		{
 			context.launch_failed.disconnect (on_launch_failed);
 			context.launched.disconnect (on_launched);
+			if (launch_error_dialog != null)
+				launch_error_dialog.destroy ();
 		}
 		
 		void on_launch_failed (string startup_notify_id) 
 		{
-			warning ("Failed to launch '%s'", startup_notify_id);
+			report_launch_failure ("Failed to launch '%s'".printf (startup_notify_id));
+		}
+
+		internal void report_launch_failure (string technical_message)
+		{
+			warning ("Unable to open requested item: %s", technical_message);
+			if (Gdk.Display.get_default () == null)
+				return;
+			if (launch_error_dialog != null) {
+				launch_error_dialog.present ();
+				return;
+			}
+			var dialog = new Gtk.MessageDialog (null, (Gtk.DialogFlags) 0,
+				Gtk.MessageType.ERROR, Gtk.ButtonsType.CLOSE,
+				_("The selected item could not be opened."));
+			dialog.format_secondary_text (_("Check that the application or file is still available, then try again."));
+			dialog.set_keep_above (true);
+			dialog.skip_taskbar_hint = true;
+			dialog.window_position = Gtk.WindowPosition.CENTER;
+			launch_error_dialog = dialog;
+			dialog.response.connect (() => {
+				launch_error_dialog = null;
+				dialog.destroy ();
+			});
+			dialog.show_all ();
+			dialog.present ();
 		}
 		
 		void on_launched (AppInfo info, Variant platform_data)
@@ -112,7 +140,7 @@ namespace Plank
 		public void launch_with_files (File? app, File[] files)
 		{
 			if (app != null && !app.query_exists ()) {
-				warning ("Application '%s' doesn't exist", app.get_path () ?? "");
+				report_launch_failure ("Application '%s' doesn't exist".printf (app.get_path () ?? ""));
 				return;
 			}
 			
@@ -168,7 +196,7 @@ namespace Plank
 					keyfile = new KeyFile ();
 					keyfile.load_from_file (launcher, KeyFileFlags.NONE);
 				} catch (Error e) {
-					critical ("%s: %s", launcher, e.message);
+					report_launch_failure ("%s: %s".printf (launcher, e.message));
 					return;
 				}
 				
@@ -184,12 +212,12 @@ namespace Plank
 							var url = keyfile.get_string (KeyFileDesktop.GROUP, KeyFileDesktop.KEY_URL);
 							AppInfo.launch_default_for_uri (url, context);
 						} catch (Error e) {
-							critical ("%s: %s", launcher, e.message);
+							report_launch_failure ("%s: %s".printf (launcher, e.message));
 						}
 						return;
 					}
 				} catch (KeyFileError e) {
-					critical ("%s: %s", launcher, e.message);
+					report_launch_failure ("%s: %s".printf (launcher, e.message));
 					return;
 				}
 				
@@ -198,13 +226,13 @@ namespace Plank
 				try {
 					info = files.first ().data.query_default_handler ();
 				} catch (Error e) {
-					critical (e.message);
+					report_launch_failure (e.message);
 				}
 			}
 			
 			if (info == null) {
-				critical ("Unable to use application/file '%s' for execution.",
-					(app != null ? app.get_path () : files.first ().data.get_path ()));
+				report_launch_failure ("Unable to use application/file '%s' for execution.".printf (
+					app != null ? app.get_path () : files.first ().data.get_path ()));
 				return;
 			}
 			
@@ -229,9 +257,10 @@ namespace Plank
 					return;
 				}
 				
-				warning ("The application '%s' doesn't support files/URIs or wasn't found.", info.get_name ());
+				report_launch_failure ("The application '%s' doesn't support files/URIs or wasn't found."
+					.printf (info.get_name ()));
 			} catch (Error e) {
-				critical (e.message);
+				report_launch_failure (e.message);
 			}
 		}
 	}

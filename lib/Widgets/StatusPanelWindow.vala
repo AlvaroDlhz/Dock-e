@@ -372,7 +372,8 @@ namespace Plank
 
 			var settings = new Gtk.Button.with_label (_("Advanced sound settings"));
 			settings.get_style_context ().add_class ("status-action-button");
-			settings.clicked.connect (() => launch ("pavucontrol"));
+			settings.clicked.connect (() => launch_external ("pavucontrol",
+				_("Advanced sound settings could not be opened.")));
 			footer.pack_start (settings, false, false, 0);
 			audio_service.refresh.begin ();
 			audio_service.refresh_devices.begin ();
@@ -656,7 +657,8 @@ namespace Plank
 		{
 			var settings = new Gtk.Button.with_label (_("Advanced Bluetooth settings"));
 			settings.get_style_context ().add_class ("status-action-button");
-			settings.clicked.connect (() => launch ("blueman-manager"));
+			settings.clicked.connect (() => launch_external ("blueman-manager",
+				_("Advanced Bluetooth settings could not be opened.")));
 			footer.pack_start (settings, false, false, 0);
 		}
 
@@ -842,7 +844,8 @@ namespace Plank
 		{
 			var settings = new Gtk.Button.with_label (_("Advanced network settings"));
 			settings.get_style_context ().add_class ("status-action-button");
-			settings.clicked.connect (() => launch ("nm-connection-editor"));
+			settings.clicked.connect (() => launch_external ("nm-connection-editor",
+				_("Advanced network settings could not be opened.")));
 			footer.pack_start (settings, false, false, 0);
 		}
 
@@ -991,7 +994,8 @@ namespace Plank
 		{
 			var settings = new Gtk.Button.with_label (_("Advanced power settings"));
 			settings.get_style_context ().add_class ("status-action-button");
-			settings.clicked.connect (() => launch ("xfce4-power-manager-settings"));
+			settings.clicked.connect (() => launch_external ("xfce4-power-manager-settings",
+				_("Advanced power settings could not be opened.")));
 			footer.pack_start (settings, false, false, 0);
 		}
 
@@ -1166,8 +1170,8 @@ namespace Plank
 				if (countdown_seconds > 0) return true;
 				countdown_tick_id = 0U;
 				if (countdown_button != null) countdown_button.label = _("Start");
-				launch ("notify-send " + Shell.quote (_("Pomodoro finished")) + " "
-					+ Shell.quote (_("The current focus or break session has finished.")));
+				launch_external ("notify-send " + Shell.quote (_("Pomodoro finished")) + " "
+					+ Shell.quote (_("The current focus or break session has finished.")), null);
 				return false;
 			});
 		}
@@ -1343,7 +1347,17 @@ namespace Plank
 			Gtk.StyleContext.add_provider_for_screen (get_screen (), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
 		}
 
-		static void launch (string command) { try { Process.spawn_command_line_async (command); } catch (SpawnError e) {} }
+		void launch_external (string command, string? user_message)
+		{
+			try {
+				Process.spawn_command_line_async (command);
+				notice_model.dismiss ();
+			} catch (SpawnError e) {
+				warning ("Unable to launch '%s': %s", command, e.message);
+				if (user_message != null)
+					notice_model.show_error (user_message);
+			}
+		}
 		static string label_for_kind (StatusIndicatorKind kind) {
 			switch (kind) {
 			case StatusIndicatorKind.VOLUME: return _("Volume"); case StatusIndicatorKind.BLUETOOTH: return _("Bluetooth");

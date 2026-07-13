@@ -149,11 +149,11 @@ am__objects_3 = tests-ApplicationUninstallService.$(OBJEXT) \
 	tests-BrightnessService.$(OBJEXT) \
 	tests-CommandRunner.$(OBJEXT) tests-NetworkService.$(OBJEXT) \
 	tests-PowerService.$(OBJEXT) tests-StatusNoticeModel.$(OBJEXT) \
-	tests-UpdateService.$(OBJEXT) tests-Controller.$(OBJEXT) \
-	tests-Drawing.$(OBJEXT) tests-Items.$(OBJEXT) \
-	tests-Preferences.$(OBJEXT) tests-Widgets.$(OBJEXT) \
-	tests-Main.$(OBJEXT) tests-TestHelper.$(OBJEXT) \
-	$(am__objects_1)
+	tests-System.$(OBJEXT) tests-UpdateService.$(OBJEXT) \
+	tests-Controller.$(OBJEXT) tests-Drawing.$(OBJEXT) \
+	tests-Items.$(OBJEXT) tests-Preferences.$(OBJEXT) \
+	tests-Widgets.$(OBJEXT) tests-Main.$(OBJEXT) \
+	tests-TestHelper.$(OBJEXT) $(am__objects_1)
 nodist_tests_OBJECTS = $(am__objects_3) $(am__objects_1)
 tests_OBJECTS = $(nodist_tests_OBJECTS)
 tests_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -189,7 +189,7 @@ am__depfiles_remade = ./$(DEPDIR)/dock-Dock.Po \
 	./$(DEPDIR)/tests-PowerService.Po \
 	./$(DEPDIR)/tests-Preferences.Po \
 	./$(DEPDIR)/tests-StatusNoticeModel.Po \
-	./$(DEPDIR)/tests-TestHelper.Po \
+	./$(DEPDIR)/tests-System.Po ./$(DEPDIR)/tests-TestHelper.Po \
 	./$(DEPDIR)/tests-UpdateService.Po \
 	./$(DEPDIR)/tests-Widgets.Po gmock/$(DEPDIR)/tests-color.Po \
 	gmock/$(DEPDIR)/tests-main.Po
@@ -500,6 +500,7 @@ tests_VALASOURCES = \
 	NetworkService.vala \
 	PowerService.vala \
 	StatusNoticeModel.vala \
+	System.vala \
 	UpdateService.vala \
 	Controller.vala \
 	Drawing.vala \
@@ -665,6 +666,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-PowerService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Preferences.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-StatusNoticeModel.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-System.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-TestHelper.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-UpdateService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Widgets.Po@am__quote@ # am--include-marker
@@ -826,6 +828,20 @@ tests-StatusNoticeModel.obj: StatusNoticeModel.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='StatusNoticeModel.c' object='tests-StatusNoticeModel.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-StatusNoticeModel.obj `if test -f 'StatusNoticeModel.c'; then $(CYGPATH_W) 'StatusNoticeModel.c'; else $(CYGPATH_W) '$(srcdir)/StatusNoticeModel.c'; fi`
+
+tests-System.o: System.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-System.o -MD -MP -MF $(DEPDIR)/tests-System.Tpo -c -o tests-System.o `test -f 'System.c' || echo '$(srcdir)/'`System.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-System.Tpo $(DEPDIR)/tests-System.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='System.c' object='tests-System.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-System.o `test -f 'System.c' || echo '$(srcdir)/'`System.c
+
+tests-System.obj: System.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-System.obj -MD -MP -MF $(DEPDIR)/tests-System.Tpo -c -o tests-System.obj `if test -f 'System.c'; then $(CYGPATH_W) 'System.c'; else $(CYGPATH_W) '$(srcdir)/System.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-System.Tpo $(DEPDIR)/tests-System.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='System.c' object='tests-System.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-System.obj `if test -f 'System.c'; then $(CYGPATH_W) 'System.c'; else $(CYGPATH_W) '$(srcdir)/System.c'; fi`
 
 tests-UpdateService.o: UpdateService.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-UpdateService.o -MD -MP -MF $(DEPDIR)/tests-UpdateService.Tpo -c -o tests-UpdateService.o `test -f 'UpdateService.c' || echo '$(srcdir)/'`UpdateService.c
@@ -1144,6 +1160,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/tests-PowerService.Po
 	-rm -f ./$(DEPDIR)/tests-Preferences.Po
 	-rm -f ./$(DEPDIR)/tests-StatusNoticeModel.Po
+	-rm -f ./$(DEPDIR)/tests-System.Po
 	-rm -f ./$(DEPDIR)/tests-TestHelper.Po
 	-rm -f ./$(DEPDIR)/tests-UpdateService.Po
 	-rm -f ./$(DEPDIR)/tests-Widgets.Po
@@ -1208,6 +1225,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/tests-PowerService.Po
 	-rm -f ./$(DEPDIR)/tests-Preferences.Po
 	-rm -f ./$(DEPDIR)/tests-StatusNoticeModel.Po
+	-rm -f ./$(DEPDIR)/tests-System.Po
 	-rm -f ./$(DEPDIR)/tests-TestHelper.Po
 	-rm -f ./$(DEPDIR)/tests-UpdateService.Po
 	-rm -f ./$(DEPDIR)/tests-Widgets.Po
