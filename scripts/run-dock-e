@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PROJECT_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+BUILD_DIR=${DOCK_E_BUILD_DIR:-"$PROJECT_DIR/.build"}
+DOCK_E="$BUILD_DIR/src/.libs/plank"
+LIB_DIR="$BUILD_DIR/lib/.libs"
+
+if [ ! -x "$DOCK_E" ]; then
+	echo "Dock-E has not been built yet. Run scripts/build-dock-e first." >&2
+	exit 1
+fi
+
+if pgrep -u "$(id -u)" -f "$DOCK_E" >/dev/null 2>&1; then
+	echo "This Dock-E build is already running." >&2
+	exit 0
+fi
+
+export LD_LIBRARY_PATH="$LIB_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export GSETTINGS_SCHEMA_DIR="$BUILD_DIR/data"
+export PLANK_DOCKLET_DIRS="$BUILD_DIR/docklets"
+
+exec "$DOCK_E" -n dev -d "$@"

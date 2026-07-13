@@ -11,6 +11,7 @@
 /stamp-h1
 
 # Compiler and libtool output
+/.build/
 /.libs/
 /**/.libs/
 /.deps/
@@ -22,6 +23,7 @@
 *.Po
 *.Plo
 *.stamp
+**/.dirstamp
 
 # Generated Vala C sources
 /lib/*.c
@@ -52,6 +54,7 @@
 /data/plank.appdata.xml
 /data/plank.desktop
 /po/Makefile
+/po/Makefile.in
 /po/POTFILES
 /po/*.gmo
 /po/*.mo

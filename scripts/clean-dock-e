@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PROJECT_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+BUILD_DIR=${DOCK_E_BUILD_DIR:-"$PROJECT_DIR/.build"}
+
+if [ ! -f "$BUILD_DIR/Makefile" ]; then
+	echo "No configured Dock-E build found at $BUILD_DIR"
+	exit 0
+fi
+
+echo "Cleaning Dock-E build at $BUILD_DIR"
+exec make -C "$BUILD_DIR" distclean

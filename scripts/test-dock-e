@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PROJECT_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+BUILD_DIR=${DOCK_E_BUILD_DIR:-"$PROJECT_DIR/.build"}
+
+"$SCRIPT_DIR/build-dock-e"
+
+echo "Running Dock-E tests"
+if command -v xvfb-run >/dev/null 2>&1; then
+	exec xvfb-run -a make -C "$BUILD_DIR" check
+fi
+
+echo "xvfb-run is unavailable; tests require an accessible graphical display." >&2
+exec make -C "$BUILD_DIR" check

@@ -1,9 +1,11 @@
 #!/usr/bin/env sh
 
-# Start the project build of Dock-e for the desktop session.
-PROJECT_DIR="/home/alvaro/coding/opensource/plank-fork"
-DOCK_E="$PROJECT_DIR/src/.libs/plank"
-LIB_DIR="$PROJECT_DIR/lib/.libs"
+# Start the out-of-tree project build of Dock-E for the desktop session.
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PROJECT_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+BUILD_DIR=${DOCK_E_BUILD_DIR:-"$PROJECT_DIR/.build"}
+DOCK_E="$BUILD_DIR/src/.libs/plank"
+LIB_DIR="$BUILD_DIR/lib/.libs"
 LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}"
 LOG_FILE="$LOG_DIR/dock-e-autostart.log"
 
@@ -27,5 +29,7 @@ mkdir -p "$LOG_DIR"
 
   echo "starting project build: $DOCK_E"
   export LD_LIBRARY_PATH="$LIB_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+  export GSETTINGS_SCHEMA_DIR="$BUILD_DIR/data"
+  export PLANK_DOCKLET_DIRS="$BUILD_DIR/docklets"
   exec "$DOCK_E" -n dev -d
 } >>"$LOG_FILE" 2>&1
