@@ -383,7 +383,7 @@ namespace Plank
 			
 			// Look in user's themes-folder
 			try {
-				var enumerator = Paths.AppThemeFolder.enumerate_children ("standard::name,standard::type",
+				var enumerator = Paths.AppThemeFolder.enumerate_children ("standard::name,standard::type,standard::is-hidden",
 					GLib.FileQueryInfoFlags.NONE);
 				FileInfo info;
 				while ((info = enumerator.next_file ()) != null) {
@@ -397,7 +397,7 @@ namespace Plank
 			
 			// Look in system's themes-folder
 			try {
-				var enumerator = Paths.ThemeFolder.enumerate_children ("standard::name,standard::type",
+				var enumerator = Paths.ThemeFolder.enumerate_children ("standard::name,standard::type,standard::is-hidden",
 					GLib.FileQueryInfoFlags.NONE);
 				FileInfo info;
 				while ((info = enumerator.next_file ()) != null) {

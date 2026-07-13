@@ -36,6 +36,7 @@ namespace PlankTests
 		Log.set_always_fatal (LogLevelFlags.LEVEL_ERROR | LogLevelFlags.LEVEL_CRITICAL);
 		
 		Paths.initialize ("test", Config.DATA_DIR);
+		internal_quarks_initialize ();
 		
 		// static tests
 		register_drawing_tests ();
