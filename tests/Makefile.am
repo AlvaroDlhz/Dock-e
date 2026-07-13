@@ -34,6 +34,7 @@ tests_LDADD = \
 	$(NULL)
 
 tests_VALASOURCES = \
+	ApplicationUninstallService.vala \
 	AudioService.vala \
 	BluetoothService.vala \
 	CommandRunner.vala \

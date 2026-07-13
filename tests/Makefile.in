@@ -144,14 +144,14 @@ gmock_tests_OBJECTS = $(am_gmock_tests_OBJECTS)
 gmock_tests_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(gmock_tests_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-am__objects_3 = tests-AudioService.$(OBJEXT) \
-	tests-BluetoothService.$(OBJEXT) tests-CommandRunner.$(OBJEXT) \
-	tests-NetworkService.$(OBJEXT) tests-PowerService.$(OBJEXT) \
-	tests-UpdateService.$(OBJEXT) tests-Controller.$(OBJEXT) \
-	tests-Drawing.$(OBJEXT) tests-Items.$(OBJEXT) \
-	tests-Preferences.$(OBJEXT) tests-Widgets.$(OBJEXT) \
-	tests-Main.$(OBJEXT) tests-TestHelper.$(OBJEXT) \
-	$(am__objects_1)
+am__objects_3 = tests-ApplicationUninstallService.$(OBJEXT) \
+	tests-AudioService.$(OBJEXT) tests-BluetoothService.$(OBJEXT) \
+	tests-CommandRunner.$(OBJEXT) tests-NetworkService.$(OBJEXT) \
+	tests-PowerService.$(OBJEXT) tests-UpdateService.$(OBJEXT) \
+	tests-Controller.$(OBJEXT) tests-Drawing.$(OBJEXT) \
+	tests-Items.$(OBJEXT) tests-Preferences.$(OBJEXT) \
+	tests-Widgets.$(OBJEXT) tests-Main.$(OBJEXT) \
+	tests-TestHelper.$(OBJEXT) $(am__objects_1)
 nodist_tests_OBJECTS = $(am__objects_3) $(am__objects_1)
 tests_OBJECTS = $(nodist_tests_OBJECTS)
 tests_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -176,6 +176,7 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/dock-Dock.Po \
+	./$(DEPDIR)/tests-ApplicationUninstallService.Po \
 	./$(DEPDIR)/tests-AudioService.Po \
 	./$(DEPDIR)/tests-BluetoothService.Po \
 	./$(DEPDIR)/tests-CommandRunner.Po \
@@ -487,6 +488,7 @@ tests_LDADD = \
 	$(NULL)
 
 tests_VALASOURCES = \
+	ApplicationUninstallService.vala \
 	AudioService.vala \
 	BluetoothService.vala \
 	CommandRunner.vala \
@@ -644,6 +646,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dock-Dock.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-ApplicationUninstallService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-AudioService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-BluetoothService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-CommandRunner.Po@am__quote@ # am--include-marker
@@ -703,6 +706,20 @@ dock-Dock.obj: Dock.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Dock.c' object='dock-Dock.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dock_CFLAGS) $(CFLAGS) -c -o dock-Dock.obj `if test -f 'Dock.c'; then $(CYGPATH_W) 'Dock.c'; else $(CYGPATH_W) '$(srcdir)/Dock.c'; fi`
+
+tests-ApplicationUninstallService.o: ApplicationUninstallService.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-ApplicationUninstallService.o -MD -MP -MF $(DEPDIR)/tests-ApplicationUninstallService.Tpo -c -o tests-ApplicationUninstallService.o `test -f 'ApplicationUninstallService.c' || echo '$(srcdir)/'`ApplicationUninstallService.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-ApplicationUninstallService.Tpo $(DEPDIR)/tests-ApplicationUninstallService.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ApplicationUninstallService.c' object='tests-ApplicationUninstallService.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-ApplicationUninstallService.o `test -f 'ApplicationUninstallService.c' || echo '$(srcdir)/'`ApplicationUninstallService.c
+
+tests-ApplicationUninstallService.obj: ApplicationUninstallService.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-ApplicationUninstallService.obj -MD -MP -MF $(DEPDIR)/tests-ApplicationUninstallService.Tpo -c -o tests-ApplicationUninstallService.obj `if test -f 'ApplicationUninstallService.c'; then $(CYGPATH_W) 'ApplicationUninstallService.c'; else $(CYGPATH_W) '$(srcdir)/ApplicationUninstallService.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-ApplicationUninstallService.Tpo $(DEPDIR)/tests-ApplicationUninstallService.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ApplicationUninstallService.c' object='tests-ApplicationUninstallService.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-ApplicationUninstallService.obj `if test -f 'ApplicationUninstallService.c'; then $(CYGPATH_W) 'ApplicationUninstallService.c'; else $(CYGPATH_W) '$(srcdir)/ApplicationUninstallService.c'; fi`
 
 tests-AudioService.o: AudioService.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-AudioService.o -MD -MP -MF $(DEPDIR)/tests-AudioService.Tpo -c -o tests-AudioService.o `test -f 'AudioService.c' || echo '$(srcdir)/'`AudioService.c
@@ -1078,6 +1095,7 @@ clean-am: clean-checkPROGRAMS clean-generic clean-libtool clean-local \
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/dock-Dock.Po
+	-rm -f ./$(DEPDIR)/tests-ApplicationUninstallService.Po
 	-rm -f ./$(DEPDIR)/tests-AudioService.Po
 	-rm -f ./$(DEPDIR)/tests-BluetoothService.Po
 	-rm -f ./$(DEPDIR)/tests-CommandRunner.Po
@@ -1139,6 +1157,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/dock-Dock.Po
+	-rm -f ./$(DEPDIR)/tests-ApplicationUninstallService.Po
 	-rm -f ./$(DEPDIR)/tests-AudioService.Po
 	-rm -f ./$(DEPDIR)/tests-BluetoothService.Po
 	-rm -f ./$(DEPDIR)/tests-CommandRunner.Po

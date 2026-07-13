@@ -171,6 +171,7 @@ libplank_internal_la_LIBADD = \
 libplank_internal_la_VALASOURCES = \
 	InternalConsts.vala \
 	InternalQuarks.vala \
+	Services/ApplicationUninstallService.vala \
 	Services/AudioService.vala \
 	Services/BluetoothService.vala \
 	Services/CommandRunner.vala \

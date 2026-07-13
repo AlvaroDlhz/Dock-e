@@ -148,6 +148,7 @@ am_libplank_internal_la_OBJECTS = libplank_internal_la-gtk-compat.lo \
 am__dirstamp = $(am__leading_dot)dirstamp
 am__objects_2 = libplank_internal_la-InternalConsts.lo \
 	libplank_internal_la-InternalQuarks.lo \
+	Services/libplank_internal_la-ApplicationUninstallService.lo \
 	Services/libplank_internal_la-AudioService.lo \
 	Services/libplank_internal_la-BluetoothService.lo \
 	Services/libplank_internal_la-CommandRunner.lo \
@@ -267,6 +268,7 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Services/$(DEPDIR)/Preferences.Plo \
 	Services/$(DEPDIR)/Settings.Plo Services/$(DEPDIR)/System.Plo \
 	Services/$(DEPDIR)/Unity.Plo Services/$(DEPDIR)/Worker.Plo \
+	Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Plo \
@@ -864,6 +866,7 @@ libplank_internal_la_LIBADD = \
 libplank_internal_la_VALASOURCES = \
 	InternalConsts.vala \
 	InternalQuarks.vala \
+	Services/ApplicationUninstallService.vala \
 	Services/AudioService.vala \
 	Services/BluetoothService.vala \
 	Services/CommandRunner.vala \
@@ -1001,6 +1004,8 @@ Services/$(am__dirstamp):
 Services/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) Services/$(DEPDIR)
 	@: > Services/$(DEPDIR)/$(am__dirstamp)
+Services/libplank_internal_la-ApplicationUninstallService.lo:  \
+	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-AudioService.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-BluetoothService.lo:  \
@@ -1241,6 +1246,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/System.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Unity.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Worker.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Plo@am__quote@ # am--include-marker
@@ -1311,6 +1317,13 @@ libplank_internal_la-InternalQuarks.lo: InternalQuarks.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='InternalQuarks.c' object='libplank_internal_la-InternalQuarks.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o libplank_internal_la-InternalQuarks.lo `test -f 'InternalQuarks.c' || echo '$(srcdir)/'`InternalQuarks.c
+
+Services/libplank_internal_la-ApplicationUninstallService.lo: Services/ApplicationUninstallService.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-ApplicationUninstallService.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Tpo -c -o Services/libplank_internal_la-ApplicationUninstallService.lo `test -f 'Services/ApplicationUninstallService.c' || echo '$(srcdir)/'`Services/ApplicationUninstallService.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Tpo Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/ApplicationUninstallService.c' object='Services/libplank_internal_la-ApplicationUninstallService.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-ApplicationUninstallService.lo `test -f 'Services/ApplicationUninstallService.c' || echo '$(srcdir)/'`Services/ApplicationUninstallService.c
 
 Services/libplank_internal_la-AudioService.lo: Services/AudioService.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-AudioService.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-AudioService.Tpo -c -o Services/libplank_internal_la-AudioService.lo `test -f 'Services/AudioService.c' || echo '$(srcdir)/'`Services/AudioService.c
@@ -1826,6 +1839,7 @@ distclean: distclean-am
 	-rm -f Services/$(DEPDIR)/System.Plo
 	-rm -f Services/$(DEPDIR)/Unity.Plo
 	-rm -f Services/$(DEPDIR)/Worker.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Plo
@@ -1946,6 +1960,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Services/$(DEPDIR)/System.Plo
 	-rm -f Services/$(DEPDIR)/Unity.Plo
 	-rm -f Services/$(DEPDIR)/Worker.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Plo
