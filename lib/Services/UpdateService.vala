@@ -151,16 +151,14 @@ namespace Plank
 				refresh_again = false;
 				try {
 					var available = yield backend.check (lifetime);
-					last_error = "";
+					update_error ("");
 					if (updates_available != available) {
 						updates_available = available;
 						state_changed ();
 					}
 				} catch (Error e) {
-					if (!lifetime.is_cancelled ()) {
-						last_error = e.message;
-						state_changed ();
-					}
+					if (!lifetime.is_cancelled ())
+						update_error (e.message);
 				}
 			} while (refresh_again && !lifetime.is_cancelled ());
 			refresh_running = false;
@@ -200,6 +198,14 @@ namespace Plank
 			if (checking == value)
 				return;
 			checking = value;
+			state_changed ();
+		}
+
+		void update_error (string value)
+		{
+			if (last_error == value)
+				return;
+			last_error = value;
 			state_changed ();
 		}
 	}

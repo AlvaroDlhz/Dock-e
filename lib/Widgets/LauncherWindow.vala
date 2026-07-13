@@ -18,6 +18,10 @@ namespace Plank
 		Gtk.ToggleButton frequent_tab;
 		Gtk.ToggleButton all_tab;
 		Gtk.Menu power_menu;
+		StatusNoticeModel notice_model;
+		Gtk.Revealer notice_revealer;
+		Gtk.Label notice_label;
+		ulong notice_changed_id = 0UL;
 		Gee.ArrayList<AppInfo> applications;
 		Gee.ArrayList<AppInfo> visible_results;
 		Gee.HashMap<string, int> usage_counts;
@@ -42,6 +46,8 @@ namespace Plank
 			visible_results = new Gee.ArrayList<AppInfo> ();
 			usage_counts = new Gee.HashMap<string, int> ();
 			uninstall_service = new ApplicationUninstallService ();
+			notice_model = new StatusNoticeModel ();
+			notice_changed_id = notice_model.changed.connect (sync_notice);
 
 			decorated = false;
 			resizable = false;
@@ -89,6 +95,23 @@ namespace Plank
 			});
 			navbar.pack_end (power_button, false, false, 0);
 			panel.pack_start (navbar, false, false, 0);
+
+			notice_revealer = new Gtk.Revealer ();
+			notice_revealer.transition_type = Gtk.RevealerTransitionType.NONE;
+			var notice = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 7);
+			notice.get_style_context ().add_class ("launcher-notice");
+			notice.pack_start (new Gtk.Image.from_icon_name ("dialog-warning-symbolic",
+				Gtk.IconSize.MENU), false, false, 0);
+			notice_label = new Gtk.Label ("") { xalign = 0.0f, wrap = true, max_width_chars = 44 };
+			notice.pack_start (notice_label, true, true, 0);
+			var dismiss_notice = new Gtk.Button.from_icon_name ("window-close-symbolic",
+				Gtk.IconSize.MENU);
+			dismiss_notice.tooltip_text = _("Dismiss");
+			dismiss_notice.get_style_context ().add_class ("launcher-notice-dismiss");
+			dismiss_notice.clicked.connect (() => notice_model.dismiss ());
+			notice.pack_end (dismiss_notice, false, false, 0);
+			notice_revealer.add (notice);
+			panel.pack_start (notice_revealer, false, false, 0);
 
 			var tabs = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
 			tabs.get_style_context ().add_class ("launcher-tabs");
@@ -149,6 +172,7 @@ namespace Plank
 			});
 			index_applications ();
 			load_usage ();
+			sync_notice ();
 			Matcher.get_default ().active_application_changed.connect_after (track_active_application);
 		}
 
@@ -156,6 +180,8 @@ namespace Plank
 		{
 			if (uninstall_detection != null)
 				uninstall_detection.cancel ();
+			if (notice_changed_id > 0UL)
+				SignalHandler.disconnect (notice_model, notice_changed_id);
 			if (animation_timer_id > 0U)
 				Source.remove (animation_timer_id);
 			if (theme_provider != null)
@@ -209,9 +235,30 @@ namespace Plank
 		{
 			try {
 				Process.spawn_command_line_async (command);
+				notice_model.dismiss ();
 			} catch (SpawnError e) {
 				warning ("Unable to run session action: %s", e.message);
+				show_launcher_error (_("The selected system action could not be started. Please try again."));
 			}
+		}
+
+		void show_launcher_error (string user_message)
+		{
+			notice_model.show_error (user_message);
+			if (animation_timer_id > 0U) {
+				Source.remove (animation_timer_id);
+				animation_timer_id = 0U;
+			}
+			opacity = 1.0;
+			show ();
+			position_over_anchor ();
+			present ();
+		}
+
+		void sync_notice ()
+		{
+			notice_label.label = notice_model.message;
+			notice_revealer.reveal_child = notice_model.visible;
 		}
 
 		void index_applications ()
@@ -518,9 +565,16 @@ namespace Plank
 			card.pack_start (new Gtk.Separator (Gtk.Orientation.HORIZONTAL), false, false, 2);
 
 			card.pack_start (context_action_button (_("Open"), "media-playback-start-symbolic", () => {
-				try { app.launch (null, null); } catch (Error e) { warning ("Unable to launch app: %s", e.message); }
-				context.hide ();
-				hide_animated ();
+				try {
+					app.launch (null, null);
+					notice_model.dismiss ();
+					context.hide ();
+					hide_animated ();
+				} catch (Error e) {
+					warning ("Unable to launch app: %s", e.message);
+					context.hide ();
+					show_launcher_error (_("The application could not be opened. Check that it is still installed and try again."));
+				}
 			}), false, false, 0);
 
 			var desktop = app as DesktopAppInfo;
@@ -644,12 +698,20 @@ namespace Plank
 					SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD, null, out pid);
 				ChildWatch.add (pid, (child_pid, status) => {
 					Process.close_pid (child_pid);
-					index_applications ();
-					if (visible)
-						refresh_results ();
+					try {
+						Process.check_wait_status (status);
+						notice_model.dismiss ();
+						index_applications ();
+						if (visible)
+							refresh_results ();
+					} catch (Error e) {
+						warning ("Unable to uninstall '%s': %s", target.package_id, e.message);
+						show_launcher_error (_("The package manager could not complete the uninstall. Check its status and try again."));
+					}
 				});
 			} catch (Error e) {
 				warning ("Unable to uninstall '%s': %s", target.package_id, e.message);
+				show_launcher_error (_("The application could not be uninstalled. Please try again."));
 			}
 		}
 
@@ -710,13 +772,15 @@ namespace Plank
 			try {
 				var app = visible_results[index];
 				app.launch (null, null);
+				notice_model.dismiss ();
 				var id = app.get_id () ?? app.get_name ();
 				usage_counts[id] = usage_count (app) + 1;
 				save_usage ();
+				hide_animated ();
 			} catch (Error e) {
 				warning ("Unable to launch '%s': %s", visible_results[index].get_name (), e.message);
+				show_launcher_error (_("The application could not be opened. Check that it is still installed and try again."));
 			}
-			hide_animated ();
 		}
 
 		void position_over_anchor ()
@@ -744,6 +808,9 @@ namespace Plank
 			css += ".plank-native-launcher .launcher-navbar { min-height: 34px; margin: 6px 7px 0 7px; }";
 			css += ".plank-native-launcher .launcher-power-button { color: rgba(255,255,255,0.68); background: transparent; background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 7px; }";
 			css += ".plank-native-launcher .launcher-power-button:hover { color: white; background-color: rgba(255,255,255,0.09); }";
+			css += ".plank-native-launcher .launcher-notice { color: white; background-color: rgba(224,70,70,0.20); border: 1px solid rgba(255,120,120,0.30); border-radius: 8px; padding: 7px 9px; margin: 2px 7px 5px 7px; }";
+			css += ".plank-native-launcher .launcher-notice-dismiss { color: white; background: transparent; background-image: none; border: none; box-shadow: none; padding: 2px; }";
+			css += ".plank-native-launcher .launcher-notice-dismiss:hover { background-color: rgba(255,255,255,0.12); border-radius: 5px; }";
 			css += ".plank-native-launcher .launcher-tabs button { color: rgba(255,255,255,0.58); background: transparent; background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 6px; }";
 			css += ".plank-native-launcher .launcher-tabs button:hover { color: rgba(255,255,255,0.82); background-color: rgba(255,255,255,0.06); }";
 			css += ".plank-native-launcher .launcher-tabs button:checked { color: white; background-color: rgba(255,255,255,0.13); }";

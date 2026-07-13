@@ -4,11 +4,13 @@ namespace Plank
 {
 	public class UpdateManagerItem : DockItem
 	{
+		const int RETRY_RESPONSE = 1;
 		string command;
 		bool updates_available = false;
 		Gdk.Pixbuf? update_pixbuf;
 		unowned UpdateService update_service;
 		ulong update_state_changed_id = 0UL;
+		Gtk.MessageDialog? launch_error_dialog;
 
 		public UpdateManagerItem (string command)
 		{
@@ -28,6 +30,8 @@ namespace Plank
 		{
 			if (update_state_changed_id > 0UL)
 				SignalHandler.disconnect (update_service, update_state_changed_id);
+			if (launch_error_dialog != null)
+				launch_error_dialog.destroy ();
 		}
 
 		public static string? available_command ()
@@ -109,7 +113,35 @@ namespace Plank
 				update_service.schedule_refresh (2);
 			} catch (Error e) {
 				warning ("Unable to open update manager: %s", e.message);
+				show_launch_error ();
 			}
+		}
+
+		void show_launch_error ()
+		{
+			if (launch_error_dialog != null) {
+				launch_error_dialog.present ();
+				return;
+			}
+			var dialog = new Gtk.MessageDialog (null, (Gtk.DialogFlags) 0,
+				Gtk.MessageType.ERROR, Gtk.ButtonsType.NONE,
+				_("Update Manager could not be opened."));
+			dialog.format_secondary_text (_("Check that your system update application is installed, then try again."));
+			dialog.add_button (_("Close"), Gtk.ResponseType.CLOSE);
+			dialog.add_button (_("Try Again"), RETRY_RESPONSE);
+			dialog.set_default_response (RETRY_RESPONSE);
+			dialog.set_keep_above (true);
+			dialog.skip_taskbar_hint = true;
+			dialog.window_position = Gtk.WindowPosition.CENTER;
+			launch_error_dialog = dialog;
+			dialog.response.connect ((response) => {
+				launch_error_dialog = null;
+				dialog.destroy ();
+				if (response == RETRY_RESPONSE)
+					launch ();
+			});
+			dialog.show_all ();
+			dialog.present ();
 		}
 
 		public override Gee.ArrayList<Gtk.MenuItem> get_menu_items ()
@@ -119,6 +151,20 @@ namespace Plank
 				"software-update-available-symbolic");
 			open.activate.connect (launch);
 			items.add (open);
+			if (update_service.checking) {
+				var checking = create_menu_item (_("Checking for updates…"),
+					"view-refresh-symbolic");
+				checking.sensitive = false;
+				items.add (checking);
+			} else if (update_service.last_error != "") {
+				var unavailable = create_menu_item (_("Update status unavailable"),
+					"dialog-warning-symbolic");
+				unavailable.sensitive = false;
+				items.add (unavailable);
+				var retry = create_menu_item (_("Check _Again"), "view-refresh-symbolic");
+				retry.activate.connect (() => update_service.refresh.begin ());
+				items.add (retry);
+			}
 			return items;
 		}
 	}

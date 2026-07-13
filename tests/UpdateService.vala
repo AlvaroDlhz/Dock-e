@@ -48,6 +48,7 @@ namespace PlankTests
 		Test.add_func ("/Services/UpdateService/refresh-state", update_service_refresh_state);
 		Test.add_func ("/Services/UpdateService/coalesce-refreshes", update_service_coalesce_refreshes);
 		Test.add_func ("/Services/UpdateService/preserve-cache-on-error", update_service_preserve_cache);
+		Test.add_func ("/Services/UpdateService/clear-error-after-recovery", update_service_clear_error);
 		Test.add_func ("/Services/UpdateService/parse-apt", update_service_parse_apt);
 		Test.add_func ("/Services/UpdateService/parse-backends", update_service_parse_backends);
 	}
@@ -106,6 +107,18 @@ namespace PlankTests
 		assert (wait_for_update (() => backend.checks == 2 && !service.checking));
 		assert (service.updates_available);
 		assert (service.last_error == "check failed");
+	}
+
+	void update_service_clear_error ()
+	{
+		var backend = new FakeUpdateBackend () { fail = true };
+		var service = new Plank.UpdateService.with_backend (backend);
+		assert (wait_for_update (() => backend.checks == 1 && !service.checking));
+		assert (service.last_error == "check failed");
+		backend.fail = false;
+		service.refresh.begin ();
+		assert (wait_for_update (() => backend.checks == 2 && !service.checking));
+		assert (service.last_error == "");
 	}
 
 	void update_service_parse_apt ()
