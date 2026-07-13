@@ -54,6 +54,7 @@ namespace Plank
 		 */
 		Gtk.Menu? menu;
 		Gee.ArrayList<Gtk.MenuItem>? menu_items;
+		Gtk.CssProvider? context_menu_provider;
 		
 		uint hover_reposition_timer_id = 0U;
 		
@@ -100,6 +101,8 @@ namespace Plank
 				menu.show.disconnect (on_menu_show);
 				menu.hide.disconnect (on_menu_hide);
 			}
+			if (context_menu_provider != null)
+				Gtk.StyleContext.remove_provider_for_screen (get_screen (), context_menu_provider);
 			
 			controller.prefs.notify["HideMode"].disconnect (set_struts);
 			
@@ -679,9 +682,12 @@ namespace Plank
 				return false;
 			
 			menu = new Gtk.Menu ();
+			menu.get_style_context ().add_class ("plank-dock-context-menu");
 			menu.attach_to_widget (this, null);
 			menu.show.connect (on_menu_show);
 			menu.hide.connect (on_menu_hide);
+			apply_context_menu_style ();
+			menu.append (create_context_menu_header (item));
 			
 			var iterator = menu_items.bidir_list_iterator ();
 			if (controller.prefs.Position == Gtk.PositionType.TOP) {
@@ -703,6 +709,57 @@ namespace Plank
 			menu.popup (null, null, position_func, event.button, event.time);
 			
 			return true;
+		}
+
+		Gtk.MenuItem create_context_menu_header (DockItem? item)
+		{
+			var header = new Gtk.MenuItem ();
+			header.sensitive = false;
+			header.get_style_context ().add_class ("context-menu-header");
+			var box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
+			var icon_name = item == null ? "plank" : item.Icon;
+			var image = new Gtk.Image.from_icon_name (icon_name, Gtk.IconSize.DIALOG);
+			image.pixel_size = 28;
+			box.pack_start (image, false, false, 0);
+			var labels = new Gtk.Box (Gtk.Orientation.VERTICAL, 1);
+			var title = new Gtk.Label (item == null ? "Dock-E" : item.Text) { xalign = 0.0f };
+			title.ellipsize = Pango.EllipsizeMode.END;
+			title.max_width_chars = 26;
+			title.get_style_context ().add_class ("context-menu-title");
+			labels.pack_start (title, false, false, 0);
+			var subtitle = new Gtk.Label (item == null ? _("Dock options") : _("Application options")) { xalign = 0.0f };
+			subtitle.get_style_context ().add_class ("context-menu-subtitle");
+			labels.pack_start (subtitle, false, false, 0);
+			box.pack_start (labels, true, true, 0);
+			header.add (box);
+			header.show_all ();
+			return header;
+		}
+
+		void apply_context_menu_style ()
+		{
+			var color = controller.renderer.theme.FillStartColor;
+			var css = ".plank-dock-context-menu { background-color: rgb(%d,%d,%d); background-image: none; border: 1px solid rgba(255,255,255,0.11); border-radius: 13px; padding: 7px; }"
+				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255));
+			css += ".plank-dock-context-menu menuitem { min-width: 250px; min-height: 24px; color: rgba(255,255,255,0.92); border-radius: 9px; padding: 7px 11px; margin: 1px; }";
+			css += ".plank-dock-context-menu menuitem:hover { color: white; background-color: rgba(255,255,255,0.11); }";
+			css += ".plank-dock-context-menu menuitem:disabled { color: rgba(255,255,255,0.38); }";
+			css += ".plank-dock-context-menu .context-menu-header { min-height: 42px; padding: 8px 9px 9px 9px; margin-bottom: 4px; border-radius: 9px; background-color: rgba(255,255,255,0.055); }";
+			css += ".plank-dock-context-menu .context-menu-header:disabled { color: white; }";
+			css += ".plank-dock-context-menu .context-menu-title { color: white; font-size: 14px; font-weight: bold; }";
+			css += ".plank-dock-context-menu .context-menu-subtitle { color: rgba(255,255,255,0.55); font-size: 10px; }";
+			css += ".plank-dock-context-menu separator { min-height: 1px; margin: 5px 9px; background-color: rgba(255,255,255,0.10); }";
+			css += ".plank-dock-context-menu check, .plank-dock-context-menu radio { color: white; background: transparent; border-color: rgba(255,255,255,0.45); }";
+			css += ".plank-dock-context-menu check:checked, .plank-dock-context-menu radio:checked { color: white; background-color: #73d216; border-color: #73d216; }";
+			css += ".plank-dock-context-menu .destructive-action { color: #ff817a; }";
+			css += ".plank-dock-context-menu .destructive-action:hover { color: white; background-color: rgba(220,65,65,0.42); }";
+			if (context_menu_provider != null)
+				Gtk.StyleContext.remove_provider_for_screen (get_screen (), context_menu_provider);
+			context_menu_provider = new Gtk.CssProvider ();
+			try { context_menu_provider.load_from_data (css); }
+			catch (Error e) { warning ("Context menu CSS: %s", e.message); }
+			Gtk.StyleContext.add_provider_for_screen (get_screen (), context_menu_provider,
+				Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
 		}
 		
 		static Gee.ArrayList<Gtk.MenuItem> get_dock_debug_menu_items (DockController controller)

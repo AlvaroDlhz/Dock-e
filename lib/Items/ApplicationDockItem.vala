@@ -418,6 +418,7 @@ namespace Plank
 			var event_time = Gtk.get_current_event_time ();
 			if (is_running () && window_count > 0) {
 				var item = create_menu_item ((window_count > 1 ? _("_Close All") : _("_Close")), "window-close-symbolic;;window-close");
+				item.get_style_context ().add_class ("destructive-action");
 				item.activate.connect (() => WindowControl.close_all (App, event_time));
 				items.add (item);
 			}

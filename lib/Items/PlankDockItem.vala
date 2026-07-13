@@ -93,6 +93,7 @@ namespace Plank
 				items.add (new Gtk.SeparatorMenuItem ());
 			
 				item = new Gtk.ImageMenuItem.from_stock (Gtk.Stock.QUIT, null);
+				item.get_style_context ().add_class ("destructive-action");
 				item.activate.connect (() => Application.get_default ().activate_action ("quit", null));
 				items.add (item);
 			}
