@@ -30,6 +30,8 @@ namespace Plank
 		ulong bluetooth_state_changed_id = 0UL;
 		NetworkService? network_service;
 		ulong network_state_changed_id = 0UL;
+		PowerService? power_service;
+		ulong power_state_changed_id = 0UL;
 
 		public StatusIndicatorItem (StatusIndicatorKind kind)
 		{
@@ -57,6 +59,12 @@ namespace Plank
 				sync_network_state ();
 				return;
 			}
+			if (Kind == StatusIndicatorKind.BATTERY) {
+				power_service = PowerService.get_default ();
+				power_state_changed_id = power_service.state_changed.connect (sync_power_state);
+				sync_power_state ();
+				return;
+			}
 			update_state ();
 			update_timer_id = Timeout.add_seconds (1, () => {
 				update_state ();
@@ -72,6 +80,8 @@ namespace Plank
 				SignalHandler.disconnect (bluetooth_service, bluetooth_state_changed_id);
 			if (network_service != null && network_state_changed_id > 0UL)
 				SignalHandler.disconnect (network_service, network_state_changed_id);
+			if (power_service != null && power_state_changed_id > 0UL)
+				SignalHandler.disconnect (power_service, power_state_changed_id);
 			if (update_timer_id > 0U)
 				Source.remove (update_timer_id);
 		}
@@ -101,9 +111,6 @@ namespace Plank
 			case StatusIndicatorKind.WIFI:
 				active = NetworkMonitor.get_default ().network_available;
 				break;
-			case StatusIndicatorKind.BATTERY:
-				update_battery_state ();
-				break;
 			default:
 				break;
 			}
@@ -115,30 +122,6 @@ namespace Plank
 				|| old_battery_percent != battery_percent
 				|| old_battery_charging != battery_charging)
 				reset_icon_buffer ();
-		}
-
-		void update_battery_state ()
-		{
-			active = false;
-			try {
-				var directory = Dir.open ("/sys/class/power_supply");
-				string? name;
-				while ((name = directory.read_name ()) != null) {
-					if (!name.has_prefix ("BAT"))
-						continue;
-					string capacity;
-					string status;
-					if (!FileUtils.get_contents ("/sys/class/power_supply/%s/capacity".printf (name), out capacity))
-						continue;
-					FileUtils.get_contents ("/sys/class/power_supply/%s/status".printf (name), out status);
-					battery_percent = int.parse (capacity.strip ());
-					battery_charging = status.strip () == "Charging" || status.strip () == "Full";
-					active = true;
-					break;
-				}
-			} catch (FileError e) {
-				active = false;
-			}
 		}
 
 		void sync_audio_state ()
@@ -174,6 +157,22 @@ namespace Plank
 				&& network_service.connected;
 			if (active != new_active) {
 				active = new_active;
+				reset_icon_buffer ();
+			}
+		}
+
+		void sync_power_state ()
+		{
+			if (power_service == null)
+				return;
+			var new_active = power_service.battery_available;
+			var new_percent = (int) Math.round (power_service.percentage);
+			var new_charging = power_service.is_charging ();
+			if (active != new_active || battery_percent != new_percent
+				|| battery_charging != new_charging) {
+				active = new_active;
+				battery_percent = new_percent;
+				battery_charging = new_charging;
 				reset_icon_buffer ();
 			}
 		}
@@ -241,8 +240,9 @@ namespace Plank
 		Gee.ArrayList<Gtk.MenuItem> get_battery_menu_items ()
 		{
 			var items = new Gee.ArrayList<Gtk.MenuItem> ();
-			var state = !active ? _("Not available") :
-				(battery_charging ? _("Charging") : _("On battery"));
+			var state = !active ? _("Not available")
+				: (power_service != null && power_service.battery_state == BatteryState.FULLY_CHARGED
+					? _("Fully charged") : (battery_charging ? _("Charging") : _("On battery")));
 			items.add (create_status_item (_("Battery · %d%%").printf (battery_percent), state,
 				battery_charging ? "battery-good-charging-symbolic" : "battery-good-symbolic", active));
 			items.add (new Gtk.SeparatorMenuItem ());

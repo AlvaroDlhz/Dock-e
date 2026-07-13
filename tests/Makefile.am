@@ -38,6 +38,7 @@ tests_VALASOURCES = \
 	BluetoothService.vala \
 	CommandRunner.vala \
 	NetworkService.vala \
+	PowerService.vala \
 	Controller.vala \
 	Drawing.vala \
 	Items.vala \

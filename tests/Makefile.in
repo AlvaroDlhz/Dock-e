@@ -146,11 +146,11 @@ gmock_tests_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 am__objects_3 = tests-AudioService.$(OBJEXT) \
 	tests-BluetoothService.$(OBJEXT) tests-CommandRunner.$(OBJEXT) \
-	tests-NetworkService.$(OBJEXT) tests-Controller.$(OBJEXT) \
-	tests-Drawing.$(OBJEXT) tests-Items.$(OBJEXT) \
-	tests-Preferences.$(OBJEXT) tests-Widgets.$(OBJEXT) \
-	tests-Main.$(OBJEXT) tests-TestHelper.$(OBJEXT) \
-	$(am__objects_1)
+	tests-NetworkService.$(OBJEXT) tests-PowerService.$(OBJEXT) \
+	tests-Controller.$(OBJEXT) tests-Drawing.$(OBJEXT) \
+	tests-Items.$(OBJEXT) tests-Preferences.$(OBJEXT) \
+	tests-Widgets.$(OBJEXT) tests-Main.$(OBJEXT) \
+	tests-TestHelper.$(OBJEXT) $(am__objects_1)
 nodist_tests_OBJECTS = $(am__objects_3) $(am__objects_1)
 tests_OBJECTS = $(nodist_tests_OBJECTS)
 tests_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -181,6 +181,7 @@ am__depfiles_remade = ./$(DEPDIR)/dock-Dock.Po \
 	./$(DEPDIR)/tests-Controller.Po ./$(DEPDIR)/tests-Drawing.Po \
 	./$(DEPDIR)/tests-Items.Po ./$(DEPDIR)/tests-Main.Po \
 	./$(DEPDIR)/tests-NetworkService.Po \
+	./$(DEPDIR)/tests-PowerService.Po \
 	./$(DEPDIR)/tests-Preferences.Po \
 	./$(DEPDIR)/tests-TestHelper.Po ./$(DEPDIR)/tests-Widgets.Po \
 	gmock/$(DEPDIR)/tests-color.Po gmock/$(DEPDIR)/tests-main.Po
@@ -487,6 +488,7 @@ tests_VALASOURCES = \
 	BluetoothService.vala \
 	CommandRunner.vala \
 	NetworkService.vala \
+	PowerService.vala \
 	Controller.vala \
 	Drawing.vala \
 	Items.vala \
@@ -646,6 +648,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Items.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Main.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-NetworkService.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-PowerService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Preferences.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-TestHelper.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Widgets.Po@am__quote@ # am--include-marker
@@ -751,6 +754,20 @@ tests-NetworkService.obj: NetworkService.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='NetworkService.c' object='tests-NetworkService.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-NetworkService.obj `if test -f 'NetworkService.c'; then $(CYGPATH_W) 'NetworkService.c'; else $(CYGPATH_W) '$(srcdir)/NetworkService.c'; fi`
+
+tests-PowerService.o: PowerService.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-PowerService.o -MD -MP -MF $(DEPDIR)/tests-PowerService.Tpo -c -o tests-PowerService.o `test -f 'PowerService.c' || echo '$(srcdir)/'`PowerService.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-PowerService.Tpo $(DEPDIR)/tests-PowerService.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='PowerService.c' object='tests-PowerService.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-PowerService.o `test -f 'PowerService.c' || echo '$(srcdir)/'`PowerService.c
+
+tests-PowerService.obj: PowerService.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-PowerService.obj -MD -MP -MF $(DEPDIR)/tests-PowerService.Tpo -c -o tests-PowerService.obj `if test -f 'PowerService.c'; then $(CYGPATH_W) 'PowerService.c'; else $(CYGPATH_W) '$(srcdir)/PowerService.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-PowerService.Tpo $(DEPDIR)/tests-PowerService.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='PowerService.c' object='tests-PowerService.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-PowerService.obj `if test -f 'PowerService.c'; then $(CYGPATH_W) 'PowerService.c'; else $(CYGPATH_W) '$(srcdir)/PowerService.c'; fi`
 
 tests-Controller.o: Controller.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-Controller.o -MD -MP -MF $(DEPDIR)/tests-Controller.Tpo -c -o tests-Controller.o `test -f 'Controller.c' || echo '$(srcdir)/'`Controller.c
@@ -1050,6 +1067,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/tests-Items.Po
 	-rm -f ./$(DEPDIR)/tests-Main.Po
 	-rm -f ./$(DEPDIR)/tests-NetworkService.Po
+	-rm -f ./$(DEPDIR)/tests-PowerService.Po
 	-rm -f ./$(DEPDIR)/tests-Preferences.Po
 	-rm -f ./$(DEPDIR)/tests-TestHelper.Po
 	-rm -f ./$(DEPDIR)/tests-Widgets.Po
@@ -1109,6 +1127,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/tests-Items.Po
 	-rm -f ./$(DEPDIR)/tests-Main.Po
 	-rm -f ./$(DEPDIR)/tests-NetworkService.Po
+	-rm -f ./$(DEPDIR)/tests-PowerService.Po
 	-rm -f ./$(DEPDIR)/tests-Preferences.Po
 	-rm -f ./$(DEPDIR)/tests-TestHelper.Po
 	-rm -f ./$(DEPDIR)/tests-Widgets.Po

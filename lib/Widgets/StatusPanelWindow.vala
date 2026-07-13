@@ -55,6 +55,9 @@ namespace Plank
 		unowned NetworkService network_service;
 		ulong network_state_changed_id = 0UL;
 		ulong network_networks_changed_id = 0UL;
+		unowned PowerService power_service;
+		ulong power_state_changed_id = 0UL;
+		uint power_rebuild_id = 0U;
 
 		public StatusPanelWindow (DockController controller)
 		{
@@ -69,6 +72,8 @@ namespace Plank
 			network_service = NetworkService.get_default ();
 			network_state_changed_id = network_service.state_changed.connect (network_service_changed);
 			network_networks_changed_id = network_service.networks_changed.connect (network_service_changed);
+			power_service = PowerService.get_default ();
+			power_state_changed_id = power_service.state_changed.connect (power_service_changed);
 			decorated = false;
 			resizable = false;
 			skip_taskbar_hint = true;
@@ -135,11 +140,15 @@ namespace Plank
 				SignalHandler.disconnect (network_service, network_state_changed_id);
 			if (network_networks_changed_id > 0UL)
 				SignalHandler.disconnect (network_service, network_networks_changed_id);
+			if (power_state_changed_id > 0UL)
+				SignalHandler.disconnect (power_service, power_state_changed_id);
 			if (bluetooth_rebuild_id > 0U)
 				Source.remove (bluetooth_rebuild_id);
 			stop_bluetooth_discovery ();
 			if (wifi_rebuild_id > 0U)
 				Source.remove (wifi_rebuild_id);
+			if (power_rebuild_id > 0U)
+				Source.remove (power_rebuild_id);
 			stop_clock_display ();
 			if (countdown_tick_id > 0U) Source.remove (countdown_tick_id);
 			if (stopwatch_tick_id > 0U) Source.remove (stopwatch_tick_id);
@@ -716,6 +725,22 @@ namespace Plank
 			});
 		}
 
+		void power_service_changed ()
+		{
+			if (!visible || current_item == null || current_item.Kind != StatusIndicatorKind.BATTERY)
+				return;
+			if (power_rebuild_id > 0U)
+				Source.remove (power_rebuild_id);
+			power_rebuild_id = Timeout.add (100, () => {
+				power_rebuild_id = 0U;
+				if (visible && current_item != null && current_item.Kind == StatusIndicatorKind.BATTERY) {
+					rebuild (StatusIndicatorKind.BATTERY);
+					show_all ();
+				}
+				return false;
+			});
+		}
+
 		void add_wifi_settings_button ()
 		{
 			var settings = new Gtk.Button.with_label (_("Advanced network settings"));
@@ -726,43 +751,35 @@ namespace Plank
 
 		void build_battery ()
 		{
-			var battery = find_power_supply ("BAT");
-			if (battery == "") {
+			if (!power_service.battery_available) {
 				content.pack_start (info_row (_("No battery detected"),
 					_("This device may be running on external power")), false, false, 0);
+				build_power_profiles ();
+				build_brightness_control ();
 				add_power_settings_button ();
 				return;
 			}
 
-			var percent = read_sys_int (battery + "/capacity");
-			var status = read_sys (battery + "/status");
-			var charge_now = read_sys_int64 (battery + "/charge_now");
-			var charge_full = read_sys_int64 (battery + "/charge_full");
-			var charge_design = read_sys_int64 (battery + "/charge_full_design");
-			var current = read_sys_int64 (battery + "/current_now");
-			var voltage = read_sys_int64 (battery + "/voltage_now");
-			var cycles = read_sys_int (battery + "/cycle_count");
-
 			var summary = new Gtk.Box (Gtk.Orientation.VERTICAL, 4);
 			summary.get_style_context ().add_class ("battery-summary");
-			var percentage = new Gtk.Label ("%d%%".printf (percent));
+			var percentage = new Gtk.Label ("%.0f%%".printf (power_service.percentage));
 			percentage.get_style_context ().add_class ("battery-percentage");
 			summary.pack_start (percentage, false, false, 0);
-			var estimate = battery_time_text (status, charge_now, charge_full, current);
-			var status_label = new Gtk.Label (estimate == "" ? translated_battery_status (status) : estimate);
+			var status_label = new Gtk.Label (battery_status_text ());
 			status_label.get_style_context ().add_class (Gtk.STYLE_CLASS_DIM_LABEL);
 			summary.pack_start (status_label, false, false, 0);
 			content.pack_start (summary, false, false, 0);
 
 			content.pack_start (section_label (_("Energy")), false, false, 0);
-			var power = current > 0 && voltage > 0 ? current * voltage / 1000000000000.0 : 0.0;
 			content.pack_start (metric_row (_("Current consumption"),
-				power > 0.01 ? "%.1f W".printf (power) : _("Not available")), false, false, 0);
-			var health = charge_design > 0 ? 100.0 * charge_full / charge_design : 0.0;
+				power_service.energy_rate > 0.01
+					? "%.1f W".printf (power_service.energy_rate) : _("Not available")), false, false, 0);
 			content.pack_start (metric_row (_("Battery health"),
-				health > 0 ? "%.0f%%".printf (health) : _("Not available")), false, false, 0);
+				power_service.capacity > 0
+					? "%.0f%%".printf (power_service.capacity) : _("Not available")), false, false, 0);
 			content.pack_start (metric_row (_("Charge cycles"),
-				cycles >= 0 ? "%d".printf (cycles) : _("Not available")), false, false, 0);
+				power_service.charge_cycles >= 0
+					? "%d".printf (power_service.charge_cycles) : _("Not available")), false, false, 0);
 
 			build_power_profiles ();
 			build_brightness_control ();
@@ -782,23 +799,24 @@ namespace Plank
 
 		void build_power_profiles ()
 		{
-			string current = "";
-			if (!run ("powerprofilesctl get", out current))
+			if (!power_service.profiles_available)
 				return;
 			content.pack_start (section_label (_("Power profile")), false, false, 0);
 			var profiles = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
 			profiles.get_style_context ().add_class ("power-profiles");
-			string[] profile_ids = { "power-saver", "balanced", "performance" };
 			Gtk.RadioButton? first_profile = null;
-			foreach (unowned string id in profile_ids) {
+			foreach (string id in power_service.get_profiles ()) {
+				var profile_id = id;
 				var button = first_profile == null
-					? new Gtk.RadioButton.with_label (null, profile_label (id))
-					: new Gtk.RadioButton.with_label_from_widget (first_profile, profile_label (id));
+					? new Gtk.RadioButton.with_label (null, profile_label (profile_id))
+					: new Gtk.RadioButton.with_label_from_widget (first_profile, profile_label (profile_id));
 				if (first_profile == null) first_profile = button;
-				button.active = current.strip () == id;
+				button.active = power_service.active_profile == profile_id;
+				button.sensitive = !power_service.busy;
 				button.get_style_context ().add_class ("power-profile-button");
 				button.toggled.connect (() => {
-					if (button.active) run_action ("powerprofilesctl set " + id);
+					if (button.active && profile_id != power_service.active_profile)
+						power_service.change_profile.begin (profile_id);
 				});
 				profiles.pack_start (button, true, true, 0);
 			}
@@ -844,23 +862,24 @@ namespace Plank
 			content.pack_start (overlay, false, false, 0);
 		}
 
-		string battery_time_text (string status, int64 now, int64 full, int64 current)
+		string battery_status_text ()
 		{
-			if (current <= 0) return "";
-			var amount = status == "Charging" ? full - now : now;
-			if (amount <= 0) return "";
-			var minutes = (int) Math.round (60.0 * amount / current);
-			var time = _("%d h %02d min").printf (minutes / 60, minutes % 60);
-			return status == "Charging" ? _("%s until full").printf (time) : _("%s remaining").printf (time);
-		}
-
-		string translated_battery_status (string status)
-		{
-			switch (status) {
-			case "Charging": return _("Charging");
-			case "Discharging": return _("On battery");
-			case "Full": return _("Fully charged");
-			default: return status;
+			var seconds = power_service.is_charging ()
+				? power_service.time_to_full : power_service.time_to_empty;
+			if (seconds > 0) {
+				var minutes = (int) Math.round (seconds / 60.0);
+				var time = _("%d h %02d min").printf (minutes / 60, minutes % 60);
+				return power_service.is_charging () ? _("%s until full").printf (time)
+					: _("%s remaining").printf (time);
+			}
+			switch (power_service.battery_state) {
+			case BatteryState.CHARGING:
+			case BatteryState.PENDING_CHARGE: return _("Charging");
+			case BatteryState.DISCHARGING:
+			case BatteryState.PENDING_DISCHARGE: return _("On battery");
+			case BatteryState.FULLY_CHARGED: return _("Fully charged");
+			case BatteryState.EMPTY: return _("Empty");
+			default: return _("Battery status unavailable");
 			}
 		}
 
@@ -879,17 +898,6 @@ namespace Plank
 			settings.get_style_context ().add_class ("status-action-button");
 			settings.clicked.connect (() => launch ("xfce4-power-manager-settings"));
 			footer.pack_start (settings, false, false, 0);
-		}
-
-		static string find_power_supply (string prefix)
-		{
-			try {
-				var directory = Dir.open ("/sys/class/power_supply");
-				string? name;
-				while ((name = directory.read_name ()) != null)
-					if (name.has_prefix (prefix)) return "/sys/class/power_supply/" + name;
-			} catch (FileError e) {}
-			return "";
 		}
 
 		static string first_directory (string path)
@@ -914,12 +922,6 @@ namespace Plank
 		{
 			var value = read_sys (path);
 			return value == "" ? -1 : int.parse (value);
-		}
-
-		static int64 read_sys_int64 (string path)
-		{
-			var value = read_sys (path);
-			return value == "" ? -1 : int64.parse (value);
 		}
 
 		void build_clock ()
@@ -1267,17 +1269,7 @@ namespace Plank
 			Gtk.StyleContext.add_provider_for_screen (get_screen (), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
 		}
 
-		static bool run (string command, out string output)
-		{
-			string error; int status;
-			try {
-				Process.spawn_command_line_sync (command, out output, out error, out status);
-				return status == 0;
-			} catch (SpawnError e) { output = ""; return false; }
-		}
-		static void run_action (string command) { string output; run (command, out output); }
 		static void launch (string command) { try { Process.spawn_command_line_async (command); } catch (SpawnError e) {} }
-		static bool contains (string command, string needle) { string output; return run (command, out output) && output.contains (needle); }
 		static string label_for_kind (StatusIndicatorKind kind) {
 			switch (kind) {
 			case StatusIndicatorKind.VOLUME: return _("Volume"); case StatusIndicatorKind.BLUETOOTH: return _("Bluetooth");
