@@ -28,6 +28,8 @@ namespace Plank
 		ulong audio_state_changed_id = 0UL;
 		BluetoothService? bluetooth_service;
 		ulong bluetooth_state_changed_id = 0UL;
+		NetworkService? network_service;
+		ulong network_state_changed_id = 0UL;
 
 		public StatusIndicatorItem (StatusIndicatorKind kind)
 		{
@@ -49,6 +51,12 @@ namespace Plank
 				sync_bluetooth_state ();
 				return;
 			}
+			if (Kind == StatusIndicatorKind.WIFI) {
+				network_service = NetworkService.get_default ();
+				network_state_changed_id = network_service.state_changed.connect (sync_network_state);
+				sync_network_state ();
+				return;
+			}
 			update_state ();
 			update_timer_id = Timeout.add_seconds (1, () => {
 				update_state ();
@@ -62,6 +70,8 @@ namespace Plank
 				SignalHandler.disconnect (audio_service, audio_state_changed_id);
 			if (bluetooth_service != null && bluetooth_state_changed_id > 0UL)
 				SignalHandler.disconnect (bluetooth_service, bluetooth_state_changed_id);
+			if (network_service != null && network_state_changed_id > 0UL)
+				SignalHandler.disconnect (network_service, network_state_changed_id);
 			if (update_timer_id > 0U)
 				Source.remove (update_timer_id);
 		}
@@ -156,25 +166,16 @@ namespace Plank
 			}
 		}
 
-		static bool run_command (string command, out string output)
+		void sync_network_state ()
 		{
-			string standard_output;
-			string standard_error;
-			int status;
-			try {
-				Process.spawn_command_line_sync (command, out standard_output, out standard_error, out status);
-				output = standard_output;
-				return status == 0;
-			} catch (SpawnError e) {
-				output = "";
-				return false;
+			if (network_service == null)
+				return;
+			var new_active = network_service.available && network_service.enabled
+				&& network_service.connected;
+			if (active != new_active) {
+				active = new_active;
+				reset_icon_buffer ();
 			}
-		}
-
-		static bool run_action (string command)
-		{
-			string output;
-			return run_command (command, out output);
 		}
 
 		static void launch_command (string command)
@@ -291,28 +292,32 @@ namespace Plank
 		Gee.ArrayList<Gtk.MenuItem> get_wifi_menu_items ()
 		{
 			var items = new Gee.ArrayList<Gtk.MenuItem> ();
-			string output = "";
-			var enabled = run_command ("nmcli radio wifi", out output) && output.strip () == "enabled";
+			var enabled = network_service != null && network_service.available
+				&& network_service.enabled;
 			Gtk.Switch toggle;
 			items.add (create_switch_item (_("Wi-Fi"), "network-wireless-symbolic", enabled, out toggle));
+			toggle.sensitive = network_service != null && network_service.available
+				&& !network_service.busy;
 			toggle.notify["active"].connect (() => {
-				run_action ("nmcli radio wifi " + (toggle.active ? "on" : "off"));
-				update_state ();
+				if (network_service != null && toggle.sensitive)
+					network_service.change_enabled.begin (toggle.active);
 			});
 
-			if (enabled && run_command ("nmcli -t -f IN-USE,SSID,SIGNAL device wifi list --rescan no", out output)) {
+			if (enabled && network_service != null && network_service.get_networks ().size > 0) {
 				items.add (new Gtk.SeparatorMenuItem ());
 				items.add (new TitledSeparatorMenuItem.no_line (_("Available Networks")));
-				var seen = new Gee.HashSet<string> ();
-				foreach (unowned string line in output.split ("\n")) {
-					var fields = line.split (":");
-					if (fields.length < 3 || fields[1] == "" || fields[1] in seen)
-						continue;
-					seen.add (fields[1]);
-					var network_item = create_status_item (fields[1], _("Signal %s%%").printf (fields[2]),
-						wifi_icon_for_signal (fields[2]), fields[0] == "*");
-					var ssid = fields[1];
-				network_item.activate.connect (() => run_action ("nmcli connection up id " + Shell.quote (ssid)));
+				foreach (WifiNetwork network in network_service.get_networks ()) {
+					var menu_network = network;
+					var network_item = create_status_item (network.ssid,
+						network.connected ? _("Connected") : _("Signal %d%%").printf (network.strength),
+						wifi_icon_for_signal (network.strength), network.connected);
+					network_item.sensitive = !network_service.busy;
+					network_item.activate.connect (() => {
+						if (menu_network.connected)
+							network_service.disconnect_network.begin ();
+						else
+							network_service.connect_network.begin (menu_network);
+					});
 					items.add (network_item);
 				}
 			}
@@ -419,9 +424,8 @@ namespace Plank
 			return item;
 		}
 
-		string wifi_icon_for_signal (string signal_text)
+		string wifi_icon_for_signal (int signal)
 		{
-			var signal = int.parse (signal_text);
 			if (signal >= 75) return "network-wireless-signal-excellent-symbolic";
 			if (signal >= 50) return "network-wireless-signal-good-symbolic";
 			if (signal >= 25) return "network-wireless-signal-ok-symbolic";

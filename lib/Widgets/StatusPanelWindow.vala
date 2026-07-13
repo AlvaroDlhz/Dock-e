@@ -23,7 +23,7 @@ namespace Plank
 		bool device_popup_open = false;
 		uint bluetooth_rebuild_id = 0U;
 		bool bluetooth_discovery_owned = false;
-		uint wifi_refresh_id = 0U;
+		uint wifi_rebuild_id = 0U;
 		uint clock_display_tick_id = 0U;
 		uint countdown_tick_id = 0U;
 		uint stopwatch_tick_id = 0U;
@@ -52,6 +52,9 @@ namespace Plank
 		unowned BluetoothService bluetooth_service;
 		ulong bluetooth_state_changed_id = 0UL;
 		ulong bluetooth_devices_changed_id = 0UL;
+		unowned NetworkService network_service;
+		ulong network_state_changed_id = 0UL;
+		ulong network_networks_changed_id = 0UL;
 
 		public StatusPanelWindow (DockController controller)
 		{
@@ -63,6 +66,9 @@ namespace Plank
 			bluetooth_service = BluetoothService.get_default ();
 			bluetooth_state_changed_id = bluetooth_service.state_changed.connect (bluetooth_service_changed);
 			bluetooth_devices_changed_id = bluetooth_service.devices_changed.connect (bluetooth_service_changed);
+			network_service = NetworkService.get_default ();
+			network_state_changed_id = network_service.state_changed.connect (network_service_changed);
+			network_networks_changed_id = network_service.networks_changed.connect (network_service_changed);
 			decorated = false;
 			resizable = false;
 			skip_taskbar_hint = true;
@@ -125,10 +131,15 @@ namespace Plank
 				SignalHandler.disconnect (bluetooth_service, bluetooth_state_changed_id);
 			if (bluetooth_devices_changed_id > 0UL)
 				SignalHandler.disconnect (bluetooth_service, bluetooth_devices_changed_id);
+			if (network_state_changed_id > 0UL)
+				SignalHandler.disconnect (network_service, network_state_changed_id);
+			if (network_networks_changed_id > 0UL)
+				SignalHandler.disconnect (network_service, network_networks_changed_id);
 			if (bluetooth_rebuild_id > 0U)
 				Source.remove (bluetooth_rebuild_id);
 			stop_bluetooth_discovery ();
-			stop_wifi_refresh ();
+			if (wifi_rebuild_id > 0U)
+				Source.remove (wifi_rebuild_id);
 			stop_clock_display ();
 			if (countdown_tick_id > 0U) Source.remove (countdown_tick_id);
 			if (stopwatch_tick_id > 0U) Source.remove (stopwatch_tick_id);
@@ -145,9 +156,6 @@ namespace Plank
 			if (current_item != null && current_item.Kind == StatusIndicatorKind.BLUETOOTH
 				&& item.Kind != StatusIndicatorKind.BLUETOOTH)
 				stop_bluetooth_discovery ();
-			if (current_item != null && current_item.Kind == StatusIndicatorKind.WIFI
-				&& item.Kind != StatusIndicatorKind.WIFI)
-				stop_wifi_refresh ();
 			if (current_item != null && current_item.Kind == StatusIndicatorKind.CLOCK
 				&& item.Kind != StatusIndicatorKind.CLOCK)
 				stop_clock_display ();
@@ -156,7 +164,7 @@ namespace Plank
 			if (item.Kind == StatusIndicatorKind.BLUETOOTH)
 				start_bluetooth_discovery ();
 			if (item.Kind == StatusIndicatorKind.WIFI)
-				start_wifi_refresh ();
+				network_service.request_scan.begin ();
 			rebuild (item.Kind);
 			if (item.Kind == StatusIndicatorKind.CLOCK)
 				start_clock_display ();
@@ -210,8 +218,6 @@ namespace Plank
 		{
 			if (current_item != null && current_item.Kind == StatusIndicatorKind.BLUETOOTH)
 				stop_bluetooth_discovery ();
-			if (current_item != null && current_item.Kind == StatusIndicatorKind.WIFI)
-				stop_wifi_refresh ();
 			if (current_item != null && current_item.Kind == StatusIndicatorKind.CLOCK)
 				stop_clock_display ();
 			if (visible)
@@ -565,13 +571,16 @@ namespace Plank
 
 		void build_wifi ()
 		{
-			string output = "";
-			var enabled = run ("nmcli radio wifi", out output) && output.strip () == "enabled";
+			var enabled = network_service.available && network_service.enabled;
 			content.pack_start (switch_row (_("Wi-Fi · %s").printf (enabled ? _("On") : _("Off")), enabled, (state) => {
-				run_action ("nmcli radio wifi " + (state ? "on" : "off"));
-				if (state) start_wifi_refresh (); else stop_wifi_refresh ();
-				rebuild_wifi_later (350);
-			}), false, false, 0);
+				network_service.change_enabled.begin (state);
+			}, network_service.available && !network_service.busy), false, false, 0);
+			if (!network_service.available) {
+				content.pack_start (info_row (_("Wi-Fi is unavailable"),
+					_("No wireless adapter was detected")), false, false, 0);
+				add_wifi_settings_button ();
+				return;
+			}
 			if (!enabled) {
 				content.pack_start (info_row (_("Wi-Fi is turned off"),
 					_("Turn it on to see nearby networks")), false, false, 0);
@@ -579,43 +588,15 @@ namespace Plank
 				return;
 			}
 
-			var known = new Gee.HashSet<string> ();
-			if (run ("nmcli -t -f NAME,TYPE connection show", out output))
-				foreach (unowned string line in output.split ("\n")) {
-					var separator = line.last_index_of_char (':');
-					if (separator > 0 && line.substring (separator + 1) == "802-11-wireless")
-						known.add (line.substring (0, separator).replace ("\\:", ":"));
-				}
-
-			string active_ssid = "";
-			string ip_address = "";
-			if (run ("nmcli -t -f ACTIVE,SSID device wifi", out output))
-				foreach (unowned string line in output.split ("\n"))
-					if (line.has_prefix ("yes:")) { active_ssid = line.substring (4).replace ("\\:", ":"); break; }
-			if (run ("nmcli -g IP4.ADDRESS device show", out output))
-				foreach (unowned string line in output.split ("\n"))
-					if (line.strip () != "") { ip_address = line.strip ().split ("/")[0]; break; }
-
 			var connected_rows = new Gee.ArrayList<Gtk.Widget> ();
 			var known_rows = new Gee.ArrayList<Gtk.Widget> ();
 			var nearby_rows = new Gee.ArrayList<Gtk.Widget> ();
-			var seen = new Gee.HashSet<string> ();
-			if (run ("nmcli -t -f IN-USE,SSID,SIGNAL,SECURITY device wifi list --rescan no", out output))
-				foreach (unowned string line in output.split ("\n")) {
-					var fields = line.split (":");
-					if (fields.length < 4 || fields[1] == "") continue;
-					var ssid = fields[1].replace ("\\:", ":");
-					if (ssid in seen) continue;
-					seen.add (ssid);
-					var connected = fields[0] == "*" || ssid == active_ssid;
-					var saved = ssid in known;
-					var secure = fields[3] != "" && fields[3] != "--";
-					var row = wifi_network_row (ssid, fields[2], secure, connected, saved,
-						connected ? ip_address : "");
-					if (connected) connected_rows.add (row);
-					else if (saved) known_rows.add (row);
-					else nearby_rows.add (row);
-				}
+			foreach (WifiNetwork network in network_service.get_networks ()) {
+				var row = wifi_network_row (network);
+				if (network.connected) connected_rows.add (row);
+				else if (network.saved) known_rows.add (row);
+				else nearby_rows.add (row);
+			}
 
 			if (connected_rows.size > 0) {
 				content.pack_start (section_label (_("Connected")), false, false, 0);
@@ -644,63 +625,63 @@ namespace Plank
 			add_wifi_settings_button ();
 		}
 
-		Gtk.Widget wifi_network_row (string ssid, string signal, bool secure,
-			bool connected, bool known, string ip_address)
+		Gtk.Widget wifi_network_row (WifiNetwork network)
 		{
 			var row = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 8);
 			row.get_style_context ().add_class ("wifi-network-row");
-			row.pack_start (new Gtk.Image.from_icon_name (wifi_signal_icon (signal), Gtk.IconSize.BUTTON), false, false, 0);
+			row.pack_start (new Gtk.Image.from_icon_name (wifi_signal_icon (network.strength), Gtk.IconSize.BUTTON), false, false, 0);
 			var labels = new Gtk.Box (Gtk.Orientation.VERTICAL, 1);
-			var title = new Gtk.Label (ssid) { xalign = 0.0f, ellipsize = Pango.EllipsizeMode.END };
-			var detail = connected ? _("Connected") : _("Signal %s%%").printf (signal);
-			if (connected && ip_address != "") detail += " · " + ip_address;
-			if (secure) detail += " · " + _("Secured");
+			var title = new Gtk.Label (network.ssid) { xalign = 0.0f, ellipsize = Pango.EllipsizeMode.END };
+			var detail = network.connected ? _("Connected") : _("Signal %d%%").printf (network.strength);
+			if (network.connected && network_service.ip_address != "")
+				detail += " · " + network_service.ip_address;
+			if (network.secure) detail += " · " + _("Secured");
 			var subtitle = new Gtk.Label (detail) { xalign = 0.0f };
 			subtitle.get_style_context ().add_class (Gtk.STYLE_CLASS_DIM_LABEL);
 			labels.pack_start (title, false, false, 0);
 			labels.pack_start (subtitle, false, false, 0);
 			row.pack_start (labels, true, true, 0);
-			var action = new Gtk.Button.with_label (connected ? _("Disconnect") : _("Connect"));
+			var action = new Gtk.Button.with_label (network.connected ? _("Disconnect") : _("Connect"));
 			action.get_style_context ().add_class ("wifi-network-action");
+			action.sensitive = !network_service.busy;
 			action.clicked.connect (() => {
 				action.sensitive = false;
-				if (connected)
-					launch ("nmcli connection down id " + Shell.quote (ssid));
-				else if (known)
-					launch ("nmcli connection up id " + Shell.quote (ssid));
-				else if (secure)
-					prompt_wifi_password (ssid);
+				if (network.connected)
+					network_service.disconnect_network.begin ();
+				else if (network.saved)
+					network_service.connect_network.begin (network);
+				else if (network.secure)
+					prompt_wifi_password (network);
 				else
-					launch ("nmcli device wifi connect " + Shell.quote (ssid));
-				rebuild_wifi_later (1800);
+					network_service.connect_network.begin (network);
 			});
 			row.pack_end (action, false, false, 0);
-			if (known && !connected) {
+			if (network.saved && !network.connected) {
 				var forget = new Gtk.Button.from_icon_name ("edit-delete-symbolic", Gtk.IconSize.MENU);
 				forget.tooltip_text = _("Forget network");
 				forget.get_style_context ().add_class ("wifi-network-action");
+				forget.sensitive = !network_service.busy;
 				forget.clicked.connect (() => {
-					run_action ("nmcli connection delete id " + Shell.quote (ssid));
-					rebuild_wifi_later (300);
+					forget.sensitive = false;
+					network_service.forget_network.begin (network);
 				});
 				row.pack_end (forget, false, false, 0);
 			}
 			return row;
 		}
 
-		string wifi_signal_icon (string signal)
+		string wifi_signal_icon (int value)
 		{
-			var value = int.parse (signal);
 			if (value >= 75) return "network-wireless-signal-excellent-symbolic";
 			if (value >= 50) return "network-wireless-signal-good-symbolic";
 			if (value >= 25) return "network-wireless-signal-ok-symbolic";
 			return "network-wireless-signal-weak-symbolic";
 		}
 
-		void prompt_wifi_password (string ssid)
+		void prompt_wifi_password (WifiNetwork network)
 		{
 			device_popup_open = true;
-			var dialog = new Gtk.Dialog.with_buttons (_("Connect to %s").printf (ssid), this,
+			var dialog = new Gtk.Dialog.with_buttons (_("Connect to %s").printf (network.ssid), this,
 				Gtk.DialogFlags.MODAL, _("Cancel"), Gtk.ResponseType.CANCEL,
 				_("Connect"), Gtk.ResponseType.OK);
 			var entry = new Gtk.Entry ();
@@ -712,39 +693,21 @@ namespace Plank
 			dialog.set_default_response (Gtk.ResponseType.OK);
 			dialog.response.connect ((response) => {
 				if (response == Gtk.ResponseType.OK && entry.text != "")
-					launch ("nmcli device wifi connect " + Shell.quote (ssid)
-						+ " password " + Shell.quote (entry.text));
+					network_service.connect_network.begin (network, entry.text);
 				dialog.destroy ();
 				device_popup_open = false;
-				rebuild_wifi_later (1800);
 			});
 			dialog.show_all ();
 		}
 
-		void start_wifi_refresh ()
+		void network_service_changed ()
 		{
-			if (wifi_refresh_id > 0U || !contains ("nmcli radio wifi", "enabled")) return;
-			launch ("nmcli device wifi rescan");
-			wifi_refresh_id = Timeout.add (5000, () => {
-				if (!visible || current_item == null || current_item.Kind != StatusIndicatorKind.WIFI) {
-					wifi_refresh_id = 0U;
-					return false;
-				}
-				launch ("nmcli device wifi rescan");
-				rebuild (StatusIndicatorKind.WIFI);
-				show_all ();
-				return true;
-			});
-		}
-
-		void stop_wifi_refresh ()
-		{
-			if (wifi_refresh_id > 0U) { Source.remove (wifi_refresh_id); wifi_refresh_id = 0U; }
-		}
-
-		void rebuild_wifi_later (uint delay)
-		{
-			Timeout.add (delay, () => {
+			if (!visible || current_item == null || current_item.Kind != StatusIndicatorKind.WIFI)
+				return;
+			if (wifi_rebuild_id > 0U)
+				Source.remove (wifi_rebuild_id);
+			wifi_rebuild_id = Timeout.add (100, () => {
+				wifi_rebuild_id = 0U;
 				if (visible && current_item != null && current_item.Kind == StatusIndicatorKind.WIFI) {
 					rebuild (StatusIndicatorKind.WIFI);
 					show_all ();
