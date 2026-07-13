@@ -21,9 +21,8 @@ namespace Plank
 		int active_panel_width = PANEL_WIDTH;
 		int active_panel_height = PANEL_HEIGHT;
 		bool device_popup_open = false;
-		uint bluetooth_refresh_id = 0U;
-		uint bluetooth_scan_refresh_id = 0U;
-		bool bluetooth_scanning = false;
+		uint bluetooth_rebuild_id = 0U;
+		bool bluetooth_discovery_owned = false;
 		uint wifi_refresh_id = 0U;
 		uint clock_display_tick_id = 0U;
 		uint countdown_tick_id = 0U;
@@ -50,6 +49,9 @@ namespace Plank
 		Gtk.ComboBoxText? output_device_combo;
 		Gtk.ComboBoxText? input_device_combo;
 		bool updating_audio_controls = false;
+		unowned BluetoothService bluetooth_service;
+		ulong bluetooth_state_changed_id = 0UL;
+		ulong bluetooth_devices_changed_id = 0UL;
 
 		public StatusPanelWindow (DockController controller)
 		{
@@ -58,6 +60,9 @@ namespace Plank
 			audio_service = AudioService.get_default ();
 			audio_state_changed_id = audio_service.state_changed.connect (sync_audio_controls);
 			audio_devices_changed_id = audio_service.devices_changed.connect (sync_audio_devices);
+			bluetooth_service = BluetoothService.get_default ();
+			bluetooth_state_changed_id = bluetooth_service.state_changed.connect (bluetooth_service_changed);
+			bluetooth_devices_changed_id = bluetooth_service.devices_changed.connect (bluetooth_service_changed);
 			decorated = false;
 			resizable = false;
 			skip_taskbar_hint = true;
@@ -116,8 +121,12 @@ namespace Plank
 				SignalHandler.disconnect (audio_service, audio_state_changed_id);
 			if (audio_devices_changed_id > 0UL)
 				SignalHandler.disconnect (audio_service, audio_devices_changed_id);
-			if (bluetooth_refresh_id > 0U)
-				Source.remove (bluetooth_refresh_id);
+			if (bluetooth_state_changed_id > 0UL)
+				SignalHandler.disconnect (bluetooth_service, bluetooth_state_changed_id);
+			if (bluetooth_devices_changed_id > 0UL)
+				SignalHandler.disconnect (bluetooth_service, bluetooth_devices_changed_id);
+			if (bluetooth_rebuild_id > 0U)
+				Source.remove (bluetooth_rebuild_id);
 			stop_bluetooth_discovery ();
 			stop_wifi_refresh ();
 			stop_clock_display ();
@@ -423,16 +432,19 @@ namespace Plank
 
 		void build_bluetooth ()
 		{
-			var powered = contains ("bluetoothctl show", "Powered: yes");
+			if (!bluetooth_service.available) {
+				content.pack_start (info_row (_("Bluetooth is not available"),
+					_("No Bluetooth adapter was found")), false, false, 0);
+				add_bluetooth_settings_button ();
+				return;
+			}
+			var powered = bluetooth_service.powered;
 			var adapter_state = powered ? _("On") : _("Off");
 			content.pack_start (switch_row (_("Bluetooth · %s").printf (adapter_state), powered, (state) => {
-				run_action ("bluetoothctl power " + (state ? "on" : "off"));
-				if (state)
-					start_bluetooth_discovery ();
-				else
+				if (!state)
 					stop_bluetooth_discovery ();
-				rebuild_bluetooth_later (250);
-			}), false, false, 0);
+				bluetooth_service.change_powered.begin (state);
+			}, !bluetooth_service.busy), false, false, 0);
 			if (!powered) {
 				content.pack_start (info_row (_("Bluetooth is turned off"),
 					_("Turn it on to see nearby devices")), false, false, 0);
@@ -440,134 +452,101 @@ namespace Plank
 				return;
 			}
 
-			string output = "";
 			var connected_count = 0;
 			var known_count = 0;
 			var nearby_count = 0;
-			if (run ("bluetoothctl devices", out output)) {
-				var connected_rows = new Gee.ArrayList<Gtk.Widget> ();
-				var known_rows = new Gee.ArrayList<Gtk.Widget> ();
-				var nearby_rows = new Gee.ArrayList<Gtk.Widget> ();
-				foreach (unowned string line in output.split ("\n")) {
-					var fields = line.split (" ", 3);
-					if (fields.length < 3)
-						continue;
-					var address = fields[1];
-					var name = fields[2];
-					string info = "";
-					if (!run ("bluetoothctl info " + Shell.quote (address), out info))
-						continue;
-					var connected = info.contains ("Connected: yes");
-					var paired = info.contains ("Paired: yes");
-					var row = bluetooth_device_row (name, address, connected, paired,
-						bluetooth_battery (info));
-					if (connected) { connected_rows.add (row); connected_count++; }
-					else if (paired) { known_rows.add (row); known_count++; }
-					else if (nearby_count < 3) { nearby_rows.add (row); nearby_count++; }
-				}
-				if (connected_count > 0) {
-					content.pack_start (section_label (_("Connected")), false, false, 0);
-					foreach (var row in connected_rows) content.pack_start (row, false, false, 0);
-				}
-				if (known_count > 0) {
-					content.pack_start (section_label (_("Known devices")), false, false, 0);
-					foreach (var row in known_rows) content.pack_start (row, false, false, 0);
-				}
-				if (nearby_count > 0) {
-					content.pack_start (section_label (_("Nearby")), false, false, 0);
-					foreach (var row in nearby_rows) content.pack_start (row, false, false, 0);
-				}
+			var connected_rows = new Gee.ArrayList<Gtk.Widget> ();
+			var known_rows = new Gee.ArrayList<Gtk.Widget> ();
+			var nearby_rows = new Gee.ArrayList<Gtk.Widget> ();
+			foreach (BluetoothDevice device in bluetooth_service.get_devices ()) {
+				var row = bluetooth_device_row (device);
+				if (device.connected) { connected_rows.add (row); connected_count++; }
+				else if (device.paired) { known_rows.add (row); known_count++; }
+				else if (nearby_count < 3) { nearby_rows.add (row); nearby_count++; }
+			}
+			if (connected_count > 0) {
+				content.pack_start (section_label (_("Connected")), false, false, 0);
+				foreach (var row in connected_rows) content.pack_start (row, false, false, 0);
+			}
+			if (known_count > 0) {
+				content.pack_start (section_label (_("Known devices")), false, false, 0);
+				foreach (var row in known_rows) content.pack_start (row, false, false, 0);
+			}
+			if (nearby_count > 0) {
+				content.pack_start (section_label (_("Nearby")), false, false, 0);
+				foreach (var row in nearby_rows) content.pack_start (row, false, false, 0);
 			}
 
 			if (connected_count + known_count + nearby_count == 0)
 				content.pack_start (info_row (_("No devices found"),
-					_("Search to discover nearby devices")), false, false, 0);
+					bluetooth_service.discovering ? _("Searching for nearby devices")
+						: _("Open this panel to search for nearby devices")), false, false, 0);
 
 			add_bluetooth_settings_button ();
 		}
 
 		void start_bluetooth_discovery ()
 		{
-			if (bluetooth_scanning || !contains ("bluetoothctl show", "Powered: yes"))
-				return;
-			bluetooth_scanning = true;
-			launch ("bluetoothctl scan on");
-			bluetooth_scan_refresh_id = Timeout.add (4000, () => {
-				if (!visible || current_item == null || current_item.Kind != StatusIndicatorKind.BLUETOOTH) {
-					bluetooth_scan_refresh_id = 0U;
-					return false;
-				}
-				rebuild (StatusIndicatorKind.BLUETOOTH);
-				show_all ();
-				return true;
-			});
+			if (bluetooth_service.powered && !bluetooth_discovery_owned) {
+				bluetooth_discovery_owned = true;
+				bluetooth_service.change_discovery (true);
+			}
 		}
 
 		void stop_bluetooth_discovery ()
 		{
-			if (bluetooth_scan_refresh_id > 0U) {
-				Source.remove (bluetooth_scan_refresh_id);
-				bluetooth_scan_refresh_id = 0U;
-			}
-			if (bluetooth_scanning) {
-				bluetooth_scanning = false;
-				launch ("bluetoothctl scan off");
-			}
+			if (bluetooth_discovery_owned)
+				bluetooth_service.change_discovery (false);
+			bluetooth_discovery_owned = false;
 		}
 
-		Gtk.Widget bluetooth_device_row (string name, string address, bool connected,
-			bool paired, string battery)
+		Gtk.Widget bluetooth_device_row (BluetoothDevice device)
 		{
 			var row = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 8);
 			row.get_style_context ().add_class ("bluetooth-device-row");
 			row.pack_start (new Gtk.Image.from_icon_name ("bluetooth-symbolic", Gtk.IconSize.BUTTON), false, false, 0);
 			var labels = new Gtk.Box (Gtk.Orientation.VERTICAL, 1);
-			var title = new Gtk.Label (name) { xalign = 0.0f, ellipsize = Pango.EllipsizeMode.END };
-			var state = connected ? _("Connected") : (paired ? _("Known device") : _("Nearby"));
-			if (battery != "") state += " · " + battery;
+			var title = new Gtk.Label (device.name) { xalign = 0.0f, ellipsize = Pango.EllipsizeMode.END };
+			var state = device.connected ? _("Connected") : (device.paired ? _("Known device") : _("Nearby"));
+			if (device.battery_percentage >= 0)
+				state += " · %d%%".printf (device.battery_percentage);
 			var subtitle = new Gtk.Label (state) { xalign = 0.0f };
 			subtitle.get_style_context ().add_class (Gtk.STYLE_CLASS_DIM_LABEL);
 			labels.pack_start (title, false, false, 0);
 			labels.pack_start (subtitle, false, false, 0);
 			row.pack_start (labels, true, true, 0);
-			var action = new Gtk.Button.with_label (connected ? _("Disconnect") : _("Connect"));
+			var action = new Gtk.Button.with_label (device.connected ? _("Disconnect") : _("Connect"));
 			action.get_style_context ().add_class ("bluetooth-device-action");
+			action.sensitive = !bluetooth_service.busy;
 			action.clicked.connect (() => {
 				action.sensitive = false;
-				launch ("bluetoothctl " + (connected ? "disconnect " : "connect ") + Shell.quote (address));
-				rebuild_bluetooth_later (1800);
+				bluetooth_service.set_connected.begin (device, !device.connected);
 			});
 			row.pack_end (action, false, false, 0);
-			if (paired && !connected) {
+			if (device.paired && !device.connected) {
 				var forget = new Gtk.Button.from_icon_name ("edit-delete-symbolic", Gtk.IconSize.MENU);
 				forget.tooltip_text = _("Forget device");
 				forget.get_style_context ().add_class ("bluetooth-device-action");
+				forget.sensitive = !bluetooth_service.busy;
 				forget.clicked.connect (() => {
-					run_action ("bluetoothctl remove " + Shell.quote (address));
-					rebuild_bluetooth_later (250);
+					forget.sensitive = false;
+					bluetooth_service.remove_device.begin (device);
 				});
 				row.pack_end (forget, false, false, 0);
 			}
 			return row;
 		}
 
-		string bluetooth_battery (string info)
+		void bluetooth_service_changed ()
 		{
-			foreach (unowned string line in info.split ("\n")) {
-				if (!line.contains ("Battery Percentage:")) continue;
-				var open = line.last_index_of_char ('(');
-				var close = line.last_index_of_char (')');
-				if (open >= 0 && close > open)
-					return line.substring (open + 1, close - open - 1) + "%";
-			}
-			return "";
-		}
-
-		void rebuild_bluetooth_later (uint delay)
-		{
-			if (bluetooth_refresh_id > 0U) Source.remove (bluetooth_refresh_id);
-			bluetooth_refresh_id = Timeout.add (delay, () => {
-				bluetooth_refresh_id = 0U;
+			if (!visible || current_item == null || current_item.Kind != StatusIndicatorKind.BLUETOOTH)
+				return;
+			if (bluetooth_service.powered && !bluetooth_discovery_owned)
+				start_bluetooth_discovery ();
+			if (bluetooth_rebuild_id > 0U)
+				Source.remove (bluetooth_rebuild_id);
+			bluetooth_rebuild_id = Timeout.add (75, () => {
+				bluetooth_rebuild_id = 0U;
 				if (visible && current_item != null && current_item.Kind == StatusIndicatorKind.BLUETOOTH) {
 					rebuild (StatusIndicatorKind.BLUETOOTH);
 					show_all ();
@@ -1208,12 +1187,14 @@ namespace Plank
 		}
 
 		delegate void SwitchChanged (bool state);
-		Gtk.Widget switch_row (string label, bool state, owned SwitchChanged changed)
+		Gtk.Widget switch_row (string label, bool state, owned SwitchChanged changed,
+			bool sensitive = true)
 		{
 			var row = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
 			row.get_style_context ().add_class ("status-row");
 			row.pack_start (new Gtk.Label (label) { xalign = 0.0f }, true, true, 0);
 			var toggle = new Gtk.Switch () { active = state, valign = Gtk.Align.CENTER };
+			toggle.sensitive = sensitive;
 			toggle.notify["active"].connect (() => changed (toggle.active));
 			row.pack_end (toggle, false, false, 0);
 			return row;

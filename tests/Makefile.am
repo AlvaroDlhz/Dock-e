@@ -35,6 +35,7 @@ tests_LDADD = \
 
 tests_VALASOURCES = \
 	AudioService.vala \
+	BluetoothService.vala \
 	CommandRunner.vala \
 	Controller.vala \
 	Drawing.vala \

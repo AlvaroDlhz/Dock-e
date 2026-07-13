@@ -172,6 +172,7 @@ libplank_internal_la_VALASOURCES = \
 	InternalConsts.vala \
 	InternalQuarks.vala \
 	Services/AudioService.vala \
+	Services/BluetoothService.vala \
 	Services/CommandRunner.vala \
 	Services/Matcher.vala \
 	Services/WindowControl.vala \

@@ -26,6 +26,8 @@ namespace Plank
 		uint update_timer_id = 0U;
 		AudioService? audio_service;
 		ulong audio_state_changed_id = 0UL;
+		BluetoothService? bluetooth_service;
+		ulong bluetooth_state_changed_id = 0UL;
 
 		public StatusIndicatorItem (StatusIndicatorKind kind)
 		{
@@ -41,6 +43,12 @@ namespace Plank
 				sync_audio_state ();
 				return;
 			}
+			if (Kind == StatusIndicatorKind.BLUETOOTH) {
+				bluetooth_service = BluetoothService.get_default ();
+				bluetooth_state_changed_id = bluetooth_service.state_changed.connect (sync_bluetooth_state);
+				sync_bluetooth_state ();
+				return;
+			}
 			update_state ();
 			update_timer_id = Timeout.add_seconds (1, () => {
 				update_state ();
@@ -52,6 +60,8 @@ namespace Plank
 		{
 			if (audio_service != null && audio_state_changed_id > 0UL)
 				SignalHandler.disconnect (audio_service, audio_state_changed_id);
+			if (bluetooth_service != null && bluetooth_state_changed_id > 0UL)
+				SignalHandler.disconnect (bluetooth_service, bluetooth_state_changed_id);
 			if (update_timer_id > 0U)
 				Source.remove (update_timer_id);
 		}
@@ -80,9 +90,6 @@ namespace Plank
 			switch (Kind) {
 			case StatusIndicatorKind.WIFI:
 				active = NetworkMonitor.get_default ().network_available;
-				break;
-			case StatusIndicatorKind.BLUETOOTH:
-				active = command_output_contains ("bluetoothctl show", "Powered: yes");
 				break;
 			case StatusIndicatorKind.BATTERY:
 				update_battery_state ();
@@ -138,10 +145,15 @@ namespace Plank
 				reset_icon_buffer ();
 		}
 
-		static bool command_output_contains (string command, string needle)
+		void sync_bluetooth_state ()
 		{
-			string output = "";
-			return run_command (command, out output) && output.contains (needle);
+			if (bluetooth_service == null)
+				return;
+			var new_active = bluetooth_service.available && bluetooth_service.powered;
+			if (active != new_active) {
+				active = new_active;
+				reset_icon_buffer ();
+			}
 		}
 
 		static bool run_command (string command, out string output)
@@ -313,31 +325,36 @@ namespace Plank
 		Gee.ArrayList<Gtk.MenuItem> get_bluetooth_menu_items ()
 		{
 			var items = new Gee.ArrayList<Gtk.MenuItem> ();
-			string output = "";
-			var powered = command_output_contains ("bluetoothctl show", "Powered: yes");
+			var powered = bluetooth_service != null && bluetooth_service.powered;
 			Gtk.Switch toggle;
 			items.add (create_switch_item (_("Bluetooth"), "bluetooth-symbolic", powered, out toggle));
+			toggle.sensitive = bluetooth_service != null && bluetooth_service.available
+				&& !bluetooth_service.busy;
 			toggle.notify["active"].connect (() => {
-				run_action ("bluetoothctl power " + (toggle.active ? "on" : "off"));
-				update_state ();
+				if (bluetooth_service != null && toggle.sensitive)
+					bluetooth_service.change_powered.begin (toggle.active);
 			});
 
-			if (powered && run_command ("bluetoothctl devices Paired", out output)) {
-				items.add (new Gtk.SeparatorMenuItem ());
-				items.add (new TitledSeparatorMenuItem.no_line (_("Devices")));
-				foreach (unowned string line in output.split ("\n")) {
-					var fields = line.split (" ", 3);
-					if (fields.length < 3)
-						continue;
-					var address = fields[1];
-					var connected = command_output_contains ("bluetoothctl info " + Shell.quote (address), "Connected: yes");
-					var device_item = create_status_item (fields[2], connected ? _("Connected") : _("Available"),
-						"bluetooth-symbolic", connected);
-					device_item.activate.connect (() => {
-						run_action ("bluetoothctl " + (connected ? "disconnect " : "connect ") + Shell.quote (address));
-						update_state ();
-					});
-					items.add (device_item);
+			if (powered && bluetooth_service != null) {
+				var paired_count = 0;
+				foreach (BluetoothDevice device in bluetooth_service.get_devices ())
+					if (device.paired)
+						paired_count++;
+				if (paired_count > 0) {
+					items.add (new Gtk.SeparatorMenuItem ());
+					items.add (new TitledSeparatorMenuItem.no_line (_("Devices")));
+					foreach (BluetoothDevice device in bluetooth_service.get_devices ()) {
+						if (!device.paired)
+							continue;
+						var menu_device = device;
+						var device_item = create_status_item (device.name,
+							device.connected ? _("Connected") : _("Available"),
+							"bluetooth-symbolic", device.connected);
+						device_item.activate.connect (() => {
+							bluetooth_service.set_connected.begin (menu_device, !menu_device.connected);
+						});
+						items.add (device_item);
+					}
 				}
 			}
 
