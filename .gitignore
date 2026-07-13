@@ -1,0 +1,76 @@
+# Autotools configuration state
+/Makefile
+/**/Makefile
+/autom4te.cache/
+/config.cache
+/config.h
+/config.log
+/config.lt
+/config.status
+/libtool
+/stamp-h1
+
+# Compiler and libtool output
+/.libs/
+/**/.libs/
+/.deps/
+/**/.deps/
+*.o
+*.lo
+*.la
+*.lai
+*.Po
+*.Plo
+*.stamp
+
+# Generated Vala C sources
+/lib/*.c
+!/lib/gtk-compat.c
+/lib/DBus/*.c
+/lib/Docklets/*.c
+/lib/Drawing/*.c
+/lib/Factories/*.c
+/lib/Items/*.c
+/lib/Services/*.c
+/lib/Widgets/*.c
+/docklets/*/*.c
+/examples/*.c
+/src/*.c
+/tests/*.c
+
+# Generated API and resource output
+/lib/build-abi
+/lib/plank.h
+/lib/plank.vapi
+/lib/plank-internal.h
+/lib/plank-internal.vapi
+/lib/Version.vala
+/lib/plank.pc
+/data/gschemas.compiled
+/data/net.launchpad.plank.gschema.valid
+/data/net.launchpad.plank.gschema.xml
+/data/plank.appdata.xml
+/data/plank.desktop
+/po/Makefile
+/po/POTFILES
+/po/*.gmo
+/po/*.mo
+
+# Tests, coverage and diagnostics
+*.log
+*.trs
+/coverage.xml
+/**/*.gcda
+/**/*.gcno
+/tests/home/
+/tests/test-report.xml
+/tests/tests
+/tests/dock
+
+# Built programs and documentation
+/src/plank
+/examples/remote-client
+/examples/unity-client
+/docs/c-doc/
+/docs/vala-doc/
+/docs/web-doc/

@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<!-- Deprecated: Since GLib 2.62, gtester and gtester-report are deprecated. Port to TAP. -->
-<gtester>
-  <testbinary path="./tests">
-    <binary file="/home/alvaro/coding/opensource/plank-fork/tests/.libs/tests"/>
-    <random-seed>R02Sd0ea3e77e2a7a0881e8604ae532be10b</random-seed>
-    <duration>0.119383</duration>
-  </testbinary>
-</gtester>
