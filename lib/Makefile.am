@@ -178,6 +178,7 @@ libplank_internal_la_VALASOURCES = \
 	Services/CommandRunner.vala \
 	Services/NetworkService.vala \
 	Services/PowerService.vala \
+	Services/StatusNoticeModel.vala \
 	Services/UpdateService.vala \
 	Services/Matcher.vala \
 	Services/WindowControl.vala \

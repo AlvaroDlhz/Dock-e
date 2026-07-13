@@ -41,6 +41,7 @@ tests_VALASOURCES = \
 	CommandRunner.vala \
 	NetworkService.vala \
 	PowerService.vala \
+	StatusNoticeModel.vala \
 	UpdateService.vala \
 	Controller.vala \
 	Drawing.vala \

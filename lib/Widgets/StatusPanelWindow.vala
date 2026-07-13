@@ -16,6 +16,10 @@ namespace Plank
 		unowned DockController controller;
 		Gtk.Box content;
 		Gtk.Box footer;
+		StatusNoticeModel notice_model;
+		Gtk.Revealer notice_revealer;
+		Gtk.Label notice_label;
+		ulong notice_changed_id = 0UL;
 		StatusIndicatorItem? current_item;
 		Gtk.CssProvider? css_provider;
 		int active_panel_width = PANEL_WIDTH;
@@ -52,13 +56,17 @@ namespace Plank
 		unowned BluetoothService bluetooth_service;
 		ulong bluetooth_state_changed_id = 0UL;
 		ulong bluetooth_devices_changed_id = 0UL;
+		ulong bluetooth_operation_failed_id = 0UL;
 		unowned NetworkService network_service;
 		ulong network_state_changed_id = 0UL;
 		ulong network_networks_changed_id = 0UL;
+		ulong network_operation_failed_id = 0UL;
 		unowned PowerService power_service;
 		ulong power_state_changed_id = 0UL;
+		ulong power_operation_failed_id = 0UL;
 		unowned BrightnessService brightness_service;
 		ulong brightness_state_changed_id = 0UL;
+		ulong brightness_operation_failed_id = 0UL;
 		Gtk.Scale? brightness_scale;
 		Gtk.Label? brightness_value_label;
 		bool updating_brightness_control = false;
@@ -68,19 +76,37 @@ namespace Plank
 		{
 			Object (type: Gtk.WindowType.TOPLEVEL);
 			this.controller = controller;
+			notice_model = new StatusNoticeModel ();
+			notice_changed_id = notice_model.changed.connect (sync_notice);
 			audio_service = AudioService.get_default ();
 			audio_state_changed_id = audio_service.state_changed.connect (sync_audio_controls);
 			audio_devices_changed_id = audio_service.devices_changed.connect (sync_audio_devices);
 			bluetooth_service = BluetoothService.get_default ();
 			bluetooth_state_changed_id = bluetooth_service.state_changed.connect (bluetooth_service_changed);
 			bluetooth_devices_changed_id = bluetooth_service.devices_changed.connect (bluetooth_service_changed);
+			bluetooth_operation_failed_id = bluetooth_service.operation_failed.connect ((message) => {
+				show_operation_error (StatusIndicatorKind.BLUETOOTH,
+					_("Bluetooth could not complete that action. Please try again."), message);
+			});
 			network_service = NetworkService.get_default ();
 			network_state_changed_id = network_service.state_changed.connect (network_service_changed);
 			network_networks_changed_id = network_service.networks_changed.connect (network_service_changed);
+			network_operation_failed_id = network_service.operation_failed.connect ((message) => {
+				show_operation_error (StatusIndicatorKind.WIFI,
+					_("Wi-Fi could not complete that action. Check the connection and try again."), message);
+			});
 			power_service = PowerService.get_default ();
 			power_state_changed_id = power_service.state_changed.connect (power_service_changed);
+			power_operation_failed_id = power_service.operation_failed.connect ((message) => {
+				show_operation_error (StatusIndicatorKind.BATTERY,
+					_("The power profile could not be changed."), message);
+			});
 			brightness_service = BrightnessService.get_default ();
 			brightness_state_changed_id = brightness_service.state_changed.connect (brightness_service_changed);
+			brightness_operation_failed_id = brightness_service.operation_failed.connect ((message) => {
+				show_operation_error (StatusIndicatorKind.BATTERY,
+					_("Screen brightness could not be changed."), message);
+			});
 			decorated = false;
 			resizable = false;
 			skip_taskbar_hint = true;
@@ -105,6 +131,22 @@ namespace Plank
 			card.margin = 10;
 			card.get_style_context ().add_class ("status-card");
 			content = new Gtk.Box (Gtk.Orientation.VERTICAL, 3);
+			notice_revealer = new Gtk.Revealer ();
+			notice_revealer.transition_type = Gtk.RevealerTransitionType.NONE;
+			var notice = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 7);
+			notice.get_style_context ().add_class ("status-notice");
+			notice.pack_start (new Gtk.Image.from_icon_name ("dialog-warning-symbolic",
+				Gtk.IconSize.MENU), false, false, 0);
+			notice_label = new Gtk.Label ("") { xalign = 0.0f, wrap = true, max_width_chars = 32 };
+			notice.pack_start (notice_label, true, true, 0);
+			var dismiss_notice = new Gtk.Button.from_icon_name ("window-close-symbolic",
+				Gtk.IconSize.MENU);
+			dismiss_notice.tooltip_text = _("Dismiss");
+			dismiss_notice.get_style_context ().add_class ("status-notice-dismiss");
+			dismiss_notice.clicked.connect (() => notice_model.dismiss ());
+			notice.pack_end (dismiss_notice, false, false, 0);
+			notice_revealer.add (notice);
+			card.pack_start (notice_revealer, false, false, 0);
 			var scroll = new Gtk.ScrolledWindow (null, null);
 			scroll.hscrollbar_policy = Gtk.PolicyType.NEVER;
 			scroll.vscrollbar_policy = Gtk.PolicyType.NEVER;
@@ -118,6 +160,7 @@ namespace Plank
 			footer.get_style_context ().add_class ("status-footer");
 			card.pack_end (footer, false, false, 0);
 			add (card);
+			sync_notice ();
 			focus_out_event.connect (() => {
 				if (!device_popup_open)
 					dismiss ();
@@ -135,6 +178,8 @@ namespace Plank
 
 		~StatusPanelWindow ()
 		{
+			if (notice_changed_id > 0UL)
+				SignalHandler.disconnect (notice_model, notice_changed_id);
 			if (audio_state_changed_id > 0UL)
 				SignalHandler.disconnect (audio_service, audio_state_changed_id);
 			if (audio_devices_changed_id > 0UL)
@@ -143,14 +188,22 @@ namespace Plank
 				SignalHandler.disconnect (bluetooth_service, bluetooth_state_changed_id);
 			if (bluetooth_devices_changed_id > 0UL)
 				SignalHandler.disconnect (bluetooth_service, bluetooth_devices_changed_id);
+			if (bluetooth_operation_failed_id > 0UL)
+				SignalHandler.disconnect (bluetooth_service, bluetooth_operation_failed_id);
 			if (network_state_changed_id > 0UL)
 				SignalHandler.disconnect (network_service, network_state_changed_id);
 			if (network_networks_changed_id > 0UL)
 				SignalHandler.disconnect (network_service, network_networks_changed_id);
+			if (network_operation_failed_id > 0UL)
+				SignalHandler.disconnect (network_service, network_operation_failed_id);
 			if (power_state_changed_id > 0UL)
 				SignalHandler.disconnect (power_service, power_state_changed_id);
+			if (power_operation_failed_id > 0UL)
+				SignalHandler.disconnect (power_service, power_operation_failed_id);
 			if (brightness_state_changed_id > 0UL)
 				SignalHandler.disconnect (brightness_service, brightness_state_changed_id);
+			if (brightness_operation_failed_id > 0UL)
+				SignalHandler.disconnect (brightness_service, brightness_operation_failed_id);
 			if (bluetooth_rebuild_id > 0U)
 				Source.remove (bluetooth_rebuild_id);
 			stop_bluetooth_discovery ();
@@ -177,6 +230,8 @@ namespace Plank
 			if (current_item != null && current_item.Kind == StatusIndicatorKind.CLOCK
 				&& item.Kind != StatusIndicatorKind.CLOCK)
 				stop_clock_display ();
+			if (current_item != null && current_item.Kind != item.Kind)
+				notice_model.dismiss ();
 			current_item = item;
 			apply_geometry (item.Kind);
 			if (item.Kind == StatusIndicatorKind.BLUETOOTH)
@@ -199,6 +254,20 @@ namespace Plank
 				Idle.add (() => { position_over_item (); return false; });
 				return false;
 			});
+		}
+
+		void show_operation_error (StatusIndicatorKind kind, string user_message,
+			string technical_message)
+		{
+			warning ("%s operation failed: %s", label_for_kind (kind), technical_message);
+			if (current_item != null && current_item.Kind == kind)
+				notice_model.show_error (user_message);
+		}
+
+		void sync_notice ()
+		{
+			notice_label.label = notice_model.message;
+			notice_revealer.reveal_child = notice_model.visible;
 		}
 
 		void apply_geometry (StatusIndicatorKind kind)
@@ -1214,6 +1283,9 @@ namespace Plank
 			css += ".plank-status-panel .status-title { padding: 5px 7px; color: white; }";
 			css += ".plank-status-panel .status-title-label { font-weight: bold; font-size: 15px; }";
 			css += ".plank-status-panel .status-row { color: white; padding: 4px 6px; border-radius: 8px; }";
+			css += ".plank-status-panel .status-notice { color: white; background-color: rgba(224,70,70,0.20); border: 1px solid rgba(255,120,120,0.30); border-radius: 8px; padding: 6px 7px; margin: 2px 1px 5px 1px; }";
+			css += ".plank-status-panel .status-notice-dismiss { color: white; background: transparent; background-image: none; border: none; box-shadow: none; padding: 2px; }";
+			css += ".plank-status-panel .status-notice-dismiss:hover { background-color: rgba(255,255,255,0.12); border-radius: 5px; }";
 			css += ".plank-status-panel .status-section-label { color: rgba(255,255,255,0.58); font-size: 10px; font-weight: bold; margin: 4px 6px 0 6px; }";
 			css += ".plank-status-panel .status-action-button { color: white; background-color: rgba(255,255,255,0.08); background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 5px; margin-top: 4px; }";
 			css += ".plank-status-panel .bluetooth-device-row { color: white; padding: 7px 6px; border-radius: 9px; background-color: rgba(255,255,255,0.05); margin: 2px 3px; }";
