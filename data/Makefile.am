@@ -11,6 +11,9 @@ endif
 
 EXTRA_DIST = \
 	application-default-icon.svg \
+	areas.svg \
+	segundo-plano-closed.svg \
+	segundo-plano-open.svg \
 	lucide/LICENSE \
 	lucide/volume.svg \
 	lucide/volume-1.svg \

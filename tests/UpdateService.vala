@@ -17,14 +17,14 @@ namespace PlankTests
 	{
 		public bool is_supported = true;
 		public bool supported { get { return is_supported; } }
-		public bool answer = false;
+		public int answer = 0;
 		public bool fail = false;
 		public uint delay_ms = 1;
 		public int checks = 0;
 		public int concurrent = 0;
 		public int maximum_concurrent = 0;
 
-		public async bool check (Cancellable? cancellable) throws Error
+		public async int check (Cancellable? cancellable) throws Error
 		{
 			checks++;
 			concurrent++;
@@ -67,21 +67,21 @@ namespace PlankTests
 
 	void update_service_load_state ()
 	{
-		var backend = new FakeUpdateBackend () { answer = true };
+		var backend = new FakeUpdateBackend () { answer = 3 };
 		var service = new Plank.UpdateService.with_backend (backend);
 		assert (wait_for_update (() => backend.checks == 1 && !service.checking));
-		assert (service.supported && service.updates_available);
+		assert (service.supported && service.updates_available && service.update_count == 3);
 	}
 
 	void update_service_refresh_state ()
 	{
-		var backend = new FakeUpdateBackend () { answer = false };
+		var backend = new FakeUpdateBackend () { answer = 0 };
 		var service = new Plank.UpdateService.with_backend (backend);
 		assert (wait_for_update (() => backend.checks == 1 && !service.checking));
-		backend.answer = true;
+		backend.answer = 7;
 		service.refresh.begin ();
 		assert (wait_for_update (() => backend.checks == 2 && !service.checking));
-		assert (service.updates_available);
+		assert (service.updates_available && service.update_count == 7);
 	}
 
 	void update_service_coalesce_refreshes ()
@@ -99,13 +99,13 @@ namespace PlankTests
 
 	void update_service_preserve_cache ()
 	{
-		var backend = new FakeUpdateBackend () { answer = true };
+		var backend = new FakeUpdateBackend () { answer = 2 };
 		var service = new Plank.UpdateService.with_backend (backend);
 		assert (wait_for_update (() => service.updates_available && !service.checking));
 		backend.fail = true;
 		service.refresh.begin ();
 		assert (wait_for_update (() => backend.checks == 2 && !service.checking));
-		assert (service.updates_available);
+		assert (service.updates_available && service.update_count == 2);
 		assert (service.last_error == "check failed");
 	}
 
@@ -123,17 +123,18 @@ namespace PlankTests
 
 	void update_service_parse_apt ()
 	{
-		var with_updates = "Listing...\nlinux/repo 2 amd64 [upgradable from: 1]\n";
+		var with_updates = "Listing...\nlinux/repo 2 amd64 [upgradable from: 1]\nmesa/repo 3 amd64 [upgradable from: 2]\n";
+		assert (CommandUpdateBackend.output_update_count (UpdateCheckFormat.APT, with_updates) == 2);
 		assert (CommandUpdateBackend.output_has_updates (UpdateCheckFormat.APT, with_updates));
 		assert (!CommandUpdateBackend.output_has_updates (UpdateCheckFormat.APT, "Listing...\n"));
 	}
 
 	void update_service_parse_backends ()
 	{
-		assert (CommandUpdateBackend.output_has_updates (UpdateCheckFormat.MINTUPDATE,
-			"package         old version   new version"));
-		assert (CommandUpdateBackend.output_has_updates (UpdateCheckFormat.PACKAGEKIT,
-			"Available  firefox;1;x86_64;repo"));
+		assert (CommandUpdateBackend.output_update_count (UpdateCheckFormat.MINTUPDATE,
+			"security  package-one  2\npackage  package-two  3\n") == 2);
+		assert (CommandUpdateBackend.output_update_count (UpdateCheckFormat.PACKAGEKIT,
+			"Available  firefox;1;x86_64;repo\nAvailable  mesa;2;x86_64;repo\n") == 2);
 		assert (!CommandUpdateBackend.output_has_updates (UpdateCheckFormat.PACKAGEKIT,
 			"No packages require updating"));
 	}

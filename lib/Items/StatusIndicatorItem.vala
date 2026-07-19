@@ -153,8 +153,10 @@ namespace Plank
 		{
 			if (network_service == null)
 				return;
-			var new_active = network_service.available && network_service.enabled
-				&& network_service.connected;
+			// The icon represents whether the wireless radio is powered on. The
+			// connected network can briefly be unknown while NetworkManager is
+			// refreshing access points, which must not make Wi-Fi look disabled.
+			var new_active = network_service.available && network_service.enabled;
 			if (active != new_active) {
 				active = new_active;
 				reset_icon_buffer ();

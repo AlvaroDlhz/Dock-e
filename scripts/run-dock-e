@@ -13,11 +13,6 @@ if [ ! -x "$DOCK_E" ]; then
 	exit 1
 fi
 
-if pgrep -u "$(id -u)" -f "$DOCK_E" >/dev/null 2>&1; then
-	echo "This Dock-E build is already running." >&2
-	exit 0
-fi
-
 export LD_LIBRARY_PATH="$LIB_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 export GSETTINGS_SCHEMA_DIR="$BUILD_DIR/data"
 export PLANK_DOCKLET_DIRS="$BUILD_DIR/docklets"

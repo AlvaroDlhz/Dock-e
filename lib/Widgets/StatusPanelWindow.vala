@@ -126,6 +126,7 @@ namespace Plank
 			if (visual != null)
 				set_visual (visual);
 			get_style_context ().add_class ("plank-status-panel");
+			Accessibility.describe (this, _("System status controls"));
 
 			var card = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
 			card.margin = 10;
@@ -135,6 +136,7 @@ namespace Plank
 			notice_revealer.transition_type = Gtk.RevealerTransitionType.NONE;
 			var notice = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 7);
 			notice.get_style_context ().add_class ("status-notice");
+			Accessibility.set_role (notice, Atk.Role.ALERT);
 			notice.pack_start (new Gtk.Image.from_icon_name ("dialog-warning-symbolic",
 				Gtk.IconSize.MENU), false, false, 0);
 			notice_label = new Gtk.Label ("") { xalign = 0.0f, wrap = true, max_width_chars = 32 };
@@ -142,6 +144,7 @@ namespace Plank
 			var dismiss_notice = new Gtk.Button.from_icon_name ("window-close-symbolic",
 				Gtk.IconSize.MENU);
 			dismiss_notice.tooltip_text = _("Dismiss");
+			Accessibility.describe (dismiss_notice, _("Dismiss error"));
 			dismiss_notice.get_style_context ().add_class ("status-notice-dismiss");
 			dismiss_notice.clicked.connect (() => notice_model.dismiss ());
 			notice.pack_end (dismiss_notice, false, false, 0);
@@ -164,6 +167,18 @@ namespace Plank
 			focus_out_event.connect (() => {
 				if (!device_popup_open)
 					dismiss ();
+				return false;
+			});
+			key_press_event.connect ((event) => {
+				Accessibility.set_keyboard_navigation (this, true);
+				if (event.keyval == Gdk.Key.Escape) {
+					dismiss ();
+					return true;
+				}
+				return false;
+			});
+			button_press_event.connect (() => {
+				Accessibility.set_keyboard_navigation (this, false);
 				return false;
 			});
 			show.connect (() => {
@@ -220,10 +235,12 @@ namespace Plank
 
 		public void toggle (StatusIndicatorItem item)
 		{
+			controller.workspace_previews.dismiss ();
 			if (visible && current_item == item) {
 				dismiss ();
 				return;
 			}
+			Accessibility.set_keyboard_navigation (this, false);
 			if (current_item != null && current_item.Kind == StatusIndicatorKind.BLUETOOTH
 				&& item.Kind != StatusIndicatorKind.BLUETOOTH)
 				stop_bluetooth_discovery ();
@@ -233,6 +250,7 @@ namespace Plank
 			if (current_item != null && current_item.Kind != item.Kind)
 				notice_model.dismiss ();
 			current_item = item;
+			Accessibility.describe (this, _("%s controls").printf (label_for_kind (item.Kind)));
 			apply_geometry (item.Kind);
 			if (item.Kind == StatusIndicatorKind.BLUETOOTH)
 				start_bluetooth_discovery ();
@@ -251,6 +269,7 @@ namespace Plank
 				resize (active_panel_width, active_panel_height);
 				position_over_item ();
 				opacity = 1.0;
+				child_focus (Gtk.DirectionType.TAB_FORWARD);
 				Idle.add (() => { position_over_item (); return false; });
 				return false;
 			});
@@ -275,9 +294,27 @@ namespace Plank
 			if (kind == StatusIndicatorKind.VOLUME) {
 				var workarea = active_workarea ();
 				var bar = controller.position_manager.get_screen_background_region ();
-				var available_above = bar.y - PANEL_GAP - workarea.y;
+				var available_outside = 0;
+				switch (controller.position_manager.Position) {
+				default:
+				case Gtk.PositionType.BOTTOM:
+					available_outside = bar.y - PANEL_GAP - workarea.y;
+					break;
+				case Gtk.PositionType.TOP:
+					available_outside = workarea.y + workarea.height
+						- (bar.y + bar.height) - PANEL_GAP;
+					break;
+				case Gtk.PositionType.LEFT:
+					available_outside = workarea.x + workarea.width
+						- (bar.x + bar.width) - PANEL_GAP;
+					break;
+				case Gtk.PositionType.RIGHT:
+					available_outside = bar.x - PANEL_GAP - workarea.x;
+					break;
+				}
 				var square_size = int.min (VOLUME_PANEL_SIZE,
-					int.min (workarea.width - 20, available_above));
+					int.min (int.min (workarea.width - 20, workarea.height - 20),
+						available_outside));
 				active_panel_width = active_panel_height = int.max (160, square_size);
 			} else if (kind == StatusIndicatorKind.BLUETOOTH) {
 				active_panel_width = active_panel_height = BLUETOOTH_PANEL_SIZE;
@@ -385,6 +422,8 @@ namespace Plank
 			var overlay = new Gtk.Overlay ();
 			overlay.get_style_context ().add_class ("modern-volume-bar");
 			var scale = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 0, maximum, 1);
+			var control_name = target == AudioTarget.OUTPUT ? _("Output volume") : _("Microphone volume");
+			Accessibility.describe (scale, control_name, _("Use the arrow keys to adjust the level"));
 			scale.draw_value = false;
 			scale.has_origin = true;
 			scale.height_request = 36;
@@ -392,7 +431,8 @@ namespace Plank
 			scale.get_style_context ().add_class ("modern-volume-scale");
 			overlay.add (scale);
 
-			var icon = icon_toggle_button (icon_name, audio_service.is_muted (target));
+			var mute_name = target == AudioTarget.OUTPUT ? _("Mute output") : _("Mute microphone");
+			var icon = icon_toggle_button (icon_name, audio_service.is_muted (target), mute_name);
 			icon.halign = Gtk.Align.START;
 			icon.valign = Gtk.Align.CENTER;
 			icon.margin_start = 5;
@@ -426,10 +466,11 @@ namespace Plank
 			return overlay;
 		}
 
-		Gtk.ToggleButton icon_toggle_button (string icon, bool active)
+		Gtk.ToggleButton icon_toggle_button (string icon, bool active, string accessible_name)
 		{
 			var button = new Gtk.ToggleButton ();
 			button.active = active;
+			Accessibility.describe (button, accessible_name);
 			button.get_style_context ().add_class ("status-icon-toggle");
 			button.add (new Gtk.Image.from_icon_name (icon, Gtk.IconSize.MENU));
 			return button;
@@ -447,6 +488,8 @@ namespace Plank
 			var row = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
 			row.get_style_context ().add_class ("status-row");
 			var combo = new Gtk.ComboBoxText ();
+			Accessibility.describe (combo, target == AudioTarget.OUTPUT
+				? _("Output device") : _("Input device"));
 			combo.get_style_context ().add_class ("modern-device-selector");
 			foreach (unowned Gtk.CellRenderer renderer in combo.get_cells ()) {
 				var text_renderer = renderer as Gtk.CellRendererText;
@@ -624,6 +667,7 @@ namespace Plank
 			if (device.paired && !device.connected) {
 				var forget = new Gtk.Button.from_icon_name ("edit-delete-symbolic", Gtk.IconSize.MENU);
 				forget.tooltip_text = _("Forget device");
+				Accessibility.describe (forget, _("Forget %s").printf (device.name));
 				forget.get_style_context ().add_class ("bluetooth-device-action");
 				forget.sensitive = !bluetooth_service.busy;
 				forget.clicked.connect (() => {
@@ -752,6 +796,7 @@ namespace Plank
 			if (network.saved && !network.connected) {
 				var forget = new Gtk.Button.from_icon_name ("edit-delete-symbolic", Gtk.IconSize.MENU);
 				forget.tooltip_text = _("Forget network");
+				Accessibility.describe (forget, _("Forget network %s").printf (network.ssid));
 				forget.get_style_context ().add_class ("wifi-network-action");
 				forget.sensitive = !network_service.busy;
 				forget.clicked.connect (() => {
@@ -778,6 +823,7 @@ namespace Plank
 				Gtk.DialogFlags.MODAL, _("Cancel"), Gtk.ResponseType.CANCEL,
 				_("Connect"), Gtk.ResponseType.OK);
 			var entry = new Gtk.Entry ();
+			Accessibility.describe (entry, _("Password for %s").printf (network.ssid));
 			entry.visibility = false;
 			entry.activates_default = true;
 			entry.placeholder_text = _("Wi-Fi password");
@@ -930,6 +976,8 @@ namespace Plank
 			var overlay = new Gtk.Overlay ();
 			overlay.get_style_context ().add_class ("modern-volume-bar");
 			var scale = new Gtk.Scale.with_range (Gtk.Orientation.HORIZONTAL, 5, 100, 1);
+			Accessibility.describe (scale, _("Screen brightness"),
+				_("Use the arrow keys to adjust the level"));
 			brightness_scale = scale;
 			scale.draw_value = false;
 			scale.has_origin = true;
@@ -1042,6 +1090,11 @@ namespace Plank
 			calendar.show_heading = true;
 			calendar.show_day_names = true;
 			calendar.get_style_context ().add_class ("clock-calendar");
+			calendar.month_changed.connect (() => sync_calendar_today (calendar));
+			calendar.event_after.connect ((event) => {
+				if (event.type == Gdk.EventType.SCROLL)
+					sync_calendar_today (calendar);
+			});
 			calendar_page.pack_start (calendar, true, true, 0);
 			stack.add_titled (calendar_page, "calendar", _("Calendar"));
 
@@ -1087,6 +1140,7 @@ namespace Plank
 			});
 			var reset = new Gtk.Button.from_icon_name ("view-refresh-symbolic", Gtk.IconSize.MENU);
 			reset.tooltip_text = _("Reset Pomodoro");
+			Accessibility.describe (reset, _("Reset Pomodoro"));
 			reset.get_style_context ().add_class ("clock-tool-button");
 			reset.clicked.connect (() => {
 				stop_countdown ();
@@ -1120,6 +1174,16 @@ namespace Plank
 			pomodoro_box.pack_end (pomodoro_actions, false, false, 0);
 			pomodoro_page.pack_start (pomodoro_box, true, true, 0);
 			stack.add_titled (pomodoro_page, "pomodoro", _("Pomodoro"));
+		}
+
+		void sync_calendar_today (Gtk.Calendar calendar)
+		{
+			var today = new DateTime.now_local ();
+			if (calendar.year == today.get_year ()
+				&& calendar.month == today.get_month () - 1)
+				calendar.select_day ((uint) today.get_day_of_month ());
+			else
+				calendar.select_day (0);
 		}
 
 		void start_clock_display ()
@@ -1234,6 +1298,7 @@ namespace Plank
 			row.get_style_context ().add_class ("status-row");
 			row.pack_start (new Gtk.Label (label) { xalign = 0.0f }, true, true, 0);
 			var toggle = new Gtk.Switch () { active = state, valign = Gtk.Align.CENTER };
+			Accessibility.describe (toggle, label);
 			toggle.sensitive = sensitive;
 			toggle.notify["active"].connect (() => changed (toggle.active));
 			row.pack_end (toggle, false, false, 0);
@@ -1256,18 +1321,13 @@ namespace Plank
 			if (current_item == null)
 				return;
 			var item = controller.position_manager.get_screen_region_for_item (current_item);
-			var bar = controller.position_manager.get_screen_background_region ();
 			var workarea = active_workarea ();
 			int actual_width, actual_height;
 			get_size (out actual_width, out actual_height);
-			var desired_x = item.x + item.width / 2 - actual_width / 2;
-			var min_x = workarea.x + 8;
-			var max_x = workarea.x + workarea.width - actual_width - 8;
-			var desired_y = bar.y - actual_height - PANEL_GAP;
-			var min_y = workarea.y + 8;
-			var max_y = workarea.y + workarea.height - actual_height - 8;
-			move (int.max (min_x, int.min (max_x, desired_x)),
-				int.max (min_y, int.min (max_y, desired_y)));
+			int x, y;
+			controller.position_manager.get_popup_position (item, actual_width, actual_height,
+				PANEL_GAP, workarea, out x, out y);
+			move (x, y);
 		}
 
 		Gdk.Rectangle active_workarea ()
@@ -1290,6 +1350,7 @@ namespace Plank
 			css += ".plank-status-panel .status-notice { color: white; background-color: rgba(224,70,70,0.20); border: 1px solid rgba(255,120,120,0.30); border-radius: 8px; padding: 6px 7px; margin: 2px 1px 5px 1px; }";
 			css += ".plank-status-panel .status-notice-dismiss { color: white; background: transparent; background-image: none; border: none; box-shadow: none; padding: 2px; }";
 			css += ".plank-status-panel .status-notice-dismiss:hover { background-color: rgba(255,255,255,0.12); border-radius: 5px; }";
+			css += ".plank-status-panel.keyboard-navigation button:focus, .plank-status-panel.keyboard-navigation switch:focus, .plank-status-panel.keyboard-navigation scale:focus, .plank-status-panel.keyboard-navigation combobox:focus { box-shadow: 0 0 0 2px rgba(115,210,22,0.85); }";
 			css += ".plank-status-panel .status-section-label { color: rgba(255,255,255,0.58); font-size: 10px; font-weight: bold; margin: 4px 6px 0 6px; }";
 			css += ".plank-status-panel .status-action-button { color: white; background-color: rgba(255,255,255,0.08); background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 5px; margin-top: 4px; }";
 			css += ".plank-status-panel .bluetooth-device-row { color: white; padding: 7px 6px; border-radius: 9px; background-color: rgba(255,255,255,0.05); margin: 2px 3px; }";
@@ -1317,7 +1378,13 @@ namespace Plank
 			css += ".plank-status-panel .clock-page { color: white; padding: 5px 8px; }";
 			css += ".plank-status-panel .clock-time { color: white; font-size: 31px; font-weight: bold; }";
 			css += ".plank-status-panel .clock-date { color: rgba(255,255,255,0.86); font-weight: bold; }";
-			css += ".plank-status-panel .clock-calendar { color: white; padding: 2px; }";
+			css += ".plank-status-panel .clock-calendar { color: rgba(255,255,255,0.90); background: transparent; border: none; border-radius: 12px; padding: 10px 8px 6px 8px; }";
+			css += ".plank-status-panel .clock-calendar.header { color: white; background: transparent; border: none; font-size: 15px; font-weight: bold; padding-bottom: 10px; }";
+			css += ".plank-status-panel .clock-calendar.button, .plank-status-panel .clock-calendar.button:focus { color: rgba(255,255,255,0.58); background: transparent; background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 5px; }";
+			css += ".plank-status-panel .clock-calendar.button:hover, .plank-status-panel .clock-calendar.button:focus:hover { color: white; background-color: rgba(255,255,255,0.09); }";
+			css += ".plank-status-panel .clock-calendar.highlight { color: rgba(255,255,255,0.52); background: transparent; font-size: 10px; font-weight: bold; padding: 8px 0 5px 0; }";
+			css += ".plank-status-panel .clock-calendar:selected { color: rgb(20,32,12); background-color: rgb(115,210,22); border: none; border-radius: 7px; box-shadow: none; font-weight: bold; }";
+			css += ".plank-status-panel .clock-calendar:indeterminate { color: rgba(255,255,255,0.27); }";
 			css += ".plank-status-panel .clock-tools { color: white; margin: 3px 5px; }";
 			css += ".plank-status-panel .clock-tools spinbutton { color: white; background-color: rgba(255,255,255,0.07); border: none; border-radius: 7px; }";
 			css += ".plank-status-panel .clock-tool-button { color: white; background-color: rgba(255,255,255,0.09); background-image: none; border: none; border-radius: 7px; box-shadow: none; padding: 5px 7px; }";

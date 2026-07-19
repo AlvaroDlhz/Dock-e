@@ -33,6 +33,7 @@ namespace Plank
 			{ "verbose", 'v', 0, OptionArg.NONE, null, "Enable verbose logging", null },
 			{ "name", 'n', 0, OptionArg.STRING, null, "The name of this dock. Defaults to \"dock1\".", null },
 			{ "preferences", 0, 0, OptionArg.NONE, null, "Show preferences dialog of the just started or already running instance", null },
+			{ "toggle-launcher", 0, 0, OptionArg.NONE, null, "Show or hide the application launcher", null },
 			{ "version", 'V', 0, OptionArg.NONE, null, "Show the application's version", null },
 			{ null }
 		};
@@ -202,6 +203,8 @@ namespace Plank
 			
 			if (options.contains ("preferences"))
 				activate_action ("preferences", null);
+			if (options.contains ("toggle-launcher"))
+				activate_action ("toggle-launcher", null);
 			
 			return 0;
 		}
@@ -358,6 +361,13 @@ namespace Plank
 			action = new SimpleAction ("preferences", null);
 			action.activate.connect (() => {
 				show_preferences (primary_dock);
+			});
+			add_action (action);
+
+			action = new SimpleAction ("toggle-launcher", null);
+			action.activate.connect (() => {
+				if (primary_dock != null)
+					primary_dock.launcher.toggle_global ();
 			});
 			add_action (action);
 			

@@ -51,7 +51,7 @@ namespace Plank
 		[Description(nick = "dock-items", blurb = "Array of the dockitem-files on this dock. DO NOT MODIFY")]
 		public string[] DockItems { get; set; }
 		
-		[Description(nick = "position", blurb = "The position for the dock on the monitor.  If 0, left.  If 1, right.  If 2, top.  If 3, bottom.")]
+		[Description(nick = "position", blurb = "The dock is always positioned at the bottom of the monitor.")]
 		public Gtk.PositionType Position { get; set; }
 		
 		[Description(nick = "offset", blurb = "The dock's position offset from center (in percent).")]
@@ -59,6 +59,15 @@ namespace Plank
 		
 		[Description(nick = "theme", blurb = "The name of the dock's theme to use.")]
 		public string Theme { get; set; }
+
+		[Description(nick = "custom-background-enabled", blurb = "Whether to use a custom color for the dock background.")]
+		public bool CustomBackgroundEnabled { get; set; }
+
+		[Description(nick = "background-color", blurb = "The custom color used for the dock background.")]
+		public string BackgroundColor { get; set; }
+
+		[Description(nick = "background-opacity", blurb = "The opacity of the dock background, from 0 to 1.")]
+		public double BackgroundOpacity { get; set; }
 		
 		[Description(nick = "alignment", blurb = "The alignment for the dock on the monitor's edge.  If 0, panel-mode.  If 1, left-aligned.  If 2, right-aligned.  If 3, centered.")]
 		public Gtk.Align Alignment { get; set; }
@@ -89,6 +98,12 @@ namespace Plank
 		
 		[Description(nick = "tooltips-enabled", blurb = "Whether to show tooltips when items are hovered.")]
 		public bool TooltipsEnabled { get; set; }
+
+		[Description(nick = "window-previews-enabled", blurb = "Whether to show previews of open windows when application items are hovered.")]
+		public bool WindowPreviewsEnabled { get; set; }
+
+		[Description(nick = "show-side-sections", blurb = "Whether to show the control and status sections at the sides of the dock.")]
+		public bool ShowSideSections { get; set; }
 		
 		/**
 		 * {@inheritDoc}
@@ -96,6 +111,8 @@ namespace Plank
 		public DockPreferences (string name)
 		{
 			Object (settings: create_settings ("net.launchpad.plank.dock.settings", "/net/launchpad/plank/docks/%s/".printf (name)));
+			if (Position != Gtk.PositionType.BOTTOM)
+				Position = Gtk.PositionType.BOTTOM;
 		}
 		
 		~DockPreferences ()
@@ -127,7 +144,7 @@ namespace Plank
 		 */
 		public bool is_horizontal_dock ()
 		{
-			return (Position == Gtk.PositionType.TOP || Position == Gtk.PositionType.BOTTOM);
+			return true;
 		}
 		
 		/**
@@ -136,6 +153,11 @@ namespace Plank
 		protected override void verify (string prop)
 		{
 			switch (prop) {
+			case "Position":
+				if (Position != Gtk.PositionType.BOTTOM)
+					Position = Gtk.PositionType.BOTTOM;
+				break;
+
 			case "IconSize":
 				if (IconSize < MIN_ICON_SIZE)
 					IconSize = MIN_ICON_SIZE;
@@ -150,6 +172,16 @@ namespace Plank
 					Theme = Plank.Theme.DEFAULT_NAME;
 				else if (Theme.contains ("/"))
 					Theme = Theme.replace ("/", "");
+				break;
+
+			case "BackgroundColor":
+				Gdk.RGBA color = {};
+				if (!color.parse (BackgroundColor))
+					BackgroundColor = "#292929";
+				break;
+
+			case "BackgroundOpacity":
+				BackgroundOpacity = BackgroundOpacity.clamp (0.0, 1.0);
 				break;
 			}
 		}

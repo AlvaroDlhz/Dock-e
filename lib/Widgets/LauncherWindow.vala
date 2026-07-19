@@ -48,6 +48,7 @@ namespace Plank
 			uninstall_service = new ApplicationUninstallService ();
 			notice_model = new StatusNoticeModel ();
 			notice_changed_id = notice_model.changed.connect (sync_notice);
+			Accessibility.describe (this, _("Application launcher"));
 
 			decorated = false;
 			resizable = false;
@@ -76,8 +77,19 @@ namespace Plank
 
 			var navbar = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
 			navbar.get_style_context ().add_class ("launcher-navbar");
+			var user_name = Environment.get_user_name ();
+			var user_identity = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 8);
+			user_identity.get_style_context ().add_class ("launcher-user-identity");
+			Accessibility.describe (user_identity, _("Current user: %s").printf (user_name));
+			user_identity.pack_start (create_user_avatar (), false, false, 0);
+			var user_label = new Gtk.Label (user_name) { xalign = 0.0f };
+			user_label.get_style_context ().add_class ("launcher-user-name");
+			user_identity.pack_start (user_label, false, false, 0);
+			navbar.pack_start (user_identity, false, false, 0);
 			var power_button = new Gtk.Button ();
 			power_button.tooltip_text = _("Session and power options");
+			Accessibility.describe (power_button, _("Session and power options"),
+				_("Opens lock, suspend, log out, restart, and power off actions"));
 			power_button.get_style_context ().add_class ("launcher-power-button");
 			power_button.add (new Gtk.Image.from_icon_name ("system-shutdown-symbolic", Gtk.IconSize.BUTTON));
 			power_menu = create_power_menu ();
@@ -100,6 +112,7 @@ namespace Plank
 			notice_revealer.transition_type = Gtk.RevealerTransitionType.NONE;
 			var notice = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 7);
 			notice.get_style_context ().add_class ("launcher-notice");
+			Accessibility.set_role (notice, Atk.Role.ALERT);
 			notice.pack_start (new Gtk.Image.from_icon_name ("dialog-warning-symbolic",
 				Gtk.IconSize.MENU), false, false, 0);
 			notice_label = new Gtk.Label ("") { xalign = 0.0f, wrap = true, max_width_chars = 44 };
@@ -107,6 +120,7 @@ namespace Plank
 			var dismiss_notice = new Gtk.Button.from_icon_name ("window-close-symbolic",
 				Gtk.IconSize.MENU);
 			dismiss_notice.tooltip_text = _("Dismiss");
+			Accessibility.describe (dismiss_notice, _("Dismiss error"));
 			dismiss_notice.get_style_context ().add_class ("launcher-notice-dismiss");
 			dismiss_notice.clicked.connect (() => notice_model.dismiss ());
 			notice.pack_end (dismiss_notice, false, false, 0);
@@ -117,6 +131,8 @@ namespace Plank
 			tabs.get_style_context ().add_class ("launcher-tabs");
 			frequent_tab = new Gtk.ToggleButton.with_label (_("Frequently used"));
 			all_tab = new Gtk.ToggleButton.with_label (_("All"));
+			Accessibility.describe (frequent_tab, _("Frequently used applications"));
+			Accessibility.describe (all_tab, _("All applications"));
 			frequent_tab.active = true;
 			frequent_tab.clicked.connect (() => select_tab (false));
 			all_tab.clicked.connect (() => select_tab (true));
@@ -125,10 +141,12 @@ namespace Plank
 			panel.pack_start (tabs, false, false, 0);
 
 			result_list = new Gtk.ListBox ();
+			Accessibility.describe (result_list, _("Application results"));
 			result_list.selection_mode = Gtk.SelectionMode.SINGLE;
 			result_list.activate_on_single_click = true;
 			result_list.row_activated.connect ((row) => activate_row (row));
 			result_list.button_press_event.connect ((event) => {
+				Accessibility.set_keyboard_navigation (this, false);
 				if (event.button != 3U)
 					return false;
 				var row = result_list.get_row_at_y ((int) event.y);
@@ -151,6 +169,8 @@ namespace Plank
 			search_box.get_style_context ().add_class ("launcher-search");
 			search_entry = new Gtk.Entry ();
 			search_entry.placeholder_text = _("Search applications…");
+			Accessibility.describe (search_entry, _("Search applications"),
+				_("Type to filter the application list"));
 			search_entry.has_frame = false;
 			search_entry.changed.connect (refresh_results);
 			search_entry.focus_in_event.connect (() => {
@@ -165,6 +185,10 @@ namespace Plank
 			panel.pack_end (search_box, false, false, 0);
 
 			key_press_event.connect (handle_key_press);
+			button_press_event.connect (() => {
+				Accessibility.set_keyboard_navigation (this, false);
+				return false;
+			});
 			focus_out_event.connect (() => {
 				if (!power_menu.visible && !context_menu_open)
 					hide_animated ();
@@ -189,6 +213,56 @@ namespace Plank
 			Matcher.get_default ().active_application_changed.disconnect (track_active_application);
 		}
 
+		Gtk.Widget create_user_avatar ()
+		{
+			const int avatar_size = 28;
+			var fallback = new Gtk.Image.from_icon_name ("avatar-default-symbolic", Gtk.IconSize.BUTTON);
+			fallback.pixel_size = 22;
+			fallback.get_style_context ().add_class ("launcher-user-avatar-fallback");
+
+			var home = Environment.get_home_dir ();
+			var user_name = Environment.get_user_name ();
+			string[] candidates = {
+				Path.build_filename (home, ".face"),
+				Path.build_filename (home, ".face.icon"),
+				Path.build_filename ("/var/lib/AccountsService/icons", user_name)
+			};
+			foreach (unowned string path in candidates) {
+				if (!FileUtils.test (path, FileTest.IS_REGULAR))
+					continue;
+				try {
+					var source = new Gdk.Pixbuf.from_file (path);
+					var side = int.min (source.width, source.height);
+					var square = new Gdk.Pixbuf.subpixbuf (source,
+						(source.width - side) / 2, (source.height - side) / 2, side, side);
+					var scaled = square.scale_simple (avatar_size, avatar_size,
+						Gdk.InterpType.BILINEAR);
+					if (scaled == null)
+						continue;
+					var surface = new Cairo.ImageSurface (Cairo.Format.ARGB32,
+						avatar_size, avatar_size);
+					var cr = new Cairo.Context (surface);
+					cr.set_operator (Cairo.Operator.SOURCE);
+					cr.set_source_rgba (0.0, 0.0, 0.0, 0.0);
+					cr.paint ();
+					cr.set_operator (Cairo.Operator.OVER);
+					cr.arc (avatar_size / 2.0, avatar_size / 2.0,
+						avatar_size / 2.0, 0.0, 2.0 * Math.PI);
+					cr.clip ();
+					Gdk.cairo_set_source_pixbuf (cr, scaled, 0.0, 0.0);
+					cr.paint ();
+					var avatar = new Gtk.Image.from_pixbuf (Gdk.pixbuf_get_from_surface (
+						surface, 0, 0, avatar_size, avatar_size));
+					avatar.get_style_context ().add_class ("launcher-user-avatar");
+					return avatar;
+				} catch (Error e) {
+					warning ("Unable to load user avatar '%s': %s", path, e.message);
+				}
+			}
+
+			return fallback;
+		}
+
 		void select_tab (bool all)
 		{
 			if (changing_tab)
@@ -199,6 +273,8 @@ namespace Plank
 			all_tab.active = all;
 			changing_tab = false;
 			refresh_results ();
+			search_entry.grab_focus ();
+			search_entry.set_position (-1);
 		}
 
 		Gtk.Menu create_power_menu ()
@@ -302,10 +378,40 @@ namespace Plank
 			show_for_item (item);
 		}
 
+		public void toggle_global ()
+		{
+			if (visible) {
+				hide_animated ();
+				return;
+			}
+
+			foreach (unowned DockItem item in controller.VisibleItems) {
+				var launcher_item = item as LauncherItem;
+				if (launcher_item != null) {
+					show_for_item (launcher_item);
+					return;
+				}
+			}
+			warning ("Unable to open the launcher: its dock item is not available");
+		}
+
 		public void dismiss ()
 		{
 			dismiss_application_context ();
 			hide_animated ();
+		}
+
+		public void dismiss_immediately ()
+		{
+			dismiss_application_context ();
+			if (animation_timer_id > 0U) {
+				Source.remove (animation_timer_id);
+				animation_timer_id = 0U;
+			}
+			opacity = 0.0;
+			if (visible)
+				hide ();
+			controller.renderer.animated_draw ();
 		}
 
 		public void dismiss_application_context ()
@@ -316,6 +422,8 @@ namespace Plank
 
 		public void show_for_item (LauncherItem item)
 		{
+			controller.workspace_previews.dismiss ();
+			Accessibility.set_keyboard_navigation (this, false);
 			anchor_item = item;
 			index_applications ();
 			search_entry.text = "";
@@ -328,7 +436,9 @@ namespace Plank
 			search_entry.grab_focus ();
 			Idle.add (() => {
 				position_over_anchor ();
-				move (panel_x, panel_y + 8);
+				int slide_x, slide_y;
+				controller.position_manager.get_popup_slide_offset (8, out slide_x, out slide_y);
+				move (panel_x + slide_x, panel_y + slide_y);
 				animate_to (1.0, false);
 				return false;
 			});
@@ -730,6 +840,7 @@ namespace Plank
 
 		bool handle_key_press (Gdk.EventKey event)
 		{
+			Accessibility.set_keyboard_navigation (this, true);
 			switch (event.keyval) {
 			case Gdk.Key.Escape:
 				if (search_entry.text != "")
@@ -790,8 +901,12 @@ namespace Plank
 			int width, height;
 			get_size (out width, out height);
 			var bar_rect = controller.position_manager.get_screen_background_region ();
-			panel_x = bar_rect.x + (bar_rect.width - width) / 2;
-			panel_y = bar_rect.y - height - PANEL_GAP;
+			var screen = get_screen ();
+			var monitor = screen.get_monitor_at_point (
+				bar_rect.x + bar_rect.width / 2, bar_rect.y + bar_rect.height / 2);
+			var workarea = screen.get_monitor_workarea (monitor);
+			controller.position_manager.get_popup_position (bar_rect, width, height,
+				PANEL_GAP, workarea, out panel_x, out panel_y);
 			move (panel_x, panel_y);
 		}
 
@@ -806,11 +921,17 @@ namespace Plank
 				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255));
 			css += ".plank-native-launcher .launcher-tabs { margin: 7px 7px 5px 7px; }";
 			css += ".plank-native-launcher .launcher-navbar { min-height: 34px; margin: 6px 7px 0 7px; }";
+			css += ".plank-native-launcher .launcher-user-identity { color: white; }";
+			css += ".plank-native-launcher .launcher-user-name { color: rgba(255,255,255,0.88); font-size: 13px; font-weight: bold; }";
+			css += ".plank-native-launcher .launcher-user-avatar { margin: 1px 0; }";
+			css += ".plank-native-launcher .launcher-user-avatar-fallback { color: rgba(255,255,255,0.78); background-color: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 3px; }";
 			css += ".plank-native-launcher .launcher-power-button { color: rgba(255,255,255,0.68); background: transparent; background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 7px; }";
 			css += ".plank-native-launcher .launcher-power-button:hover { color: white; background-color: rgba(255,255,255,0.09); }";
 			css += ".plank-native-launcher .launcher-notice { color: white; background-color: rgba(224,70,70,0.20); border: 1px solid rgba(255,120,120,0.30); border-radius: 8px; padding: 7px 9px; margin: 2px 7px 5px 7px; }";
 			css += ".plank-native-launcher .launcher-notice-dismiss { color: white; background: transparent; background-image: none; border: none; box-shadow: none; padding: 2px; }";
 			css += ".plank-native-launcher .launcher-notice-dismiss:hover { background-color: rgba(255,255,255,0.12); border-radius: 5px; }";
+			css += ".plank-native-launcher.keyboard-navigation button:focus { color: white; box-shadow: 0 0 0 2px rgba(115,210,22,0.85); }";
+			css += ".plank-native-launcher.keyboard-navigation row:focus { box-shadow: inset 0 0 0 2px rgba(115,210,22,0.85); }";
 			css += ".plank-native-launcher .launcher-tabs button { color: rgba(255,255,255,0.58); background: transparent; background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 6px; }";
 			css += ".plank-native-launcher .launcher-tabs button:hover { color: rgba(255,255,255,0.82); background-color: rgba(255,255,255,0.06); }";
 			css += ".plank-native-launcher .launcher-tabs button:checked { color: white; background-color: rgba(255,255,255,0.13); }";
@@ -863,15 +984,20 @@ namespace Plank
 			if (animation_timer_id > 0U)
 				Source.remove (animation_timer_id);
 			var start = opacity;
-			int current_x, start_y;
-			get_position (out current_x, out start_y);
-			var end_y = hide_when_done ? panel_y + 7 : panel_y;
+			int start_x, start_y;
+			get_position (out start_x, out start_y);
+			int slide_x, slide_y;
+			controller.position_manager.get_popup_slide_offset (
+				hide_when_done ? 7 : 0, out slide_x, out slide_y);
+			var end_x = panel_x + slide_x;
+			var end_y = panel_y + slide_y;
 			var started = GLib.get_monotonic_time ();
 			animation_timer_id = Timeout.add (16, () => {
 				var progress = double.min (1.0, (GLib.get_monotonic_time () - started) / (ANIMATION_TIME * 1000.0));
 				var eased = 1.0 - Math.pow (1.0 - progress, 3.0);
 				opacity = start + (target - start) * eased;
-				move (panel_x, (int) Math.round (start_y + (end_y - start_y) * eased));
+				move ((int) Math.round (start_x + (end_x - start_x) * eased),
+					(int) Math.round (start_y + (end_y - start_y) * eased));
 				if (progress < 1.0)
 					return true;
 				animation_timer_id = 0U;

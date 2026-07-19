@@ -30,13 +30,9 @@ namespace Plank
 		DockPreferences prefs;
 		
 		[GtkChild]
-		Gtk.ComboBoxText cb_theme;
-		[GtkChild]
 		Gtk.ComboBoxText cb_hidemode;
 		[GtkChild]
 		Gtk.ComboBoxText cb_display_plug;
-		[GtkChild]
-		Gtk.ComboBoxText cb_position;
 		[GtkChild]
 		Gtk.ComboBoxText cb_alignment;
 		[GtkChild]
@@ -49,7 +45,9 @@ namespace Plank
 		[GtkChild]
 		Gtk.Scale s_offset;
 		[GtkChild]
-		Gtk.Scale s_zoom_percent;
+		Gtk.Scale s_background_opacity;
+		[GtkChild]
+		Gtk.ColorButton btn_background_color;
 		
 		[GtkChild]
 		Gtk.Adjustment adj_hide_delay;
@@ -60,7 +58,7 @@ namespace Plank
 		[GtkChild]
 		Gtk.Adjustment adj_offset;
 		[GtkChild]
-		Gtk.Adjustment adj_zoom_percent;
+		Gtk.Adjustment adj_background_opacity;
 		
 		[GtkChild]
 		Gtk.Switch sw_hide;
@@ -75,7 +73,11 @@ namespace Plank
 		[GtkChild]
 		Gtk.Switch sw_pressure_reveal;
 		[GtkChild]
-		Gtk.Switch sw_zoom_enabled;
+		Gtk.Switch sw_window_previews;
+		[GtkChild]
+		Gtk.Switch sw_custom_background;
+		[GtkChild]
+		Gtk.Switch sw_show_side_sections;
 		
 		[GtkChild]
 		Gtk.IconView view_docklets;
@@ -125,6 +127,17 @@ namespace Plank
 			case "CurrentWorkspaceOnly":
 				sw_workspace_only.set_active (prefs.CurrentWorkspaceOnly);
 				break;
+			case "CustomBackgroundEnabled":
+				sw_custom_background.set_active (prefs.CustomBackgroundEnabled);
+				btn_background_color.sensitive = prefs.CustomBackgroundEnabled;
+				s_background_opacity.sensitive = prefs.CustomBackgroundEnabled;
+				break;
+			case "BackgroundColor":
+				set_background_color_button ();
+				break;
+			case "BackgroundOpacity":
+				adj_background_opacity.value = prefs.BackgroundOpacity * 100.0;
+				break;
 			case "IconSize":
 				adj_iconsize.value = prefs.IconSize;
 				break;
@@ -155,18 +168,17 @@ namespace Plank
 				sw_show_unpinned.set_active (!prefs.PinnedOnly);
 				break;
 			case "Position":
-				cb_position.active_id = ((int) prefs.Position).to_string ();
 				break;
 			case "PressureReveal":
 				sw_pressure_reveal.set_active (prefs.PressureReveal);
 				break;
+			case "ShowSideSections":
+				sw_show_side_sections.set_active (prefs.ShowSideSections);
+				break;
+			case "WindowPreviewsEnabled":
+				sw_window_previews.set_active (prefs.WindowPreviewsEnabled);
+				break;
 			case "Theme":
-				var pos = 0;
-				foreach (unowned string theme in Plank.Theme.get_theme_list ()) {
-					if (theme == prefs.Theme)
-						cb_theme.set_active (pos);
-					pos++;
-				}
 				break;
 			case "HideDelay":
 				adj_hide_delay.value = prefs.HideDelay;
@@ -174,14 +186,10 @@ namespace Plank
 			case "UnhideDelay":
 				adj_unhide_delay.value = prefs.UnhideDelay;
 				break;
-			case "ZoomEnabled":
-				sw_zoom_enabled.set_active (prefs.ZoomEnabled);
-				break;
-			case "ZoomPercent":
-				adj_zoom_percent.value = prefs.ZoomPercent;
-				break;
 			// Ignored settings
 			case "DockItems":
+			case "ZoomEnabled":
+			case "ZoomPercent":
 				break;
 			default:
 				warning ("%s not supported", prop.name);
@@ -190,19 +198,33 @@ namespace Plank
 			
 		}
 		
-		void theme_changed (Gtk.ComboBox widget)
+		void custom_background_toggled (GLib.Object widget, ParamSpec param)
 		{
-			prefs.Theme = ((Gtk.ComboBoxText) widget).get_active_text ();
+			prefs.CustomBackgroundEnabled = ((Gtk.Switch) widget).get_active ();
+			btn_background_color.sensitive = prefs.CustomBackgroundEnabled;
+			s_background_opacity.sensitive = prefs.CustomBackgroundEnabled;
+		}
+
+		void background_color_changed (Gtk.ColorButton button)
+		{
+			prefs.BackgroundColor = button.rgba.to_string ();
+		}
+
+		void background_opacity_changed (Gtk.Adjustment adj)
+		{
+			prefs.BackgroundOpacity = adj.value / 100.0;
+		}
+
+		void set_background_color_button ()
+		{
+			Gdk.RGBA color = {};
+			if (color.parse (prefs.BackgroundColor))
+				btn_background_color.rgba = color;
 		}
 		
 		void hidemode_changed (Gtk.ComboBox widget)
 		{
 			prefs.HideMode = (HideType) int.parse (widget.get_active_id ());
-		}
-		
-		void position_changed (Gtk.ComboBox widget)
-		{
-			prefs.Position = (Gtk.PositionType) int.parse (widget.get_active_id ());
 		}
 		
 		void alignment_changed (Gtk.ComboBox widget)
@@ -264,16 +286,15 @@ namespace Plank
 		{
 			prefs.PressureReveal = ((Gtk.Switch) widget).get_active ();
 		}
-		
-		void zoom_enabled_toggled (GLib.Object widget, ParamSpec param)
+
+		void window_previews_toggled (GLib.Object widget, ParamSpec param)
 		{
-			if (((Gtk.Switch) widget).get_active ()) {
-				prefs.ZoomEnabled = true;
-				s_zoom_percent.sensitive = true;
-			} else {
-				prefs.ZoomEnabled = false;
-				s_zoom_percent.sensitive = false;
-			}
+			prefs.WindowPreviewsEnabled = ((Gtk.Switch) widget).get_active ();
+		}
+
+		void show_side_sections_toggled (GLib.Object widget, ParamSpec param)
+		{
+			prefs.ShowSideSections = ((Gtk.Switch) widget).get_active ();
 		}
 		
 		void iconsize_changed (Gtk.Adjustment adj)
@@ -296,11 +317,6 @@ namespace Plank
 			prefs.UnhideDelay = (int) adj.value;
 		}
 		
-		void zoom_percent_changed (Gtk.Adjustment adj)
-		{
-			prefs.ZoomPercent = (int) adj.value;
-		}
-		
 		void monitor_changed (Gtk.ComboBox widget)
 		{
 			prefs.Monitor = ((Gtk.ComboBoxText) widget).get_active_text ();
@@ -310,22 +326,23 @@ namespace Plank
 		{
 			prefs.notify.connect (prefs_changed);
 			
-			cb_theme.changed.connect (theme_changed);
 			cb_hidemode.changed.connect (hidemode_changed);
-			cb_position.changed.connect (position_changed);
 			adj_hide_delay.value_changed.connect (hide_delay_changed);
 			adj_unhide_delay.value_changed.connect (unhide_delay_changed);
 			cb_display_plug.changed.connect (monitor_changed);
 			adj_iconsize.value_changed.connect (iconsize_changed);
 			adj_offset.value_changed.connect (offset_changed);
-			adj_zoom_percent.value_changed.connect (zoom_percent_changed);
+			adj_background_opacity.value_changed.connect (background_opacity_changed);
+			btn_background_color.color_set.connect (background_color_changed);
 			sw_hide.notify["active"].connect (hide_toggled);
 			sw_primary_display.notify["active"].connect (primary_display_toggled);
 			sw_workspace_only.notify["active"].connect (workspace_only_toggled);
 			sw_show_unpinned.notify["active"].connect (show_unpinned_toggled);
 			sw_lock_items.notify["active"].connect (lock_items_toggled);
 			sw_pressure_reveal.notify["active"].connect (pressure_reveal_toggled);
-			sw_zoom_enabled.notify["active"].connect (zoom_enabled_toggled);
+			sw_window_previews.notify["active"].connect (window_previews_toggled);
+			sw_custom_background.notify["active"].connect (custom_background_toggled);
+			sw_show_side_sections.notify["active"].connect (show_side_sections_toggled);
 			cb_alignment.changed.connect (alignment_changed);
 			cb_items_alignment.changed.connect (items_alignment_changed);
 		}
@@ -334,44 +351,35 @@ namespace Plank
 		{
 			prefs.notify.disconnect (prefs_changed);
 			
-			cb_theme.changed.disconnect (theme_changed);
 			cb_hidemode.changed.disconnect (hidemode_changed);
-			cb_position.changed.disconnect (position_changed);
 			adj_hide_delay.value_changed.disconnect (hide_delay_changed);
 			adj_unhide_delay.value_changed.disconnect (unhide_delay_changed);
 			cb_display_plug.changed.disconnect (monitor_changed);
 			adj_iconsize.value_changed.disconnect (iconsize_changed);
 			adj_offset.value_changed.disconnect (offset_changed);
-			adj_zoom_percent.value_changed.disconnect (zoom_percent_changed);
+			adj_background_opacity.value_changed.disconnect (background_opacity_changed);
+			btn_background_color.color_set.disconnect (background_color_changed);
 			sw_hide.notify["active"].disconnect (hide_toggled);
 			sw_primary_display.notify["active"].disconnect (primary_display_toggled);
 			sw_workspace_only.notify["active"].disconnect (workspace_only_toggled);
 			sw_show_unpinned.notify["active"].disconnect (show_unpinned_toggled);
 			sw_lock_items.notify["active"].disconnect (lock_items_toggled);
 			sw_pressure_reveal.notify["active"].disconnect (pressure_reveal_toggled);
-			sw_zoom_enabled.notify["active"].disconnect (zoom_enabled_toggled);
+			sw_window_previews.notify["active"].disconnect (window_previews_toggled);
+			sw_custom_background.notify["active"].disconnect (custom_background_toggled);
+			sw_show_side_sections.notify["active"].disconnect (show_side_sections_toggled);
 			cb_alignment.changed.disconnect (alignment_changed);
 			cb_items_alignment.changed.disconnect (items_alignment_changed);
 		}
 		
 		void init_dock_tab ()
 		{
-			var pos = 0;
-			cb_theme.remove_all ();
-			foreach (unowned string theme in Plank.Theme.get_theme_list ()) {
-				cb_theme.append ("%i".printf (pos), theme);
-				if (theme == prefs.Theme)
-					cb_theme.set_active (pos);
-				pos++;
-			}
-
 			cb_hidemode.active_id = ((int) prefs.HideMode).to_string ();
 			cb_hidemode.sensitive = (prefs.HideMode != HideType.NONE);
-			cb_position.active_id = ((int) prefs.Position).to_string ();
 			adj_hide_delay.value = prefs.HideDelay;
 			adj_unhide_delay.value = prefs.UnhideDelay;
 
-			pos = 0;
+			var pos = 0;
 			cb_display_plug.remove_all ();
 			foreach (unowned string plug_name in Plank.PositionManager.get_monitor_plug_names (get_screen ())) {
 				cb_display_plug.append ("%i".printf (pos), plug_name);
@@ -388,16 +396,20 @@ namespace Plank
 			
 			adj_iconsize.value = prefs.IconSize;
 			adj_offset.value = prefs.Offset;
-			adj_zoom_percent.value = prefs.ZoomPercent;
+			adj_background_opacity.value = prefs.BackgroundOpacity * 100.0;
+			set_background_color_button ();
+			sw_custom_background.set_active (prefs.CustomBackgroundEnabled);
+			btn_background_color.sensitive = prefs.CustomBackgroundEnabled;
+			s_background_opacity.sensitive = prefs.CustomBackgroundEnabled;
 			s_offset.sensitive = (prefs.Alignment == Gtk.Align.CENTER);
-			s_zoom_percent.sensitive = prefs.ZoomEnabled;
 			sw_hide.set_active (prefs.HideMode != HideType.NONE);
 			sw_primary_display.set_active (prefs.Monitor == "");
 			sw_workspace_only.set_active (prefs.CurrentWorkspaceOnly);
 			sw_show_unpinned.set_active (!prefs.PinnedOnly);
 			sw_lock_items.set_active (prefs.LockItems);
 			sw_pressure_reveal.set_active (prefs.PressureReveal);
-			sw_zoom_enabled.set_active (prefs.ZoomEnabled);
+			sw_window_previews.set_active (prefs.WindowPreviewsEnabled);
+			sw_show_side_sections.set_active (prefs.ShowSideSections);
 			cb_alignment.active_id = ((int) prefs.Alignment).to_string ();
 			cb_items_alignment.active_id = ((int) prefs.ItemsAlignment).to_string ();
 			cb_items_alignment.sensitive = (prefs.Alignment == Gtk.Align.FILL);

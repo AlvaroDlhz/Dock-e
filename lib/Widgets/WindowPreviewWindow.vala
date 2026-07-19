@@ -18,6 +18,7 @@ namespace Plank
 		uint open_timer = 0U;
 		uint close_timer = 0U;
 		uint refresh_timer = 0U;
+		ulong previews_enabled_changed_id = 0UL;
 		bool pointer_inside = false;
 		Gtk.CssProvider css_provider;
 
@@ -37,11 +38,13 @@ namespace Plank
 			destroy_with_parent = true;
 			app_paintable = true;
 			get_style_context ().add_class ("plank-window-previews");
+			Accessibility.describe (this, _("Window previews"));
 			var visual = get_screen ().get_rgba_visual ();
 			if (visual != null)
 				set_visual (visual);
 
 			flow = new Gtk.FlowBox ();
+			Accessibility.describe (flow, _("Open windows"));
 			flow.selection_mode = Gtk.SelectionMode.NONE;
 			flow.row_spacing = 8;
 			flow.column_spacing = 8;
@@ -60,13 +63,27 @@ namespace Plank
 				int wx, wy, ww, wh;
 				get_position (out wx, out wy);
 				get_size (out ww, out wh);
-				// Lateral and upward exits are deliberate and close immediately.
-				// The bridge is only useful through the bottom edge, toward the dock.
-				if (event.x_root < wx || event.x_root >= wx + ww || event.y_root < wy)
-					dismiss ();
-				else
+				if (exit_is_toward_dock (event, wx, wy, ww, wh))
 					schedule_close ();
+				else
+					dismiss ();
 				return false;
+			});
+			key_press_event.connect ((event) => {
+				Accessibility.set_keyboard_navigation (this, true);
+				if (event.keyval == Gdk.Key.Escape) {
+					dismiss ();
+					return true;
+				}
+				return false;
+			});
+			button_press_event.connect (() => {
+				Accessibility.set_keyboard_navigation (this, false);
+				return false;
+			});
+			previews_enabled_changed_id = controller.prefs.notify["WindowPreviewsEnabled"].connect (() => {
+				if (!controller.prefs.WindowPreviewsEnabled)
+					dismiss ();
 			});
 			show.connect (() => {
 				controller.hide_manager.ExternalMenuVisible = true;
@@ -84,11 +101,17 @@ namespace Plank
 			cancel_open ();
 			cancel_close ();
 			stop_refresh ();
+			if (previews_enabled_changed_id > 0UL)
+				SignalHandler.disconnect (controller.prefs, previews_enabled_changed_id);
 			Gtk.StyleContext.remove_provider_for_screen (get_screen (), css_provider);
 		}
 
 		public void handle_dock_hover (DockItem? item)
 		{
+			if (!controller.prefs.WindowPreviewsEnabled) {
+				dismiss ();
+				return;
+			}
 			var app_item = item as ApplicationDockItem;
 			if (app_item != null && app_item.is_running () && app_item.App != null
 				&& app_item.App.get_windows ().length () > 0) {
@@ -105,7 +128,7 @@ namespace Plank
 			} else {
 				cancel_open ();
 				if (visible && item != null) {
-					// Another concrete item means horizontal movement along the dock.
+					// Another concrete item means movement along the dock's main axis.
 					dismiss ();
 				} else if (visible && !pointer_inside) {
 					// Null is the gap between the dock and the native preview window.
@@ -114,15 +137,37 @@ namespace Plank
 			}
 		}
 
-		public void handle_dock_motion (double root_x)
+		public void handle_dock_motion (double root_x, double root_y)
 		{
 			if (!visible || current_item == null || pointer_inside)
 				return;
 			// Item hit targets intentionally grow for easier acquisition. Preview
-			// ownership instead follows the real painted icon horizontally.
+			// ownership instead follows the real painted icon along the dock axis.
 			var anchor = controller.position_manager.get_screen_region_for_item (current_item);
-			if (root_x < anchor.x || root_x >= anchor.x + anchor.width)
+			var inside_anchor_axis = controller.position_manager.is_horizontal_dock ()
+				? root_x >= anchor.x && root_x < anchor.x + anchor.width
+				: root_y >= anchor.y && root_y < anchor.y + anchor.height;
+			if (!inside_anchor_axis)
 				dismiss ();
+		}
+
+		bool exit_is_toward_dock (Gdk.EventCrossing event, int x, int y, int width, int height)
+		{
+			switch (controller.position_manager.Position) {
+			default:
+			case Gtk.PositionType.BOTTOM:
+				return event.x_root >= x && event.x_root < x + width
+					&& event.y_root >= y + height;
+			case Gtk.PositionType.TOP:
+				return event.x_root >= x && event.x_root < x + width
+					&& event.y_root < y;
+			case Gtk.PositionType.LEFT:
+				return event.y_root >= y && event.y_root < y + height
+					&& event.x_root < x;
+			case Gtk.PositionType.RIGHT:
+				return event.y_root >= y && event.y_root < y + height
+					&& event.x_root >= x + width;
+			}
 		}
 
 		void schedule_open (ApplicationDockItem item)
@@ -139,6 +184,11 @@ namespace Plank
 
 		void show_for_item (ApplicationDockItem item)
 		{
+			if (!controller.prefs.WindowPreviewsEnabled) {
+				dismiss ();
+				return;
+			}
+			Accessibility.set_keyboard_navigation (this, false);
 			current_item = item;
 			rebuild ();
 			if (flow.get_children ().length () == 0) {
@@ -173,6 +223,10 @@ namespace Plank
 		Gtk.Widget create_card (Bamf.Window window)
 		{
 			var event_box = new Gtk.EventBox ();
+			event_box.can_focus = true;
+			Accessibility.describe (event_box, _("Activate %s").printf (window.get_name ()),
+				_("Window preview"));
+			Accessibility.set_role (event_box, Atk.Role.PUSH_BUTTON);
 			event_box.visible_window = true;
 			event_box.get_style_context ().add_class ("preview-card");
 			event_box.set_size_request (CARD_WIDTH, PREVIEW_HEIGHT + 38);
@@ -195,6 +249,7 @@ namespace Plank
 			var close = new Gtk.Button.from_icon_name ("window-close-symbolic", Gtk.IconSize.MENU);
 			close.relief = Gtk.ReliefStyle.NONE;
 			close.tooltip_text = _("Close window");
+			Accessibility.describe (close, _("Close %s").printf (window.get_name ()));
 			close.get_style_context ().add_class ("preview-close");
 			close.clicked.connect (() => {
 				unowned Wnck.Window? wnck = Wnck.Window.@get (window.get_xid ());
@@ -206,8 +261,7 @@ namespace Plank
 			event_box.add (box);
 			event_box.button_release_event.connect ((event) => {
 				if (event.button == 1U) {
-					WindowControl.focus_window (window, event.time);
-					dismiss ();
+					activate_preview (window, event.time);
 					return true;
 				}
 				if (event.button == 2U) {
@@ -218,7 +272,21 @@ namespace Plank
 				}
 				return false;
 			});
+			event_box.key_press_event.connect ((event) => {
+				if (event.keyval == Gdk.Key.Return || event.keyval == Gdk.Key.KP_Enter
+					|| event.keyval == Gdk.Key.space) {
+					activate_preview (window, event.time);
+					return true;
+				}
+				return false;
+			});
 			return event_box;
+		}
+
+		void activate_preview (Bamf.Window window, uint32 event_time)
+		{
+			WindowControl.focus_window (window, event_time);
+			dismiss ();
 		}
 
 		void update_image (Gtk.Image image, uint32 xid)
@@ -328,9 +396,10 @@ namespace Plank
 			var screen = get_screen ();
 			var monitor = screen.get_monitor_at_point (anchor.x, anchor.y);
 			var workarea = screen.get_monitor_workarea (monitor);
-			var x = anchor.x + anchor.width / 2 - width / 2;
-			x = int.max (workarea.x + GAP, int.min (x, workarea.x + workarea.width - width - GAP));
-			move (x, anchor.y - height - GAP);
+			int x, y;
+			controller.position_manager.get_popup_position (anchor, width, height,
+				GAP, workarea, out x, out y);
+			move (x, y);
 		}
 
 		void apply_theme ()
@@ -351,6 +420,7 @@ namespace Plank
 				.printf (card_red, card_green, card_blue);
 			css += ".plank-window-previews .preview-card:hover { background: rgb(%d,%d,%d); }"
 				.printf (hover_red, hover_green, hover_blue);
+			css += ".plank-window-previews.keyboard-navigation .preview-card:focus { box-shadow: inset 0 0 0 2px rgba(115,210,22,0.85); }";
 			css += ".plank-window-previews .preview-title { color: white; font-weight: 500; }";
 			css += ".plank-window-previews .preview-close { color: white; border-radius: 8px; padding: 3px; background: transparent; }";
 			css += ".plank-window-previews .preview-close:hover { background: rgb(210,65,65); }";

@@ -22,7 +22,6 @@ namespace Plank
 	// Collection of constansts which don't have an user-adjustable setting (yet)
 	
 	// Duration of animations (in ms)
-	public const uint DOCK_ZOOM_DURATION = 200;
 	public const uint ITEM_HOVER_DURATION = 150;
 	public const uint ITEM_INVALID_DURATION = 60000;
 	public const uint ITEM_SCROLL_DURATION = 300;

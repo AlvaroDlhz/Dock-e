@@ -29,6 +29,10 @@ namespace Plank
 		public DockController controller { private get; construct; }
 		
 		public DockTheme theme { get; private set; }
+		Color theme_fill_start;
+		Color theme_fill_end;
+		Color theme_outer_stroke;
+		Color theme_inner_stroke;
 		
 		/**
 		 * The current progress [0.0..1.0] of the hide-animation of the dock.
@@ -43,7 +47,7 @@ namespace Plank
 		double opacity { get; private set; }
 		
 		/**
-		 * The current progress [0.0..1.0] of the zoom-in-animation of the dock.
+		 * Legacy zoom progress. Icon magnification is disabled, so this remains 0.
 		 */
 		[CCode (notify = false)]
 		public double zoom_in_progress { get; private set; }
@@ -68,20 +72,16 @@ namespace Plank
 		Surface? urgent_glow_buffer = null;
 		
 		int64 last_hide = 0LL;
-		int64 last_hovered_changed = 0LL;
 		
 		bool screen_is_composited = false;
 		bool show_notifications = true;
 		uint reset_position_manager_timer_id = 0U;
 		int window_scale_factor = 1;
 		bool is_first_frame = true;
-		bool zoom_changed = false;
 		
 		ulong gtk_theme_name_changed_handler_id = 0UL;
 		
 		double dynamic_animation_offset = 0.0;
-		int64 last_zoom_frame = 0LL;
-		bool zoom_animation_active = false;
 		double primary_hide_progress = 1.0;
 		double status_hide_progress = 1.0;
 		int64 last_section_frame = 0LL;
@@ -152,6 +152,12 @@ namespace Plank
 			case "Theme":
 				load_theme ();
 				break;
+			case "CustomBackgroundEnabled":
+			case "BackgroundColor":
+			case "BackgroundOpacity":
+				apply_background_preferences ();
+				reset_buffers ();
+				break;
 			default:
 				// Nothing important for us changed
 				break;
@@ -200,10 +206,41 @@ namespace Plank
 			
 			theme = new DockTheme (name);
 			theme.load ("dock");
+			theme_fill_start = theme.FillStartColor;
+			theme_fill_end = theme.FillEndColor;
+			theme_outer_stroke = theme.OuterStrokeColor;
+			theme_inner_stroke = theme.InnerStrokeColor;
+			apply_background_preferences ();
 			theme.notify.connect (theme_changed);
 			
 			if (is_reload)
 				theme_changed ();
+		}
+
+		void apply_background_preferences ()
+		{
+			var fill_start = theme_fill_start;
+			var fill_end = theme_fill_end;
+			var outer_stroke = theme_outer_stroke;
+			var inner_stroke = theme_inner_stroke;
+
+			if (controller.prefs.CustomBackgroundEnabled) {
+				Gdk.RGBA selected = {};
+				if (selected.parse (controller.prefs.BackgroundColor)) {
+					fill_start.red = fill_end.red = selected.red;
+					fill_start.green = fill_end.green = selected.green;
+					fill_start.blue = fill_end.blue = selected.blue;
+					// The selected opacity is applied to the complete rendered
+					// background below.  Start from an opaque custom fill so 100%
+					// really is opaque, regardless of the theme's original alpha.
+					fill_start.alpha = fill_end.alpha = 1.0;
+				}
+			}
+
+			theme.FillStartColor = fill_start;
+			theme.FillEndColor = fill_end;
+			theme.OuterStrokeColor = outer_stroke;
+			theme.InnerStrokeColor = inner_stroke;
 		}
 		
 		/**
@@ -274,19 +311,7 @@ namespace Plank
 					hide_progress = (controller.hide_manager.Hidden ? 1.0 : 0.0);
 				}
 				
-				var zoom_duration = double.max (1.0, DOCK_ZOOM_DURATION * 1000.0);
-				var zoom_target = controller.hide_manager.Hovered
-					&& position_manager.pointer_is_over_primary_section (local_cursor.x) ? 1.0 : 0.0;
-				if (last_zoom_frame == 0LL) {
-					zoom_in_progress = zoom_target;
-				} else {
-					var frame_step = double.min (1.0, (frame_time - last_zoom_frame) / zoom_duration);
-					var eased_step = 1.0 - Math.pow (1.0 - frame_step, 3.0);
-					zoom_in_progress += (zoom_target - zoom_in_progress) * eased_step;
-				}
-				last_zoom_frame = frame_time;
-				zoom_in_progress *= 1.0 - hide_progress;
-				zoom_animation_active = Math.fabs (zoom_in_progress - zoom_target) > 0.002;
+				zoom_in_progress = 0.0;
 			} else {
 				hide_progress = 0.0;
 				zoom_in_progress = 0.0;
@@ -575,7 +600,10 @@ namespace Plank
 			}
 			
 			cr.set_source_surface (buffer.Internal, background_rect.x + x_offset, background_rect.y + y_offset);
-			cr.paint ();
+			if (controller.prefs.CustomBackgroundEnabled)
+				cr.paint_with_alpha (controller.prefs.BackgroundOpacity.clamp (0.0, 1.0));
+			else
+				cr.paint ();
 		}
 		
 		[CCode (instance_pos = -1)]
@@ -1128,16 +1156,6 @@ namespace Plank
 		
 		void hovered_changed ()
 		{
-			force_frame_time_update ();
-			var now = frame_time;
-			var diff = now - last_hovered_changed;
-			var time = DOCK_ZOOM_DURATION * 1000;
-			
-			if (diff < time)
-				last_hovered_changed = now + (diff - time);
-			else
-				last_hovered_changed = now;
-			
 			animated_draw ();
 		}
 		
@@ -1149,10 +1167,6 @@ namespace Plank
 			
 			local_cursor = new_cursor;
 			
-			if (screen_is_composited) {
-				zoom_changed = true;
-				animated_draw ();
-			}
 		}
 		
 		public void animate_items (Gee.List<DockElement> elements)
@@ -1175,19 +1189,7 @@ namespace Plank
 		 */
 		protected override bool animation_needed (int64 frame_time)
 		{
-			if (zoom_animation_active)
-				return true;
-
 			if (section_animation_active)
-				return true;
-
-			if (zoom_changed) {
-				//FIXME reset at a better place
-				zoom_changed = false;
-				return true;
-			}
-			
-			if (frame_time - last_hovered_changed <= DOCK_ZOOM_DURATION * 1000)
 				return true;
 			
 			if (theme.FadeOpacity == 1.0) {

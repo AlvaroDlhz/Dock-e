@@ -16,9 +16,6 @@
 	</enum>
 
 	<enum id="GtkPositionType">
-		<value nick="left" value="0"/>
-		<value nick="right" value="1"/>
-		<value nick="top" value="2"/>
 		<value nick="bottom" value="3"/>
 	</enum>
 
@@ -43,6 +40,22 @@
 			<default>true</default>
 			<summary>Automatically pin an application if it seems useful to do</summary>
 			<description>If true, automatically pin applications when it seems useful to do.</description>
+		</key>
+		<key name="background-color" type="s">
+			<default>'#292929'</default>
+			<summary>Custom dock background color</summary>
+			<description>The color used for the dock background when custom background color is enabled.</description>
+		</key>
+		<key name="background-opacity" type="d">
+			<range min="0.0" max="1.0"/>
+			<default>1.0</default>
+			<summary>Dock background opacity</summary>
+			<description>The opacity of the dock background, from fully transparent to fully opaque.</description>
+		</key>
+		<key name="custom-background-enabled" type="b">
+			<default>false</default>
+			<summary>Use a custom dock background color</summary>
+			<description>If true, replace the theme background colors with the selected custom color.</description>
 		</key>
 		<key name="current-workspace-only" type="b">
 			<default>false</default>
@@ -100,7 +113,7 @@
 		<key name="position" enum='GtkPositionType'>
 			<default>'bottom'</default>
 			<summary>The position for the dock on the monitor</summary>
-			<description>Possible values are "left", "right", "top", and "bottom".</description>
+			<description>The dock is always positioned at the bottom of the monitor.</description>
 		</key>
 		<key name="pressure-reveal" type="b">
 			<default>false</default>
@@ -112,6 +125,11 @@
 			<summary>Show the item for the dock itself</summary>
 			<description>If true, show the Plank dock item.</description>
 		</key>
+		<key name="show-side-sections" type="b">
+			<default>true</default>
+			<summary>Show the side sections</summary>
+			<description>If true, show the control and status sections at the sides of the central application section.</description>
+		</key>
 		<key name="theme" type="s">
 			<default>'Default'</default>
 			<summary>The name of the dock theme for Plank to use</summary>
@@ -121,6 +139,11 @@
 			<default>true</default>
 			<summary>Show tooltips when items are hovered</summary>
 			<description>If true, tooltips will be shown when dock items are hovered with the cursor.</description>
+		</key>
+		<key name="window-previews-enabled" type="b">
+			<default>true</default>
+			<summary>Show previews of open application windows</summary>
+			<description>If true, previews of open windows will be shown when running application items are hovered.</description>
 		</key>
 		<key name="unhide-delay" type="i">
 			<range min="0"/>

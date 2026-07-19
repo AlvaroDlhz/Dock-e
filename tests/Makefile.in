@@ -144,7 +144,8 @@ gmock_tests_OBJECTS = $(am_gmock_tests_OBJECTS)
 gmock_tests_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(gmock_tests_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-am__objects_3 = tests-ApplicationUninstallService.$(OBJEXT) \
+am__objects_3 = tests-Accessibility.$(OBJEXT) \
+	tests-ApplicationUninstallService.$(OBJEXT) \
 	tests-AudioService.$(OBJEXT) tests-BluetoothService.$(OBJEXT) \
 	tests-BrightnessService.$(OBJEXT) \
 	tests-CommandRunner.$(OBJEXT) tests-NetworkService.$(OBJEXT) \
@@ -178,6 +179,7 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/dock-Dock.Po \
+	./$(DEPDIR)/tests-Accessibility.Po \
 	./$(DEPDIR)/tests-ApplicationUninstallService.Po \
 	./$(DEPDIR)/tests-AudioService.Po \
 	./$(DEPDIR)/tests-BluetoothService.Po \
@@ -492,6 +494,7 @@ tests_LDADD = \
 	$(NULL)
 
 tests_VALASOURCES = \
+	Accessibility.vala \
 	ApplicationUninstallService.vala \
 	AudioService.vala \
 	BluetoothService.vala \
@@ -653,6 +656,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dock-Dock.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Accessibility.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-ApplicationUninstallService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-AudioService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-BluetoothService.Po@am__quote@ # am--include-marker
@@ -716,6 +720,20 @@ dock-Dock.obj: Dock.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Dock.c' object='dock-Dock.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dock_CFLAGS) $(CFLAGS) -c -o dock-Dock.obj `if test -f 'Dock.c'; then $(CYGPATH_W) 'Dock.c'; else $(CYGPATH_W) '$(srcdir)/Dock.c'; fi`
+
+tests-Accessibility.o: Accessibility.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-Accessibility.o -MD -MP -MF $(DEPDIR)/tests-Accessibility.Tpo -c -o tests-Accessibility.o `test -f 'Accessibility.c' || echo '$(srcdir)/'`Accessibility.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-Accessibility.Tpo $(DEPDIR)/tests-Accessibility.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Accessibility.c' object='tests-Accessibility.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-Accessibility.o `test -f 'Accessibility.c' || echo '$(srcdir)/'`Accessibility.c
+
+tests-Accessibility.obj: Accessibility.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-Accessibility.obj -MD -MP -MF $(DEPDIR)/tests-Accessibility.Tpo -c -o tests-Accessibility.obj `if test -f 'Accessibility.c'; then $(CYGPATH_W) 'Accessibility.c'; else $(CYGPATH_W) '$(srcdir)/Accessibility.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-Accessibility.Tpo $(DEPDIR)/tests-Accessibility.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Accessibility.c' object='tests-Accessibility.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-Accessibility.obj `if test -f 'Accessibility.c'; then $(CYGPATH_W) 'Accessibility.c'; else $(CYGPATH_W) '$(srcdir)/Accessibility.c'; fi`
 
 tests-ApplicationUninstallService.o: ApplicationUninstallService.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-ApplicationUninstallService.o -MD -MP -MF $(DEPDIR)/tests-ApplicationUninstallService.Tpo -c -o tests-ApplicationUninstallService.o `test -f 'ApplicationUninstallService.c' || echo '$(srcdir)/'`ApplicationUninstallService.c
@@ -1147,6 +1165,7 @@ clean-am: clean-checkPROGRAMS clean-generic clean-libtool clean-local \
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/dock-Dock.Po
+	-rm -f ./$(DEPDIR)/tests-Accessibility.Po
 	-rm -f ./$(DEPDIR)/tests-ApplicationUninstallService.Po
 	-rm -f ./$(DEPDIR)/tests-AudioService.Po
 	-rm -f ./$(DEPDIR)/tests-BluetoothService.Po
@@ -1212,6 +1231,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/dock-Dock.Po
+	-rm -f ./$(DEPDIR)/tests-Accessibility.Po
 	-rm -f ./$(DEPDIR)/tests-ApplicationUninstallService.Po
 	-rm -f ./$(DEPDIR)/tests-AudioService.Po
 	-rm -f ./$(DEPDIR)/tests-BluetoothService.Po

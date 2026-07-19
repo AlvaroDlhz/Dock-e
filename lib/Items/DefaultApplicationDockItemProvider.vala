@@ -27,6 +27,7 @@ namespace Plank
 		public DockPreferences Prefs { get; construct; }
 		
 		bool current_workspace_only;
+		uint reconcile_transient_items_source = 0;
 		
 		/**
 		 * Creates the default container for dock items.
@@ -42,6 +43,8 @@ namespace Plank
 		{
 			Prefs.notify["CurrentWorkspaceOnly"].connect (handle_setting_changed);
 			Prefs.notify["PinnedOnly"].connect (handle_pinned_only_changed);
+			Matcher.get_default ().window_opened.connect (handle_matcher_window_opened);
+			Matcher.get_default ().active_window_changed.connect (handle_matcher_active_window_changed);
 			
 			current_workspace_only = Prefs.CurrentWorkspaceOnly;
 			
@@ -53,6 +56,13 @@ namespace Plank
 		{
 			Prefs.notify["CurrentWorkspaceOnly"].disconnect (handle_setting_changed);
 			Prefs.notify["PinnedOnly"].disconnect (handle_pinned_only_changed);
+			Matcher.get_default ().window_opened.disconnect (handle_matcher_window_opened);
+			Matcher.get_default ().active_window_changed.disconnect (handle_matcher_active_window_changed);
+
+			if (reconcile_transient_items_source != 0) {
+				Source.remove (reconcile_transient_items_source);
+				reconcile_transient_items_source = 0;
+			}
 			
 			if (current_workspace_only)
 				disconnect_wnck ();
@@ -191,6 +201,33 @@ namespace Plank
 				add_transient_items ();
 		}
 		
+		void handle_matcher_window_opened (Bamf.Window window)
+		{
+			schedule_transient_items_reconciliation ();
+		}
+
+		void handle_matcher_active_window_changed (Bamf.Window? old_window, Bamf.Window? new_window)
+		{
+			if (new_window != null)
+				schedule_transient_items_reconciliation ();
+		}
+
+		void schedule_transient_items_reconciliation ()
+		{
+			if (Prefs.PinnedOnly || reconcile_transient_items_source != 0)
+				return;
+
+			// application_opened is the fast path. This delayed scan is a
+			// fallback for applications whose BAMF visibility event arrived
+			// before the matcher was able to subscribe to it.
+			reconcile_transient_items_source = Timeout.add (100, () => {
+				reconcile_transient_items_source = 0;
+				if (!Prefs.PinnedOnly)
+					add_transient_items ();
+				return false;
+			});
+		}
+
 		void add_transient_items ()
 		{
 			var transient_items = new Gee.ArrayList<DockElement> ();

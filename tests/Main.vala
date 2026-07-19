@@ -39,6 +39,7 @@ namespace PlankTests
 		internal_quarks_initialize ();
 		
 		// static tests
+		register_accessibility_tests ();
 		register_audio_service_tests ();
 		register_application_uninstall_service_tests ();
 		register_bluetooth_service_tests ();

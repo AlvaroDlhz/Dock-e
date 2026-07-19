@@ -6,7 +6,6 @@ namespace Plank
 	{
 		const int RETRY_RESPONSE = 1;
 		string command;
-		bool updates_available = false;
 		Gdk.Pixbuf? update_pixbuf;
 		unowned UpdateService update_service;
 		ulong update_state_changed_id = 0UL;
@@ -54,10 +53,12 @@ namespace Plank
 
 		void sync_update_state ()
 		{
-			if (updates_available != update_service.updates_available) {
-				updates_available = update_service.updates_available;
-				reset_icon_buffer ();
-			}
+			var count = update_service.update_count;
+			Count = count;
+			CountVisible = count > 0;
+			Text = count > 0
+				? ngettext ("%d update available", "%d updates available", count).printf (count)
+				: _("Update Manager");
 		}
 
 		protected override void draw_icon (Surface surface)
@@ -73,17 +74,6 @@ namespace Plank
 					(surface.Width - update_pixbuf.width) / 2.0,
 					(surface.Height - update_pixbuf.height) / 2.0);
 				cr.paint_with_alpha (0.92);
-				if (updates_available) {
-					var cx = surface.Width * 0.70;
-					var cy = surface.Height * 0.28;
-					var radius = size * 0.075;
-					cr.set_source_rgba (0.10, 0.14, 0.10, 0.95);
-					cr.arc (cx, cy, radius + size * 0.025, 0, Math.PI * 2.0);
-					cr.fill ();
-					cr.set_source_rgba (0.45, 0.82, 0.09, 1.0);
-					cr.arc (cx, cy, radius, 0, Math.PI * 2.0);
-					cr.fill ();
-				}
 			} catch (Error e) {
 				warning ("Unable to load update icon: %s", e.message);
 			}

@@ -42,7 +42,10 @@ namespace Plank
 		public HoverWindow hover { get; protected set; }
 		public LauncherWindow launcher { get; protected set; }
 		public StatusPanelWindow status_panel { get; protected set; }
+		public BackgroundAppsWindow background_apps { get; protected set; }
 		public WindowPreviewWindow window_previews { get; protected set; }
+		public WorkspacePreviewWindow workspace_previews { get; protected set; }
+		SuperKeyBinding? super_key_binding;
 		
 		public DockItemProvider? default_provider { get; private set; }
 		LauncherProvider? launcher_provider;
@@ -95,8 +98,9 @@ namespace Plank
 			items = new Gee.ArrayList<unowned DockItem> ();
 			visible_items = new Gee.ArrayList<unowned DockItem> ();
 			
-			prefs.notify["Position"].connect (update_visible_elements);
+			prefs.notify["Position"].connect (position_changed);
 			prefs.notify["ShowDockItem"].connect (update_show_dock_item);
+			prefs.notify["ShowSideSections"].connect (show_side_sections_changed);
 			
 			dbus_manager = new DBusManager (this);
 			
@@ -107,14 +111,19 @@ namespace Plank
 			hover = new HoverWindow ();
 			renderer = new DockRenderer (this, window);
 			launcher = new LauncherWindow (this);
+			super_key_binding = new SuperKeyBinding (window.get_display ());
+			super_key_binding.activated.connect (() => launcher.toggle_global ());
 			status_panel = new StatusPanelWindow (this);
+			background_apps = new BackgroundAppsWindow (this);
 			window_previews = new WindowPreviewWindow (this);
+			workspace_previews = new WorkspacePreviewWindow (this);
 		}
 		
 		~DockController ()
 		{
-			prefs.notify["Position"].disconnect (update_visible_elements);
+			prefs.notify["Position"].disconnect (position_changed);
 			prefs.notify["ShowDockItem"].disconnect (update_show_dock_item);
+			prefs.notify["ShowSideSections"].disconnect (show_side_sections_changed);
 			
 			positions_changed.disconnect (handle_positions_changed);
 			states_changed.disconnect (handle_states_changed);
@@ -126,6 +135,17 @@ namespace Plank
 
 			items.clear ();
 			visible_items.clear ();
+		}
+
+		void position_changed ()
+		{
+			launcher.dismiss_immediately ();
+			status_panel.dismiss ();
+			background_apps.dismiss ();
+			window_previews.dismiss ();
+			workspace_previews.dismiss ();
+			hover.hide ();
+			update_visible_elements ();
 		}
 		
 		/**
@@ -225,6 +245,26 @@ namespace Plank
 				dock_itself_item = null;
 			}
 		}
+
+		void show_side_sections_changed ()
+		{
+			if (!prefs.ShowSideSections) {
+				status_panel.dismiss ();
+				background_apps.dismiss ();
+				workspace_previews.dismiss ();
+			}
+
+			update_visible_elements ();
+			position_manager.update (renderer.theme);
+			window.update_icon_regions ();
+		}
+
+		static bool is_side_section_item (DockItem item)
+		{
+			return item is StatusIndicatorItem || item is UpdateManagerItem
+				|| item is TrayToggleItem || item is TrayStatusItem
+				|| item is TrayOverflowItem || item is WorkspaceItem;
+		}
 		
 		protected override void connect_element (DockElement element)
 		{
@@ -304,6 +344,9 @@ namespace Plank
 
 			item = (element as DockItem);
 			if (item == null)
+				return;
+
+			if (!prefs.ShowSideSections && is_side_section_item (item))
 				return;
 			
 			if (item.Position != current_position)

@@ -120,7 +120,7 @@ namespace Plank
 			// FIXME Needed for gtk+ 3.14+
 			if (menu_is_visible ())
 				return Gdk.EVENT_PROPAGATE;
-			
+
 			// If the dock is hidden we should ignore it.
 			if (controller.hide_manager.Hidden)
 				return Gdk.EVENT_STOP;
@@ -135,6 +135,12 @@ namespace Plank
 			// delegated correctly
 			if (HoveredItem == null)
 				update_hovered ((int) event.x, (int) event.y);
+
+			// The background-applications panel behaves like the other native
+			// dock popovers: clicking anywhere else on the bar dismisses it.
+			// The toggle itself keeps its normal open/close behaviour.
+			if (controller.background_apps.visible && !(HoveredItem is TrayToggleItem))
+				controller.background_apps.dismiss ();
 			
 			ClickedItem = HoveredItem;
 			controller.launcher.dismiss_application_context ();
@@ -145,6 +151,8 @@ namespace Plank
 				controller.launcher.dismiss ();
 			if (controller.status_panel.visible && !(HoveredItem is StatusIndicatorItem))
 				controller.status_panel.dismiss ();
+			if (controller.workspace_previews.visible && !(HoveredItem is WorkspaceItem))
+				controller.workspace_previews.dismiss ();
 
 			if (HoveredItem is StatusIndicatorItem && event.button == 1U) {
 				var status_item = (StatusIndicatorItem) HoveredItem;
@@ -164,6 +172,19 @@ namespace Plank
 				ClickedItem = null;
 				Idle.add (() => {
 					update_item.launch ();
+					return false;
+				});
+				return Gdk.EVENT_STOP;
+			}
+
+			// Workspace controls are repositioned with the other fixed left-side
+			// items. Activate on press so a layout/hover refresh before release
+			// cannot discard the click.
+			if (HoveredItem is WorkspaceItem && event.button == 1U) {
+				var workspace_item = (WorkspaceItem) HoveredItem;
+				ClickedItem = null;
+				Idle.add (() => {
+					controller.workspace_previews.toggle (workspace_item);
 					return false;
 				});
 				return Gdk.EVENT_STOP;
@@ -264,7 +285,7 @@ namespace Plank
 			if (menu_is_visible ())
 				return Gdk.EVENT_STOP;
 			
-			controller.window_previews.handle_dock_motion (event.x_root);
+			controller.window_previews.handle_dock_motion (event.x_root, event.y_root);
 			controller.renderer.update_local_cursor ((int) event.x, (int) event.y);
 			update_hovered ((int) event.x, (int) event.y);
 			
@@ -486,7 +507,8 @@ namespace Plank
 			// hierarchy so hover and clicks follow the icon's actual draw position.
 			foreach (unowned DockItem fixed_item in controller.VisibleItems) {
 				if (!(fixed_item is UpdateManagerItem) && !(fixed_item is TrayToggleItem)
-					&& !(fixed_item is TrayStatusItem) && !(fixed_item is TrayOverflowItem))
+					&& !(fixed_item is TrayStatusItem) && !(fixed_item is TrayOverflowItem)
+					&& !(fixed_item is WorkspaceItem))
 					continue;
 				rect = position_manager.get_hover_region_for_element (fixed_item);
 				if (y < rect.y || y >= rect.y + rect.height || x < rect.x || x >= rect.x + rect.width)

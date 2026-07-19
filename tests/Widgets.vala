@@ -26,6 +26,7 @@ namespace PlankTests
 		Test.add_func ("/Widgets/CompositedWindow/basics", composited_window_basics);
 		Test.add_func ("/Widgets/PoofWindow/basics", poof_window_basics);
 		Test.add_func ("/Widgets/HoverWindow/basics", hover_window_basics);
+		Test.add_func ("/Widgets/PopupPosition/all-edges", popup_position_all_edges);
 	}
 	
 	void composited_window_basics ()
@@ -99,5 +100,30 @@ namespace PlankTests
 		
 		wait (X_WAIT_MS);
 	}
-}
 
+	void popup_position_all_edges ()
+	{
+		Gdk.Rectangle workarea = { 0, 0, 1000, 800 };
+		int x, y;
+
+		PositionManager.calculate_popup_position (Gtk.PositionType.BOTTOM,
+			{ 0, 740, 1000, 60 }, { 450, 740, 50, 60 }, 200, 100, 10,
+			workarea, out x, out y);
+		assert (x == 375 && y == 630);
+
+		PositionManager.calculate_popup_position (Gtk.PositionType.TOP,
+			{ 0, 0, 1000, 60 }, { 450, 0, 50, 60 }, 200, 100, 10,
+			workarea, out x, out y);
+		assert (x == 375 && y == 70);
+
+		PositionManager.calculate_popup_position (Gtk.PositionType.LEFT,
+			{ 0, 0, 60, 800 }, { 0, 350, 60, 50 }, 200, 100, 10,
+			workarea, out x, out y);
+		assert (x == 70 && y == 325);
+
+		PositionManager.calculate_popup_position (Gtk.PositionType.RIGHT,
+			{ 940, 0, 60, 800 }, { 940, 350, 60, 50 }, 200, 100, 10,
+			workarea, out x, out y);
+		assert (x == 730 && y == 325);
+	}
+}

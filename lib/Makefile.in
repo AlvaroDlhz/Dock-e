@@ -148,6 +148,7 @@ am_libplank_internal_la_OBJECTS = libplank_internal_la-gtk-compat.lo \
 am__dirstamp = $(am__leading_dot)dirstamp
 am__objects_2 = libplank_internal_la-InternalConsts.lo \
 	libplank_internal_la-InternalQuarks.lo \
+	Services/libplank_internal_la-Accessibility.lo \
 	Services/libplank_internal_la-ApplicationUninstallService.lo \
 	Services/libplank_internal_la-AudioService.lo \
 	Services/libplank_internal_la-BluetoothService.lo \
@@ -198,12 +199,14 @@ am__objects_5 = DBusManager.lo DockController.lo DockPreferences.lo \
 	Items/PlaceholderDockItem.lo Items/PlankDockItem.lo \
 	Items/StatusIndicatorItem.lo Items/UpdateManagerItem.lo \
 	Items/TrayToggleItem.lo Items/TransientDockItem.lo \
-	Items/LauncherItem.lo Services/Environment.lo \
+	Items/WorkspaceItem.lo Items/LauncherItem.lo Services/Environment.lo \
 	Services/EnvironmentSettings.lo Services/Logger.lo \
 	Services/Paths.lo Services/Preferences.lo Services/Settings.lo \
-	Services/System.lo Services/Unity.lo Services/Worker.lo \
+	Services/System.lo Services/SuperKeyBinding.lo \
+	Services/Unity.lo Services/Worker.lo \
 	Widgets/CompositedWindow.lo Widgets/DockWindow.lo \
 	Widgets/StatusPanelWindow.lo Widgets/WindowPreviewWindow.lo \
+	Widgets/WorkspacePreviewWindow.lo \
 	Widgets/HoverWindow.lo Widgets/LauncherWindow.lo \
 	Widgets/PoofWindow.lo Widgets/PreferencesWindow.lo \
 	Widgets/TitledSeparatorMenuItem.lo $(am__objects_1)
@@ -264,12 +267,16 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Items/$(DEPDIR)/TransientDockItem.Plo \
 	Items/$(DEPDIR)/TrayToggleItem.Plo \
 	Items/$(DEPDIR)/UpdateManagerItem.Plo \
+	Items/$(DEPDIR)/WorkspaceItem.Plo \
 	Services/$(DEPDIR)/Environment.Plo \
 	Services/$(DEPDIR)/EnvironmentSettings.Plo \
 	Services/$(DEPDIR)/Logger.Plo Services/$(DEPDIR)/Paths.Plo \
 	Services/$(DEPDIR)/Preferences.Plo \
-	Services/$(DEPDIR)/Settings.Plo Services/$(DEPDIR)/System.Plo \
-	Services/$(DEPDIR)/Unity.Plo Services/$(DEPDIR)/Worker.Plo \
+	Services/$(DEPDIR)/Settings.Plo \
+	Services/$(DEPDIR)/SuperKeyBinding.Plo \
+	Services/$(DEPDIR)/System.Plo Services/$(DEPDIR)/Unity.Plo \
+	Services/$(DEPDIR)/Worker.Plo \
+	Services/$(DEPDIR)/libplank_internal_la-Accessibility.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo \
@@ -291,6 +298,7 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Widgets/$(DEPDIR)/StatusPanelWindow.Plo \
 	Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo \
 	Widgets/$(DEPDIR)/WindowPreviewWindow.Plo \
+	Widgets/$(DEPDIR)/WorkspacePreviewWindow.Plo \
 	Widgets/$(DEPDIR)/libplank_internal_la-DockletViewModel.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
@@ -819,6 +827,7 @@ libplank_la_VALASOURCES = \
 	Items/UpdateManagerItem.vala \
 	Items/TrayToggleItem.vala \
 	Items/TransientDockItem.vala \
+	Items/WorkspaceItem.vala \
 	Items/LauncherItem.vala \
 	Services/Environment.vala \
 	Services/EnvironmentSettings.vala \
@@ -827,12 +836,14 @@ libplank_la_VALASOURCES = \
 	Services/Preferences.vala \
 	Services/Settings.vala \
 	Services/System.vala \
+	Services/SuperKeyBinding.vala \
 	Services/Unity.vala \
 	Services/Worker.vala \
 	Widgets/CompositedWindow.vala \
 	Widgets/DockWindow.vala \
 	Widgets/StatusPanelWindow.vala \
 	Widgets/WindowPreviewWindow.vala \
+	Widgets/WorkspacePreviewWindow.vala \
 	Widgets/HoverWindow.vala \
 	Widgets/LauncherWindow.vala \
 	Widgets/PoofWindow.vala \
@@ -870,6 +881,7 @@ libplank_internal_la_LIBADD = \
 libplank_internal_la_VALASOURCES = \
 	InternalConsts.vala \
 	InternalQuarks.vala \
+	Services/Accessibility.vala \
 	Services/ApplicationUninstallService.vala \
 	Services/AudioService.vala \
 	Services/BluetoothService.vala \
@@ -1010,6 +1022,8 @@ Services/$(am__dirstamp):
 Services/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) Services/$(DEPDIR)
 	@: > Services/$(DEPDIR)/$(am__dirstamp)
+Services/libplank_internal_la-Accessibility.lo:  \
+	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-ApplicationUninstallService.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-AudioService.lo:  \
@@ -1139,6 +1153,8 @@ Items/TrayToggleItem.lo: Items/$(am__dirstamp) \
 	Items/$(DEPDIR)/$(am__dirstamp)
 Items/TransientDockItem.lo: Items/$(am__dirstamp) \
 	Items/$(DEPDIR)/$(am__dirstamp)
+Items/WorkspaceItem.lo: Items/$(am__dirstamp) \
+	Items/$(DEPDIR)/$(am__dirstamp)
 Items/LauncherItem.lo: Items/$(am__dirstamp) \
 	Items/$(DEPDIR)/$(am__dirstamp)
 Services/Environment.lo: Services/$(am__dirstamp) \
@@ -1155,6 +1171,8 @@ Services/Settings.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
 Services/System.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
+Services/SuperKeyBinding.lo: Services/$(am__dirstamp) \
+	Services/$(DEPDIR)/$(am__dirstamp)
 Services/Unity.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
 Services/Worker.lo: Services/$(am__dirstamp) \
@@ -1166,6 +1184,8 @@ Widgets/DockWindow.lo: Widgets/$(am__dirstamp) \
 Widgets/StatusPanelWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
 Widgets/WindowPreviewWindow.lo: Widgets/$(am__dirstamp) \
+	Widgets/$(DEPDIR)/$(am__dirstamp)
+Widgets/WorkspacePreviewWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
 Widgets/HoverWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
@@ -1253,9 +1273,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Paths.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Preferences.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Settings.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/SuperKeyBinding.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/System.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Unity.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Worker.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-Accessibility.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo@am__quote@ # am--include-marker
@@ -1329,6 +1351,13 @@ libplank_internal_la-InternalQuarks.lo: InternalQuarks.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='InternalQuarks.c' object='libplank_internal_la-InternalQuarks.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o libplank_internal_la-InternalQuarks.lo `test -f 'InternalQuarks.c' || echo '$(srcdir)/'`InternalQuarks.c
+
+Services/libplank_internal_la-Accessibility.lo: Services/Accessibility.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-Accessibility.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-Accessibility.Tpo -c -o Services/libplank_internal_la-Accessibility.lo `test -f 'Services/Accessibility.c' || echo '$(srcdir)/'`Services/Accessibility.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-Accessibility.Tpo Services/$(DEPDIR)/libplank_internal_la-Accessibility.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/Accessibility.c' object='Services/libplank_internal_la-Accessibility.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-Accessibility.lo `test -f 'Services/Accessibility.c' || echo '$(srcdir)/'`Services/Accessibility.c
 
 Services/libplank_internal_la-ApplicationUninstallService.lo: Services/ApplicationUninstallService.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-ApplicationUninstallService.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Tpo -c -o Services/libplank_internal_la-ApplicationUninstallService.lo `test -f 'Services/ApplicationUninstallService.c' || echo '$(srcdir)/'`Services/ApplicationUninstallService.c
@@ -1862,9 +1891,11 @@ distclean: distclean-am
 	-rm -f Services/$(DEPDIR)/Paths.Plo
 	-rm -f Services/$(DEPDIR)/Preferences.Plo
 	-rm -f Services/$(DEPDIR)/Settings.Plo
+	-rm -f Services/$(DEPDIR)/SuperKeyBinding.Plo
 	-rm -f Services/$(DEPDIR)/System.Plo
 	-rm -f Services/$(DEPDIR)/Unity.Plo
 	-rm -f Services/$(DEPDIR)/Worker.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-Accessibility.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo
@@ -1985,9 +2016,11 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Services/$(DEPDIR)/Paths.Plo
 	-rm -f Services/$(DEPDIR)/Preferences.Plo
 	-rm -f Services/$(DEPDIR)/Settings.Plo
+	-rm -f Services/$(DEPDIR)/SuperKeyBinding.Plo
 	-rm -f Services/$(DEPDIR)/System.Plo
 	-rm -f Services/$(DEPDIR)/Unity.Plo
 	-rm -f Services/$(DEPDIR)/Worker.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-Accessibility.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo

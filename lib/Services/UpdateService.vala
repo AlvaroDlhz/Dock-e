@@ -21,7 +21,7 @@ namespace Plank
 	public interface UpdateBackend : Object
 	{
 		public abstract bool supported { get; }
-		public abstract async bool check (Cancellable? cancellable) throws Error;
+		public abstract async int check (Cancellable? cancellable) throws Error;
 	}
 
 	public class CommandUpdateBackend : Object, UpdateBackend
@@ -52,36 +52,46 @@ namespace Plank
 			}
 		}
 
-		public async bool check (Cancellable? cancellable) throws Error
+		public async int check (Cancellable? cancellable) throws Error
 		{
 			if (!supported)
-				return false;
+				return 0;
 			var result = yield runner.run (argv, null, CHECK_TIMEOUT_MS, cancellable);
 			if (!result.successful)
 				throw new IOError.FAILED ("Update check exited with status %d: %s".printf (
 					result.exit_status, result.standard_error.strip ()));
-			return output_has_updates (format, result.standard_output);
+			return output_update_count (format, result.standard_output);
 		}
 
-		public static bool output_has_updates (UpdateCheckFormat format, string output)
+		public static int output_update_count (UpdateCheckFormat format, string output)
 		{
+			var count = 0;
 			switch (format) {
 			case UpdateCheckFormat.MINTUPDATE:
-				return output.contains ("package         ") || output.contains ("###");
+				// mintupdate-cli prints one non-empty line per available package.
+				foreach (unowned string line in output.split ("\n"))
+					if (line.strip () != "")
+						count++;
+				return count;
 			case UpdateCheckFormat.APT:
 				foreach (unowned string line in output.split ("\n"))
 					if (line.contains ("/") && line.contains ("[") && line.contains ("]"))
-						return true;
-				return false;
+						count++;
+				return count;
 			case UpdateCheckFormat.PACKAGEKIT:
 				foreach (unowned string line in output.split ("\n"))
 					if (line.strip ().has_prefix ("Available")
 						|| line.strip ().has_prefix ("Disponible"))
-						return true;
-				return false;
+						count++;
+				return count;
 			default:
-				return false;
+				return 0;
 			}
+		}
+
+		public static bool output_has_updates (UpdateCheckFormat format, string output)
+		{
+			return output_update_count (format, output) > 0;
 		}
 	}
 
@@ -99,7 +109,8 @@ namespace Plank
 		}
 
 		public bool supported { get; private set; default = false; }
-		public bool updates_available { get; private set; default = false; }
+		public int update_count { get; private set; default = 0; }
+		public bool updates_available { get { return update_count > 0; } }
 		public bool checking { get; private set; default = false; }
 		public string last_error { get; private set; default = ""; }
 
@@ -150,10 +161,10 @@ namespace Plank
 			do {
 				refresh_again = false;
 				try {
-					var available = yield backend.check (lifetime);
+					var count = int.max (0, yield backend.check (lifetime));
 					update_error ("");
-					if (updates_available != available) {
-						updates_available = available;
+					if (update_count != count) {
+						update_count = count;
 						state_changed ();
 					}
 				} catch (Error e) {

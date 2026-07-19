@@ -98,6 +98,7 @@ libplank_la_VALASOURCES = \
 	Items/UpdateManagerItem.vala \
 	Items/TrayToggleItem.vala \
 	Items/TransientDockItem.vala \
+	Items/WorkspaceItem.vala \
 	Items/LauncherItem.vala \
 	Services/Environment.vala \
 	Services/EnvironmentSettings.vala \
@@ -106,12 +107,14 @@ libplank_la_VALASOURCES = \
 	Services/Preferences.vala \
 	Services/Settings.vala \
 	Services/System.vala \
+	Services/SuperKeyBinding.vala \
 	Services/Unity.vala \
 	Services/Worker.vala \
 	Widgets/CompositedWindow.vala \
 	Widgets/DockWindow.vala \
 	Widgets/StatusPanelWindow.vala \
 	Widgets/WindowPreviewWindow.vala \
+	Widgets/WorkspacePreviewWindow.vala \
 	Widgets/HoverWindow.vala \
 	Widgets/LauncherWindow.vala \
 	Widgets/PoofWindow.vala \
@@ -171,6 +174,7 @@ libplank_internal_la_LIBADD = \
 libplank_internal_la_VALASOURCES = \
 	InternalConsts.vala \
 	InternalQuarks.vala \
+	Services/Accessibility.vala \
 	Services/ApplicationUninstallService.vala \
 	Services/AudioService.vala \
 	Services/BluetoothService.vala \

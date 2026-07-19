@@ -2,8 +2,8 @@
 Type=Application
 Name=Dock-e
 Comment=Start the project build of Dock-e
-TryExec=/home/alvaro/.local/bin/dock-e
-Exec=/home/alvaro/.local/bin/start-dock-e
+TryExec=/home/alvaro/coding/opensource/plank-fork/scripts/start-dock-e
+Exec=/home/alvaro/coding/opensource/plank-fork/scripts/start-dock-e
 Terminal=false
 StartupNotify=false
 Hidden=false
