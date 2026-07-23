@@ -62,6 +62,11 @@ namespace Plank
 			return AnimationType.NONE;
 		}
 
+		protected override AnimationType on_hovered ()
+		{
+			return AnimationType.NONE;
+		}
+
 		public override Gee.ArrayList<Gtk.MenuItem> get_menu_items ()
 		{
 			var items = new Gee.ArrayList<Gtk.MenuItem> ();

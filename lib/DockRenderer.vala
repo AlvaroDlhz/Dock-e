@@ -25,6 +25,7 @@ namespace Plank
 	public class DockRenderer : Renderer
 	{
 		const double CLOSED_APPLICATION_OPACITY = 0.60;
+		const double CENTRAL_ITEM_HOVER_SCALE = 1.10;
 
 		public DockController controller { private get; construct; }
 		
@@ -497,6 +498,8 @@ namespace Plank
 				// Do not draw the currently dragged item
 				if (item.IsVisible && dragged_item != item) {
 					var draw_value = position_manager.get_draw_value_for_item (item);
+					if (item is LauncherItem)
+						draw_menu_divider (item_cr, draw_value);
 					draw_item (item_cr, item, draw_value, frame_time);
 					draw_item_shadow (shadow_cr, item, draw_value);
 				}
@@ -663,12 +666,15 @@ namespace Plank
 			// check for and calculate hover-animation
 			var max_hover_time = ITEM_HOVER_DURATION * 1000;
 			var hover_time = int64.max (0LL, frame_time - item.LastHovered);
+			var hover_animation_progress = 0.0;
+			var hover_scale_progress = 0.0;
 			if (hover_time < max_hover_time) {
-				var hover_animation_progress = 0.0;
 				if (hovered_item == item) {
 					hover_animation_progress = easing_for_mode (AnimationMode.LINEAR, hover_time, max_hover_time);
+					hover_scale_progress = easing_for_mode (AnimationMode.EASE_OUT_CUBIC, hover_time, max_hover_time);
 				} else {
 					hover_animation_progress = 1.0 - easing_for_mode (AnimationMode.LINEAR, hover_time, max_hover_time);
+					hover_scale_progress = 1.0 - easing_for_mode (AnimationMode.EASE_OUT_CUBIC, hover_time, max_hover_time);
 				}
 				
 				switch (item.HoveredAnimation) {
@@ -680,7 +686,20 @@ namespace Plank
 					break;
 				}
 			} else if (hovered_item == item) {
+				hover_animation_progress = 1.0;
+				hover_scale_progress = 1.0;
 				draw_value.lighten = 0.2;
+			}
+
+			// Scale central applications on hover while keeping the menu button and
+			// fixed controls unchanged.
+			var is_central_item = !(item is LauncherItem) && !(item is StatusIndicatorItem)
+				&& !(item is UpdateManagerItem) && !(item is TrayToggleItem)
+				&& !(item is TrayStatusItem) && !(item is TrayOverflowItem)
+				&& !(item is WorkspaceItem);
+			if (is_central_item && hover_scale_progress > 0.0) {
+				draw_value.icon_size *= 1.0
+					+ (CENTRAL_ITEM_HOVER_SCALE - 1.0) * hover_scale_progress;
 			}
 			
 			if (hovered_item == item && controller.window.menu_is_visible ())
@@ -860,6 +879,30 @@ namespace Plank
 			return item is LauncherItem && !controller.launcher.visible;
 		}
 
+		void draw_menu_divider (Cairo.Context cr, DockItemDrawValue draw_value)
+		{
+			unowned PositionManager position_manager = controller.position_manager;
+			var divider_length = position_manager.IconSize * 0.58;
+			var divider_offset = (position_manager.IconSize + position_manager.ItemPadding) / 2.0;
+			var background_luminance = theme_fill_start.red * 0.2126
+				+ theme_fill_start.green * 0.7152 + theme_fill_start.blue * 0.0722;
+			var divider_color = background_luminance > 0.55 ? 0.0 : 1.0;
+
+			cr.save ();
+			cr.set_source_rgba (divider_color, divider_color, divider_color, 0.18);
+			if (position_manager.is_horizontal_dock ()) {
+				cr.rectangle (Math.round (draw_value.center.x + divider_offset),
+					Math.round (draw_value.center.y - divider_length / 2.0),
+					1.0, Math.round (divider_length));
+			} else {
+				cr.rectangle (Math.round (draw_value.center.x - divider_length / 2.0),
+					Math.round (draw_value.center.y + divider_offset),
+					Math.round (divider_length), 1.0);
+			}
+			cr.fill ();
+			cr.restore ();
+		}
+
 		void desaturate_icon (Surface icon_surface)
 		{
 			var source = icon_surface.to_pixbuf ();
@@ -925,7 +968,8 @@ namespace Plank
 			if ((item.State & ItemState.ACTIVE) == 0)
 				opacity = 1 - opacity;
 			if (opacity > 0) {
-				theme.draw_active_glow (item_buffer, background_rect, draw_value.background_region, item.AverageIconColor, opacity, position);
+				theme.draw_active_glow (item_buffer, background_rect, draw_value.draw_region,
+					item.AverageIconColor, opacity, position);
 			}
 			
 			// draw the icon

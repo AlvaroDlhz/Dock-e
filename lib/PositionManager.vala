@@ -25,6 +25,7 @@ namespace Plank
 	public class PositionManager : GLib.Object
 	{
 		const int BAR_SIDE_INSET = 12;
+		const double CENTRAL_HOVER_CLEARANCE = 0.75;
 		public DockController controller { private get; construct; }
 		
 		public bool screen_is_composited { get; private set; }
@@ -376,6 +377,13 @@ namespace Plank
 			BottomPadding = (int) (theme.BottomPadding * scaled_icon_size);
 			DockMargin    = (int) (theme.DockMargin    * scaled_icon_size);
 			ItemPadding   = (int) (theme.ItemPadding   * scaled_icon_size);
+			var hover_clearance = (int) Math.ceil (CENTRAL_HOVER_CLEARANCE * scaled_icon_size);
+			if (theme.HorizPadding >= 0)
+				HorizPadding += hover_clearance;
+			if (theme.TopPadding >= 0)
+				TopPadding += hover_clearance;
+			if (theme.BottomPadding >= 0)
+				BottomPadding += hover_clearance;
 			UrgentBounceHeight = (int) (theme.UrgentBounceHeight * IconSize);
 			LaunchBounceHeight = (int) (theme.LaunchBounceHeight * IconSize);
 			LineWidth     = theme.LineWidth;

@@ -342,8 +342,14 @@ namespace Plank
 			cr.set_line_width (LineWidth);
 			cr.clip ();
 
-			cr.rectangle (rect.x, rect.y, rect.width, rect.height);
-			cr.set_source_rgba (color.red, color.green, color.blue, 0.3 * opacity);
+			var indicator_width = rect.width * 0.42;
+			var indicator_height = double.max (2.0, rect.height * 0.04);
+			var indicator_x = rect.x + (rect.width - indicator_width) / 2.0;
+			var indicator_y = rect.y + rect.height + 2.0;
+			draw_rounded_rect (cr, indicator_x, indicator_y,
+				indicator_width, indicator_height,
+				indicator_height / 2.0, indicator_height / 2.0, 0.0);
+			cr.set_source_rgba (color.red, color.green, color.blue, 0.75 * opacity);
 			cr.fill ();
 			
 			cr.reset_clip ();
