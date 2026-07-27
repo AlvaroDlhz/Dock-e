@@ -7,7 +7,7 @@ namespace Plank
 	public class LauncherWindow : Gtk.Window
 	{
 		const int RESULT_LIMIT = 9;
-		const int PANEL_WIDTH = 480;
+		const int PANEL_WIDTH = 580;
 		const int PANEL_HEIGHT = 580;
 		const int PANEL_GAP = 10;
 		const int ANIMATION_TIME = 140;

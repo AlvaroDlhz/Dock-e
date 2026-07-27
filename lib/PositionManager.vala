@@ -298,6 +298,7 @@ namespace Plank
 		
 		Gdk.Rectangle background_rect;
 		Gdk.Rectangle primary_background_rect;
+		Gdk.Rectangle control_background_rect;
 		Gdk.Rectangle status_background_rect;
 		
 		/**
@@ -889,26 +890,49 @@ namespace Plank
 			}
 
 			primary_background_rect = {};
+			control_background_rect = {};
 			status_background_rect = {};
 			if (primary_first != null && primary_last != null) {
 				update_background_region (draw_values[primary_first], draw_values[primary_last]);
 				primary_background_rect = background_rect;
+			}
+			if (left_first != null && left_last != null) {
+				update_background_region (draw_values[left_first], draw_values[left_last]);
+				control_background_rect = background_rect;
 			}
 			if (status_first != null && status_last != null) {
 				update_background_region (draw_values[status_first], draw_values[status_last]);
 				status_background_rect = background_rect;
 			}
 
-			// Keep the fixed status icons centered inside their own background,
+			// Keep the fixed side icons centered inside their own backgrounds,
 			// independently of the launchers' zoom-oriented baseline.
+			if (control_background_rect.width > 0 && control_background_rect.height > 0) {
+				var control_cross_center = is_horizontal_dock ()
+					? control_background_rect.y + control_background_rect.height / 2.0
+					: control_background_rect.x + control_background_rect.width / 2.0;
+				foreach (unowned DockItem item in items) {
+					if (!(item is UpdateManagerItem) && !(item is TrayToggleItem)
+						&& !(item is TrayStatusItem) && !(item is TrayOverflowItem)
+						&& !(item is WorkspaceItem))
+						continue;
+
+					var value = draw_values[item];
+					if (is_horizontal_dock ()) {
+						value.center.y = control_cross_center;
+						value.static_center.y = control_cross_center;
+					} else {
+						value.center.x = control_cross_center;
+						value.static_center.x = control_cross_center;
+					}
+				}
+			}
 			if (status_background_rect.width > 0 && status_background_rect.height > 0) {
 				var status_cross_center = is_horizontal_dock ()
 					? status_background_rect.y + status_background_rect.height / 2.0
 					: status_background_rect.x + status_background_rect.width / 2.0;
 				foreach (unowned DockItem item in items) {
-					if (!(item is StatusIndicatorItem) && !(item is UpdateManagerItem)
-						&& !(item is TrayToggleItem) && !(item is TrayStatusItem)
-						&& !(item is TrayOverflowItem) && !(item is WorkspaceItem))
+					if (!(item is StatusIndicatorItem))
 						continue;
 
 					var value = draw_values[item];
@@ -922,38 +946,22 @@ namespace Plank
 				}
 			}
 
-			if (primary_background_rect.width > 0 && status_background_rect.width > 0)
-				primary_background_rect.union (status_background_rect, out background_rect);
-			else if (primary_background_rect.width > 0)
+			// Keep the aggregate region for input handling and popup placement, while
+			// retaining each section rectangle so the renderer can paint separate bars.
+			background_rect = {};
+			if (primary_background_rect.width > 0 && primary_background_rect.height > 0)
 				background_rect = primary_background_rect;
-			else
-				background_rect = status_background_rect;
-
-			// With side sections enabled, render one continuous bar with the
-			// theme's floating margin on every edge. Central-only mode keeps the
-			// compact background calculated from the menu and application items.
-			if (controller.prefs.ShowSideSections
-				&& background_rect.width > 0 && background_rect.height > 0) {
-				var side_inset = BAR_SIDE_INSET * window_scale_factor;
-				if (is_horizontal_dock ()) {
-					background_rect.x = DockMargin + side_inset;
-					background_rect.width = int.max (1, DockWidth - 2 * (DockMargin + side_inset));
-				} else {
-					background_rect.y = DockMargin + side_inset;
-					background_rect.height = int.max (1, DockHeight - 2 * (DockMargin + side_inset));
-
-					// Vertical docks use a rotated theme whose asymmetric top/bottom
-					// padding otherwise leaves application icons on a different axis
-					// from the fixed controls. Center every visual icon in the final
-					// painted bar while preserving its animation/static displacement.
-					var cross_center = background_rect.x + background_rect.width / 2.0;
-					foreach (unowned DockItem item in items) {
-						var value = draw_values[item];
-						var static_delta = value.static_center.x - value.center.x;
-						value.center.x = cross_center;
-						value.static_center.x = cross_center + static_delta;
-					}
-				}
+			if (control_background_rect.width > 0 && control_background_rect.height > 0) {
+				if (background_rect.width > 0 && background_rect.height > 0)
+					background_rect.union (control_background_rect, out background_rect);
+				else
+					background_rect = control_background_rect;
+			}
+			if (status_background_rect.width > 0 && status_background_rect.height > 0) {
+				if (background_rect.width > 0 && background_rect.height > 0)
+					background_rect.union (status_background_rect, out background_rect);
+				else
+					background_rect = status_background_rect;
 			}
 			
 			// precalculate and cache regions (for the current frame)
@@ -1501,6 +1509,11 @@ namespace Plank
 			return primary_background_rect;
 		}
 
+		public Gdk.Rectangle get_control_background_region ()
+		{
+			return control_background_rect;
+		}
+
 		public Gdk.Rectangle get_status_background_region ()
 		{
 			return status_background_rect;
@@ -1522,15 +1535,85 @@ namespace Plank
 			return point_in_rectangle (x, y, primary_background_rect);
 		}
 
+		public bool pointer_is_over_control_section (int x, int y)
+		{
+			return point_in_rectangle (x, y, control_background_rect);
+		}
+
 		public bool pointer_is_over_status_section (int x, int y)
 		{
 			return point_in_rectangle (x, y, status_background_rect);
+		}
+
+		public bool pointer_axis_is_over_primary_section (int x, int y)
+		{
+			return point_on_section_axis (x, y, primary_background_rect);
+		}
+
+		public bool pointer_axis_is_over_control_section (int x, int y)
+		{
+			return point_on_section_axis (x, y, control_background_rect);
+		}
+
+		public bool pointer_axis_is_over_status_section (int x, int y)
+		{
+			return point_on_section_axis (x, y, status_background_rect);
+		}
+
+		public bool pointer_is_over_primary_section_for_progress (int x, int y, double progress)
+		{
+			return point_in_animated_section (x, y, primary_background_rect, progress);
+		}
+
+		public bool pointer_is_over_control_section_for_progress (int x, int y, double progress)
+		{
+			return point_in_animated_section (x, y, control_background_rect, progress);
+		}
+
+		public bool pointer_is_over_status_section_for_progress (int x, int y, double progress)
+		{
+			return point_in_animated_section (x, y, status_background_rect, progress);
 		}
 
 		static bool point_in_rectangle (int x, int y, Gdk.Rectangle rectangle)
 		{
 			return x >= rectangle.x && x < rectangle.x + rectangle.width
 				&& y >= rectangle.y && y < rectangle.y + rectangle.height;
+		}
+
+		bool point_on_section_axis (int x, int y, Gdk.Rectangle rectangle)
+		{
+			if (rectangle.width <= 0 || rectangle.height <= 0)
+				return false;
+			return is_horizontal_dock ()
+				? x >= rectangle.x && x < rectangle.x + rectangle.width
+				: y >= rectangle.y && y < rectangle.y + rectangle.height;
+		}
+
+		bool point_in_animated_section (int x, int y, Gdk.Rectangle rectangle, double progress)
+		{
+			if (!point_on_section_axis (x, y, rectangle))
+				return false;
+
+			var x_offset = 0, y_offset = 0;
+			get_dock_draw_position_for_progress (progress, out x_offset, out y_offset);
+			var edge_size = int.max (1, window_scale_factor);
+
+			switch (Position) {
+			default:
+			case Gtk.PositionType.BOTTOM:
+				var top = int.min (rectangle.y + y_offset, DockHeight - edge_size);
+				return y >= top && y < DockHeight;
+			case Gtk.PositionType.TOP:
+				var bottom = int.max (rectangle.y + rectangle.height + y_offset, edge_size);
+				return y >= 0 && y < bottom;
+			case Gtk.PositionType.LEFT:
+				var right = int.max (rectangle.x + rectangle.width + x_offset, edge_size);
+				return x >= 0 && x < right;
+			case Gtk.PositionType.RIGHT:
+				var left = int.min (rectangle.x + x_offset, DockWidth - edge_size);
+				return x >= left && x < DockWidth;
+			}
 		}
 
 		public void get_popup_position (Gdk.Rectangle anchor, int popup_width, int popup_height,

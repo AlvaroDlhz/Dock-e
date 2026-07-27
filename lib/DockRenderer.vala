@@ -65,8 +65,11 @@ namespace Plank
 		Surface? shadow_buffer = null;
 		
 		Surface? background_buffer = null;
+		Surface? control_background_buffer = null;
 		Surface? status_background_buffer = null;
 		Gdk.Rectangle background_rect;
+		Gdk.Rectangle primary_background_rect;
+		Gdk.Rectangle control_background_rect;
 		Gdk.Rectangle status_background_rect;
 		Surface? indicator_buffer = null;
 		Surface? urgent_indicator_buffer = null;
@@ -84,6 +87,7 @@ namespace Plank
 		
 		double dynamic_animation_offset = 0.0;
 		double primary_hide_progress = 1.0;
+		double control_hide_progress = 1.0;
 		double status_hide_progress = 1.0;
 		int64 last_section_frame = 0LL;
 		bool section_animation_active = false;
@@ -257,6 +261,7 @@ namespace Plank
 			shadow_buffer = null;
 			
 			background_buffer = null;
+			control_background_buffer = null;
 			status_background_buffer = null;
 			indicator_buffer = null;
 			urgent_indicator_buffer = null;
@@ -371,32 +376,52 @@ namespace Plank
 				(DrawValuesFunc) post_process_draw_values);
 			
 			background_rect = position_manager.get_background_region ();
-			status_background_rect = {};
+			primary_background_rect = position_manager.get_primary_background_region ();
+			control_background_rect = position_manager.get_control_background_region ();
+			status_background_rect = position_manager.get_status_background_region ();
 		}
 
 		void update_section_progress (int64 current_frame_time)
 		{
 			var primary_target = 0.0;
+			var control_target = 0.0;
 			var status_target = 0.0;
 
 			if (controller.hide_manager.Hidden) {
-				primary_target = status_target = 1.0;
-			} else if (controller.hide_manager.Hovered) {
-				primary_target = status_target = 0.0;
+				primary_target = control_target = status_target = 1.0;
+			} else if (controller.hide_manager.Hovered && controller.prefs.ShowSideSections) {
+				unowned PositionManager position_manager = controller.position_manager;
+				var cursor = local_cursor;
+				primary_target = control_target = status_target = 1.0;
+				if (position_manager.pointer_is_over_control_section_for_progress (
+					cursor.x, cursor.y, control_hide_progress))
+					control_target = 0.0;
+				else if (position_manager.pointer_is_over_status_section_for_progress (
+					cursor.x, cursor.y, status_hide_progress))
+					status_target = 0.0;
+				else if (position_manager.pointer_is_over_primary_section_for_progress (
+					cursor.x, cursor.y, primary_hide_progress))
+					primary_target = 0.0;
 			}
 
 			if (last_section_frame == 0LL) {
 				primary_hide_progress = primary_target;
+				control_hide_progress = control_target;
 				status_hide_progress = status_target;
 			} else {
 				var duration = double.max (1.0, theme.HideTime * 1000.0);
-				var step = double.min (1.0, (current_frame_time - last_section_frame) / duration);
-				primary_hide_progress += (primary_target - primary_hide_progress) * step;
-				status_hide_progress += (status_target - status_hide_progress) * step;
+				var elapsed = current_frame_time - last_section_frame;
+				var primary_step = double.min (1.0, elapsed / duration);
+				var control_step = double.min (1.0, elapsed / (duration * 0.82));
+				var status_step = double.min (1.0, elapsed / (duration * 1.18));
+				primary_hide_progress += (primary_target - primary_hide_progress) * primary_step;
+				control_hide_progress += (control_target - control_hide_progress) * control_step;
+				status_hide_progress += (status_target - status_hide_progress) * status_step;
 			}
 
 			last_section_frame = current_frame_time;
 			section_animation_active = Math.fabs (primary_hide_progress - primary_target) > 0.002
+				|| Math.fabs (control_hide_progress - control_target) > 0.002
 				|| Math.fabs (status_hide_progress - status_target) > 0.002;
 		}
 		
@@ -473,6 +498,12 @@ namespace Plank
 			var primary_x_offset = 0, primary_y_offset = 0;
 			position_manager.get_dock_draw_position_for_progress (primary_hide_progress,
 				out primary_x_offset, out primary_y_offset);
+			var control_x_offset = 0, control_y_offset = 0;
+			var status_x_offset = 0, status_y_offset = 0;
+			position_manager.get_dock_draw_position_for_progress (control_hide_progress,
+				out control_x_offset, out control_y_offset);
+			position_manager.get_dock_draw_position_for_progress (status_hide_progress,
+				out status_x_offset, out status_y_offset);
 			
 			// composite dock layers and make sure to draw onto the window's context with one operation
 			main_buffer.clear ();
@@ -482,9 +513,19 @@ namespace Plank
 #if BENCHMARK
 			start2 = new DateTime.now_local ();
 #endif
-			// draw background-layer
-			draw_dock_background (main_cr, background_rect, primary_x_offset, primary_y_offset,
-				primary_hide_progress);
+			// Draw the side sections as independent themed bars. When they are
+			// disabled, preserve the traditional single compact background.
+			if (controller.prefs.ShowSideSections) {
+				draw_dock_background (main_cr, primary_background_rect,
+					primary_x_offset, primary_y_offset, primary_hide_progress);
+				draw_dock_background (main_cr, control_background_rect,
+					control_x_offset, control_y_offset, control_hide_progress, false, true);
+				draw_dock_background (main_cr, status_background_rect,
+					status_x_offset, status_y_offset, status_hide_progress, true);
+			} else {
+				draw_dock_background (main_cr, background_rect,
+					primary_x_offset, primary_y_offset, primary_hide_progress);
+			}
 #if BENCHMARK
 			end2 = new DateTime.now_local ();
 			benchmark.add ("background render time - %f ms".printf (end2.difference (start2) / 1000.0));
@@ -498,10 +539,27 @@ namespace Plank
 				// Do not draw the currently dragged item
 				if (item.IsVisible && dragged_item != item) {
 					var draw_value = position_manager.get_draw_value_for_item (item);
+					var item_x_offset = primary_x_offset;
+					var item_y_offset = primary_y_offset;
+					if (controller.prefs.ShowSideSections && is_control_section_item (item)) {
+						item_x_offset = control_x_offset;
+						item_y_offset = control_y_offset;
+					} else if (controller.prefs.ShowSideSections && item is StatusIndicatorItem) {
+						item_x_offset = status_x_offset;
+						item_y_offset = status_y_offset;
+					}
+					var relative_x = item_x_offset - primary_x_offset;
+					var relative_y = item_y_offset - primary_y_offset;
+					item_cr.save ();
+					shadow_cr.save ();
+					item_cr.translate (relative_x, relative_y);
+					shadow_cr.translate (relative_x, relative_y);
 					if (item is LauncherItem)
 						draw_menu_divider (item_cr, draw_value);
 					draw_item (item_cr, item, draw_value, frame_time);
 					draw_item_shadow (shadow_cr, item, draw_value);
+					item_cr.restore ();
+					shadow_cr.restore ();
 				}
 #if BENCHMARK
 				end2 = new DateTime.now_local ();
@@ -573,24 +631,30 @@ namespace Plank
 		}
 		
 		void draw_dock_background (Cairo.Context cr, Gdk.Rectangle background_rect, int x_offset, int y_offset,
-			double section_progress, bool is_status = false)
+			double section_progress, bool is_status = false, bool is_control = false)
 		{
 			unowned PositionManager position_manager = controller.position_manager;
 			
 			if (background_rect.width <= 0 || background_rect.height <= 0) {
 				if (is_status)
 					status_background_buffer = null;
+				else if (is_control)
+					control_background_buffer = null;
 				else
 					background_buffer = null;
 				return;
 			}
 
-			Surface? buffer = is_status ? status_background_buffer : background_buffer;
+			Surface? buffer = is_status
+				? status_background_buffer
+				: (is_control ? control_background_buffer : background_buffer);
 			if (buffer == null || buffer.Width != background_rect.width || buffer.Height != background_rect.height) {
 				buffer = theme.create_background (background_rect.width, background_rect.height,
 					position_manager.Position, main_buffer);
 				if (is_status)
 					status_background_buffer = buffer;
+				else if (is_control)
+					control_background_buffer = buffer;
 				else
 					background_buffer = buffer;
 			}
@@ -1021,6 +1085,13 @@ namespace Plank
 					cr.restore ();
 			}
 		}
+
+		static bool is_control_section_item (DockItem item)
+		{
+			return item is UpdateManagerItem || item is TrayToggleItem
+				|| item is TrayStatusItem || item is TrayOverflowItem
+				|| item is WorkspaceItem;
+		}
 		
 		[CCode (instance_pos = -1)]
 		Surface draw_item_foreground (int width, int height, Surface model, DockItem item)
@@ -1202,6 +1273,20 @@ namespace Plank
 		{
 			animated_draw ();
 		}
+
+		internal bool pointer_is_over_interactive_section (int x, int y)
+		{
+			if (!controller.prefs.ShowSideSections)
+				return true;
+
+			unowned PositionManager position_manager = controller.position_manager;
+			return position_manager.pointer_is_over_control_section_for_progress (
+					x, y, control_hide_progress)
+				|| position_manager.pointer_is_over_status_section_for_progress (
+					x, y, status_hide_progress)
+				|| position_manager.pointer_is_over_primary_section_for_progress (
+					x, y, primary_hide_progress);
+		}
 		
 		public void update_local_cursor (int x, int y)
 		{
@@ -1210,7 +1295,9 @@ namespace Plank
 				return;
 			
 			local_cursor = new_cursor;
-			
+
+			if (controller.prefs.ShowSideSections)
+				animated_draw ();
 		}
 		
 		public void animate_items (Gee.List<DockElement> elements)
