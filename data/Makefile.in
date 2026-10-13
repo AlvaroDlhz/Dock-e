@@ -432,6 +432,7 @@ EXTRA_DIST = \
 	net.launchpad.plank.gschema.xml.in \
 	plank.desktop.in \
 	plank.gresource.xml \
+	menu-2.svg \
 	poof.svg \
 	ui/preferences.ui \
 	$(NULL)

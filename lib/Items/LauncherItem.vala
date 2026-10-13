@@ -23,31 +23,37 @@ namespace Plank
 		{
 			if (menu_pixbuf == null) {
 				try {
-					menu_pixbuf = new Gdk.Pixbuf.from_resource (G_RESOURCE_PATH + "/img/menu.svg");
+					menu_pixbuf = new Gdk.Pixbuf.from_resource (G_RESOURCE_PATH + "/img/menu-2.svg");
 				} catch (Error e) {
 					warning ("Unable to load dock menu image: %s", e.message);
 					return;
 				}
 			}
 
-			var size = (int) (int.min (surface.Width, surface.Height) * 0.88);
-			var scaled = menu_pixbuf.scale_simple (size, size, Gdk.InterpType.BILINEAR);
 			unowned Cairo.Context cr = surface.Context;
-			var x = (surface.Width - size) / 2.0;
-			var y = (surface.Height - size) / 2.0;
-			var radius = size * 0.18;
+			var extent = (double) int.min (surface.Width, surface.Height);
+
+			var box = extent * 0.90;
+			var box_x = (surface.Width - box) / 2.0;
+			var box_y = (surface.Height - box) / 2.0;
+			var box_radius = box * 0.22;
+			var line_width = double.max (1.0, extent * 0.028);
 
 			cr.save ();
-			cr.new_sub_path ();
-			cr.arc (x + size - radius, y + radius, radius, -Math.PI_2, 0);
-			cr.arc (x + size - radius, y + size - radius, radius, 0, Math.PI_2);
-			cr.arc (x + radius, y + size - radius, radius, Math.PI_2, Math.PI);
-			cr.arc (x + radius, y + radius, radius, Math.PI, Math.PI * 1.5);
-			cr.close_path ();
-			cr.clip ();
+			Theme.draw_rounded_rect (cr, box_x, box_y, box, box,
+				box_radius, box_radius, line_width);
+			cr.set_line_width (line_width);
+			cr.set_source_rgba (1.0, 1.0, 1.0, 0.92);
+			cr.stroke ();
+			cr.restore ();
+
+			var size = (int) (extent * 0.50);
+			var scaled = menu_pixbuf.scale_simple (size, size, Gdk.InterpType.BILINEAR);
+			var x = (surface.Width - size) / 2.0;
+			var y = (surface.Height - size) / 2.0;
+
 			Gdk.cairo_set_source_pixbuf (cr, scaled, x, y);
 			cr.paint ();
-			cr.restore ();
 		}
 
 		protected override AnimationType on_clicked (PopupButton button, Gdk.ModifierType mod, uint32 event_time)

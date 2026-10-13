@@ -292,8 +292,9 @@ namespace Plank
 		 * @param color the color of the glow
 		 * @param opacity the opacity of the glow
 		 * @param pos the dock's position
+		 * @param multiple whether the item has multiple windows open
 		 */
-		public void draw_active_glow (Surface surface, Gdk.Rectangle clip_rect, Gdk.Rectangle rect, Color color, double opacity, Gtk.PositionType pos)
+		public void draw_active_glow (Surface surface, Gdk.Rectangle clip_rect, Gdk.Rectangle rect, Color color, double opacity, Gtk.PositionType pos, bool multiple = false)
 		{
 			if (opacity <= 0.0 || rect.width <= 0 || rect.height <= 0)
 				return;
@@ -344,13 +345,33 @@ namespace Plank
 
 			var indicator_width = rect.width * 0.42;
 			var indicator_height = double.max (2.0, rect.height * 0.04);
-			var indicator_x = rect.x + (rect.width - indicator_width) / 2.0;
+			var indicator_radius = indicator_height / 2.0;
 			var indicator_y = rect.y + rect.height + 2.0;
-			draw_rounded_rect (cr, indicator_x, indicator_y,
-				indicator_width, indicator_height,
-				indicator_height / 2.0, indicator_height / 2.0, 0.0);
+			var indicator_x = rect.x + (rect.width - indicator_width) / 2.0;
+
 			cr.set_source_rgba (color.red, color.green, color.blue, 0.75 * opacity);
-			cr.fill ();
+
+			if (multiple) {
+				var gap = 2.0;
+				var segments_width = indicator_width - gap;
+				var first_width = segments_width * 0.70;
+				var second_width = segments_width * 0.30;
+
+				draw_rounded_rect (cr, indicator_x, indicator_y,
+					first_width, indicator_height,
+					indicator_radius, indicator_radius, 0.0);
+				cr.fill ();
+
+				draw_rounded_rect (cr, indicator_x + first_width + gap, indicator_y,
+					second_width, indicator_height,
+					indicator_radius, indicator_radius, 0.0);
+				cr.fill ();
+			} else {
+				draw_rounded_rect (cr, indicator_x, indicator_y,
+					indicator_width, indicator_height,
+					indicator_radius, indicator_radius, 0.0);
+				cr.fill ();
+			}
 			
 			cr.reset_clip ();
 		}

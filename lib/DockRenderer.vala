@@ -27,6 +27,8 @@ namespace Plank
 		const double CLOSED_APPLICATION_OPACITY = 0.60;
 		const double CENTRAL_ITEM_HOVER_SCALE = 1.10;
 
+		static Color active_indicator_color = { 0.450980, 0.823529, 0.086275, 1.0 };
+
 		public DockController controller { private get; construct; }
 		
 		public DockTheme theme { get; private set; }
@@ -1033,7 +1035,8 @@ namespace Plank
 				opacity = 1 - opacity;
 			if (opacity > 0) {
 				theme.draw_active_glow (item_buffer, background_rect, draw_value.draw_region,
-					item.AverageIconColor, opacity, position);
+					active_indicator_color, opacity, position,
+					item.Indicator == IndicatorState.SINGLE_PLUS);
 			}
 			
 			// draw the icon

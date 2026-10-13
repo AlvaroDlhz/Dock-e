@@ -21,6 +21,7 @@
 	<gresource prefix="/net/launchpad/plank">
 		<file alias="img/application-default-icon.svg" compressed="true" preprocess="xml-stripblanks">application-default-icon.svg</file>
 		<file alias="img/menu.svg" compressed="true" preprocess="xml-stripblanks">menu.svg</file>
+		<file alias="img/menu-2.svg" compressed="true" preprocess="xml-stripblanks">menu-2.svg</file>
 		<file alias="img/areas.svg" compressed="true" preprocess="xml-stripblanks">areas.svg</file>
 		<file alias="img/segundo-plano-closed.svg" compressed="true" preprocess="xml-stripblanks">segundo-plano-closed.svg</file>
 		<file alias="img/segundo-plano-open.svg" compressed="true" preprocess="xml-stripblanks">segundo-plano-open.svg</file>
