@@ -500,15 +500,14 @@ namespace Plank
 				return false;
 			}
 
-			// The launcher provider contains both the central menu button and controls
-			// anchored independently at the left edge.  Its aggregate first/last-child
-			// region is therefore not a reliable gate for those displaced controls.
-			// Hit-test each fixed left control directly before walking the container
-			// hierarchy so hover and clicks follow the icon's actual draw position.
+			// The launcher provider contains both the central menu button and side
+			// controls anchored independently at either edge.  Its aggregate
+			// first/last-child region is therefore not a reliable gate for those
+			// displaced controls.  Hit-test each fixed side control directly before
+			// walking the container hierarchy so hover and clicks follow the icon's
+			// actual draw position.
 			foreach (unowned DockItem fixed_item in controller.VisibleItems) {
-				if (!(fixed_item is UpdateManagerItem) && !(fixed_item is TrayToggleItem)
-					&& !(fixed_item is TrayStatusItem) && !(fixed_item is TrayOverflowItem)
-					&& !(fixed_item is WorkspaceItem))
+				if (!DockController.is_side_section_item (fixed_item))
 					continue;
 				rect = position_manager.get_hover_region_for_element (fixed_item);
 				if (y < rect.y || y >= rect.y + rect.height || x < rect.x || x >= rect.x + rect.width)

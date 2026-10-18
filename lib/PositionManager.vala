@@ -25,6 +25,9 @@ namespace Plank
 	public class PositionManager : GLib.Object
 	{
 		const int BAR_SIDE_INSET = 12;
+		const int STATUS_BAR_MIN_GAP = 48;
+		const int STATUS_ITEM_SPACING = 6;
+		const double STATUS_CLOCK_WIDTH_FACTOR = 2.0;
 		const double CENTRAL_HOVER_CLEARANCE = 0.75;
 		public DockController controller { private get; construct; }
 		
@@ -696,6 +699,8 @@ namespace Plank
 			if (draw_value == null) {
 				warning ("Without a draw_value there is trouble ahead for '%s'", item.Text);
 				draw_value = new DockItemDrawValue ();
+				draw_value.icon_size = IconSize;
+				draw_value.icon_width = IconSize;
 			}
 			
 			return draw_value;
@@ -764,6 +769,7 @@ namespace Plank
 				
 				val.center = { Math.round (center.x), icon_size / 2.0 };
 				val.icon_size = icon_size;
+				val.icon_width = icon_size;
 				
 				// now we undo our transforms to the point
 				if (!is_horizontal_dock ()) {
@@ -815,12 +821,11 @@ namespace Plank
 			DockItem? left_last = null;
 			var status_count = 0;
 			foreach (unowned DockItem item in items) {
-				if (item is UpdateManagerItem || item is TrayToggleItem || item is TrayStatusItem
-					|| item is TrayOverflowItem || item is WorkspaceItem) {
+				if (DockController.is_control_section_item (item)) {
 					if (left_first == null)
 						left_first = item;
 					left_last = item;
-				} else if (item is StatusIndicatorItem) {
+				} else if (DockController.is_status_section_item (item)) {
 					if (status_first == null)
 						status_first = item;
 					status_last = item;
@@ -832,15 +837,14 @@ namespace Plank
 				}
 			}
 
-			// Left-side controls share a provider with the launcher button, so their
-			// original slots sit between the launcher and application items. Compact
-			// the central sequence after classification to remove those empty slots,
-			// while move_right() preserves each item's current draw displacement.
+			// Side-section controls share a provider with the launcher button, so
+			// their original slots sit between the launcher and application items.
+			// Compact the central sequence after classification to remove those
+			// empty slots, while move_right() preserves each item's current draw
+			// displacement.
 			DockItem? previous_primary = null;
 			foreach (unowned DockItem item in items) {
-				if (item is StatusIndicatorItem || item is UpdateManagerItem
-					|| item is TrayToggleItem || item is TrayStatusItem || item is TrayOverflowItem
-					|| item is WorkspaceItem)
+				if (DockController.is_side_section_item (item))
 					continue;
 				if (previous_primary != null) {
 					var desired_axis = axis_position (draw_values[previous_primary], true)
@@ -858,9 +862,7 @@ namespace Plank
 					+ axis_position (draw_values[primary_last], true)) / 2.0;
 				var primary_shift = axis_length () / 2.0 - primary_center;
 				foreach (unowned DockItem item in items) {
-					if (!(item is StatusIndicatorItem) && !(item is UpdateManagerItem)
-						&& !(item is TrayToggleItem) && !(item is TrayStatusItem)
-						&& !(item is TrayOverflowItem) && !(item is WorkspaceItem))
+					if (!DockController.is_side_section_item (item))
 						draw_values[item].move_right (Position, primary_shift);
 				}
 			}
@@ -873,7 +875,7 @@ namespace Plank
 					- (IconSize + background_padding) / 2.0;
 				var status_shift = desired_last_center - status_last_center;
 				foreach (unowned DockItem item in items) {
-					if (item is StatusIndicatorItem)
+					if (DockController.is_status_section_item (item))
 						draw_values[item].move_right (Position, status_shift);
 				}
 			}
@@ -884,8 +886,7 @@ namespace Plank
 				var desired_center = DockMargin + side_inset + (IconSize + background_padding) / 2.0;
 				var left_shift = desired_center - axis_position (draw_values[left_first]);
 				foreach (unowned DockItem item in items)
-					if (item is UpdateManagerItem || item is TrayToggleItem || item is TrayStatusItem
-						|| item is TrayOverflowItem || item is WorkspaceItem)
+					if (DockController.is_control_section_item (item))
 						draw_values[item].move_right (Position, left_shift);
 			}
 
@@ -905,6 +906,74 @@ namespace Plank
 				status_background_rect = background_rect;
 			}
 
+			// Lay out the status section as a compact cluster with a small fixed
+			// spacing between its items, anchored at the trailing edge, and size
+			// its background bar to wrap that cluster. The bar is never allowed to
+			// come closer than STATUS_BAR_MIN_GAP to the primary section: the
+			// spacing shrinks first so the two bars never overlap.
+			if (status_first != null && status_last != null
+				&& status_background_rect.width > 0 && status_background_rect.height > 0
+				&& Alignment != Gtk.Align.FILL) {
+				var edge_margin = (ItemPadding + 2 * HorizPadding + 4 * LineWidth) / 2.0;
+				var status_items = new Gee.ArrayList<DockItem> ();
+				foreach (unowned DockItem item in items)
+					if (DockController.is_status_section_item (item))
+						status_items.add (item);
+
+				if (is_horizontal_dock ()) {
+					// Widen the clock so its time and date fit without squeezing.
+					foreach (var item in status_items) {
+						var status = item as StatusIndicatorItem;
+						draw_values[item].icon_width = (status != null
+							&& status.Kind == StatusIndicatorKind.CLOCK)
+							? IconSize * STATUS_CLOCK_WIDTH_FACTOR
+							: IconSize;
+					}
+
+					var widths = 0.0;
+					foreach (var item in status_items)
+						widths += draw_values[item].icon_width;
+
+					// Keep the cluster's current right edge as the anchor.
+					var bar_right = status_background_rect.x + status_background_rect.width;
+					var item_spacing = (double) (STATUS_ITEM_SPACING * window_scale_factor);
+
+					// Shrink the spacing (never below zero) if the cluster would
+					// otherwise encroach on the primary section's clearance.
+					if (status_items.size > 1 && primary_first != null && primary_last != null
+						&& primary_background_rect.width > 0) {
+						var limit = primary_background_rect.x + primary_background_rect.width
+							+ STATUS_BAR_MIN_GAP * window_scale_factor;
+						var max_cluster = bar_right - 2 * edge_margin - limit;
+						if (widths + item_spacing * (status_items.size - 1) > max_cluster)
+							item_spacing = double.max (0.0,
+								(max_cluster - widths) / (status_items.size - 1));
+					}
+
+					var cluster_width = widths
+						+ item_spacing * double.max (0, status_items.size - 1);
+					var cursor = bar_right - edge_margin - cluster_width;
+					var bar_start = cursor - edge_margin;
+					foreach (var item in status_items) {
+						var value = draw_values[item];
+						var desired_axis = cursor + value.icon_width / 2.0;
+						value.move_right (Position, desired_axis - axis_position (value));
+						cursor += value.icon_width + item_spacing;
+					}
+
+					status_background_rect.x = (int) Math.round (bar_start);
+					status_background_rect.width = (int) Math.round (bar_right - bar_start);
+				} else {
+					var bar_center = status_background_rect.y + status_background_rect.height / 2.0;
+					var icons_center = (axis_position (draw_values[status_first])
+						+ axis_position (draw_values[status_last])) / 2.0;
+					var icon_shift = bar_center - icons_center;
+					foreach (unowned DockItem item in items)
+						if (DockController.is_status_section_item (item))
+							draw_values[item].move_right (Position, icon_shift);
+				}
+			}
+
 			// Keep the fixed side icons centered inside their own backgrounds,
 			// independently of the launchers' zoom-oriented baseline.
 			if (control_background_rect.width > 0 && control_background_rect.height > 0) {
@@ -912,9 +981,7 @@ namespace Plank
 					? control_background_rect.y + control_background_rect.height / 2.0
 					: control_background_rect.x + control_background_rect.width / 2.0;
 				foreach (unowned DockItem item in items) {
-					if (!(item is UpdateManagerItem) && !(item is TrayToggleItem)
-						&& !(item is TrayStatusItem) && !(item is TrayOverflowItem)
-						&& !(item is WorkspaceItem))
+					if (!DockController.is_control_section_item (item))
 						continue;
 
 					var value = draw_values[item];
@@ -932,7 +999,7 @@ namespace Plank
 					? status_background_rect.y + status_background_rect.height / 2.0
 					: status_background_rect.x + status_background_rect.width / 2.0;
 				foreach (unowned DockItem item in items) {
-					if (!(item is StatusIndicatorItem))
+					if (!DockController.is_status_section_item (item))
 						continue;
 
 					var value = draw_values[item];
@@ -980,7 +1047,7 @@ namespace Plank
 		 */
 		Gdk.Rectangle get_item_draw_region (DockItemDrawValue val)
 		{
-			var width = val.icon_size, height = val.icon_size;
+			var width = val.icon_width, height = val.icon_size;
 			
 			return { (int) Math.round (val.center.x - width / 2.0),
 				(int) Math.round (val.center.y - height / 2.0),
@@ -1037,7 +1104,7 @@ namespace Plank
 			var item_padding = ItemPadding;
 			var top_padding = (top_offset < 0 ? 0 : top_offset);
 			var bottom_padding = bottom_offset;
-			var width = val.icon_size, height = val.icon_size;
+			var width = val.icon_width, height = val.icon_size;
 			
 			// Apply scalable padding
 			switch (Position) {

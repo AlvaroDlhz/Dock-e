@@ -543,10 +543,12 @@ namespace Plank
 					var draw_value = position_manager.get_draw_value_for_item (item);
 					var item_x_offset = primary_x_offset;
 					var item_y_offset = primary_y_offset;
-					if (controller.prefs.ShowSideSections && is_control_section_item (item)) {
+					if (controller.prefs.ShowSideSections
+						&& DockController.is_control_section_item (item)) {
 						item_x_offset = control_x_offset;
 						item_y_offset = control_y_offset;
-					} else if (controller.prefs.ShowSideSections && item is StatusIndicatorItem) {
+					} else if (controller.prefs.ShowSideSections
+						&& DockController.is_status_section_item (item)) {
 						item_x_offset = status_x_offset;
 						item_y_offset = status_y_offset;
 					}
@@ -758,11 +760,9 @@ namespace Plank
 			}
 
 			// Scale central applications on hover while keeping the menu button and
-			// fixed controls unchanged.
-			var is_central_item = !(item is LauncherItem) && !(item is StatusIndicatorItem)
-				&& !(item is UpdateManagerItem) && !(item is TrayToggleItem)
-				&& !(item is TrayStatusItem) && !(item is TrayOverflowItem)
-				&& !(item is WorkspaceItem);
+			// fixed side controls unchanged.
+			var is_central_item = !(item is LauncherItem)
+				&& !DockController.is_side_section_item (item);
 			if (is_central_item && hover_scale_progress > 0.0) {
 				draw_value.icon_size *= 1.0
 					+ (CENTRAL_ITEM_HOVER_SCALE - 1.0) * hover_scale_progress;
@@ -908,9 +908,9 @@ namespace Plank
 			});
 		}
 		
-		inline Surface get_item_surface (DockItem item, int icon_size)
+		inline Surface get_item_surface (DockItem item, int icon_width, int icon_size)
 		{
-			var private_icon_surface = item.get_surface (icon_size, icon_size, item_buffer);
+			var private_icon_surface = item.get_surface (icon_width, icon_size, item_buffer);
 			if (!screen_is_composited)
 				return private_icon_surface;
 			
@@ -920,10 +920,13 @@ namespace Plank
 			string? drawing_status;
 			unowned PositionManager position_manager = controller.position_manager;
 			var max_icon_size = position_manager.ZoomIconSize * window_scale_factor;
+			var max_icon_width = icon_width > icon_size
+				? (int) (icon_width * max_icon_size / (double) icon_size)
+				: max_icon_size;
 			if (icon_size < max_icon_size
 				&& ((drawing_status = private_icon_surface.steal_qdata<string> (quark_surface_stats)) != null
 				&& drawing_status == SURFACE_STATS_DRAWING_TIME_EXCEEDED))
-				item.get_surface (max_icon_size, max_icon_size, item_buffer);
+				item.get_surface (max_icon_width, max_icon_size, item_buffer);
 			
 			return private_icon_surface;
 		}
@@ -986,18 +989,19 @@ namespace Plank
 		{
 			unowned PositionManager position_manager = controller.position_manager;
 			var icon_size = (int) draw_value.icon_size * window_scale_factor;
+			var icon_width = (int) draw_value.icon_width * window_scale_factor;
 			var position = position_manager.Position;
 			
 			// load the icon
 #if BENCHMARK
 			var start = new DateTime.now_local ();
 #endif
-			var icon_surface = get_item_surface (item, icon_size).copy ();
+			var icon_surface = get_item_surface (item, icon_width, icon_size).copy ();
 			unowned Cairo.Context icon_cr = icon_surface.Context;
 			
 			Surface? icon_overlay_surface = null;
 			if (item.CountVisible || item.ProgressVisible)
-				icon_overlay_surface = item.get_foreground_surface (icon_size, icon_size, item_buffer, (DrawDataFunc<DockItem>) draw_item_foreground);
+				icon_overlay_surface = item.get_foreground_surface (icon_width, icon_size, item_buffer, (DrawDataFunc<DockItem>) draw_item_foreground);
 			
 			if (icon_overlay_surface != null) {
 				icon_cr.set_source_surface (icon_overlay_surface.Internal, 0, 0);
@@ -1065,11 +1069,12 @@ namespace Plank
 			var shadow_size = position_manager.IconShadowSize;
 			// Inflate size to fit shadow
 			var icon_size = (int) (draw_value.icon_size + 2 * shadow_size) * window_scale_factor;
+			var icon_width = (int) (draw_value.icon_width + 2 * shadow_size) * window_scale_factor;
 			
 			// load and draw the icon shadow
 			Surface? icon_shadow_surface = null;
 			if (shadow_size > 0)
-				icon_shadow_surface = item.get_background_surface (icon_size, icon_size, item_buffer, (DrawDataFunc<DockItem>) draw_item_background);
+				icon_shadow_surface = item.get_background_surface (icon_width, icon_size, item_buffer, (DrawDataFunc<DockItem>) draw_item_background);
 			
 			if (icon_shadow_surface != null) {
 				if (window_scale_factor > 1) {
@@ -1089,13 +1094,6 @@ namespace Plank
 			}
 		}
 
-		static bool is_control_section_item (DockItem item)
-		{
-			return item is UpdateManagerItem || item is TrayToggleItem
-				|| item is TrayStatusItem || item is TrayOverflowItem
-				|| item is WorkspaceItem;
-		}
-		
 		[CCode (instance_pos = -1)]
 		Surface draw_item_foreground (int width, int height, Surface model, DockItem item)
 		{

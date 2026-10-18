@@ -15,17 +15,24 @@ namespace Plank
 		const string XAPP_PREFIX = "org.x.StatusIcon.";
 		const string XAPP_ROOT = "/org/x/StatusIcon";
 		const string OBJECT_MANAGER_IFACE = "org.freedesktop.DBus.ObjectManager";
+		const string WATCHER_NAME = "org.kde.StatusNotifierWatcher";
+		const string WATCHER_PATH = "/StatusNotifierWatcher";
 
 		public signal void tray_changed ();
 		public signal void expansion_changed (bool expanded);
 
 		StatusNotifierWatcher? watcher;
+		LocalStatusNotifierWatcher? local_watcher;
 		Gee.HashMap<string, TrayStatusItem> tray_items;
 		Gee.HashMap<string, TrayStatusItem> xapp_items;
 		DBusConnection? session_connection;
+		DBusConnection? watcher_connection;
 		Gdk.Pixbuf? closed_pixbuf;
 		Gdk.Pixbuf? open_pixbuf;
+		bool owns_watcher = false;
+		bool destroying = false;
 		uint watcher_name_id = 0U;
+		uint watcher_watch_id = 0U;
 		uint name_owner_subscription_id = 0U;
 		uint interfaces_added_subscription_id = 0U;
 		uint interfaces_removed_subscription_id = 0U;
@@ -42,17 +49,18 @@ namespace Plank
 			xapp_items = new Gee.HashMap<string, TrayStatusItem> ();
 			load_state_icons ();
 			connect_xapp_monitor ();
-			watcher_name_id = Bus.watch_name (BusType.SESSION, "org.kde.StatusNotifierWatcher",
-				BusNameWatcherFlags.NONE,
-				(connection, name, owner) => connect_watcher (),
-				(connection, name) => disconnect_watcher ());
+			try_own_watcher ();
 			reconciliation_timeout_id = Timeout.add_seconds (2, reconcile_items);
 		}
 
 		~TrayToggleItem ()
 		{
+			destroying = true;
 			if (watcher_name_id > 0U)
-				Bus.unwatch_name (watcher_name_id);
+				Bus.unown_name (watcher_name_id);
+			if (watcher_watch_id > 0U)
+				Bus.unwatch_name (watcher_watch_id);
+			unregister_local_watcher ();
 			if (xapp_refresh_idle_id > 0U)
 				Source.remove (xapp_refresh_idle_id);
 			if (reconciliation_timeout_id > 0U)
@@ -193,11 +201,72 @@ namespace Plank
 			}
 		}
 
+		void try_own_watcher ()
+		{
+			watcher_name_id = Bus.own_name (BusType.SESSION, WATCHER_NAME,
+				BusNameOwnerFlags.NONE,
+				(connection, name) => {},
+				(connection, name) => on_watcher_name_acquired (connection, name),
+				(connection, name) => on_watcher_name_lost (connection, name));
+		}
+
+		void on_watcher_name_acquired (DBusConnection connection, string name)
+		{
+			if (destroying)
+				return;
+			owns_watcher = true;
+			watcher_connection = connection;
+			local_watcher = new LocalStatusNotifierWatcher (connection);
+			try {
+				local_watcher.registration_id =
+					connection.register_object<LocalStatusNotifierWatcher> (WATCHER_PATH, local_watcher);
+			} catch (IOError e) {
+				warning ("Unable to export the status notifier watcher: %s", e.message);
+			}
+			local_watcher.status_notifier_item_registered.connect (() => refresh ());
+			local_watcher.status_notifier_item_unregistered.connect (() => refresh ());
+			debug ("Dock-E is now the StatusNotifierWatcher");
+			refresh ();
+		}
+
+		void on_watcher_name_lost (DBusConnection connection, string name)
+		{
+			if (destroying)
+				return;
+			if (owns_watcher) {
+				owns_watcher = false;
+				unregister_local_watcher ();
+			}
+			// Someone else already owns the name or just took it over; track it as a client.
+			start_watcher_fallback ();
+		}
+
+		void unregister_local_watcher ()
+		{
+			if (local_watcher != null && watcher_connection != null
+				&& local_watcher.registration_id > 0U) {
+				watcher_connection.unregister_object (local_watcher.registration_id);
+				local_watcher.registration_id = 0U;
+			}
+			local_watcher = null;
+			watcher_connection = null;
+		}
+
+		void start_watcher_fallback ()
+		{
+			if (watcher_watch_id > 0U)
+				return;
+			watcher_watch_id = Bus.watch_name (BusType.SESSION, WATCHER_NAME,
+				BusNameWatcherFlags.NONE,
+				(connection, name, owner) => connect_watcher (),
+				(connection, name) => disconnect_watcher ());
+		}
+
 		void connect_watcher ()
 		{
 			try {
 				watcher = Bus.get_proxy_sync<StatusNotifierWatcher> (BusType.SESSION,
-					"org.kde.StatusNotifierWatcher", "/StatusNotifierWatcher");
+					WATCHER_NAME, WATCHER_PATH);
 				watcher.StatusNotifierItemRegistered.connect (() => refresh ());
 				watcher.StatusNotifierItemUnregistered.connect (() => refresh ());
 				watcher.notify["registered-status-notifier-items"].connect (() => refresh ());
@@ -218,7 +287,7 @@ namespace Plank
 
 		void refresh ()
 		{
-			if (watcher == null)
+			if (watcher == null && local_watcher == null)
 				return;
 			var registered = new Gee.HashSet<string> ();
 			foreach (var identifier in identifiers ())
@@ -279,6 +348,8 @@ namespace Plank
 
 		string[] identifiers ()
 		{
+			if (local_watcher != null)
+				return local_watcher.registered_status_notifier_items;
 			return watcher == null ? new string[0] : watcher.RegisteredStatusNotifierItems;
 		}
 
@@ -341,6 +412,153 @@ namespace Plank
 			Gdk.cairo_set_source_pixbuf (cr, scaled,
 				(surface.Width - size) / 2.0, (surface.Height - size) / 2.0);
 			cr.paint_with_alpha (0.94);
+		}
+	}
+
+	// In-process implementation of the StatusNotifierWatcher D-Bus service.
+	// Dock-E claims this role when no other watcher (Plasma, xapp-sn-watcher,
+	// ...) is running, so plain StatusNotifierItem clients register and show up.
+	[DBus (name = "org.kde.StatusNotifierWatcher")]
+	class LocalStatusNotifierWatcher : GLib.Object
+	{
+		const string ITEM_INTERFACE = "org.kde.StatusNotifierItem";
+
+		// Some clients (Qt) call RegisterStatusNotifierItem just before the item
+		// object becomes introspectable, so retry the probe a few times.
+		const uint VALIDATION_RETRY_MS = 150U;
+		const uint MAX_VALIDATION_ATTEMPTS = 10U;
+
+		Gee.HashSet<string> registered_items;
+		DBusConnection connection;
+		uint name_owner_changed_id = 0U;
+
+		// Not a D-Bus member (public fields are never exported); owned by TrayToggleItem.
+		public uint registration_id = 0U;
+
+		public signal void status_notifier_item_registered (string item);
+		public signal void status_notifier_item_unregistered (string item);
+		public signal void status_notifier_host_registered ();
+		public signal void status_notifier_host_unregistered ();
+
+		public LocalStatusNotifierWatcher (DBusConnection connection)
+		{
+			this.connection = connection;
+			registered_items = new Gee.HashSet<string> ();
+			name_owner_changed_id = connection.signal_subscribe ("org.freedesktop.DBus",
+				"org.freedesktop.DBus", "NameOwnerChanged", "/org/freedesktop/DBus", null,
+				DBusSignalFlags.NONE, on_name_owner_changed);
+		}
+
+		~LocalStatusNotifierWatcher ()
+		{
+			if (connection != null && name_owner_changed_id > 0U)
+				connection.signal_unsubscribe (name_owner_changed_id);
+		}
+
+		public string[] registered_status_notifier_items {
+			owned get {
+				var result = new string[registered_items.size];
+				var index = 0;
+				foreach (var item in registered_items)
+					result[index++] = item;
+				return result;
+			}
+		}
+
+		public bool is_status_notifier_host_registered {
+			get { return true; }
+		}
+
+		public int protocol_version {
+			get { return 0; }
+		}
+
+		public void register_status_notifier_item (string service_or_path, GLib.BusName sender)
+		{
+			string service;
+			string path;
+			if (service_or_path.has_prefix ("/")) {
+				service = sender;
+				path = service_or_path;
+			} else {
+				service = service_or_path;
+				path = "/StatusNotifierItem";
+			}
+
+			if (service == "")
+				return;
+			var identifier = service + path;
+			if (registered_items.contains (identifier))
+				return;
+
+			// Defer the synchronous validity probe out of the method-call
+			// dispatch so the bus reply can be processed safely.
+			var probe_service = service;
+			var probe_path = path;
+			Idle.add (() => {
+				validate_with_retry (probe_service, probe_path, 0U);
+				return false;
+			});
+		}
+
+		public void register_status_notifier_host (string service, GLib.BusName sender)
+		{
+			status_notifier_host_registered ();
+		}
+
+		void validate_with_retry (string service, string path, uint attempt)
+		{
+			var identifier = service + path;
+			if (registered_items.contains (identifier))
+				return;
+			if (is_valid_item (service, path)) {
+				registered_items.add (identifier);
+				status_notifier_item_registered (identifier);
+				return;
+			}
+			if (attempt >= MAX_VALIDATION_ATTEMPTS)
+				return;
+			Timeout.add (VALIDATION_RETRY_MS, () => {
+				validate_with_retry (service, path, attempt + 1);
+				return false;
+			});
+		}
+
+		bool is_valid_item (string service, string path)
+		{
+			try {
+				var proxy = new DBusProxy.for_bus_sync (BusType.SESSION, DBusProxyFlags.NONE,
+					null, service, path, ITEM_INTERFACE);
+				if (proxy.g_name_owner == null)
+					return false;
+				return proxy.get_cached_property ("Id") != null
+					|| proxy.get_cached_property ("Status") != null
+					|| proxy.get_cached_property ("IconName") != null;
+			} catch (Error e) {
+				debug ("Rejecting status notifier item %s%s: %s", service, path, e.message);
+				return false;
+			}
+		}
+
+		[CCode (instance_pos = -1)]
+		void on_name_owner_changed (DBusConnection connection, string? sender_name,
+			string object_path, string interface_name, string signal_name, Variant parameters)
+		{
+			var name = parameters.get_child_value (0).get_string ();
+			var new_owner = parameters.get_child_value (2).get_string ();
+			if (new_owner != "")
+				return;
+
+			var prefix = name + "/";
+			var removed = new Gee.ArrayList<string> ();
+			foreach (var item in registered_items)
+				if (item.has_prefix (prefix))
+					removed.add (item);
+
+			foreach (var item in removed) {
+				registered_items.remove (item);
+				status_notifier_item_unregistered (item);
+			}
 		}
 	}
 

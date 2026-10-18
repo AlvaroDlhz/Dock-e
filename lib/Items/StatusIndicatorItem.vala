@@ -455,8 +455,20 @@ namespace Plank
 			switch (Kind) {
 			case StatusIndicatorKind.CLOCK:
 				var now = new DateTime.now_local ();
-				draw_text_right_at (cr, surface, now.format ("%H:%M"), size * 0.245, size * 0.34);
-				draw_text_right_at (cr, surface, now.format ("%d/%m/%y"), size * 0.245, size * 0.70);
+				if (surface.Width > surface.Height * 1.3) {
+					// Wide slot: time over date, both centered with the same font
+					// size and a single line each, so nothing gets squeezed.
+					var padding = size_for_text_padding (surface);
+					var available_width = surface.Width - 2.0 * padding;
+					var font_size = double.min (size * 0.38, available_width / 3.6);
+					draw_text_centered_fit (cr, now.format ("%H:%M"),
+						available_width, font_size, surface.Width / 2.0, surface.Height * 0.28);
+					draw_text_centered_fit (cr, now.format ("%d/%m/%y"),
+						available_width, font_size, surface.Width / 2.0, surface.Height * 0.74);
+				} else {
+					draw_text_right_at (cr, surface, now.format ("%H:%M"), size * 0.245, size * 0.34);
+					draw_text_right_at (cr, surface, now.format ("%d/%m/%y"), size * 0.245, size * 0.70);
+				}
 				break;
 			case StatusIndicatorKind.DATE:
 				draw_text (cr, surface, new DateTime.now_local ().format ("%d/%m"), size * 0.24);
@@ -509,6 +521,21 @@ namespace Plank
 			cr.text_extents (text, out extents);
 			cr.move_to ((surface.Width - extents.width) / 2.0 - extents.x_bearing,
 				(surface.Height - extents.height) / 2.0 - extents.y_bearing);
+			cr.show_text (text);
+		}
+
+		void draw_text_centered_fit (Cairo.Context cr, string text, double max_width,
+			double font_size, double center_x, double center_y)
+		{
+			Cairo.TextExtents extents;
+			cr.select_font_face ("Sans", Cairo.FontSlant.NORMAL, Cairo.FontWeight.BOLD);
+			cr.set_font_size (font_size);
+			cr.text_extents (text, out extents);
+			if (extents.width > max_width && extents.width > 0.0)
+				cr.set_font_size (font_size * max_width / extents.width);
+			cr.text_extents (text, out extents);
+			cr.move_to (center_x - extents.width / 2.0 - extents.x_bearing,
+				center_y - extents.height / 2.0 - extents.y_bearing);
 			cr.show_text (text);
 		}
 

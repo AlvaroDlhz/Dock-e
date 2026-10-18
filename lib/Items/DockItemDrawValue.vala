@@ -48,6 +48,7 @@ namespace Plank
 		public PointD center;
 		public PointD static_center;
 		public double icon_size;
+		public double icon_width;
 		
 		public Gdk.Rectangle hover_region;
 		public Gdk.Rectangle draw_region;

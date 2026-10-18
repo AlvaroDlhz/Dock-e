@@ -259,11 +259,24 @@ namespace Plank
 			window.update_icon_regions ();
 		}
 
-		static bool is_side_section_item (DockItem item)
+		internal static bool is_control_section_item (DockItem item)
 		{
+			// Left (leading) side section: workspace switcher and any docked tray
+			// status/overflow icons.
+			return item is WorkspaceItem || item is TrayStatusItem || item is TrayOverflowItem;
+		}
+
+		internal static bool is_status_section_item (DockItem item)
+		{
+			// Right (trailing) side section: the update and background-applications
+			// buttons followed by the system indicators.
 			return item is StatusIndicatorItem || item is UpdateManagerItem
-				|| item is TrayToggleItem || item is TrayStatusItem
-				|| item is TrayOverflowItem || item is WorkspaceItem;
+				|| item is TrayToggleItem;
+		}
+
+		internal static bool is_side_section_item (DockItem item)
+		{
+			return is_control_section_item (item) || is_status_section_item (item);
 		}
 		
 		protected override void connect_element (DockElement element)
