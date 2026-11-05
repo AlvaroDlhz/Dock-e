@@ -9,7 +9,6 @@ namespace Plank
 		const int RESULT_LIMIT = 9;
 		const int PANEL_WIDTH = 580;
 		const int PANEL_HEIGHT = 580;
-		const int PANEL_GAP = 10;
 		const int ANIMATION_TIME = 140;
 
 		unowned DockController controller;
@@ -327,7 +326,7 @@ namespace Plank
 			}
 			opacity = 1.0;
 			show ();
-			position_over_anchor ();
+			position_centered ();
 			present ();
 		}
 
@@ -435,7 +434,7 @@ namespace Plank
 			present ();
 			search_entry.grab_focus ();
 			Idle.add (() => {
-				position_over_anchor ();
+				position_centered ();
 				int slide_x, slide_y;
 				controller.position_manager.get_popup_slide_offset (8, out slide_x, out slide_y);
 				move (panel_x + slide_x, panel_y + slide_y);
@@ -486,7 +485,7 @@ namespace Plank
 			if (result_list.get_row_at_index (0) != null)
 				result_list.select_row (result_list.get_row_at_index (0));
 			if (visible)
-				Idle.add (() => { position_over_anchor (); return false; });
+				Idle.add (() => { position_centered (); return false; });
 		}
 
 		string searchable_text (AppInfo app)
@@ -894,7 +893,7 @@ namespace Plank
 			}
 		}
 
-		void position_over_anchor ()
+		void position_centered ()
 		{
 			if (anchor_item == null)
 				return;
@@ -905,8 +904,8 @@ namespace Plank
 			var monitor = screen.get_monitor_at_point (
 				bar_rect.x + bar_rect.width / 2, bar_rect.y + bar_rect.height / 2);
 			var workarea = screen.get_monitor_workarea (monitor);
-			controller.position_manager.get_popup_position (bar_rect, width, height,
-				PANEL_GAP, workarea, out panel_x, out panel_y);
+			PositionManager.calculate_centered_popup_position (workarea, width, height,
+				out panel_x, out panel_y);
 			move (panel_x, panel_y);
 		}
 

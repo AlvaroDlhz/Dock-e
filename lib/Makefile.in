@@ -199,16 +199,17 @@ am__objects_5 = DBusManager.lo DockController.lo DockPreferences.lo \
 	Items/PlaceholderDockItem.lo Items/PlankDockItem.lo \
 	Items/StatusIndicatorItem.lo Items/UpdateManagerItem.lo \
 	Items/TrayToggleItem.lo Items/TransientDockItem.lo \
-	Items/WorkspaceItem.lo Items/LauncherItem.lo Services/Environment.lo \
-	Services/EnvironmentSettings.lo Services/Logger.lo \
-	Services/Paths.lo Services/Preferences.lo Services/Settings.lo \
-	Services/System.lo Services/SuperKeyBinding.lo \
-	Services/Unity.lo Services/Worker.lo \
-	Widgets/CompositedWindow.lo Widgets/DockWindow.lo \
-	Widgets/StatusPanelWindow.lo Widgets/WindowPreviewWindow.lo \
-	Widgets/WorkspacePreviewWindow.lo \
-	Widgets/HoverWindow.lo Widgets/LauncherWindow.lo \
-	Widgets/PoofWindow.lo Widgets/PreferencesWindow.lo \
+	Items/WorkspaceItem.lo Items/LauncherItem.lo \
+	Services/Environment.lo Services/EnvironmentSettings.lo \
+	Services/Logger.lo Services/Paths.lo Services/Preferences.lo \
+	Services/Settings.lo Services/System.lo \
+	Services/SuperKeyBinding.lo Services/Unity.lo \
+	Services/Worker.lo Widgets/CompositedWindow.lo \
+	Widgets/DockWindow.lo Widgets/StatusPanelWindow.lo \
+	Widgets/WindowPreviewWindow.lo \
+	Widgets/WorkspacePreviewWindow.lo Widgets/HoverWindow.lo \
+	Widgets/LauncherWindow.lo Widgets/PoofWindow.lo \
+	Widgets/PreferencesWindow.lo \
 	Widgets/TitledSeparatorMenuItem.lo $(am__objects_1)
 nodist_libplank_la_OBJECTS = $(am__objects_3) $(am__objects_4) \
 	$(am__objects_5) $(am__objects_1)
@@ -1267,6 +1268,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/TransientDockItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/TrayToggleItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/UpdateManagerItem.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/WorkspaceItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Environment.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/EnvironmentSettings.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Logger.Plo@am__quote@ # am--include-marker
@@ -1299,6 +1301,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/StatusPanelWindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/WindowPreviewWindow.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/WorkspacePreviewWindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/libplank_internal_la-DockletViewModel.Plo@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -1885,6 +1888,7 @@ distclean: distclean-am
 	-rm -f Items/$(DEPDIR)/TransientDockItem.Plo
 	-rm -f Items/$(DEPDIR)/TrayToggleItem.Plo
 	-rm -f Items/$(DEPDIR)/UpdateManagerItem.Plo
+	-rm -f Items/$(DEPDIR)/WorkspaceItem.Plo
 	-rm -f Services/$(DEPDIR)/Environment.Plo
 	-rm -f Services/$(DEPDIR)/EnvironmentSettings.Plo
 	-rm -f Services/$(DEPDIR)/Logger.Plo
@@ -1917,6 +1921,7 @@ distclean: distclean-am
 	-rm -f Widgets/$(DEPDIR)/StatusPanelWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo
 	-rm -f Widgets/$(DEPDIR)/WindowPreviewWindow.Plo
+	-rm -f Widgets/$(DEPDIR)/WorkspacePreviewWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/libplank_internal_la-DockletViewModel.Plo
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -2010,6 +2015,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Items/$(DEPDIR)/TransientDockItem.Plo
 	-rm -f Items/$(DEPDIR)/TrayToggleItem.Plo
 	-rm -f Items/$(DEPDIR)/UpdateManagerItem.Plo
+	-rm -f Items/$(DEPDIR)/WorkspaceItem.Plo
 	-rm -f Services/$(DEPDIR)/Environment.Plo
 	-rm -f Services/$(DEPDIR)/EnvironmentSettings.Plo
 	-rm -f Services/$(DEPDIR)/Logger.Plo
@@ -2042,6 +2048,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Widgets/$(DEPDIR)/StatusPanelWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo
 	-rm -f Widgets/$(DEPDIR)/WindowPreviewWindow.Plo
+	-rm -f Widgets/$(DEPDIR)/WorkspacePreviewWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/libplank_internal_la-DockletViewModel.Plo
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic

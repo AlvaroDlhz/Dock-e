@@ -5,16 +5,34 @@ set -eu
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 PROJECT_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
 BUILD_DIR=${DOCK_E_BUILD_DIR:-"$PROJECT_DIR/.build"}
-DOCK_E="$BUILD_DIR/src/.libs/plank"
-LIB_DIR="$BUILD_DIR/lib/.libs"
 
-if [ ! -x "$DOCK_E" ]; then
-	echo "Dock-E has not been built yet. Run scripts/build-dock-e first." >&2
+# Try the configured build dir first, else use the in-tree build.
+if [ -x "$BUILD_DIR/src/.libs/plank" ]; then
+	DOCK_E="$BUILD_DIR/src/.libs/plank"
+	LIB_DIR="$BUILD_DIR/lib/.libs"
+	GSETTINGS_SCHEMA_DIR="$BUILD_DIR/data"
+	PLANK_DOCKLET_DIRS="$BUILD_DIR/docklets"
+elif [ -x "$PROJECT_DIR/src/.libs/plank" ]; then
+	DOCK_E="$PROJECT_DIR/src/.libs/plank"
+	LIB_DIR="$PROJECT_DIR/lib/.libs"
+	GSETTINGS_SCHEMA_DIR="$PROJECT_DIR/data"
+	PLANK_DOCKLET_DIRS="$PROJECT_DIR/docklets"
+else
+	echo "Dock-E has not been built yet." >&2
+	echo "  tried: $BUILD_DIR/src/.libs/plank" >&2
+	echo "  tried: $PROJECT_DIR/src/.libs/plank" >&2
+	echo "Run scripts/build-dock-e first." >&2
 	exit 1
 fi
 
-export LD_LIBRARY_PATH="$LIB_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-export GSETTINGS_SCHEMA_DIR="$BUILD_DIR/data"
-export PLANK_DOCKLET_DIRS="$BUILD_DIR/docklets"
+if [ -d "$LIB_DIR" ]; then
+	export LD_LIBRARY_PATH="$LIB_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+fi
+if [ -d "$GSETTINGS_SCHEMA_DIR" ]; then
+	export GSETTINGS_SCHEMA_DIR="$GSETTINGS_SCHEMA_DIR"
+fi
+if [ -d "$PLANK_DOCKLET_DIRS" ]; then
+	export PLANK_DOCKLET_DIRS="$PLANK_DOCKLET_DIRS"
+fi
 
 exec "$DOCK_E" -n dev -d "$@"

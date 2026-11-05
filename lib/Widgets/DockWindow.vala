@@ -513,7 +513,7 @@ namespace Plank
 				if (y < rect.y || y >= rect.y + rect.height || x < rect.x || x >= rect.x + rect.width)
 					continue;
 				if (drag_item == fixed_item)
-					break;
+					continue;
 				set_hovered_provider (fixed_item.Container as DockItemProvider);
 				set_hovered (fixed_item);
 				return true;

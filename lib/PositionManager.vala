@@ -1721,6 +1721,13 @@ namespace Plank
 				int.max (workarea.y + 8, workarea.y + workarea.height - popup_height - 8));
 		}
 
+		public static void calculate_centered_popup_position (Gdk.Rectangle workarea,
+			int popup_width, int popup_height, out int x, out int y)
+		{
+			x = workarea.x + int.max (0, (workarea.width - popup_width) / 2);
+			y = workarea.y + int.max (0, (workarea.height - popup_height) / 2);
+		}
+
 		public void get_popup_slide_offset (int amount, out int x, out int y)
 		{
 			x = 0;

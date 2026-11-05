@@ -27,6 +27,7 @@ namespace PlankTests
 		Test.add_func ("/Widgets/PoofWindow/basics", poof_window_basics);
 		Test.add_func ("/Widgets/HoverWindow/basics", hover_window_basics);
 		Test.add_func ("/Widgets/PopupPosition/all-edges", popup_position_all_edges);
+		Test.add_func ("/Widgets/PopupPosition/centered", popup_position_centered);
 	}
 	
 	void composited_window_basics ()
@@ -125,5 +126,22 @@ namespace PlankTests
 			{ 940, 0, 60, 800 }, { 940, 350, 60, 50 }, 200, 100, 10,
 			workarea, out x, out y);
 		assert (x == 730 && y == 325);
+	}
+
+	void popup_position_centered ()
+	{
+		int x, y;
+
+		PositionManager.calculate_centered_popup_position (
+			{ 0, 0, 1000, 800 }, 200, 100, out x, out y);
+		assert (x == 400 && y == 350);
+
+		PositionManager.calculate_centered_popup_position (
+			{ 100, 50, 1000, 800 }, 200, 100, out x, out y);
+		assert (x == 500 && y == 400);
+
+		PositionManager.calculate_centered_popup_position (
+			{ 0, 0, 100, 80 }, 200, 100, out x, out y);
+		assert (x == 0 && y == 0);
 	}
 }
