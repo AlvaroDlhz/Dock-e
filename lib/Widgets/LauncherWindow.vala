@@ -77,14 +77,27 @@ namespace Plank
 			var navbar = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
 			navbar.get_style_context ().add_class ("launcher-navbar");
 			var user_name = Environment.get_user_name ();
-			var user_identity = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 8);
+			var user_identity = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
 			user_identity.get_style_context ().add_class ("launcher-user-identity");
 			Accessibility.describe (user_identity, _("Current user: %s").printf (user_name));
 			user_identity.pack_start (create_user_avatar (), false, false, 0);
-			var user_label = new Gtk.Label (user_name) { xalign = 0.0f };
-			user_label.get_style_context ().add_class ("launcher-user-name");
-			user_identity.pack_start (user_label, false, false, 0);
 			navbar.pack_start (user_identity, false, false, 0);
+
+			var tabs = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
+			tabs.homogeneous = false;
+			tabs.valign = Gtk.Align.CENTER;
+			tabs.get_style_context ().add_class ("launcher-tabs");
+			frequent_tab = create_tab_button (_("Frequently used"));
+			all_tab = create_tab_button (_("All"));
+			Accessibility.describe (frequent_tab, _("Frequently used applications"));
+			Accessibility.describe (all_tab, _("All applications"));
+			frequent_tab.active = true;
+			frequent_tab.clicked.connect (() => select_tab (false));
+			all_tab.clicked.connect (() => select_tab (true));
+			tabs.pack_start (frequent_tab, true, true, 0);
+			tabs.pack_start (all_tab, true, true, 0);
+			navbar.pack_start (tabs, false, false, 0);
+
 			var power_button = new Gtk.Button ();
 			power_button.tooltip_text = _("Session and power options");
 			Accessibility.describe (power_button, _("Session and power options"),
@@ -107,6 +120,26 @@ namespace Plank
 			navbar.pack_end (power_button, false, false, 0);
 			panel.pack_start (navbar, false, false, 0);
 
+			var search_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
+			search_box.margin = 10;
+			search_box.get_style_context ().add_class ("launcher-search");
+			search_entry = new Gtk.Entry ();
+			search_entry.placeholder_text = _("Search applications…");
+			Accessibility.describe (search_entry, _("Search applications"),
+				_("Type to filter the application list"));
+			search_entry.has_frame = false;
+			search_entry.changed.connect (refresh_results);
+			search_entry.focus_in_event.connect (() => {
+				search_box.get_style_context ().add_class ("launcher-search-focused");
+				return false;
+			});
+			search_entry.focus_out_event.connect (() => {
+				search_box.get_style_context ().remove_class ("launcher-search-focused");
+				return false;
+			});
+			search_box.pack_start (search_entry, true, true, 0);
+			panel.pack_start (search_box, false, false, 0);
+
 			notice_revealer = new Gtk.Revealer ();
 			notice_revealer.transition_type = Gtk.RevealerTransitionType.NONE;
 			var notice = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 7);
@@ -125,19 +158,6 @@ namespace Plank
 			notice.pack_end (dismiss_notice, false, false, 0);
 			notice_revealer.add (notice);
 			panel.pack_start (notice_revealer, false, false, 0);
-
-			var tabs = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
-			tabs.get_style_context ().add_class ("launcher-tabs");
-			frequent_tab = new Gtk.ToggleButton.with_label (_("Frequently used"));
-			all_tab = new Gtk.ToggleButton.with_label (_("All"));
-			Accessibility.describe (frequent_tab, _("Frequently used applications"));
-			Accessibility.describe (all_tab, _("All applications"));
-			frequent_tab.active = true;
-			frequent_tab.clicked.connect (() => select_tab (false));
-			all_tab.clicked.connect (() => select_tab (true));
-			tabs.pack_start (frequent_tab, true, true, 0);
-			tabs.pack_start (all_tab, true, true, 0);
-			panel.pack_start (tabs, false, false, 0);
 
 			result_list = new Gtk.ListBox ();
 			Accessibility.describe (result_list, _("Application results"));
@@ -162,26 +182,6 @@ namespace Plank
 			result_scroll.get_style_context ().add_class ("launcher-results-scroll");
 			result_scroll.add (result_list);
 			panel.pack_start (result_scroll, true, true, 0);
-
-			var search_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
-			search_box.margin = 10;
-			search_box.get_style_context ().add_class ("launcher-search");
-			search_entry = new Gtk.Entry ();
-			search_entry.placeholder_text = _("Search applications…");
-			Accessibility.describe (search_entry, _("Search applications"),
-				_("Type to filter the application list"));
-			search_entry.has_frame = false;
-			search_entry.changed.connect (refresh_results);
-			search_entry.focus_in_event.connect (() => {
-				search_box.get_style_context ().add_class ("launcher-search-focused");
-				return false;
-			});
-			search_entry.focus_out_event.connect (() => {
-				search_box.get_style_context ().remove_class ("launcher-search-focused");
-				return false;
-			});
-			search_box.pack_start (search_entry, true, true, 0);
-			panel.pack_end (search_box, false, false, 0);
 
 			key_press_event.connect (handle_key_press);
 			button_press_event.connect (() => {
@@ -214,9 +214,10 @@ namespace Plank
 
 		Gtk.Widget create_user_avatar ()
 		{
-			const int avatar_size = 28;
+			const int avatar_size = 72;
+			const double corner_radius = 8.0;
 			var fallback = new Gtk.Image.from_icon_name ("avatar-default-symbolic", Gtk.IconSize.BUTTON);
-			fallback.pixel_size = 22;
+			fallback.pixel_size = 56;
 			fallback.get_style_context ().add_class ("launcher-user-avatar-fallback");
 
 			var home = Environment.get_home_dir ();
@@ -245,8 +246,16 @@ namespace Plank
 					cr.set_source_rgba (0.0, 0.0, 0.0, 0.0);
 					cr.paint ();
 					cr.set_operator (Cairo.Operator.OVER);
-					cr.arc (avatar_size / 2.0, avatar_size / 2.0,
-						avatar_size / 2.0, 0.0, 2.0 * Math.PI);
+					cr.new_sub_path ();
+					cr.arc (avatar_size - corner_radius, corner_radius,
+						corner_radius, -Math.PI / 2.0, 0.0);
+					cr.arc (avatar_size - corner_radius, avatar_size - corner_radius,
+						corner_radius, 0.0, Math.PI / 2.0);
+					cr.arc (corner_radius, avatar_size - corner_radius,
+						corner_radius, Math.PI / 2.0, Math.PI);
+					cr.arc (corner_radius, corner_radius,
+						corner_radius, Math.PI, 3.0 * Math.PI / 2.0);
+					cr.close_path ();
 					cr.clip ();
 					Gdk.cairo_set_source_pixbuf (cr, scaled, 0.0, 0.0);
 					cr.paint ();
@@ -260,6 +269,25 @@ namespace Plank
 			}
 
 			return fallback;
+		}
+
+		Gtk.ToggleButton create_tab_button (string label_text)
+		{
+			var button = new Gtk.ToggleButton ();
+			button.valign = Gtk.Align.CENTER;
+			var content = new Gtk.Box (Gtk.Orientation.VERTICAL, 3);
+			content.halign = Gtk.Align.CENTER;
+			content.valign = Gtk.Align.CENTER;
+			var label = new Gtk.Label (label_text);
+			label.halign = Gtk.Align.CENTER;
+			content.pack_start (label, false, false, 0);
+			var dot = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+			dot.set_size_request (5, 5);
+			dot.halign = Gtk.Align.CENTER;
+			dot.get_style_context ().add_class ("launcher-tab-dot");
+			content.pack_start (dot, false, false, 0);
+			button.add (content);
+			return button;
 		}
 
 		void select_tab (bool all)
@@ -918,23 +946,26 @@ namespace Plank
 			var css = ".plank-native-launcher { background-color: transparent; }";
 			css += ".plank-native-launcher .launcher-panel { background-color: rgb(%d,%d,%d); border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; padding: 5px; box-shadow: none; }"
 				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255));
-			css += ".plank-native-launcher .launcher-tabs { margin: 7px 7px 5px 7px; }";
-			css += ".plank-native-launcher .launcher-navbar { min-height: 34px; margin: 6px 7px 0 7px; }";
+			css += ".plank-native-launcher .launcher-tabs { margin: 0 0 0 16px; }";
+			css += ".plank-native-launcher .launcher-navbar { min-height: 46px; margin: 10px 9px 0 9px; }";
 			css += ".plank-native-launcher .launcher-user-identity { color: white; }";
-			css += ".plank-native-launcher .launcher-user-name { color: rgba(255,255,255,0.88); font-size: 13px; font-weight: bold; }";
 			css += ".plank-native-launcher .launcher-user-avatar { margin: 1px 0; }";
-			css += ".plank-native-launcher .launcher-user-avatar-fallback { color: rgba(255,255,255,0.78); background-color: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 3px; }";
-			css += ".plank-native-launcher .launcher-power-button { color: rgba(255,255,255,0.68); background: transparent; background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 7px; }";
+			css += ".plank-native-launcher .launcher-user-avatar-fallback { color: rgba(255,255,255,0.78); background-color: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 7px; }";
+			css += ".plank-native-launcher .launcher-power-button { color: rgba(255,255,255,0.68); background: transparent; background-image: none; border: none; border-radius: 10px; box-shadow: none; padding: 7px; }";
 			css += ".plank-native-launcher .launcher-power-button:hover { color: white; background-color: rgba(255,255,255,0.09); }";
 			css += ".plank-native-launcher .launcher-notice { color: white; background-color: rgba(224,70,70,0.20); border: 1px solid rgba(255,120,120,0.30); border-radius: 8px; padding: 7px 9px; margin: 2px 7px 5px 7px; }";
 			css += ".plank-native-launcher .launcher-notice-dismiss { color: white; background: transparent; background-image: none; border: none; box-shadow: none; padding: 2px; }";
 			css += ".plank-native-launcher .launcher-notice-dismiss:hover { background-color: rgba(255,255,255,0.12); border-radius: 5px; }";
 			css += ".plank-native-launcher.keyboard-navigation button:focus { color: white; box-shadow: 0 0 0 2px rgba(115,210,22,0.85); }";
 			css += ".plank-native-launcher.keyboard-navigation row:focus { box-shadow: inset 0 0 0 2px rgba(115,210,22,0.85); }";
-			css += ".plank-native-launcher .launcher-tabs button { color: rgba(255,255,255,0.58); background: transparent; background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 6px; }";
-			css += ".plank-native-launcher .launcher-tabs button:hover { color: rgba(255,255,255,0.82); background-color: rgba(255,255,255,0.06); }";
-			css += ".plank-native-launcher .launcher-tabs button:checked { color: white; background-color: rgba(255,255,255,0.13); }";
-			css += ".plank-native-launcher .launcher-results-scroll { background: transparent; border: none; box-shadow: none; }";
+			css += ".plank-native-launcher .launcher-tabs button { color: rgba(255,255,255,0.50); background: transparent; background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 8px 14px; min-width: 0; min-height: 0; font-size: 13px; }";
+			css += ".plank-native-launcher .launcher-tabs button:hover { color: rgba(255,255,255,0.80); }";
+			css += ".plank-native-launcher .launcher-tabs button:checked { color: white; }";
+			css += ".plank-native-launcher .launcher-tabs button .launcher-tab-dot { min-width: 5px; min-height: 5px; background-color: transparent; border-radius: 3px; }";
+			css += ".plank-native-launcher .launcher-tabs button:checked .launcher-tab-dot { background-color: #73d216; }";
+			css += ".plank-native-launcher .launcher-results-scroll { background: transparent; border: none; box-shadow: none; outline-style: none; outline-width: 0; }";
+			css += ".plank-native-launcher .launcher-results-scroll undershoot.top, .plank-native-launcher .launcher-results-scroll undershoot.bottom, .plank-native-launcher .launcher-results-scroll undershoot.left, .plank-native-launcher .launcher-results-scroll undershoot.right { background-image: none; background-color: transparent; border: none; box-shadow: none; }";
+			css += ".plank-native-launcher .launcher-results-scroll list, .plank-native-launcher .launcher-results-scroll row { outline-style: none; outline-width: 0; }";
 			css += ".plank-native-launcher scrollbar { background: transparent; border: none; }";
 			css += ".plank-native-launcher scrollbar slider { min-width: 4px; min-height: 28px; background-color: rgba(255,255,255,0.18); border-radius: 4px; }";
 			css += ".plank-native-launcher .launcher-alpha-header { margin: 8px 12px 4px 12px; }";
