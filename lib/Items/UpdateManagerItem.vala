@@ -56,9 +56,23 @@ namespace Plank
 			var count = update_service.update_count;
 			Count = count;
 			CountVisible = count > 0;
-			Text = count > 0
-				? ngettext ("%d update available", "%d updates available", count).printf (count)
-				: _("Update Manager");
+			if (!update_service.supported) {
+				Text = _("Update status unavailable");
+			} else if (update_service.checking) {
+				Text = _("Checking for updates…");
+			} else if (update_service.last_error != "") {
+				Text = count > 0
+					? ngettext ("%d update available — status check failed",
+						"%d updates available — status check failed", count).printf (count)
+					: _("Could not check for updates");
+			} else if (!update_service.has_checked) {
+				Text = _("Checking for updates…");
+			} else if (count > 0) {
+				Text = ngettext ("%d update available", "%d updates available", count)
+					.printf (count);
+			} else {
+				Text = _("Up to date");
+			}
 		}
 
 		protected override void draw_icon (Surface surface)
@@ -137,24 +151,34 @@ namespace Plank
 		public override Gee.ArrayList<Gtk.MenuItem> get_menu_items ()
 		{
 			var items = new Gee.ArrayList<Gtk.MenuItem> ();
-			var open = create_menu_item (_("Open _Update Manager"),
+			var open = create_menu_item (_("_Open Update Manager"),
 				"software-update-available-symbolic");
 			open.activate.connect (launch);
 			items.add (open);
-			if (update_service.checking) {
-				var checking = create_menu_item (_("Checking for updates…"),
-					"view-refresh-symbolic");
-				checking.sensitive = false;
-				items.add (checking);
-			} else if (update_service.last_error != "") {
-				var unavailable = create_menu_item (_("Update status unavailable"),
+
+			Gtk.MenuItem status;
+			if (!update_service.supported || update_service.last_error != "") {
+				status = create_menu_item (update_service.supported
+					? _("Could not check for updates") : _("Update status unavailable"),
 					"dialog-warning-symbolic");
-				unavailable.sensitive = false;
-				items.add (unavailable);
-				var retry = create_menu_item (_("Check _Again"), "view-refresh-symbolic");
-				retry.activate.connect (() => update_service.refresh.begin ());
-				items.add (retry);
+			} else if (update_service.checking || !update_service.has_checked) {
+				status = create_menu_item (_("Checking for updates…"),
+					"view-refresh-symbolic");
+			} else if (update_service.update_count > 0) {
+				status = create_menu_item (ngettext ("%d update available",
+					"%d updates available", update_service.update_count)
+					.printf (update_service.update_count), "software-update-available-symbolic");
+			} else {
+				status = create_menu_item (_("System is up to date"),
+					"emblem-ok-symbolic");
 			}
+			status.sensitive = false;
+			items.add (status);
+
+			var check = create_menu_item (_("_Check for Updates"), "view-refresh-symbolic");
+			check.sensitive = update_service.supported && !update_service.checking;
+			check.activate.connect (() => update_service.refresh.begin ());
+			items.add (check);
 			return items;
 		}
 	}

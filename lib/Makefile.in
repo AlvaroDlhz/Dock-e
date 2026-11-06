@@ -153,6 +153,7 @@ am__objects_2 = libplank_internal_la-InternalConsts.lo \
 	Services/libplank_internal_la-AudioService.lo \
 	Services/libplank_internal_la-BluetoothService.lo \
 	Services/libplank_internal_la-BrightnessService.lo \
+	Services/libplank_internal_la-CalculatorService.lo \
 	Services/libplank_internal_la-CommandRunner.lo \
 	Services/libplank_internal_la-NetworkService.lo \
 	Services/libplank_internal_la-PowerService.lo \
@@ -197,15 +198,14 @@ am__objects_5 = DBusManager.lo DockController.lo DockPreferences.lo \
 	Items/DockItemPreferences.lo Items/DockElement.lo \
 	Items/Enums.lo Items/FileDockItem.lo \
 	Items/PlaceholderDockItem.lo Items/PlankDockItem.lo \
-	Items/UpdateManagerItem.lo \
-	Items/TrayToggleItem.lo Items/TransientDockItem.lo \
-	Items/WorkspaceItem.lo Items/LauncherItem.lo \
-	Services/Environment.lo Services/EnvironmentSettings.lo \
-	Services/Logger.lo Services/Paths.lo Services/Preferences.lo \
-	Services/Settings.lo Services/System.lo \
-	Services/SuperKeyBinding.lo Services/Unity.lo \
-	Services/Worker.lo Widgets/CompositedWindow.lo \
-	Widgets/DockWindow.lo \
+	Items/UpdateManagerItem.lo Items/TrayToggleItem.lo \
+	Items/TransientDockItem.lo Items/WorkspaceItem.lo \
+	Items/LauncherItem.lo Services/Environment.lo \
+	Services/EnvironmentSettings.lo Services/Logger.lo \
+	Services/Paths.lo Services/Preferences.lo Services/Settings.lo \
+	Services/System.lo Services/SuperKeyBinding.lo \
+	Services/Unity.lo Services/Worker.lo \
+	Widgets/CompositedWindow.lo Widgets/DockWindow.lo \
 	Widgets/WindowPreviewWindow.lo \
 	Widgets/WorkspacePreviewWindow.lo Widgets/HoverWindow.lo \
 	Widgets/LauncherWindow.lo Widgets/PoofWindow.lo \
@@ -281,6 +281,7 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-BrightnessService.Plo \
+	Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-NetworkService.Plo \
@@ -883,6 +884,7 @@ libplank_internal_la_VALASOURCES = \
 	Services/AudioService.vala \
 	Services/BluetoothService.vala \
 	Services/BrightnessService.vala \
+	Services/CalculatorService.vala \
 	Services/CommandRunner.vala \
 	Services/NetworkService.vala \
 	Services/PowerService.vala \
@@ -1028,6 +1030,8 @@ Services/libplank_internal_la-AudioService.lo:  \
 Services/libplank_internal_la-BluetoothService.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-BrightnessService.lo:  \
+	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
+Services/libplank_internal_la-CalculatorService.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-CommandRunner.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
@@ -1275,6 +1279,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-BrightnessService.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-NetworkService.Plo@am__quote@ # am--include-marker
@@ -1379,6 +1384,13 @@ Services/libplank_internal_la-BrightnessService.lo: Services/BrightnessService.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/BrightnessService.c' object='Services/libplank_internal_la-BrightnessService.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-BrightnessService.lo `test -f 'Services/BrightnessService.c' || echo '$(srcdir)/'`Services/BrightnessService.c
+
+Services/libplank_internal_la-CalculatorService.lo: Services/CalculatorService.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-CalculatorService.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Tpo -c -o Services/libplank_internal_la-CalculatorService.lo `test -f 'Services/CalculatorService.c' || echo '$(srcdir)/'`Services/CalculatorService.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Tpo Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/CalculatorService.c' object='Services/libplank_internal_la-CalculatorService.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-CalculatorService.lo `test -f 'Services/CalculatorService.c' || echo '$(srcdir)/'`Services/CalculatorService.c
 
 Services/libplank_internal_la-CommandRunner.lo: Services/CommandRunner.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-CommandRunner.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Tpo -c -o Services/libplank_internal_la-CommandRunner.lo `test -f 'Services/CommandRunner.c' || echo '$(srcdir)/'`Services/CommandRunner.c
@@ -1893,6 +1905,7 @@ distclean: distclean-am
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-BrightnessService.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-NetworkService.Plo
@@ -2018,6 +2031,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-BrightnessService.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-NetworkService.Plo

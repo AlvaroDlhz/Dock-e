@@ -28,6 +28,7 @@ namespace Plank
 		public DockController controller { get; construct set; }
 		
 		DockPreferences prefs;
+		Gtk.CssProvider? preferences_css_provider;
 		
 		[GtkChild]
 		Gtk.ComboBoxText cb_hidemode;
@@ -87,8 +88,9 @@ namespace Plank
 		
 		construct
 		{
-			var title = _("Preferences");
-			
+			title = _("Dock Preferences");
+			set_default_size (880, 600);
+			style_preferences_window ();
 			prefs = controller.prefs;
 			
 			init_dock_tab ();
@@ -96,6 +98,33 @@ namespace Plank
 			connect_signals ();
 			
 			notify["controller"].connect (controller_changed);
+		}
+
+		~PreferencesWindow ()
+		{
+			if (preferences_css_provider != null)
+				Gtk.StyleContext.remove_provider_for_screen (get_screen (), preferences_css_provider);
+		}
+
+		void style_preferences_window ()
+		{
+			get_style_context ().add_class ("plank-preferences-window");
+			var css = ".plank-preferences-window GtkStackSidebar { min-width: 170px; background-color: rgba(0,0,0,0.035); border-right: 1px solid rgba(0,0,0,0.10); padding: 10px 6px; }";
+			css += ".plank-preferences-window GtkStackSidebar row { min-height: 34px; margin: 2px 4px; padding: 4px 10px; border-radius: 8px; }";
+			css += ".plank-preferences-window GtkStackSidebar row:hover { background-color: rgba(0,0,0,0.055); }";
+			css += ".plank-preferences-window GtkStackSidebar row:selected { color: @theme_selected_fg_color; background-color: @theme_selected_bg_color; }";
+			css += ".plank-preferences-window GtkGrid { padding: 4px; }";
+			css += ".plank-preferences-window GtkHeaderBar { min-height: 48px; }";
+			css += ".plank-preferences-window GtkIconView { background-color: transparent; }";
+			css += ".plank-preferences-window GtkIconView.view:selected { border-radius: 10px; }";
+			preferences_css_provider = new Gtk.CssProvider ();
+			try {
+				preferences_css_provider.load_from_data (css);
+				Gtk.StyleContext.add_provider_for_screen (get_screen (),
+					preferences_css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+			} catch (Error e) {
+				warning ("Unable to style preferences window: %s", e.message);
+			}
 		}
 		
 		void controller_changed ()
@@ -121,6 +150,8 @@ namespace Plank
 			switch (prop.name) {
 			case "Alignment":
 				cb_alignment.active_id = ((int) prefs.Alignment).to_string ();
+				s_offset.sensitive = (prefs.Alignment == Gtk.Align.CENTER);
+				cb_items_alignment.sensitive = (prefs.Alignment == Gtk.Align.FILL);
 				break;
 			case "CurrentWorkspaceOnly":
 				sw_workspace_only.set_active (prefs.CurrentWorkspaceOnly);
@@ -147,6 +178,10 @@ namespace Plank
 				sw_hide.set_active (hide_none);
 				if (!hide_none)
 					cb_hidemode.active_id = ((int) prefs.HideMode).to_string ();
+				cb_hidemode.sensitive = hide_none;
+				sp_hide_delay.sensitive = hide_none;
+				sp_unhide_delay.sensitive = hide_none;
+				sw_pressure_reveal.sensitive = hide_none;
 				break;
 			case "LockItems":
 				sw_lock_items.set_active (prefs.LockItems);
@@ -158,6 +193,7 @@ namespace Plank
 						cb_display_plug.set_active (pos);
 					pos++;
 				}
+				cb_display_plug.sensitive = (prefs.Monitor != "");
 				break;
 			case "Offset":
 				adj_offset.value = prefs.Offset;

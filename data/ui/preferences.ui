@@ -51,7 +51,7 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
   </object>
   <template class="PlankPreferencesWindow" parent="GtkWindow">
     <property name="can_focus">False</property>
-    <property name="resizable">False</property>
+    <property name="resizable">True</property>
     <property name="window_position">center</property>
     <property name="icon_name">plank</property>
     <property name="type_hint">dialog</property>
@@ -59,34 +59,56 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
     <property name="skip_pager_hint">True</property>
     <property name="gravity">center</property>
     <child>
-      <object class="GtkStack" id="dock_preferences">
+      <object class="GtkBox" id="preferences_layout">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="orientation">horizontal</property>
+        <property name="spacing">0</property>
         <child>
-          <object class="GtkGrid" id="grid_appearance">
+          <object class="GtkStackSidebar" id="dock_preferences_sidebar">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="valign">start</property>
-            <property name="margin_left">16</property>
-            <property name="margin_right">16</property>
-            <property name="margin_top">16</property>
-            <property name="margin_bottom">16</property>
-            <property name="row_spacing">8</property>
-            <property name="column_spacing">12</property>
-            <property name="row_homogeneous">True</property>
+            <property name="stack">dock_preferences</property>
+            <property name="width_request">170</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkStack" id="dock_preferences">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
             <child>
-              <object class="GtkLabel" id="l_alignment">
+              <object class="GtkGrid" id="grid_appearance">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="label" translatable="yes">Alignment:</property>
-                <property name="justify">right</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
+                <property name="valign">start</property>
+                <property name="margin_left">24</property>
+                <property name="margin_right">24</property>
+                <property name="margin_top">24</property>
+                <property name="margin_bottom">24</property>
+                <property name="row_spacing">12</property>
+                <property name="column_spacing">16</property>
+                <property name="row_homogeneous">False</property>
+                <child>
+                  <object class="GtkLabel" id="l_alignment">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="label" translatable="yes">Alignment:</property>
+                    <property name="justify">right</property>
+                    <property name="tooltip_text" translatable="yes">Choose how the dock is positioned along the screen edge</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
             <child>
               <object class="GtkComboBoxText" id="cb_alignment">
                 <property name="visible">True</property>
@@ -109,6 +131,7 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
                 <property name="can_focus">False</property>
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">On Primary Display:</property>
+                <property name="tooltip_text" translatable="yes">Use the primary monitor, or select a specific display</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -150,6 +173,7 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">Icon Alignment:</property>
                 <property name="justify">right</property>
+                <property name="tooltip_text" translatable="yes">Choose where dock icons sit when the bar fills the screen edge</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -180,6 +204,7 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">Icon Size:</property>
                 <property name="justify">right</property>
+                <property name="tooltip_text" translatable="yes">Set the base size of dock icons</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -233,6 +258,7 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">Custom Bar Color:</property>
                 <property name="justify">right</property>
+                <property name="tooltip_text" translatable="yes">Use a custom color instead of the selected theme color</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -272,6 +298,7 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">Bar Opacity:</property>
                 <property name="justify">right</property>
+                <property name="tooltip_text" translatable="yes">Lower opacity reveals background blur when supported by the compositor</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -349,6 +376,7 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
                 <property name="label" translatable="yes">Hide Dock</property>
+                <property name="tooltip_text" translatable="yes">Automatically hide the dock and reveal it when you approach its screen edge</property>
                 <attributes>
                   <attribute name="weight" value="bold"/>
                 </attributes>
@@ -419,6 +447,7 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
                 <property name="can_focus">False</property>
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">Pressure Reveal:</property>
+                <property name="tooltip_text" translatable="yes">Use pressure at the screen edge to reveal the dock</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
@@ -443,6 +472,7 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
                 <property name="label" translatable="yes">Item Management</property>
+                <property name="tooltip_text" translatable="yes">Choose which application windows and dock icons are shown</property>
                 <attributes>
                   <attribute name="weight" value="bold"/>
                 </attributes>
@@ -459,6 +489,7 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
                 <property name="can_focus">False</property>
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">Show Unpinned:</property>
+                <property name="tooltip_text" translatable="yes">Show running applications that are not pinned to the dock</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -484,6 +515,7 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">Restrict to Workspace:</property>
                 <property name="justify">right</property>
+                <property name="tooltip_text" translatable="yes">Only show running applications from the current workspace</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -508,6 +540,7 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
                 <property name="can_focus">False</property>
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">Lock Icons:</property>
+                <property name="tooltip_text" translatable="yes">Prevent dock icons from being moved or removed</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
@@ -532,6 +565,7 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
                 <property name="can_focus">False</property>
                 <property name="halign">end</property>
                 <property name="label" translatable="yes">Window Previews:</property>
+                <property name="tooltip_text" translatable="yes">Show open-window previews when hovering over running applications</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
@@ -594,8 +628,12 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
               <object class="GtkIconView" id="view_docklets">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="margin">6</property>
+                <property name="margin">16</property>
                 <property name="columns">3</property>
+                <property name="item_width">140</property>
+                <property name="row_spacing">16</property>
+                <property name="column_spacing">16</property>
+                <property name="selection_mode">single</property>
               </object>
             </child>
           </object>
@@ -607,6 +645,8 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
         </child>
       </object>
     </child>
+    </object>
+    </child>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="headerbar">
         <property name="visible">True</property>
@@ -616,11 +656,14 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
           <placeholder/>
         </child>
         <child type="title">
-          <object class="GtkStackSwitcher" id="dock_preferences_switcher">
+          <object class="GtkLabel" id="preferences_title">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">center</property>
-            <property name="stack">dock_preferences</property>
+            <property name="label" translatable="yes">Dock Preferences</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
           </object>
         </child>
       </object>

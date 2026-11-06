@@ -1010,7 +1010,9 @@ namespace Plank
 			}
 			
 			if (item.CountVisible) {
-				if (item is UpdateManagerItem || item is TrayToggleItem)
+				if (item is UpdateManagerItem)
+					draw_update_count_badge (surface, icon_size, item.Count);
+				else if (item is TrayToggleItem)
 					draw_green_count_badge (surface, icon_size, item.Count);
 				else
 					theme.draw_item_count (surface, icon_size, urgent_color, item.Count);
@@ -1024,6 +1026,21 @@ namespace Plank
 		}
 
 		void draw_green_count_badge (Surface surface, int icon_size, int64 count)
+		{
+			Color outline_color = { 0.10, 0.26, 0.04, 0.82 };
+			Color fill_color = { 0.45, 0.82, 0.08, 1.0 };
+			draw_count_badge (surface, icon_size, count, outline_color, fill_color);
+		}
+
+		void draw_update_count_badge (Surface surface, int icon_size, int64 count)
+		{
+			Color outline_color = { 0.38, 0.20, 0.02, 0.88 };
+			Color fill_color = { 0.96, 0.58, 0.12, 1.0 };
+			draw_count_badge (surface, icon_size, count, outline_color, fill_color);
+		}
+
+		void draw_count_badge (Surface surface, int icon_size, int64 count,
+			Color outline_color, Color fill_color)
 		{
 			unowned Cairo.Context cr = surface.Context;
 			var text = count.to_string ();
@@ -1042,11 +1059,13 @@ namespace Plank
 			var center_y = y + radius;
 
 			cr.save ();
-			cr.set_source_rgba (0.10, 0.26, 0.04, 0.82);
+			cr.set_source_rgba (outline_color.red, outline_color.green,
+				outline_color.blue, outline_color.alpha);
 			cr.set_line_width (double.max (1.0, icon_size * 0.035));
 			cr.arc (center_x, center_y, radius, 0.0, Math.PI * 2.0);
 			cr.stroke_preserve ();
-			cr.set_source_rgba (0.45, 0.82, 0.08, 1.0);
+			cr.set_source_rgba (fill_color.red, fill_color.green,
+				fill_color.blue, fill_color.alpha);
 			cr.fill ();
 
 			cr.set_source_rgba (1.0, 1.0, 1.0, 1.0);

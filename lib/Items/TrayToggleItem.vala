@@ -787,7 +787,9 @@ namespace Plank
 		unowned DockController controller;
 		TrayToggleItem? current_item;
 		Gtk.ListBox app_list;
+		Gtk.SearchEntry search_entry;
 		Gtk.Label count_label;
+		Gee.ArrayList<TrayStatusItem> applications;
 		Gee.ArrayList<TrayStatusItem> visible_apps;
 		Gtk.Menu? context_menu;
 		bool context_menu_open = false;
@@ -809,6 +811,7 @@ namespace Plank
 		{
 			Object (type: Gtk.WindowType.TOPLEVEL);
 			this.controller = controller;
+			applications = new Gee.ArrayList<TrayStatusItem> ();
 			visible_apps = new Gee.ArrayList<TrayStatusItem> ();
 			decorated = false;
 			resizable = false;
@@ -835,9 +838,17 @@ namespace Plank
 			header.pack_start (title, true, true, 0);
 			count_label = new Gtk.Label ("");
 			count_label.get_style_context ().add_class ("background-apps-count");
+			Accessibility.describe (count_label, _("Background application count"));
 			header.pack_end (count_label, false, false, 0);
 			card.pack_start (header, false, false, 0);
 			card.pack_start (new Gtk.Separator (Gtk.Orientation.HORIZONTAL), false, false, 0);
+
+			search_entry = new Gtk.SearchEntry ();
+			search_entry.placeholder_text = _("Search background applications");
+			Accessibility.describe (search_entry, _("Search background applications"));
+			search_entry.no_show_all = true;
+			search_entry.changed.connect (rebuild);
+			card.pack_start (search_entry, false, false, 0);
 
 			app_list = new Gtk.ListBox ();
 			app_list.selection_mode = Gtk.SelectionMode.SINGLE;
@@ -861,8 +872,41 @@ namespace Plank
 			});
 			key_press_event.connect ((event) => {
 				Accessibility.set_keyboard_navigation (this, true);
-				if (event.keyval == Gdk.Key.Escape) {
-					dismiss ();
+				switch (event.keyval) {
+				case Gdk.Key.Escape:
+					if (search_entry.text != "") {
+						search_entry.text = "";
+						search_entry.grab_focus ();
+					} else {
+						dismiss ();
+					}
+					return true;
+				case Gdk.Key.Up:
+					move_selection (-1);
+					return true;
+				case Gdk.Key.Down:
+					move_selection (1);
+					return true;
+				case Gdk.Key.Home:
+					move_selection_to (0);
+					return true;
+				case Gdk.Key.End:
+					move_selection_to (visible_apps.size - 1);
+					return true;
+				case Gdk.Key.Return:
+				case Gdk.Key.KP_Enter:
+					var row = app_list.get_selected_row ();
+					if (row != null)
+						activate_row (row);
+					return row != null;
+				case Gdk.Key.F10:
+					if ((event.state & Gdk.ModifierType.SHIFT_MASK) != 0) {
+						show_selected_context_menu ();
+						return true;
+					}
+					return false;
+				case Gdk.Key.Menu:
+					show_selected_context_menu ();
 					return true;
 				}
 				return false;
@@ -940,15 +984,26 @@ namespace Plank
 			foreach (unowned Gtk.Widget child in app_list.get_children ())
 				app_list.remove (child);
 			visible_apps.clear ();
+			applications.clear ();
 			if (current_item != null)
-				visible_apps.add_all (current_item.applications ());
-			count_label.label = "%d".printf (visible_apps.size);
+				applications.add_all (current_item.applications ());
+			count_label.label = "%d".printf (applications.size);
+			search_entry.visible = applications.size > 8;
+			if (applications.size <= 8 && search_entry.text != "")
+				search_entry.text = "";
 
-			if (visible_apps.size == 0) {
-				var empty = new Gtk.Label (_("No background applications"));
-				empty.margin = 18;
-				empty.get_style_context ().add_class ("background-apps-empty");
-				app_list.add (empty);
+			var query = search_entry.text.strip ().down ();
+			foreach (var app in applications) {
+				if (query == "" || app.Text.down ().contains (query))
+					visible_apps.add (app);
+			}
+
+			if (applications.size == 0) {
+				app_list.add (create_empty_state ("application-x-executable-symbolic",
+					_("No background applications")));
+			} else if (visible_apps.size == 0) {
+				app_list.add (create_empty_state ("system-search-symbolic",
+					_("No matching applications")));
 			} else {
 				foreach (var app in visible_apps)
 					app_list.add (create_row (app));
@@ -956,11 +1011,28 @@ namespace Plank
 			app_list.show_all ();
 		}
 
+		Gtk.Widget create_empty_state (string icon_name, string message)
+		{
+			var empty = new Gtk.Box (Gtk.Orientation.VERTICAL, 8);
+			empty.margin = 24;
+			empty.get_style_context ().add_class ("background-apps-empty");
+			var icon = new Gtk.Image.from_icon_name (icon_name, Gtk.IconSize.DIALOG);
+			icon.pixel_size = 28;
+			empty.pack_start (icon, false, false, 0);
+			var label = new Gtk.Label (message);
+			label.get_style_context ().add_class ("background-apps-empty-label");
+			empty.pack_start (label, false, false, 0);
+			Accessibility.describe (empty, message);
+			return empty;
+		}
+
 		Gtk.Widget create_row (TrayStatusItem app)
 		{
 			var row = new Gtk.ListBoxRow ();
 			row.get_style_context ().add_class ("background-app-row");
-			Accessibility.describe (row, app.Text, status_label (app.Status));
+			Accessibility.describe (row, app.Text, app.Status == "NeedsAttention"
+				? status_label (app.Status)
+				: _("Press Enter to show this application; press Shift+F10 for actions"));
 			var box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
 			box.margin = 7;
 			Gtk.Image image;
@@ -974,10 +1046,11 @@ namespace Plank
 			var title = new Gtk.Label (app.Text) { xalign = 0.0f, ellipsize = Pango.EllipsizeMode.END };
 			title.get_style_context ().add_class ("background-app-name");
 			labels.pack_start (title, false, false, 0);
-			var status = new Gtk.Label (status_label (app.Status)) { xalign = 0.0f };
-			status.get_style_context ().add_class (app.Status == "NeedsAttention"
-				? "background-app-attention" : "background-app-status");
-			labels.pack_start (status, false, false, 0);
+			if (app.Status == "NeedsAttention") {
+				var status = new Gtk.Label (status_label (app.Status)) { xalign = 0.0f };
+				status.get_style_context ().add_class ("background-app-attention");
+				labels.pack_start (status, false, false, 0);
+			}
 			box.pack_start (labels, true, true, 0);
 			if (app.Status == "NeedsAttention") {
 				var marker = new Gtk.Image.from_icon_name ("dialog-warning-symbolic", Gtk.IconSize.MENU);
@@ -999,6 +1072,44 @@ namespace Plank
 			show_context_menu_at (visible_apps[row.get_index ()], (int) event.x_root,
 				(int) event.y_root, event.button, event.time);
 			return true;
+		}
+
+		void move_selection (int delta)
+		{
+			if (visible_apps.size == 0)
+				return;
+			var selected = app_list.get_selected_row ();
+			var index = selected == null ? 0 : selected.get_index () + delta;
+			index = (index + visible_apps.size) % visible_apps.size;
+			move_selection_to (index);
+		}
+
+		void move_selection_to (int index)
+		{
+			if (visible_apps.size == 0)
+				return;
+			index = int.max (0, int.min (visible_apps.size - 1, index));
+			var row = app_list.get_row_at_index (index);
+			if (row != null) {
+				app_list.select_row (row);
+				row.grab_focus ();
+			}
+		}
+
+		void show_selected_context_menu ()
+		{
+			var row = app_list.get_selected_row ();
+			if (row == null || row.get_index () < 0 || row.get_index () >= visible_apps.size)
+				return;
+			int row_x, row_y;
+			if (!row.translate_coordinates (this, 0, 0, out row_x, out row_y))
+				return;
+			int window_x, window_y;
+			get_window ().get_origin (out window_x, out window_y);
+			show_context_menu_at (visible_apps[row.get_index ()],
+				window_x + row_x + row.get_allocated_width () / 2,
+				window_y + row_y + row.get_allocated_height () / 2,
+				0U, Gtk.get_current_event_time ());
 		}
 
 		void show_context_menu_at (TrayStatusItem app, int root_x, int root_y,
@@ -1217,17 +1328,20 @@ namespace Plank
 				.printf ((int)(color.red*255), (int)(color.green*255), (int)(color.blue*255));
 			css += ".plank-background-apps .background-apps-title { color: white; padding: 5px 7px; }";
 			css += ".plank-background-apps .background-apps-title-label { font-weight: bold; font-size: 15px; }";
-			css += ".plank-background-apps .background-apps-count { color: white; background-color: rgba(255,255,255,0.12); border-radius: 9px; padding: 2px 7px; }";
+			css += ".plank-background-apps .background-apps-count { color: white; background-color: rgba(115,210,22,0.82); border-radius: 9px; padding: 2px 7px; font-weight: bold; }";
+			css += ".plank-background-apps entry.search { color: white; background-color: rgba(255,255,255,0.08); background-image: none; border: 1px solid rgba(255,255,255,0.12); border-radius: 9px; padding: 5px 8px; }";
+			css += ".plank-background-apps entry.search:focus { border-color: #73d216; }";
 			css += ".plank-background-apps list, .plank-background-apps row, .plank-background-apps .background-apps-scroll { background: transparent; border: none; box-shadow: none; }";
 			css += ".plank-background-apps row { color: white; border-radius: 9px; margin: 2px 1px; }";
 			css += ".plank-background-apps row:hover, .plank-background-apps row:selected { background-color: rgba(255,255,255,0.10); }";
+			css += ".plank-background-apps.keyboard-navigation row:focus { box-shadow: inset 0 0 0 2px rgba(115,210,22,0.95); }";
 			css += ".plank-background-apps .background-app-name { color: white; font-weight: bold; }";
-			css += ".plank-background-apps .background-app-status, .plank-background-apps .background-apps-empty { color: rgba(255,255,255,0.58); }";
+			css += ".plank-background-apps .background-apps-empty { color: rgba(255,255,255,0.58); }";
+			css += ".plank-background-apps .background-apps-empty-label { color: rgba(255,255,255,0.72); }";
 			css += ".plank-background-apps .background-app-attention { color: rgb(255,190,80); }";
 			css += ".plank-background-apps separator { background-color: rgba(255,255,255,0.10); }";
 			css += ".plank-background-apps scrollbar { background: transparent; border: none; }";
 			css += ".plank-background-apps scrollbar slider { min-width: 4px; min-height: 28px; background-color: rgba(255,255,255,0.18); border-radius: 4px; }";
-			css += ".plank-background-apps.keyboard-navigation row:focus { box-shadow: 0 0 0 2px rgba(115,210,22,0.85); }";
 			if (css_provider != null)
 				Gtk.StyleContext.remove_provider_for_screen (get_screen (), css_provider);
 			css_provider = new Gtk.CssProvider ();

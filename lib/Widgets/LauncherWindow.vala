@@ -12,7 +12,10 @@ namespace Plank
 
 		unowned DockController controller;
 		Gtk.Entry search_entry;
+		Gtk.Button user_avatar_button;
+		Gtk.Button dismiss_notice_button;
 		Gtk.ListBox result_list;
+		Gtk.Label? calculation_status_label;
 		StatusNoticeModel notice_model;
 		Gtk.Revealer notice_revealer;
 		Gtk.Label notice_label;
@@ -21,6 +24,8 @@ namespace Plank
 		Gee.ArrayList<AppInfo> visible_results;
 		Gee.ArrayList<string> visible_commands;
 		bool showing_commands = false;
+		bool showing_calculation = false;
+		string calculation_result = "";
 		LauncherItem? anchor_item;
 		Gtk.CssProvider? theme_provider;
 		uint animation_timer_id = 0U;
@@ -79,7 +84,14 @@ namespace Plank
 			var user_identity = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
 			user_identity.get_style_context ().add_class ("launcher-user-identity");
 			Accessibility.describe (user_identity, _("Current user: %s").printf (user_name));
-			user_identity.pack_start (create_user_avatar (), false, false, 0);
+			user_avatar_button = new Gtk.Button ();
+			user_avatar_button.relief = Gtk.ReliefStyle.NONE;
+			user_avatar_button.tooltip_text = _("User settings");
+			user_avatar_button.get_style_context ().add_class ("launcher-user-avatar-button");
+			Accessibility.describe (user_avatar_button, _("Open user settings"));
+			user_avatar_button.add (create_user_avatar ());
+			user_avatar_button.clicked.connect (open_user_settings);
+			user_identity.pack_start (user_avatar_button, false, false, 0);
 			navbar.pack_start (user_identity, false, false, 0);
 
 			var search_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
@@ -114,13 +126,13 @@ namespace Plank
 				Gtk.IconSize.MENU), false, false, 0);
 			notice_label = new Gtk.Label ("") { xalign = 0.0f, wrap = true, max_width_chars = 44 };
 			notice.pack_start (notice_label, true, true, 0);
-			var dismiss_notice = new Gtk.Button.from_icon_name ("window-close-symbolic",
+			dismiss_notice_button = new Gtk.Button.from_icon_name ("window-close-symbolic",
 				Gtk.IconSize.MENU);
-			dismiss_notice.tooltip_text = _("Dismiss");
-			Accessibility.describe (dismiss_notice, _("Dismiss error"));
-			dismiss_notice.get_style_context ().add_class ("launcher-notice-dismiss");
-			dismiss_notice.clicked.connect (() => notice_model.dismiss ());
-			notice.pack_end (dismiss_notice, false, false, 0);
+			dismiss_notice_button.tooltip_text = _("Dismiss");
+			Accessibility.describe (dismiss_notice_button, _("Dismiss error"));
+			dismiss_notice_button.get_style_context ().add_class ("launcher-notice-dismiss");
+			dismiss_notice_button.clicked.connect (() => notice_model.dismiss ());
+			notice.pack_end (dismiss_notice_button, false, false, 0);
 			notice_revealer.add (notice);
 			panel.pack_start (notice_revealer, false, false, 0);
 
@@ -190,10 +202,10 @@ namespace Plank
 
 		Gtk.Widget create_user_avatar ()
 		{
-			const int avatar_size = 48;
-			const double corner_radius = 6.0;
+			const int avatar_size = 36;
+			const double corner_radius = 5.0;
 			var fallback = new Gtk.Image.from_icon_name ("avatar-default-symbolic", Gtk.IconSize.BUTTON);
-			fallback.pixel_size = 36;
+			fallback.pixel_size = 27;
 			fallback.get_style_context ().add_class ("launcher-user-avatar-fallback");
 
 			var home = Environment.get_home_dir ();
@@ -245,6 +257,35 @@ namespace Plank
 			}
 
 			return fallback;
+		}
+
+		void open_user_settings ()
+		{
+			string[] argv;
+			var gnome_control_center = Environment.find_program_in_path ("gnome-control-center");
+			var users_admin = Environment.find_program_in_path ("users-admin");
+			var system_settings = Environment.find_program_in_path ("systemsettings");
+			if (gnome_control_center != null)
+				argv = { gnome_control_center, "user-accounts" };
+			else if (users_admin != null)
+				argv = { users_admin };
+			else if (system_settings != null)
+				argv = { system_settings, "kcm_users" };
+			else {
+				warning ("Unable to open user settings: no supported user settings application was found");
+				show_launcher_error (_("User settings are not available on this system."));
+				return;
+			}
+
+			try {
+				Pid pid;
+				Process.spawn_async (null, argv, null, SpawnFlags.SEARCH_PATH, null, out pid);
+				notice_model.dismiss ();
+				hide_animated ();
+			} catch (SpawnError e) {
+				warning ("Unable to open user settings: %s", e.message);
+				show_launcher_error (_("User settings could not be opened. Please try again."));
+			}
 		}
 
 		string power_action_label (string action)
@@ -477,6 +518,9 @@ namespace Plank
 				result_list.remove (child);
 			visible_results.clear ();
 			visible_commands.clear ();
+			showing_calculation = false;
+			calculation_result = "";
+			calculation_status_label = null;
 
 			var query = search_entry.text.strip ().down ();
 			showing_commands = query.has_prefix ("/");
@@ -497,6 +541,15 @@ namespace Plank
 				return;
 			}
 
+			double result;
+			if (CalculatorService.evaluate (query, out result)) {
+				showing_calculation = true;
+				calculation_result = result == 0.0 ? "0" : result.to_string ();
+				result_list.add (create_calculation_row (search_entry.text.strip (), calculation_result));
+				finish_refresh_results ();
+				return;
+			}
+
 			var matches = new Gee.ArrayList<AppInfo> ();
 			foreach (var app in applications)
 				if (query == "" || fuzzy_score (searchable_text (app), query) >= 0)
@@ -512,6 +565,36 @@ namespace Plank
 			}
 
 			finish_refresh_results ();
+		}
+
+		Gtk.ListBoxRow create_calculation_row (string expression, string result)
+		{
+			var row = new Gtk.ListBoxRow ();
+			Accessibility.describe (row, _("Calculator result: %s").printf (result),
+				_("Press Enter to copy the result"));
+			var box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 11);
+			box.margin_left = box.margin_right = 12;
+			box.margin_top = box.margin_bottom = 9;
+			var icon = new Gtk.Image.from_icon_name ("accessories-calculator-symbolic",
+				Gtk.IconSize.DIALOG);
+			icon.pixel_size = 36;
+			box.pack_start (icon, false, false, 0);
+
+			var labels = new Gtk.Box (Gtk.Orientation.VERTICAL, 2);
+			var expression_label = new Gtk.Label (expression) { xalign = 0.0f };
+			expression_label.ellipsize = Pango.EllipsizeMode.END;
+			expression_label.get_style_context ().add_class (Gtk.STYLE_CLASS_DIM_LABEL);
+			labels.pack_start (expression_label, false, false, 0);
+			var result_label = new Gtk.Label (result) { xalign = 0.0f };
+			result_label.get_style_context ().add_class ("launcher-calculation-result");
+			labels.pack_start (result_label, false, false, 0);
+			box.pack_start (labels, true, true, 0);
+
+			calculation_status_label = new Gtk.Label (_("Enter to copy"));
+			calculation_status_label.get_style_context ().add_class ("launcher-calculation-status");
+			box.pack_end (calculation_status_label, false, false, 0);
+			row.add (box);
+			return row;
 		}
 
 		Gtk.ListBoxRow create_empty_row (string message)
@@ -794,6 +877,10 @@ namespace Plank
 				application_context.destroy ();
 			var context = new Gtk.Window (Gtk.WindowType.TOPLEVEL);
 			application_context = context;
+			context.app_paintable = true;
+			var rgba_visual = context.get_screen ().get_rgba_visual ();
+			if (rgba_visual != null)
+				context.set_visual (rgba_visual);
 			context.decorated = false;
 			context.resizable = false;
 			context.skip_taskbar_hint = true;
@@ -802,6 +889,7 @@ namespace Plank
 			context.transient_for = this;
 			context.type_hint = Gdk.WindowTypeHint.DIALOG;
 			context.get_style_context ().add_class ("launcher-app-context");
+			Accessibility.set_keyboard_navigation (context, true);
 
 			var card = new Gtk.Box (Gtk.Orientation.VERTICAL, 4);
 			card.margin = 8;
@@ -1028,6 +1116,10 @@ namespace Plank
 		{
 			Accessibility.set_keyboard_navigation (this, true);
 			switch (event.keyval) {
+			case Gdk.Key.Tab:
+			case Gdk.Key.ISO_Left_Tab:
+				advance_keyboard_focus ((event.state & Gdk.ModifierType.SHIFT_MASK) != 0);
+				return true;
 			case Gdk.Key.Escape:
 				if (search_entry.text != "")
 					search_entry.text = "";
@@ -1040,31 +1132,137 @@ namespace Plank
 			case Gdk.Key.Down:
 				move_selection (1);
 				return true;
+			case Gdk.Key.Home:
+				move_selection_to (0);
+				return true;
+			case Gdk.Key.End:
+				move_selection_to (get_result_count () - 1);
+				return true;
+			case Gdk.Key.Page_Up:
+				move_selection (-get_page_size ());
+				return true;
+			case Gdk.Key.Page_Down:
+				move_selection (get_page_size ());
+				return true;
+			case Gdk.Key.F10:
+				if ((event.state & Gdk.ModifierType.SHIFT_MASK) != 0) {
+					show_selected_application_context ();
+					return true;
+				}
+				return false;
+			case Gdk.Key.Menu:
+				show_selected_application_context ();
+				return true;
 			case Gdk.Key.Return:
 			case Gdk.Key.KP_Enter:
 				var row = result_list.get_selected_row ();
-				if (row != null)
+				if (row != null && (get_focus () == search_entry || get_focus () == row))
 					activate_row (row);
+				else
+					return false;
 				return true;
 			default:
 				return false;
 			}
 		}
 
+		void advance_keyboard_focus (bool backwards)
+		{
+			var targets = new Gee.ArrayList<Gtk.Widget> ();
+			targets.add (user_avatar_button);
+			targets.add (search_entry);
+			var row = result_list.get_selected_row ();
+			if (row != null && row.selectable)
+				targets.add (row);
+			if (notice_revealer.reveal_child)
+				targets.add (dismiss_notice_button);
+
+			if (targets.size == 0)
+				return;
+			var focus = get_focus ();
+			var current_index = targets.index_of (focus);
+			var next_index = current_index < 0
+				? (backwards ? targets.size - 1 : 0)
+				: (current_index + (backwards ? targets.size - 1 : 1)) % targets.size;
+			var target = targets[next_index];
+			if (target is Gtk.ListBoxRow)
+				result_list.select_row ((Gtk.ListBoxRow) target);
+			target.grab_focus ();
+		}
+
 		void move_selection (int delta)
 		{
-			var result_count = showing_commands ? visible_commands.size : visible_results.size;
+			var result_count = get_result_count ();
 			if (result_count == 0)
 				return;
 			var row = result_list.get_selected_row ();
 			var index = row == null ? 0 : row.get_index () + delta;
-			index = (index + result_count) % result_count;
-			result_list.select_row (result_list.get_row_at_index (index));
+			if (delta == -1 || delta == 1)
+				index = (index + result_count) % result_count;
+			else
+				index = int.max (0, int.min (result_count - 1, index));
+			move_selection_to (index);
+		}
+
+		void move_selection_to (int index)
+		{
+			var result_count = get_result_count ();
+			if (result_count == 0)
+				return;
+			index = int.max (0, int.min (result_count - 1, index));
+			var row = result_list.get_row_at_index (index);
+			if (row != null && row.selectable) {
+				var focus_is_result = get_focus () is Gtk.ListBoxRow;
+				result_list.select_row (row);
+				if (focus_is_result)
+					row.grab_focus ();
+			}
+		}
+
+		int get_result_count ()
+		{
+			if (showing_calculation)
+				return 1;
+			return showing_commands ? visible_commands.size : visible_results.size;
+		}
+
+		int get_page_size ()
+		{
+			var row = result_list.get_selected_row ();
+			var row_height = row == null ? 0 : row.get_allocated_height ();
+			if (row_height <= 0)
+				row_height = 48;
+			return int.max (1, result_list.get_allocated_height () / row_height);
+		}
+
+		void show_selected_application_context ()
+		{
+			if (showing_commands || showing_calculation)
+				return;
+			var row = result_list.get_selected_row ();
+			if (row == null || row.get_index () < 0 || row.get_index () >= visible_results.size)
+				return;
+			int row_x, row_y;
+			if (!row.translate_coordinates (this, 0, 0, out row_x, out row_y))
+				return;
+			int window_x, window_y;
+			get_window ().get_origin (out window_x, out window_y);
+			show_application_context_menu (visible_results[row.get_index ()],
+				window_x + row_x + row.get_allocated_width () / 2,
+				window_y + row_y + row.get_allocated_height () / 2);
 		}
 
 		void activate_row (Gtk.ListBoxRow row)
 		{
 			var index = row.get_index ();
+			if (showing_calculation) {
+				if (index != 0)
+					return;
+				Gtk.Clipboard.get (Gdk.SELECTION_CLIPBOARD).set_text (calculation_result, -1);
+				if (calculation_status_label != null)
+					calculation_status_label.label = _("Copied");
+				return;
+			}
 			if (showing_commands) {
 				if (index < 0 || index >= visible_commands.size)
 					return;
@@ -1109,58 +1307,96 @@ namespace Plank
 		void apply_theme ()
 		{
 			var color = controller.renderer.theme.FillStartColor;
+			var red = (int) Math.round (color.red * 255.0);
+			var green = (int) Math.round (color.green * 255.0);
+			var blue = (int) Math.round (color.blue * 255.0);
+			var background_opacity = (controller.prefs.CustomBackgroundEnabled
+				? controller.prefs.BackgroundOpacity : color.alpha).clamp (0.0, 1.0);
+			var opacity_milli = (int) Math.round (background_opacity * 1000.0);
+			var opacity_css = "%d.%03d".printf (opacity_milli / 1000, opacity_milli % 1000);
+			var luminance = relative_luminance (color.red, color.green, color.blue);
+			var foreground = luminance > 0.179 ? "24,27,32" : "255,255,255";
+			var muted_foreground = luminance > 0.179 ? "48,52,58" : "255,255,255";
+			var command_status_color = luminance > 0.179 ? "#286400" : "#a8ef70";
+			var destructive_color = luminance > 0.179 ? "#a61b1b" : "#ff8b82";
 			// Keep floating menus on the bar's RGB color.  Avoid formatting a
 			// floating-point alpha here: printf follows the current locale and can
 			// emit a decimal comma, which makes the entire GTK CSS invalid.
 			var css = ".plank-native-launcher { background-color: transparent; }";
-			css += ".plank-native-launcher .launcher-panel { background-color: rgb(%d,%d,%d); border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; padding: 5px; box-shadow: none; }"
-				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255));
+			css += ".plank-native-launcher .launcher-panel { background-color: rgba(%d,%d,%d,%s); color: rgb(%s); border: 1px solid rgba(%s,0.18); border-radius: 12px; padding: 5px; box-shadow: none; }"
+				.printf (red, green, blue, opacity_css, foreground, foreground);
 			css += ".plank-native-launcher .launcher-navbar { min-height: 46px; margin: 10px 9px 0 9px; }";
-			css += ".plank-native-launcher .launcher-user-identity { color: white; }";
+			css += ".plank-native-launcher .launcher-user-identity { color: rgb(%s); }".printf (foreground);
+			css += ".plank-native-launcher .launcher-user-avatar-button, .plank-native-launcher .launcher-user-avatar-button:hover, .plank-native-launcher .launcher-user-avatar-button:active { background: transparent; background-image: none; border: none; box-shadow: none; padding: 0; }";
+			css += ".plank-native-launcher.keyboard-navigation .launcher-user-avatar-button:focus { box-shadow: 0 0 0 2px #73d216; }";
 			css += ".plank-native-launcher .launcher-user-avatar { margin: 1px 0; }";
-			css += ".plank-native-launcher .launcher-user-avatar-fallback { color: rgba(255,255,255,0.78); background-color: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 6px; }";
-			css += ".plank-native-launcher .launcher-notice { color: white; background-color: rgba(224,70,70,0.20); border: 1px solid rgba(255,120,120,0.30); border-radius: 8px; padding: 7px 9px; margin: 2px 7px 5px 7px; }";
+			css += ".plank-native-launcher .launcher-user-avatar-fallback { color: rgba(%s,0.82); background-color: rgba(%s,0.08); border: 1px solid rgba(%s,0.16); border-radius: 6px; padding: 6px; }"
+				.printf (foreground, foreground, foreground);
+			css += ".plank-native-launcher .launcher-notice { color: white; background-color: rgba(150,25,25,0.94); border: 1px solid rgba(255,160,150,0.55); border-radius: 8px; padding: 7px 9px; margin: 2px 7px 5px 7px; }";
 			css += ".plank-native-launcher .launcher-notice-dismiss { color: white; background: transparent; background-image: none; border: none; box-shadow: none; padding: 2px; }";
 			css += ".plank-native-launcher .launcher-notice-dismiss:hover { background-color: rgba(255,255,255,0.12); border-radius: 5px; }";
-			css += ".plank-native-launcher.keyboard-navigation button:focus { color: white; box-shadow: 0 0 0 2px rgba(115,210,22,0.85); }";
+			css += ".plank-native-launcher.keyboard-navigation button:focus { color: rgb(%s); box-shadow: 0 0 0 2px rgba(115,210,22,0.95); }".printf (foreground);
 			css += ".plank-native-launcher.keyboard-navigation row:focus { box-shadow: inset 0 0 0 2px rgba(115,210,22,0.85); }";
 			css += ".plank-native-launcher .launcher-results-scroll { background: transparent; border: none; box-shadow: none; outline-style: none; outline-width: 0; margin-top: 6px; }";
+			css += ".plank-native-launcher .launcher-results-scroll viewport { background: transparent; background-image: none; border: none; box-shadow: none; }";
 			css += ".plank-native-launcher .launcher-results-scroll undershoot.top, .plank-native-launcher .launcher-results-scroll undershoot.bottom, .plank-native-launcher .launcher-results-scroll undershoot.left, .plank-native-launcher .launcher-results-scroll undershoot.right { background-image: none; background-color: transparent; border: none; box-shadow: none; }";
 			css += ".plank-native-launcher .launcher-results-scroll list, .plank-native-launcher .launcher-results-scroll row { outline-style: none; outline-width: 0; }";
 			css += ".plank-native-launcher scrollbar { background: transparent; border: none; }";
-			css += ".plank-native-launcher scrollbar slider { min-width: 4px; min-height: 28px; background-color: rgba(255,255,255,0.18); border-radius: 4px; }";
+			css += ".plank-native-launcher scrollbar slider { min-width: 4px; min-height: 28px; background-color: rgba(%s,0.28); border-radius: 4px; }".printf (foreground);
 			css += ".plank-native-launcher .launcher-alpha-header { margin: 12px 12px 5px 12px; }";
-			css += ".plank-native-launcher .launcher-alpha-letter { color: rgba(255,255,255,0.88); background-color: rgba(255,255,255,0.09); border-radius: 6px; min-width: 22px; min-height: 22px; font-size: 11px; font-weight: bold; }";
-			css += ".plank-native-launcher .launcher-panel list, .plank-native-launcher .launcher-panel row, .plank-native-launcher .launcher-search { background-color: rgb(%d,%d,%d); background-image: none; border: none; }"
-				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255));
-			css += ".plank-native-launcher .launcher-search { padding: 6px 12px; margin: 0 10px; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; }";
-			css += ".plank-native-launcher entry, .plank-native-launcher entry:focus { color: white; background: transparent; background-image: none; border: none; border-radius: 0; box-shadow: none; outline: none; font-size: 14px; }";
+			css += ".plank-native-launcher .launcher-alpha-letter { color: rgb(%s); background-color: rgba(%s,0.10); border-radius: 6px; min-width: 22px; min-height: 22px; font-size: 11px; font-weight: bold; }"
+				.printf (foreground, foreground);
+			css += ".plank-native-launcher .launcher-panel list, .plank-native-launcher .launcher-panel row, .plank-native-launcher .launcher-search { background-color: transparent; background-image: none; border: none; color: rgb(%s); }"
+				.printf (foreground);
+			css += ".plank-native-launcher .launcher-search { padding: 6px 12px; margin: 0 10px; border: 1px solid rgba(%s,0.22); border-radius: 10px; }".printf (foreground);
+			css += ".plank-native-launcher entry, .plank-native-launcher entry:focus { color: rgb(%s); caret-color: rgb(%s); background: transparent; background-image: none; border: none; border-radius: 0; box-shadow: none; outline: none; font-size: 14px; }"
+				.printf (foreground, foreground);
+			css += ".plank-native-launcher entry placeholder { color: rgba(%s,0.72); opacity: 1; }".printf (muted_foreground);
 			css += ".plank-native-launcher .launcher-search.launcher-search-focused { border-color: #73d216; box-shadow: 0 0 0 1px rgba(115,210,22,0.28); }";
-			css += ".plank-native-launcher row { color: white; border-radius: 8px; margin: 1px 5px; transition: background-color 120ms ease; }";
-			css += ".plank-native-launcher row:hover { background-color: rgba(255,255,255,0.07); }";
-			css += ".plank-native-launcher row:selected { background-color: rgba(255,255,255,0.15); }";
-			css += ".plank-native-launcher row:selected:hover { background-color: rgba(255,255,255,0.18); }";
+			css += ".plank-native-launcher row { color: rgb(%s); border-radius: 8px; margin: 1px 5px; transition: background-color 120ms ease; }".printf (foreground);
+			css += ".plank-native-launcher row:hover { background-color: rgba(%s,0.08); }".printf (foreground);
+			css += ".plank-native-launcher row:selected, .plank-native-launcher row:selected:hover { color: rgb(%s); background-color: rgba(%s,0.16); }"
+				.printf (foreground, foreground);
+			css += ".plank-native-launcher .dim-label { color: rgba(%s,0.78); }".printf (muted_foreground);
 			css += ".plank-native-launcher .launcher-result-title { font-weight: 600; }";
-			css += ".plank-native-launcher .launcher-more-button { color: rgba(255,255,255,0.65); background: transparent; background-image: none; border: none; border-radius: 7px; box-shadow: none; padding: 4px; opacity: 0; transition: opacity 120ms ease, background-color 120ms ease; }";
+			css += ".plank-native-launcher .launcher-calculation-result { font-size: 18px; font-weight: bold; }";
+			css += ".plank-native-launcher .launcher-calculation-status { color: rgba(%s,0.78); font-size: 11px; }".printf (muted_foreground);
+			css += ".plank-native-launcher .launcher-more-button { color: rgba(%s,0.78); background: transparent; background-image: none; border: none; border-radius: 7px; box-shadow: none; padding: 4px; opacity: 0; transition: opacity 120ms ease, background-color 120ms ease; }".printf (foreground);
 			css += ".plank-native-launcher row:hover .launcher-more-button, .plank-native-launcher row:selected .launcher-more-button, .plank-native-launcher row:focus .launcher-more-button { opacity: 1; }";
-			css += ".plank-native-launcher .launcher-more-button:hover, .plank-native-launcher .launcher-more-button:focus { color: white; background-color: rgba(255,255,255,0.10); }";
-			css += ".plank-native-launcher .launcher-command-status { color: rgba(115,210,22,0.90); font-size: 11px; margin-left: 2px; }";
-			css += ".plank-native-launcher .launcher-enter { color: rgba(255,255,255,0.28); font-size: 16px; }";
-			css += ".plank-native-launcher row:selected .launcher-enter { color: rgba(255,255,255,0.85); }";
-			css += ".plank-native-launcher .launcher-empty { color: rgba(255,255,255,0.55); }";
-			css += ".launcher-app-context { background-color: rgb(%d,%d,%d); border: 1px solid rgba(255,255,255,0.10); border-radius: 11px; padding: 5px; }"
-				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255));
-			css += ".launcher-app-context .app-context-header { color: white; padding: 7px; min-width: 250px; }";
+			css += ".plank-native-launcher .launcher-more-button:hover, .plank-native-launcher .launcher-more-button:focus { color: rgb(%s); background-color: rgba(%s,0.12); }"
+				.printf (foreground, foreground);
+			css += ".plank-native-launcher .launcher-command-status { color: %s; font-size: 11px; font-weight: bold; margin-left: 2px; }".printf (command_status_color);
+			css += ".plank-native-launcher .launcher-enter { color: rgba(%s,0.62); font-size: 16px; }".printf (muted_foreground);
+			css += ".plank-native-launcher row:selected .launcher-enter { color: rgba(%s,0.90); }".printf (foreground);
+			css += ".plank-native-launcher .launcher-empty { color: rgba(%s,0.78); }".printf (muted_foreground);
+			css += ".launcher-app-context { background-color: rgba(%d,%d,%d,%s); color: rgb(%s); border: 1px solid rgba(%s,0.18); border-radius: 11px; padding: 5px; }"
+				.printf (red, green, blue, opacity_css, foreground, foreground);
+			css += ".launcher-app-context .app-context-header { color: rgb(%s); padding: 7px; min-width: 250px; }".printf (foreground);
 			css += ".launcher-app-context .app-context-title { font-weight: bold; font-size: 14px; }";
-			css += ".launcher-app-context .app-context-action { color: white; background: transparent; background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 7px 9px; }";
-			css += ".launcher-app-context .app-context-action:hover { background-color: rgba(255,255,255,0.10); }";
-			css += ".launcher-app-context .destructive-action { color: #ff7b73; }";
+			css += ".launcher-app-context .dim-label { color: rgba(%s,0.78); }".printf (muted_foreground);
+			css += ".launcher-app-context .app-context-action { color: rgb(%s); background: transparent; background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 7px 9px; }".printf (foreground);
+			css += ".launcher-app-context .app-context-action:hover { background-color: rgba(%s,0.12); }".printf (foreground);
+			css += ".launcher-app-context.keyboard-navigation .app-context-action:focus { box-shadow: inset 0 0 0 2px #73d216; }";
+			css += ".launcher-app-context .destructive-action { color: %s; }".printf (destructive_color);
 			if (theme_provider != null)
 				Gtk.StyleContext.remove_provider_for_screen (get_screen (), theme_provider);
 			theme_provider = new Gtk.CssProvider ();
 			try { theme_provider.load_from_data (css); } catch (Error e) { warning ("Launcher CSS: %s", e.message); }
 			Gtk.StyleContext.add_provider_for_screen (get_screen (), theme_provider,
 				Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+		}
+
+		static double relative_luminance (double red, double green, double blue)
+		{
+			return 0.2126 * linearize_color_channel (red)
+				+ 0.7152 * linearize_color_channel (green)
+				+ 0.0722 * linearize_color_channel (blue);
+		}
+
+		static double linearize_color_channel (double channel)
+		{
+			return channel <= 0.04045 ? channel / 12.92
+				: Math.pow ((channel + 0.055) / 1.055, 2.4);
 		}
 
 		void hide_animated ()

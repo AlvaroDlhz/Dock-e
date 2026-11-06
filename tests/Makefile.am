@@ -39,6 +39,7 @@ tests_VALASOURCES = \
 	AudioService.vala \
 	BluetoothService.vala \
 	BrightnessService.vala \
+	CalculatorService.vala \
 	CommandRunner.vala \
 	NetworkService.vala \
 	PowerService.vala \

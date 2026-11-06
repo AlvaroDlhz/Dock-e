@@ -111,6 +111,7 @@ namespace Plank
 		public bool supported { get; private set; default = false; }
 		public int update_count { get; private set; default = 0; }
 		public bool updates_available { get { return update_count > 0; } }
+		public bool has_checked { get; private set; default = false; }
 		public bool checking { get; private set; default = false; }
 		public string last_error { get; private set; default = ""; }
 
@@ -163,10 +164,13 @@ namespace Plank
 				try {
 					var count = int.max (0, yield backend.check (lifetime));
 					update_error ("");
+					var state_updated = !has_checked || update_count != count;
+					has_checked = true;
 					if (update_count != count) {
 						update_count = count;
-						state_changed ();
 					}
+					if (state_updated)
+						state_changed ();
 				} catch (Error e) {
 					if (!lifetime.is_cancelled ())
 						update_error (e.message);

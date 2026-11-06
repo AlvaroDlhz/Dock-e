@@ -70,7 +70,8 @@ namespace PlankTests
 		var backend = new FakeUpdateBackend () { answer = 3 };
 		var service = new Plank.UpdateService.with_backend (backend);
 		assert (wait_for_update (() => backend.checks == 1 && !service.checking));
-		assert (service.supported && service.updates_available && service.update_count == 3);
+		assert (service.supported && service.has_checked && service.updates_available
+			&& service.update_count == 3);
 	}
 
 	void update_service_refresh_state ()
@@ -78,6 +79,7 @@ namespace PlankTests
 		var backend = new FakeUpdateBackend () { answer = 0 };
 		var service = new Plank.UpdateService.with_backend (backend);
 		assert (wait_for_update (() => backend.checks == 1 && !service.checking));
+		assert (service.has_checked);
 		backend.answer = 7;
 		service.refresh.begin ();
 		assert (wait_for_update (() => backend.checks == 2 && !service.checking));
@@ -105,8 +107,8 @@ namespace PlankTests
 		backend.fail = true;
 		service.refresh.begin ();
 		assert (wait_for_update (() => backend.checks == 2 && !service.checking));
-		assert (service.updates_available && service.update_count == 2);
-		assert (service.last_error == "check failed");
+		assert (service.has_checked && service.updates_available && service.update_count == 2);
+		assert (service.has_checked && service.last_error == "check failed");
 	}
 
 	void update_service_clear_error ()
@@ -114,7 +116,7 @@ namespace PlankTests
 		var backend = new FakeUpdateBackend () { fail = true };
 		var service = new Plank.UpdateService.with_backend (backend);
 		assert (wait_for_update (() => backend.checks == 1 && !service.checking));
-		assert (service.last_error == "check failed");
+		assert (!service.has_checked && service.last_error == "check failed");
 		backend.fail = false;
 		service.refresh.begin ();
 		assert (wait_for_update (() => backend.checks == 2 && !service.checking));

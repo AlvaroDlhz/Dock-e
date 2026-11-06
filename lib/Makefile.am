@@ -177,6 +177,7 @@ libplank_internal_la_VALASOURCES = \
 	Services/AudioService.vala \
 	Services/BluetoothService.vala \
 	Services/BrightnessService.vala \
+	Services/CalculatorService.vala \
 	Services/CommandRunner.vala \
 	Services/NetworkService.vala \
 	Services/PowerService.vala \
