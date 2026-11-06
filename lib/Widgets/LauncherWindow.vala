@@ -15,6 +15,7 @@ namespace Plank
 		Gtk.Button user_avatar_button;
 		Gtk.Button dismiss_notice_button;
 		Gtk.ListBox result_list;
+		Gtk.ScrolledWindow result_scroll;
 		Gtk.Label? calculation_status_label;
 		StatusNoticeModel notice_model;
 		Gtk.Revealer notice_revealer;
@@ -43,6 +44,10 @@ namespace Plank
 		{
 			Object (type: Gtk.WindowType.TOPLEVEL);
 			this.controller = controller;
+			hide.connect (() => {
+				if (anchor_item != null)
+					anchor_item.set_menu_active (false);
+			});
 			applications = new Gee.ArrayList<AppInfo> ();
 			visible_results = new Gee.ArrayList<AppInfo> ();
 			visible_commands = new Gee.ArrayList<string> ();
@@ -140,6 +145,15 @@ namespace Plank
 			Accessibility.describe (result_list, _("Application results"));
 			result_list.selection_mode = Gtk.SelectionMode.SINGLE;
 			result_list.activate_on_single_click = true;
+			result_list.row_selected.connect ((row) => {
+				if (row == null)
+					return;
+				Idle.add (() => {
+					if (row.get_parent () == result_list)
+						scroll_row_into_view (row);
+					return false;
+				});
+			});
 			result_list.row_activated.connect ((row) => activate_row (row));
 			result_list.set_header_func ((row, before) => {
 				var index = row.get_index ();
@@ -166,7 +180,7 @@ namespace Plank
 					event.x_root, event.y_root);
 				return true;
 			});
-			var result_scroll = new Gtk.ScrolledWindow (null, null);
+			result_scroll = new Gtk.ScrolledWindow (null, null);
 			result_scroll.hscrollbar_policy = Gtk.PolicyType.NEVER;
 			result_scroll.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC;
 			result_scroll.overlay_scrolling = true;
@@ -492,7 +506,10 @@ namespace Plank
 		{
 			controller.workspace_previews.dismiss ();
 			Accessibility.set_keyboard_navigation (this, false);
+			if (anchor_item != null && anchor_item != item)
+				anchor_item.set_menu_active (false);
 			anchor_item = item;
+			anchor_item.set_menu_active (true);
 			index_applications ();
 			search_entry.text = "";
 			refresh_results ();
@@ -626,6 +643,21 @@ namespace Plank
 				result_list.select_row (first_row);
 			if (visible)
 				Idle.add (() => { position_centered (); return false; });
+		}
+
+		void scroll_row_into_view (Gtk.ListBoxRow row)
+		{
+			int row_y;
+			if (!row.translate_coordinates (result_list, 0, 0, null, out row_y))
+				return;
+
+			var adjustment = result_scroll.get_vadjustment ();
+			var row_top = (double) row_y;
+			var row_bottom = row_top + row.get_allocated_height ();
+			if (row_top < adjustment.value)
+				adjustment.value = row_top;
+			else if (row_bottom > adjustment.value + adjustment.page_size)
+				adjustment.value = row_bottom - adjustment.page_size;
 		}
 
 		string searchable_text (AppInfo app)
@@ -1311,7 +1343,7 @@ namespace Plank
 			var green = (int) Math.round (color.green * 255.0);
 			var blue = (int) Math.round (color.blue * 255.0);
 			var background_opacity = (controller.prefs.CustomBackgroundEnabled
-				? controller.prefs.BackgroundOpacity : color.alpha).clamp (0.0, 1.0);
+				? 1.0 : color.alpha).clamp (0.0, 1.0);
 			var opacity_milli = (int) Math.round (background_opacity * 1000.0);
 			var opacity_css = "%d.%03d".printf (opacity_milli / 1000, opacity_milli % 1000);
 			var luminance = relative_luminance (color.red, color.green, color.blue);

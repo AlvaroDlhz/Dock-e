@@ -114,7 +114,6 @@ namespace Plank
 				var app = AppInfo.create_from_commandline (command, _("Update Manager"),
 					AppInfoCreateFlags.SUPPORTS_STARTUP_NOTIFICATION);
 				app.launch (null, null);
-				update_service.schedule_refresh (2);
 			} catch (Error e) {
 				warning ("Unable to open update manager: %s", e.message);
 				show_launch_error ();

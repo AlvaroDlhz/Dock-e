@@ -49,8 +49,8 @@
 		<key name="background-opacity" type="d">
 			<range min="0.0" max="1.0"/>
 			<default>1.0</default>
-			<summary>Dock background opacity</summary>
-			<description>The opacity of the dock background, from fully transparent to fully opaque.</description>
+			<summary>Legacy dock background opacity</summary>
+			<description>Retained for compatibility; the custom dock background is always fully opaque.</description>
 		</key>
 		<key name="custom-background-enabled" type="b">
 			<default>false</default>

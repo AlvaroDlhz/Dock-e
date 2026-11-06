@@ -378,7 +378,7 @@ namespace Plank
 		double get_bar_opacity (Gdk.RGBA color)
 		{
 			return controller.prefs.CustomBackgroundEnabled
-				? controller.prefs.BackgroundOpacity.clamp (0.0, 1.0)
+				? 1.0
 				: color.alpha.clamp (0.0, 1.0);
 		}
 	}

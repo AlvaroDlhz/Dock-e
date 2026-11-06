@@ -152,7 +152,6 @@ namespace Plank
 				break;
 			case "CustomBackgroundEnabled":
 			case "BackgroundColor":
-			case "BackgroundOpacity":
 				apply_background_preferences ();
 				reset_buffers ();
 				break;
@@ -228,9 +227,6 @@ namespace Plank
 					fill_start.red = fill_end.red = selected.red;
 					fill_start.green = fill_end.green = selected.green;
 					fill_start.blue = fill_end.blue = selected.blue;
-					// The selected opacity is applied to the complete rendered
-					// background below.  Start from an opaque custom fill so 100%
-					// really is opaque, regardless of the theme's original alpha.
 					fill_start.alpha = fill_end.alpha = 1.0;
 				}
 			}
@@ -568,10 +564,7 @@ namespace Plank
 			}
 			
 			cr.set_source_surface (buffer.Internal, background_rect.x + x_offset, background_rect.y + y_offset);
-			if (controller.prefs.CustomBackgroundEnabled)
-				cr.paint_with_alpha (controller.prefs.BackgroundOpacity.clamp (0.0, 1.0));
-			else
-				cr.paint ();
+			cr.paint ();
 		}
 		
 		[CCode (instance_pos = -1)]

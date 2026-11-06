@@ -46,8 +46,6 @@ namespace Plank
 		[GtkChild]
 		Gtk.Scale s_offset;
 		[GtkChild]
-		Gtk.Scale s_background_opacity;
-		[GtkChild]
 		Gtk.ColorButton btn_background_color;
 		
 		[GtkChild]
@@ -58,8 +56,6 @@ namespace Plank
 		Gtk.Adjustment adj_iconsize;
 		[GtkChild]
 		Gtk.Adjustment adj_offset;
-		[GtkChild]
-		Gtk.Adjustment adj_background_opacity;
 		
 		[GtkChild]
 		Gtk.Switch sw_hide;
@@ -159,13 +155,9 @@ namespace Plank
 			case "CustomBackgroundEnabled":
 				sw_custom_background.set_active (prefs.CustomBackgroundEnabled);
 				btn_background_color.sensitive = prefs.CustomBackgroundEnabled;
-				s_background_opacity.sensitive = prefs.CustomBackgroundEnabled;
 				break;
 			case "BackgroundColor":
 				set_background_color_button ();
-				break;
-			case "BackgroundOpacity":
-				adj_background_opacity.value = prefs.BackgroundOpacity * 100.0;
 				break;
 			case "IconSize":
 				adj_iconsize.value = prefs.IconSize;
@@ -233,17 +225,11 @@ namespace Plank
 		{
 			prefs.CustomBackgroundEnabled = ((Gtk.Switch) widget).get_active ();
 			btn_background_color.sensitive = prefs.CustomBackgroundEnabled;
-			s_background_opacity.sensitive = prefs.CustomBackgroundEnabled;
 		}
 
 		void background_color_changed (Gtk.ColorButton button)
 		{
 			prefs.BackgroundColor = button.rgba.to_string ();
-		}
-
-		void background_opacity_changed (Gtk.Adjustment adj)
-		{
-			prefs.BackgroundOpacity = adj.value / 100.0;
 		}
 
 		void set_background_color_button ()
@@ -358,7 +344,6 @@ namespace Plank
 			cb_display_plug.changed.connect (monitor_changed);
 			adj_iconsize.value_changed.connect (iconsize_changed);
 			adj_offset.value_changed.connect (offset_changed);
-			adj_background_opacity.value_changed.connect (background_opacity_changed);
 			btn_background_color.color_set.connect (background_color_changed);
 			sw_hide.notify["active"].connect (hide_toggled);
 			sw_primary_display.notify["active"].connect (primary_display_toggled);
@@ -382,7 +367,6 @@ namespace Plank
 			cb_display_plug.changed.disconnect (monitor_changed);
 			adj_iconsize.value_changed.disconnect (iconsize_changed);
 			adj_offset.value_changed.disconnect (offset_changed);
-			adj_background_opacity.value_changed.disconnect (background_opacity_changed);
 			btn_background_color.color_set.disconnect (background_color_changed);
 			sw_hide.notify["active"].disconnect (hide_toggled);
 			sw_primary_display.notify["active"].disconnect (primary_display_toggled);
@@ -420,11 +404,9 @@ namespace Plank
 			
 			adj_iconsize.value = prefs.IconSize;
 			adj_offset.value = prefs.Offset;
-			adj_background_opacity.value = prefs.BackgroundOpacity * 100.0;
 			set_background_color_button ();
 			sw_custom_background.set_active (prefs.CustomBackgroundEnabled);
 			btn_background_color.sensitive = prefs.CustomBackgroundEnabled;
-			s_background_opacity.sensitive = prefs.CustomBackgroundEnabled;
 			s_offset.sensitive = (prefs.Alignment == Gtk.Align.CENTER);
 			sw_hide.set_active (prefs.HideMode != HideType.NONE);
 			sw_primary_display.set_active (prefs.Monitor == "");

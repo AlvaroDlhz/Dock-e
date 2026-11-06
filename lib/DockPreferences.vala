@@ -66,9 +66,9 @@ namespace Plank
 		[Description(nick = "background-color", blurb = "The custom color used for the dock background.")]
 		public string BackgroundColor { get; set; }
 
-		[Description(nick = "background-opacity", blurb = "The opacity of the custom dock background, from 0 to 1; lower values reveal blur when supported by the compositor.")]
+		[Description(nick = "background-opacity", blurb = "Legacy setting; custom background opacity is always 1.0.")]
 		public double BackgroundOpacity { get; set; }
-		
+
 		[Description(nick = "alignment", blurb = "The alignment for the dock on the monitor's edge.  If 0, panel-mode.  If 1, left-aligned.  If 2, right-aligned.  If 3, centered.")]
 		public Gtk.Align Alignment { get; set; }
 		
@@ -178,7 +178,7 @@ namespace Plank
 				break;
 
 			case "BackgroundOpacity":
-				BackgroundOpacity = BackgroundOpacity.clamp (0.0, 1.0);
+				BackgroundOpacity = 1.0;
 				break;
 			}
 		}

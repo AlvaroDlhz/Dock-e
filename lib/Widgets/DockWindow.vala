@@ -84,8 +84,6 @@ namespace Plank
 			
 			stick ();
 			
-			realize.connect (() => update_blur_region ());
-			controller.prefs.notify.connect (preferences_changed);
 			add_events (Gdk.EventMask.BUTTON_PRESS_MASK |
 						Gdk.EventMask.BUTTON_RELEASE_MASK |
 						Gdk.EventMask.ENTER_NOTIFY_MASK |
@@ -107,7 +105,6 @@ namespace Plank
 				Gtk.StyleContext.remove_provider_for_screen (get_screen (), context_menu_provider);
 			
 			controller.prefs.notify["HideMode"].disconnect (set_struts);
-			controller.prefs.notify.disconnect (preferences_changed);
 			
 			if (hover_reposition_timer_id > 0U) {
 				GLib.Source.remove (hover_reposition_timer_id);
@@ -602,59 +599,6 @@ namespace Plank
 				set_hovered_provider (null);
 				set_hovered (null);
 			}
-
-			update_blur_region ();
-		}
-
-		void preferences_changed (Object prefs, ParamSpec prop)
-		{
-			if (prop.name == "CustomBackgroundEnabled" || prop.name == "BackgroundOpacity")
-				update_blur_region ();
-		}
-
-		void update_blur_region ()
-		{
-			if (!get_realized ())
-				return;
-
-			unowned Gdk.X11.Display? gdk_display = get_display () as Gdk.X11.Display;
-			unowned Gdk.X11.Window? gdk_window = get_window () as Gdk.X11.Window;
-			if (gdk_display == null || gdk_window == null)
-				return;
-
-			unowned X.Display display = gdk_display.get_xdisplay ();
-			var xid = gdk_window.get_xid ();
-			var property = display.intern_atom ("_KDE_NET_WM_BLUR_BEHIND_REGION", false);
-			var blur_enabled = get_screen ().is_composited ()
-				&& controller.prefs.CustomBackgroundEnabled
-				&& controller.prefs.BackgroundOpacity < 1.0;
-
-			gdk_display.error_trap_push ();
-			if (blur_enabled) {
-				var background = controller.position_manager.get_background_region ();
-				int width, height;
-				get_size (out width, out height);
-				Gdk.Rectangle window_region = { 0, 0, width, height };
-				Gdk.Rectangle blur_region;
-				if (background.intersect (window_region, out blur_region)
-					&& blur_region.width > 0 && blur_region.height > 0) {
-					ulong[] region = {
-						(ulong) blur_region.x,
-						(ulong) blur_region.y,
-						(ulong) blur_region.width,
-						(ulong) blur_region.height
-					};
-					display.change_property (xid, property, X.XA_CARDINAL, 32,
-						X.PropMode.Replace, (uchar[]) region, region.length);
-				} else {
-					display.delete_property (xid, property);
-				}
-			} else {
-				display.delete_property (xid, property);
-			}
-			var error = gdk_display.error_trap_pop ();
-			if (error != X.Success)
-				warning ("Unable to update dock blur region (X11 error %d)", error);
 		}
 		
 		/**

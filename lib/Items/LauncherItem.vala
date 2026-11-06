@@ -7,6 +7,7 @@ namespace Plank
 	public class LauncherItem : DockItem
 	{
 		Gdk.Pixbuf? menu_pixbuf = null;
+		bool menu_active = false;
 
 		public LauncherItem ()
 		{
@@ -17,6 +18,15 @@ namespace Plank
 		public override bool can_be_removed ()
 		{
 			return false;
+		}
+
+		public void set_menu_active (bool active)
+		{
+			if (menu_active == active)
+				return;
+
+			menu_active = active;
+			reset_icon_buffer ();
 		}
 
 		protected override void draw_icon (Surface surface)
@@ -38,12 +48,15 @@ namespace Plank
 			var box_y = (surface.Height - box) / 2.0;
 			var box_radius = box * 0.22;
 			var line_width = double.max (1.0, extent * 0.028);
+			var red = menu_active ? 115.0 / 255.0 : 1.0;
+			var green = menu_active ? 210.0 / 255.0 : 1.0;
+			var blue = menu_active ? 22.0 / 255.0 : 1.0;
 
 			cr.save ();
 			Theme.draw_rounded_rect (cr, box_x, box_y, box, box,
 				box_radius, box_radius, line_width);
 			cr.set_line_width (line_width);
-			cr.set_source_rgba (1.0, 1.0, 1.0, 0.92);
+			cr.set_source_rgba (red, green, blue, 0.92);
 			cr.stroke ();
 			cr.restore ();
 
@@ -53,7 +66,13 @@ namespace Plank
 			var y = (surface.Height - size) / 2.0;
 
 			Gdk.cairo_set_source_pixbuf (cr, scaled, x, y);
-			cr.paint ();
+			if (menu_active) {
+				var mask = cr.get_source ();
+				cr.set_source_rgba (red, green, blue, 0.92);
+				cr.mask (mask);
+			} else {
+				cr.paint ();
+			}
 		}
 
 		protected override AnimationType on_clicked (PopupButton button, Gdk.ModifierType mod, uint32 event_time)
