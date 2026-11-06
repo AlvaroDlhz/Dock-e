@@ -103,7 +103,6 @@ namespace Plank
 			}
 			current_item = item;
 			controller.launcher.dismiss ();
-			controller.status_panel.dismiss ();
 			controller.background_apps.dismiss ();
 			controller.window_previews.dismiss ();
 			rebuild ();

@@ -287,39 +287,12 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
                 <property name="round_digits">0</property>
                 <property name="digits">0</property>
                 <property name="value_pos">right</property>
-                <property name="tooltip_text" translatable="yes">Bar opacity in percent; 0 is transparent and 100 is opaque</property>
+                <property name="tooltip_text" translatable="yes">Bar opacity in percent; lower values reveal background blur when supported by the compositor</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">5</property>
                 <property name="width">3</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="l_show_side_sections">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
-                <property name="label" translatable="yes">Show Side Sections:</property>
-                <property name="justify">right</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">6</property>
-                <property name="width">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSwitch" id="sw_show_side_sections">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="tooltip_text" translatable="yes">Show controls and system indicators beside the central application section</property>
-                <property name="halign">start</property>
-                <property name="valign">center</property>
-              </object>
-              <packing>
-                <property name="left_attach">2</property>
-                <property name="top_attach">6</property>
               </packing>
             </child>
           </object>

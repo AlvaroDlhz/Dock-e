@@ -125,11 +125,6 @@
 			<summary>Show the item for the dock itself</summary>
 			<description>If true, show the Plank dock item.</description>
 		</key>
-		<key name="show-side-sections" type="b">
-			<default>true</default>
-			<summary>Show the side sections</summary>
-			<description>If true, show the control and status sections at the sides of the central application section.</description>
-		</key>
 		<key name="theme" type="s">
 			<default>'Default'</default>
 			<summary>The name of the dock theme for Plank to use</summary>

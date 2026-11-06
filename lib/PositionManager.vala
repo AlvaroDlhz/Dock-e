@@ -24,10 +24,6 @@ namespace Plank
 	 */
 	public class PositionManager : GLib.Object
 	{
-		const int BAR_SIDE_INSET = 12;
-		const int STATUS_BAR_MIN_GAP = 48;
-		const int STATUS_ITEM_SPACING = 6;
-		const double STATUS_CLOCK_WIDTH_FACTOR = 2.0;
 		const double CENTRAL_HOVER_CLEARANCE = 0.75;
 		public DockController controller { private get; construct; }
 		
@@ -813,223 +809,16 @@ namespace Plank
 			if (post_func != null)
 				post_func (draw_values);
 
-			DockItem? primary_first = null;
-			DockItem? primary_last = null;
-			DockItem? status_first = null;
-			DockItem? status_last = null;
-			DockItem? left_first = null;
-			DockItem? left_last = null;
-			var status_count = 0;
-			foreach (unowned DockItem item in items) {
-				if (DockController.is_control_section_item (item)) {
-					if (left_first == null)
-						left_first = item;
-					left_last = item;
-				} else if (DockController.is_status_section_item (item)) {
-					if (status_first == null)
-						status_first = item;
-					status_last = item;
-					status_count++;
-				} else {
-					if (primary_first == null)
-						primary_first = item;
-					primary_last = item;
-				}
-			}
-
-			// Side-section controls share a provider with the launcher button, so
-			// their original slots sit between the launcher and application items.
-			// Compact the central sequence after classification to remove those
-			// empty slots, while move_right() preserves each item's current draw
-			// displacement.
-			DockItem? previous_primary = null;
-			foreach (unowned DockItem item in items) {
-				if (DockController.is_side_section_item (item))
-					continue;
-				if (previous_primary != null) {
-					var desired_axis = axis_position (draw_values[previous_primary], true)
-						+ IconSize + ItemPadding;
-					var compact_shift = desired_axis - axis_position (draw_values[item], true);
-					draw_values[item].move_right (Position, compact_shift);
-				}
-				previous_primary = item;
-			}
-
-			if (primary_first != null && primary_last != null) {
-				// Center the primary section against the full bar, independently of
-				// the number and width of the controls anchored at either edge.
-				var primary_center = (axis_position (draw_values[primary_first], true)
-					+ axis_position (draw_values[primary_last], true)) / 2.0;
-				var primary_shift = axis_length () / 2.0 - primary_center;
-				foreach (unowned DockItem item in items) {
-					if (!DockController.is_side_section_item (item))
-						draw_values[item].move_right (Position, primary_shift);
-				}
-			}
-
-			if (status_count > 0) {
-				var side_inset = BAR_SIDE_INSET * window_scale_factor;
-				var background_padding = ItemPadding + 2 * HorizPadding + 4 * LineWidth;
-				var status_last_center = axis_position (draw_values[status_last]);
-				var desired_last_center = axis_length () - DockMargin - side_inset
-					- (IconSize + background_padding) / 2.0;
-				var status_shift = desired_last_center - status_last_center;
-				foreach (unowned DockItem item in items) {
-					if (DockController.is_status_section_item (item))
-						draw_values[item].move_right (Position, status_shift);
-				}
-			}
-
-			if (left_first != null && left_last != null) {
-				var side_inset = BAR_SIDE_INSET * window_scale_factor;
-				var background_padding = ItemPadding + 2 * HorizPadding + 4 * LineWidth;
-				var desired_center = DockMargin + side_inset + (IconSize + background_padding) / 2.0;
-				var left_shift = desired_center - axis_position (draw_values[left_first]);
-				foreach (unowned DockItem item in items)
-					if (DockController.is_control_section_item (item))
-						draw_values[item].move_right (Position, left_shift);
-			}
-
+			DockItem? first_item = items.size > 0 ? items[0] : null;
+			DockItem? last_item = items.size > 0 ? items[items.size - 1] : null;
 			primary_background_rect = {};
 			control_background_rect = {};
 			status_background_rect = {};
-			if (primary_first != null && primary_last != null) {
-				update_background_region (draw_values[primary_first], draw_values[primary_last]);
+			if (first_item != null && last_item != null) {
+				update_background_region (draw_values[first_item], draw_values[last_item]);
 				primary_background_rect = background_rect;
 			}
-			if (left_first != null && left_last != null) {
-				update_background_region (draw_values[left_first], draw_values[left_last]);
-				control_background_rect = background_rect;
-			}
-			if (status_first != null && status_last != null) {
-				update_background_region (draw_values[status_first], draw_values[status_last]);
-				status_background_rect = background_rect;
-			}
-
-			// Lay out the status section as a compact cluster with a small fixed
-			// spacing between its items, anchored at the trailing edge, and size
-			// its background bar to wrap that cluster. The bar is never allowed to
-			// come closer than STATUS_BAR_MIN_GAP to the primary section: the
-			// spacing shrinks first so the two bars never overlap.
-			if (status_first != null && status_last != null
-				&& status_background_rect.width > 0 && status_background_rect.height > 0
-				&& Alignment != Gtk.Align.FILL) {
-				var edge_margin = (ItemPadding + 2 * HorizPadding + 4 * LineWidth) / 2.0;
-				var status_items = new Gee.ArrayList<DockItem> ();
-				foreach (unowned DockItem item in items)
-					if (DockController.is_status_section_item (item))
-						status_items.add (item);
-
-				if (is_horizontal_dock ()) {
-					// Widen the clock so its time and date fit without squeezing.
-					foreach (var item in status_items) {
-						var status = item as StatusIndicatorItem;
-						draw_values[item].icon_width = (status != null
-							&& status.Kind == StatusIndicatorKind.CLOCK)
-							? IconSize * STATUS_CLOCK_WIDTH_FACTOR
-							: IconSize;
-					}
-
-					var widths = 0.0;
-					foreach (var item in status_items)
-						widths += draw_values[item].icon_width;
-
-					// Keep the cluster's current right edge as the anchor.
-					var bar_right = status_background_rect.x + status_background_rect.width;
-					var item_spacing = (double) (STATUS_ITEM_SPACING * window_scale_factor);
-
-					// Shrink the spacing (never below zero) if the cluster would
-					// otherwise encroach on the primary section's clearance.
-					if (status_items.size > 1 && primary_first != null && primary_last != null
-						&& primary_background_rect.width > 0) {
-						var limit = primary_background_rect.x + primary_background_rect.width
-							+ STATUS_BAR_MIN_GAP * window_scale_factor;
-						var max_cluster = bar_right - 2 * edge_margin - limit;
-						if (widths + item_spacing * (status_items.size - 1) > max_cluster)
-							item_spacing = double.max (0.0,
-								(max_cluster - widths) / (status_items.size - 1));
-					}
-
-					var cluster_width = widths
-						+ item_spacing * double.max (0, status_items.size - 1);
-					var cursor = bar_right - edge_margin - cluster_width;
-					var bar_start = cursor - edge_margin;
-					foreach (var item in status_items) {
-						var value = draw_values[item];
-						var desired_axis = cursor + value.icon_width / 2.0;
-						value.move_right (Position, desired_axis - axis_position (value));
-						cursor += value.icon_width + item_spacing;
-					}
-
-					status_background_rect.x = (int) Math.round (bar_start);
-					status_background_rect.width = (int) Math.round (bar_right - bar_start);
-				} else {
-					var bar_center = status_background_rect.y + status_background_rect.height / 2.0;
-					var icons_center = (axis_position (draw_values[status_first])
-						+ axis_position (draw_values[status_last])) / 2.0;
-					var icon_shift = bar_center - icons_center;
-					foreach (unowned DockItem item in items)
-						if (DockController.is_status_section_item (item))
-							draw_values[item].move_right (Position, icon_shift);
-				}
-			}
-
-			// Keep the fixed side icons centered inside their own backgrounds,
-			// independently of the launchers' zoom-oriented baseline.
-			if (control_background_rect.width > 0 && control_background_rect.height > 0) {
-				var control_cross_center = is_horizontal_dock ()
-					? control_background_rect.y + control_background_rect.height / 2.0
-					: control_background_rect.x + control_background_rect.width / 2.0;
-				foreach (unowned DockItem item in items) {
-					if (!DockController.is_control_section_item (item))
-						continue;
-
-					var value = draw_values[item];
-					if (is_horizontal_dock ()) {
-						value.center.y = control_cross_center;
-						value.static_center.y = control_cross_center;
-					} else {
-						value.center.x = control_cross_center;
-						value.static_center.x = control_cross_center;
-					}
-				}
-			}
-			if (status_background_rect.width > 0 && status_background_rect.height > 0) {
-				var status_cross_center = is_horizontal_dock ()
-					? status_background_rect.y + status_background_rect.height / 2.0
-					: status_background_rect.x + status_background_rect.width / 2.0;
-				foreach (unowned DockItem item in items) {
-					if (!DockController.is_status_section_item (item))
-						continue;
-
-					var value = draw_values[item];
-					if (is_horizontal_dock ()) {
-						value.center.y = status_cross_center;
-						value.static_center.y = status_cross_center;
-					} else {
-						value.center.x = status_cross_center;
-						value.static_center.x = status_cross_center;
-					}
-				}
-			}
-
-			// Keep the aggregate region for input handling and popup placement, while
-			// retaining each section rectangle so the renderer can paint separate bars.
-			background_rect = {};
-			if (primary_background_rect.width > 0 && primary_background_rect.height > 0)
-				background_rect = primary_background_rect;
-			if (control_background_rect.width > 0 && control_background_rect.height > 0) {
-				if (background_rect.width > 0 && background_rect.height > 0)
-					background_rect.union (control_background_rect, out background_rect);
-				else
-					background_rect = control_background_rect;
-			}
-			if (status_background_rect.width > 0 && status_background_rect.height > 0) {
-				if (background_rect.width > 0 && background_rect.height > 0)
-					background_rect.union (status_background_rect, out background_rect);
-				else
-					background_rect = status_background_rect;
-			}
+			background_rect = primary_background_rect;
 			
 			// precalculate and cache regions (for the current frame)
 			draw_values.map_iterator ().foreach ((i, val) => {
@@ -1584,17 +1373,6 @@ namespace Plank
 		public Gdk.Rectangle get_status_background_region ()
 		{
 			return status_background_rect;
-		}
-
-		double axis_position (DockItemDrawValue value, bool use_static = false)
-		{
-			var point = use_static ? value.static_center : value.center;
-			return is_horizontal_dock () ? point.x : point.y;
-		}
-
-		int axis_length ()
-		{
-			return is_horizontal_dock () ? DockWidth : DockHeight;
 		}
 
 		public bool pointer_is_over_primary_section (int x, int y)

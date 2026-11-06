@@ -66,7 +66,7 @@ namespace Plank
 		[Description(nick = "background-color", blurb = "The custom color used for the dock background.")]
 		public string BackgroundColor { get; set; }
 
-		[Description(nick = "background-opacity", blurb = "The opacity of the dock background, from 0 to 1.")]
+		[Description(nick = "background-opacity", blurb = "The opacity of the custom dock background, from 0 to 1; lower values reveal blur when supported by the compositor.")]
 		public double BackgroundOpacity { get; set; }
 		
 		[Description(nick = "alignment", blurb = "The alignment for the dock on the monitor's edge.  If 0, panel-mode.  If 1, left-aligned.  If 2, right-aligned.  If 3, centered.")]
@@ -102,9 +102,6 @@ namespace Plank
 		[Description(nick = "window-previews-enabled", blurb = "Whether to show previews of open windows when application items are hovered.")]
 		public bool WindowPreviewsEnabled { get; set; }
 
-		[Description(nick = "show-side-sections", blurb = "Whether to show the control and status sections at the sides of the dock.")]
-		public bool ShowSideSections { get; set; }
-		
 		/**
 		 * {@inheritDoc}
 		 */

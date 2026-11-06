@@ -76,8 +76,6 @@ namespace Plank
 		Gtk.Switch sw_window_previews;
 		[GtkChild]
 		Gtk.Switch sw_custom_background;
-		[GtkChild]
-		Gtk.Switch sw_show_side_sections;
 		
 		[GtkChild]
 		Gtk.IconView view_docklets;
@@ -171,9 +169,6 @@ namespace Plank
 				break;
 			case "PressureReveal":
 				sw_pressure_reveal.set_active (prefs.PressureReveal);
-				break;
-			case "ShowSideSections":
-				sw_show_side_sections.set_active (prefs.ShowSideSections);
 				break;
 			case "WindowPreviewsEnabled":
 				sw_window_previews.set_active (prefs.WindowPreviewsEnabled);
@@ -292,11 +287,6 @@ namespace Plank
 			prefs.WindowPreviewsEnabled = ((Gtk.Switch) widget).get_active ();
 		}
 
-		void show_side_sections_toggled (GLib.Object widget, ParamSpec param)
-		{
-			prefs.ShowSideSections = ((Gtk.Switch) widget).get_active ();
-		}
-		
 		void iconsize_changed (Gtk.Adjustment adj)
 		{
 			prefs.IconSize = (int) adj.value;
@@ -342,7 +332,6 @@ namespace Plank
 			sw_pressure_reveal.notify["active"].connect (pressure_reveal_toggled);
 			sw_window_previews.notify["active"].connect (window_previews_toggled);
 			sw_custom_background.notify["active"].connect (custom_background_toggled);
-			sw_show_side_sections.notify["active"].connect (show_side_sections_toggled);
 			cb_alignment.changed.connect (alignment_changed);
 			cb_items_alignment.changed.connect (items_alignment_changed);
 		}
@@ -367,7 +356,6 @@ namespace Plank
 			sw_pressure_reveal.notify["active"].disconnect (pressure_reveal_toggled);
 			sw_window_previews.notify["active"].disconnect (window_previews_toggled);
 			sw_custom_background.notify["active"].disconnect (custom_background_toggled);
-			sw_show_side_sections.notify["active"].disconnect (show_side_sections_toggled);
 			cb_alignment.changed.disconnect (alignment_changed);
 			cb_items_alignment.changed.disconnect (items_alignment_changed);
 		}
@@ -409,7 +397,6 @@ namespace Plank
 			sw_lock_items.set_active (prefs.LockItems);
 			sw_pressure_reveal.set_active (prefs.PressureReveal);
 			sw_window_previews.set_active (prefs.WindowPreviewsEnabled);
-			sw_show_side_sections.set_active (prefs.ShowSideSections);
 			cb_alignment.active_id = ((int) prefs.Alignment).to_string ();
 			cb_items_alignment.active_id = ((int) prefs.ItemsAlignment).to_string ();
 			cb_items_alignment.sensitive = (prefs.Alignment == Gtk.Align.FILL);

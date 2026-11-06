@@ -13,13 +13,14 @@ namespace Plank
 		unowned DockController controller;
 		Gtk.Entry search_entry;
 		Gtk.ListBox result_list;
-		Gtk.Menu power_menu;
 		StatusNoticeModel notice_model;
 		Gtk.Revealer notice_revealer;
 		Gtk.Label notice_label;
 		ulong notice_changed_id = 0UL;
 		Gee.ArrayList<AppInfo> applications;
 		Gee.ArrayList<AppInfo> visible_results;
+		Gee.ArrayList<string> visible_commands;
+		bool showing_commands = false;
 		LauncherItem? anchor_item;
 		Gtk.CssProvider? theme_provider;
 		uint animation_timer_id = 0U;
@@ -39,6 +40,7 @@ namespace Plank
 			this.controller = controller;
 			applications = new Gee.ArrayList<AppInfo> ();
 			visible_results = new Gee.ArrayList<AppInfo> ();
+			visible_commands = new Gee.ArrayList<string> ();
 			uninstall_service = new ApplicationUninstallService ();
 			uninstall_command_cache = new Gee.HashMap<string, string> ();
 			uninstall_detection_pending = new Gee.HashSet<string> ();
@@ -85,7 +87,7 @@ namespace Plank
 			search_box.hexpand = true;
 			search_box.get_style_context ().add_class ("launcher-search");
 			search_entry = new Gtk.Entry ();
-			search_entry.placeholder_text = _("Search applications…");
+			search_entry.placeholder_text = _("Search applications or type / for commands…");
 			Accessibility.describe (search_entry, _("Search applications"),
 				_("Type to filter the application list"));
 			search_entry.has_frame = false;
@@ -101,26 +103,6 @@ namespace Plank
 			search_box.pack_start (search_entry, true, true, 0);
 			navbar.pack_start (search_box, true, true, 0);
 
-			var power_button = new Gtk.Button ();
-			power_button.tooltip_text = _("Session and power options");
-			Accessibility.describe (power_button, _("Session and power options"),
-				_("Opens lock, suspend, log out, restart, and power off actions"));
-			power_button.get_style_context ().add_class ("launcher-power-button");
-			power_button.add (new Gtk.Image.from_icon_name ("system-shutdown-symbolic", Gtk.IconSize.BUTTON));
-			power_menu = create_power_menu ();
-			power_menu.show.connect (() => {
-				controller.hide_manager.ExternalMenuVisible = true;
-				controller.hide_manager.update_hovered ();
-			});
-			power_menu.hide.connect (() => {
-				controller.hide_manager.ExternalMenuVisible = false;
-				controller.hide_manager.update_hovered ();
-			});
-			power_button.clicked.connect (() => {
-				power_menu.popup_at_widget (power_button, Gdk.Gravity.SOUTH_EAST,
-					Gdk.Gravity.NORTH_EAST, null);
-			});
-			navbar.pack_end (power_button, false, false, 0);
 			panel.pack_start (navbar, false, false, 0);
 
 			notice_revealer = new Gtk.Revealer ();
@@ -168,7 +150,8 @@ namespace Plank
 				if (row == null || row.get_index () < 0 || row.get_index () >= visible_results.size)
 					return false;
 				result_list.select_row (row);
-				show_application_context_menu (visible_results[row.get_index ()], event);
+				show_application_context_menu (visible_results[row.get_index ()],
+					event.x_root, event.y_root);
 				return true;
 			});
 			var result_scroll = new Gtk.ScrolledWindow (null, null);
@@ -185,7 +168,7 @@ namespace Plank
 				return false;
 			});
 			focus_out_event.connect (() => {
-				if (!power_menu.visible && !context_menu_open)
+				if (!context_menu_open)
 					hide_animated ();
 				return false;
 			});
@@ -264,34 +247,86 @@ namespace Plank
 			return fallback;
 		}
 
-		Gtk.Menu create_power_menu ()
+		string power_action_label (string action)
 		{
-			var menu = new Gtk.Menu ();
-			menu.get_style_context ().add_class ("plank-power-menu");
-			menu.append (create_power_item (_("Lock"), "system-lock-screen-symbolic",
-				"xflock4"));
-			menu.append (create_power_item (_("Suspend"), "media-playback-pause-symbolic",
-				"xfce4-session-logout --suspend"));
-			menu.append (new Gtk.SeparatorMenuItem ());
-			menu.append (create_power_item (_("Log out"), "system-log-out-symbolic",
-				"xfce4-session-logout --logout"));
-			menu.append (create_power_item (_("Restart"), "system-reboot-symbolic",
-				"xfce4-session-logout --reboot"));
-			menu.append (create_power_item (_("Power off"), "system-shutdown-symbolic",
-				"xfce4-session-logout --halt"));
-			menu.show_all ();
-			return menu;
+			switch (action) {
+			case "preferences": return _("Dock-E Preferences");
+			case "lock": return _("Lock");
+			case "suspend": return _("Suspend");
+			case "logout": return _("Log out");
+			case "restart": return _("Restart");
+			case "poweroff": return _("Power off");
+			default: return action;
+			}
 		}
 
-		Gtk.MenuItem create_power_item (string title, string icon_name, string command)
+		string power_action_command (string action)
 		{
-			var item = new Gtk.MenuItem ();
-			var box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
-			box.pack_start (new Gtk.Image.from_icon_name (icon_name, Gtk.IconSize.MENU), false, false, 0);
-			box.pack_start (new Gtk.Label (title) { xalign = 0.0f }, true, true, 0);
-			item.add (box);
-			item.activate.connect (() => run_session_action (command));
-			return item;
+			switch (action) {
+			case "preferences": return "";
+			case "lock": return "xflock4";
+			case "suspend": return "xfce4-session-logout --suspend";
+			case "logout": return "xfce4-session-logout --logout";
+			case "restart": return "xfce4-session-logout --reboot";
+			case "poweroff": return "xfce4-session-logout --halt";
+			default: return "";
+			}
+		}
+
+		string power_action_aliases (string action)
+		{
+			switch (action) {
+			case "preferences": return "preferences preferencias";
+			case "lock": return "bloquear lock";
+			case "suspend": return "dormir suspender suspend";
+			case "logout": return "cerrar-sesion salir logout";
+			case "restart": return "reiniciar restart reboot";
+			case "poweroff": return "apagar poweroff halt";
+			default: return "";
+			}
+		}
+
+		Gtk.ListBoxRow create_power_command_row (string action)
+		{
+			var row = new Gtk.ListBoxRow ();
+			row.get_style_context ().add_class ("launcher-result");
+			var box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 11);
+			box.margin_left = box.margin_right = 12;
+			box.margin_top = box.margin_bottom = 9;
+			string icon_name;
+			switch (action) {
+			case "preferences": icon_name = "preferences-system-symbolic"; break;
+			case "lock": icon_name = "system-lock-screen-symbolic"; break;
+			case "suspend": icon_name = "media-playback-pause-symbolic"; break;
+			case "logout": icon_name = "system-log-out-symbolic"; break;
+			case "restart": icon_name = "system-reboot-symbolic"; break;
+			default: icon_name = "system-shutdown-symbolic"; break;
+			}
+			var icon = new Gtk.Image.from_icon_name (icon_name, Gtk.IconSize.DIALOG);
+			icon.pixel_size = 30;
+			box.pack_start (icon, false, false, 0);
+
+			var labels = new Gtk.Box (Gtk.Orientation.VERTICAL, 2);
+			labels.pack_start (new Gtk.Label (power_action_label (action)) { xalign = 0.0f },
+				false, false, 0);
+			var aliases = power_action_aliases (action).split (" ");
+			var command_hint = new Gee.ArrayList<string> ();
+			if (action == "preferences")
+				command_hint.add ("/preferences");
+			else
+				foreach (unowned string alias in aliases)
+					command_hint.add ("/" + alias);
+			var hint = new Gtk.Label (string.joinv (" · ", command_hint.to_array ())) {
+				xalign = 0.0f
+			};
+			hint.get_style_context ().add_class (Gtk.STYLE_CLASS_DIM_LABEL);
+			labels.pack_start (hint, false, false, 0);
+			box.pack_start (labels, true, true, 0);
+			var enter_hint = new Gtk.Label ("↵");
+			enter_hint.get_style_context ().add_class ("launcher-enter");
+			box.pack_end (enter_hint, false, false, 0);
+			row.add (box);
+			return row;
 		}
 
 		void run_session_action (string command)
@@ -335,7 +370,12 @@ namespace Plank
 				seen.add (id);
 				applications.add (app);
 			}
-			applications.sort ((a, b) => a.get_display_name ().collate (b.get_display_name ()));
+			applications.sort ((a, b) => {
+				var initial_order = alphabet_initial (a).collate (alphabet_initial (b));
+				if (initial_order != 0)
+					return initial_order;
+				return a.get_display_name ().collate (b.get_display_name ());
+			});
 		}
 
 		bool application_is_available (AppInfo app)
@@ -436,8 +476,27 @@ namespace Plank
 			foreach (unowned Gtk.Widget child in result_list.get_children ())
 				result_list.remove (child);
 			visible_results.clear ();
+			visible_commands.clear ();
 
 			var query = search_entry.text.strip ().down ();
+			showing_commands = query.has_prefix ("/");
+			if (showing_commands) {
+				var command_query = query.substring (1).strip ();
+				string[] actions = { "preferences", "lock", "suspend", "logout", "restart", "poweroff" };
+				foreach (unowned string action in actions) {
+					var searchable = "%s %s".printf (power_action_label (action),
+						power_action_aliases (action)).down ();
+					if (command_query == "" || fuzzy_score (searchable, command_query) >= 0) {
+						visible_commands.add (action);
+						result_list.add (create_power_command_row (action));
+					}
+				}
+				if (visible_commands.size == 0)
+					result_list.add (create_empty_row (_("No matching commands")));
+				finish_refresh_results ();
+				return;
+			}
+
 			var matches = new Gee.ArrayList<AppInfo> ();
 			foreach (var app in applications)
 				if (query == "" || fuzzy_score (searchable_text (app), query) >= 0)
@@ -449,14 +508,24 @@ namespace Plank
 				result_list.add (create_result_row (app));
 			}
 			if (visible_results.size == 0) {
-				var empty_row = new Gtk.ListBoxRow () { selectable = false, activatable = false };
-				empty_row.get_style_context ().add_class ("launcher-empty");
-				var empty_label = new Gtk.Label (_("No matching applications"));
-				empty_label.margin = 24;
-				empty_row.add (empty_label);
-				result_list.add (empty_row);
+				result_list.add (create_empty_row (_("No matching applications")));
 			}
 
+			finish_refresh_results ();
+		}
+
+		Gtk.ListBoxRow create_empty_row (string message)
+		{
+			var empty_row = new Gtk.ListBoxRow () { selectable = false, activatable = false };
+			empty_row.get_style_context ().add_class ("launcher-empty");
+			var empty_label = new Gtk.Label (message);
+			empty_label.margin = 24;
+			empty_row.add (empty_label);
+			return empty_row;
+		}
+
+		void finish_refresh_results ()
+		{
 			result_list.show_all ();
 			Timeout.add (250, () => {
 				var probe = result_list.get_row_at_index (0);
@@ -469,8 +538,9 @@ namespace Plank
 					debug ("Launcher header alloc: no header on first row");
 				return false;
 			});
-			if (result_list.get_row_at_index (0) != null)
-				result_list.select_row (result_list.get_row_at_index (0));
+			var first_row = result_list.get_row_at_index (0);
+			if (first_row != null && first_row.selectable)
+				result_list.select_row (first_row);
 			if (visible)
 				Idle.add (() => { position_centered (); return false; });
 		}
@@ -529,17 +599,18 @@ namespace Plank
 			row.get_style_context ().add_class ("launcher-result");
 			var box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 11);
 			box.margin_left = box.margin_right = 12;
-			box.margin_top = box.margin_bottom = 6;
+			box.margin_top = box.margin_bottom = 8;
 			Gtk.Image icon;
 			if (app.get_icon () != null)
 				icon = new Gtk.Image.from_gicon (app.get_icon (), Gtk.IconSize.DIALOG);
 			else
 				icon = new Gtk.Image.from_icon_name ("application-x-executable", Gtk.IconSize.DIALOG);
-			icon.pixel_size = 30;
+			icon.pixel_size = 36;
 			box.pack_start (icon, false, false, 0);
 
 			var labels = new Gtk.Box (Gtk.Orientation.VERTICAL, 2);
 			var title = new Gtk.Label (app.get_display_name ()) { xalign = 0.0f };
+			title.get_style_context ().add_class ("launcher-result-title");
 			title.ellipsize = Pango.EllipsizeMode.END;
 			title.max_width_chars = 34;
 			labels.pack_start (title, false, false, 0);
@@ -549,25 +620,30 @@ namespace Plank
 			description.get_style_context ().add_class (Gtk.STYLE_CLASS_DIM_LABEL);
 			labels.pack_start (description, false, false, 0);
 
-			var status = new Gtk.Label ("");
-			status.get_style_context ().add_class ("launcher-command-status");
-			status.visible = false;
-			var actions = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 6);
-			actions.get_style_context ().add_class ("launcher-command-actions");
-			actions.pack_start (create_copy_command_button (_("Ejecutar"),
-				build_launch_command (app), status), false, false, 0);
-			actions.pack_start (create_copy_command_button (_("Reiniciar"),
-				build_restart_command (app), status), false, false, 0);
-			actions.pack_start (create_copy_command_button (_("Matar"),
-				build_kill_command (app), status), false, false, 0);
-			actions.pack_start (create_copy_uninstall_button (app, status), false, false, 0);
-			actions.pack_start (status, false, false, 0);
-			labels.pack_start (actions, false, false, 0);
-
 			box.pack_start (labels, true, true, 0);
 			var enter_hint = new Gtk.Label ("↵");
 			enter_hint.get_style_context ().add_class ("launcher-enter");
-			box.pack_end (enter_hint, false, false, 0);
+			box.pack_start (enter_hint, false, false, 0);
+			var more_button = new Gtk.Button.from_icon_name ("view-more-symbolic",
+				Gtk.IconSize.BUTTON);
+			more_button.relief = Gtk.ReliefStyle.NONE;
+			more_button.tooltip_text = _("More options");
+			more_button.get_style_context ().add_class ("launcher-more-button");
+			Accessibility.describe (more_button, _("More options for %s")
+				.printf (app.get_display_name ()));
+			more_button.clicked.connect (() => {
+				int root_x = 0, root_y = 0;
+				var window = more_button.get_window ();
+				if (window == null)
+					return;
+				window.get_origin (out root_x, out root_y);
+				Gtk.Allocation allocation;
+				more_button.get_allocation (out allocation);
+				show_application_context_menu (app,
+					root_x + allocation.x + allocation.width / 2,
+					root_y + allocation.y + allocation.height / 2);
+			});
+			box.pack_end (more_button, false, false, 0);
 			row.add (box);
 			return row;
 		}
@@ -654,50 +730,9 @@ namespace Plank
 			return app.get_display_name ();
 		}
 
-		Gtk.Button create_copy_command_button (string label, string command, Gtk.Label status)
+		void copy_uninstall_command (AppInfo app, Gtk.Label status)
 		{
-			var button = new Gtk.Button ();
-			button.get_style_context ().add_class ("launcher-command-button");
-			var content = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 5);
-			content.pack_start (new Gtk.Image.from_icon_name ("edit-copy-symbolic",
-				Gtk.IconSize.MENU), false, false, 0);
-			content.pack_start (new Gtk.Label (label) { xalign = 0.0f }, false, false, 0);
-			button.add (content);
-			button.sensitive = command != "";
-			button.tooltip_text = command != ""
-				? _("Copiar: %s").printf (command) : _("Comando no disponible");
-			Accessibility.describe (button, _("Copy %s command").printf (label), command);
-			if (command != "")
-				button.clicked.connect (() => copy_command (command, status));
-			return button;
-		}
-
-		Gtk.Button create_copy_uninstall_button (AppInfo app, Gtk.Label status)
-		{
-			var button = new Gtk.Button ();
-			button.get_style_context ().add_class ("launcher-command-button");
-			var content = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 5);
-			content.pack_start (new Gtk.Image.from_icon_name ("edit-copy-symbolic",
-				Gtk.IconSize.MENU), false, false, 0);
-			content.pack_start (new Gtk.Label (_("Desinstalar")) { xalign = 0.0f }, false, false, 0);
-			button.add (content);
-			button.tooltip_text = _("Copiar comando de desinstalación");
-			Accessibility.describe (button, _("Copy uninstall command"));
 			var key = app_command_key (app);
-			string cached_command = "";
-			if (uninstall_command_cache.has_key (key))
-				cached_command = uninstall_command_cache[key];
-			if (cached_command != "") {
-				button.tooltip_text = _("Copiar: %s").printf (cached_command);
-				button.clicked.connect (() => copy_command (cached_command, status));
-			} else {
-				button.clicked.connect (() => copy_uninstall_command (app, key, button, status));
-			}
-			return button;
-		}
-
-		void copy_uninstall_command (AppInfo app, string key, Gtk.Button button, Gtk.Label status)
-		{
 			if (uninstall_command_cache.has_key (key)) {
 				copy_command (uninstall_command_cache[key], status);
 				return;
@@ -708,12 +743,10 @@ namespace Plank
 			}
 			uninstall_detection_pending.add (key);
 			set_command_status (status, _("Detectando…"), false);
-			button.sensitive = false;
 			var desktop = (app as DesktopAppInfo)?.get_filename ();
 			uninstall_service.detect.begin (app.get_id () ?? "", app.get_executable () ?? "",
 				desktop, null, (obj, result) => {
 					uninstall_detection_pending.remove (key);
-					button.sensitive = true;
 					UninstallTarget? target = null;
 					try {
 						target = uninstall_service.detect.end (result);
@@ -726,7 +759,6 @@ namespace Plank
 					}
 					var command = build_uninstall_command (target);
 					uninstall_command_cache[key] = command;
-					button.tooltip_text = _("Copiar: %s").printf (command);
 					copy_command (command, status);
 				});
 		}
@@ -752,14 +784,12 @@ namespace Plank
 				});
 		}
 
-		void show_application_context_menu (AppInfo app, Gdk.EventButton event)
+		void show_application_context_menu (AppInfo app, double root_x, double root_y)
 		{
 			if (uninstall_detection != null)
 				uninstall_detection.cancel ();
 			uninstall_detection = new Cancellable ();
 			var detection = uninstall_detection;
-			var root_x = event.x_root;
-			var root_y = event.y_root;
 			if (application_context != null)
 				application_context.destroy ();
 			var context = new Gtk.Window (Gtk.WindowType.TOPLEVEL);
@@ -808,6 +838,30 @@ namespace Plank
 					show_launcher_error (_("The application could not be opened. Check that it is still installed and try again."));
 				}
 			}), false, false, 0);
+
+			var command_status = new Gtk.Label ("") { xalign = 0.0f };
+			command_status.get_style_context ().add_class ("launcher-command-status");
+			command_status.visible = false;
+			var launch_command = build_launch_command (app);
+			var restart_command = build_restart_command (app);
+			var kill_command = build_kill_command (app);
+			var copy_launch = context_action_button (_("Copy launch command"),
+				"edit-copy-symbolic", () => copy_command (launch_command, command_status));
+			copy_launch.sensitive = launch_command != "";
+			card.pack_start (copy_launch, false, false, 0);
+			var copy_restart = context_action_button (_("Copy restart command"),
+				"edit-copy-symbolic", () => copy_command (restart_command, command_status));
+			copy_restart.sensitive = restart_command != "";
+			card.pack_start (copy_restart, false, false, 0);
+			var copy_kill = context_action_button (_("Copy terminate command"),
+				"edit-copy-symbolic", () => copy_command (kill_command, command_status));
+			copy_kill.sensitive = kill_command != "";
+			card.pack_start (copy_kill, false, false, 0);
+			card.pack_start (context_action_button (_("Copy uninstall command"),
+				"edit-copy-symbolic", () => copy_uninstall_command (app, command_status)),
+				false, false, 0);
+			card.pack_start (command_status, false, false, 0);
+			card.pack_start (new Gtk.Separator (Gtk.Orientation.HORIZONTAL), false, false, 2);
 
 			var desktop = app as DesktopAppInfo;
 			if (desktop != null) {
@@ -951,14 +1005,23 @@ namespace Plank
 		{
 			var header = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 9);
 			header.get_style_context ().add_class ("launcher-alpha-header");
-			var label = new Gtk.Label (initial);
+			var label = new Gtk.Label (initial) { valign = Gtk.Align.CENTER };
 			label.get_style_context ().add_class ("launcher-alpha-letter");
 			header.pack_start (label, false, false, 0);
-			var divider = new Gtk.Separator (Gtk.Orientation.HORIZONTAL);
-			divider.get_style_context ().add_class ("launcher-alpha-divider");
-			header.pack_start (divider, true, true, 0);
 			header.show_all ();
 			return header;
+		}
+
+		string alphabet_initial (AppInfo app)
+		{
+			var name = app.get_display_name ().strip ();
+			if (name == "")
+				return "#";
+			var decomposed = name.normalize (-1, GLib.NormalizeMode.NFD);
+			var initial = decomposed.get_char ();
+			if (!initial.isalpha ())
+				return "#";
+			return initial.to_string ().up ();
 		}
 
 		bool handle_key_press (Gdk.EventKey event)
@@ -990,17 +1053,30 @@ namespace Plank
 
 		void move_selection (int delta)
 		{
-			if (visible_results.size == 0)
+			var result_count = showing_commands ? visible_commands.size : visible_results.size;
+			if (result_count == 0)
 				return;
 			var row = result_list.get_selected_row ();
 			var index = row == null ? 0 : row.get_index () + delta;
-			index = (index + visible_results.size) % visible_results.size;
+			index = (index + result_count) % result_count;
 			result_list.select_row (result_list.get_row_at_index (index));
 		}
 
 		void activate_row (Gtk.ListBoxRow row)
 		{
 			var index = row.get_index ();
+			if (showing_commands) {
+				if (index < 0 || index >= visible_commands.size)
+					return;
+				var action = visible_commands[index];
+				if (action == "preferences") {
+					Application.get_default ().activate_action ("preferences", null);
+					hide_animated ();
+				} else {
+					run_session_action (power_action_command (action));
+				}
+				return;
+			}
 			if (index < 0 || index >= visible_results.size)
 				return;
 			try {
@@ -1043,8 +1119,6 @@ namespace Plank
 			css += ".plank-native-launcher .launcher-user-identity { color: white; }";
 			css += ".plank-native-launcher .launcher-user-avatar { margin: 1px 0; }";
 			css += ".plank-native-launcher .launcher-user-avatar-fallback { color: rgba(255,255,255,0.78); background-color: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 6px; }";
-			css += ".plank-native-launcher .launcher-power-button { color: rgba(255,255,255,0.68); background: transparent; background-image: none; border: none; border-radius: 10px; box-shadow: none; padding: 7px; }";
-			css += ".plank-native-launcher .launcher-power-button:hover { color: white; background-color: rgba(255,255,255,0.09); }";
 			css += ".plank-native-launcher .launcher-notice { color: white; background-color: rgba(224,70,70,0.20); border: 1px solid rgba(255,120,120,0.30); border-radius: 8px; padding: 7px 9px; margin: 2px 7px 5px 7px; }";
 			css += ".plank-native-launcher .launcher-notice-dismiss { color: white; background: transparent; background-image: none; border: none; box-shadow: none; padding: 2px; }";
 			css += ".plank-native-launcher .launcher-notice-dismiss:hover { background-color: rgba(255,255,255,0.12); border-radius: 5px; }";
@@ -1055,9 +1129,8 @@ namespace Plank
 			css += ".plank-native-launcher .launcher-results-scroll list, .plank-native-launcher .launcher-results-scroll row { outline-style: none; outline-width: 0; }";
 			css += ".plank-native-launcher scrollbar { background: transparent; border: none; }";
 			css += ".plank-native-launcher scrollbar slider { min-width: 4px; min-height: 28px; background-color: rgba(255,255,255,0.18); border-radius: 4px; }";
-			css += ".plank-native-launcher .launcher-alpha-header { margin: 8px 12px 4px 12px; }";
-			css += ".plank-native-launcher .launcher-alpha-letter { color: rgba(255,255,255,0.58); font-size: 11px; font-weight: bold; }";
-			css += ".plank-native-launcher .launcher-alpha-divider { min-height: 1px; background-color: rgba(255,255,255,0.10); border: none; }";
+			css += ".plank-native-launcher .launcher-alpha-header { margin: 12px 12px 5px 12px; }";
+			css += ".plank-native-launcher .launcher-alpha-letter { color: rgba(255,255,255,0.88); background-color: rgba(255,255,255,0.09); border-radius: 6px; min-width: 22px; min-height: 22px; font-size: 11px; font-weight: bold; }";
 			css += ".plank-native-launcher .launcher-panel list, .plank-native-launcher .launcher-panel row, .plank-native-launcher .launcher-search { background-color: rgb(%d,%d,%d); background-image: none; border: none; }"
 				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255));
 			css += ".plank-native-launcher .launcher-search { padding: 6px 12px; margin: 0 10px; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; }";
@@ -1067,10 +1140,10 @@ namespace Plank
 			css += ".plank-native-launcher row:hover { background-color: rgba(255,255,255,0.07); }";
 			css += ".plank-native-launcher row:selected { background-color: rgba(255,255,255,0.15); }";
 			css += ".plank-native-launcher row:selected:hover { background-color: rgba(255,255,255,0.18); }";
-			css += ".plank-native-launcher .launcher-command-actions { margin-top: 2px; }";
-			css += ".plank-native-launcher .launcher-command-button { color: rgba(255,255,255,0.50); background: transparent; background-image: none; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; box-shadow: none; padding: 1px 6px; min-width: 0; min-height: 0; font-size: 11px; }";
-			css += ".plank-native-launcher .launcher-command-button:hover { color: white; background-color: rgba(255,255,255,0.08); }";
-			css += ".plank-native-launcher .launcher-command-button:disabled { color: rgba(255,255,255,0.25); }";
+			css += ".plank-native-launcher .launcher-result-title { font-weight: 600; }";
+			css += ".plank-native-launcher .launcher-more-button { color: rgba(255,255,255,0.65); background: transparent; background-image: none; border: none; border-radius: 7px; box-shadow: none; padding: 4px; opacity: 0; transition: opacity 120ms ease, background-color 120ms ease; }";
+			css += ".plank-native-launcher row:hover .launcher-more-button, .plank-native-launcher row:selected .launcher-more-button, .plank-native-launcher row:focus .launcher-more-button { opacity: 1; }";
+			css += ".plank-native-launcher .launcher-more-button:hover, .plank-native-launcher .launcher-more-button:focus { color: white; background-color: rgba(255,255,255,0.10); }";
 			css += ".plank-native-launcher .launcher-command-status { color: rgba(115,210,22,0.90); font-size: 11px; margin-left: 2px; }";
 			css += ".plank-native-launcher .launcher-enter { color: rgba(255,255,255,0.28); font-size: 16px; }";
 			css += ".plank-native-launcher row:selected .launcher-enter { color: rgba(255,255,255,0.85); }";
@@ -1082,10 +1155,6 @@ namespace Plank
 			css += ".launcher-app-context .app-context-action { color: white; background: transparent; background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 7px 9px; }";
 			css += ".launcher-app-context .app-context-action:hover { background-color: rgba(255,255,255,0.10); }";
 			css += ".launcher-app-context .destructive-action { color: #ff7b73; }";
-			css += ".plank-power-menu { background-color: rgb(%d,%d,%d); border: 1px solid rgba(255,255,255,0.10); border-radius: 10px; padding: 5px; }"
-				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255));
-			css += ".plank-power-menu menuitem { color: white; border-radius: 10px; padding: 7px 10px; margin: 2px; }";
-			css += ".plank-power-menu menuitem:hover { background-color: rgba(255,255,255,0.11); }";
 			if (theme_provider != null)
 				Gtk.StyleContext.remove_provider_for_screen (get_screen (), theme_provider);
 			theme_provider = new Gtk.CssProvider ();

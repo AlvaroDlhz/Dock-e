@@ -230,9 +230,6 @@ namespace Plank
 			var hovered = ExternalMenuVisible
 				|| (x >= dock_rect.x && x < dock_rect.x + dock_rect.width
 				&& y >= dock_rect.y && y < dock_rect.y + dock_rect.height);
-			if (hovered && !ExternalMenuVisible && controller.prefs.ShowSideSections)
-				hovered = true;
-			
 			if (Hovered != hovered) {
 				Hovered = hovered;
 				update_needed = true;

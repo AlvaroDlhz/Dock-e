@@ -89,18 +89,32 @@ namespace Plank
 
 	public class LauncherProvider : DockItemProvider
 	{
-		TrayToggleItem tray_toggle;
-
 		public LauncherProvider ()
 		{
 			Object ();
 			add (new LauncherItem ());
-			add (new WorkspaceItem ());
+		}
+
+		public override bool can_accept_drop (Gee.ArrayList<string> uris)
+		{
+			return false;
+		}
+
+		public override bool move_to (DockElement move, DockElement target)
+		{
+			return false;
+		}
+	}
+
+	public class DockActionsProvider : DockItemProvider
+	{
+		public DockActionsProvider ()
+		{
+			Object ();
 			var update_command = UpdateManagerItem.available_command ();
 			if (update_command != null)
 				add (new UpdateManagerItem (update_command));
-			tray_toggle = new TrayToggleItem ();
-			add (tray_toggle);
+			add (new TrayToggleItem ());
 		}
 
 		public override bool can_accept_drop (Gee.ArrayList<string> uris)

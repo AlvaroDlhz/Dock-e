@@ -904,7 +904,7 @@ namespace Plank
 			tray_changed_id = item.tray_changed.connect (rebuild);
 			item.set_expanded (true);
 			controller.launcher.dismiss ();
-			controller.status_panel.dismiss ();
+
 			controller.window_previews.dismiss ();
 			controller.workspace_previews.dismiss ();
 			rebuild ();

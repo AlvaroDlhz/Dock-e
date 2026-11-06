@@ -197,7 +197,7 @@ am__objects_5 = DBusManager.lo DockController.lo DockPreferences.lo \
 	Items/DockItemPreferences.lo Items/DockElement.lo \
 	Items/Enums.lo Items/FileDockItem.lo \
 	Items/PlaceholderDockItem.lo Items/PlankDockItem.lo \
-	Items/StatusIndicatorItem.lo Items/UpdateManagerItem.lo \
+	Items/UpdateManagerItem.lo \
 	Items/TrayToggleItem.lo Items/TransientDockItem.lo \
 	Items/WorkspaceItem.lo Items/LauncherItem.lo \
 	Services/Environment.lo Services/EnvironmentSettings.lo \
@@ -205,7 +205,7 @@ am__objects_5 = DBusManager.lo DockController.lo DockPreferences.lo \
 	Services/Settings.lo Services/System.lo \
 	Services/SuperKeyBinding.lo Services/Unity.lo \
 	Services/Worker.lo Widgets/CompositedWindow.lo \
-	Widgets/DockWindow.lo Widgets/StatusPanelWindow.lo \
+	Widgets/DockWindow.lo \
 	Widgets/WindowPreviewWindow.lo \
 	Widgets/WorkspacePreviewWindow.lo Widgets/HoverWindow.lo \
 	Widgets/LauncherWindow.lo Widgets/PoofWindow.lo \
@@ -264,7 +264,6 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Items/$(DEPDIR)/LauncherItem.Plo \
 	Items/$(DEPDIR)/PlaceholderDockItem.Plo \
 	Items/$(DEPDIR)/PlankDockItem.Plo \
-	Items/$(DEPDIR)/StatusIndicatorItem.Plo \
 	Items/$(DEPDIR)/TransientDockItem.Plo \
 	Items/$(DEPDIR)/TrayToggleItem.Plo \
 	Items/$(DEPDIR)/UpdateManagerItem.Plo \
@@ -296,7 +295,6 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Widgets/$(DEPDIR)/LauncherWindow.Plo \
 	Widgets/$(DEPDIR)/PoofWindow.Plo \
 	Widgets/$(DEPDIR)/PreferencesWindow.Plo \
-	Widgets/$(DEPDIR)/StatusPanelWindow.Plo \
 	Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo \
 	Widgets/$(DEPDIR)/WindowPreviewWindow.Plo \
 	Widgets/$(DEPDIR)/WorkspacePreviewWindow.Plo \
@@ -824,7 +822,6 @@ libplank_la_VALASOURCES = \
 	Items/FileDockItem.vala \
 	Items/PlaceholderDockItem.vala \
 	Items/PlankDockItem.vala \
-	Items/StatusIndicatorItem.vala \
 	Items/UpdateManagerItem.vala \
 	Items/TrayToggleItem.vala \
 	Items/TransientDockItem.vala \
@@ -842,7 +839,6 @@ libplank_la_VALASOURCES = \
 	Services/Worker.vala \
 	Widgets/CompositedWindow.vala \
 	Widgets/DockWindow.vala \
-	Widgets/StatusPanelWindow.vala \
 	Widgets/WindowPreviewWindow.vala \
 	Widgets/WorkspacePreviewWindow.vala \
 	Widgets/HoverWindow.vala \
@@ -1146,8 +1142,6 @@ Items/PlaceholderDockItem.lo: Items/$(am__dirstamp) \
 	Items/$(DEPDIR)/$(am__dirstamp)
 Items/PlankDockItem.lo: Items/$(am__dirstamp) \
 	Items/$(DEPDIR)/$(am__dirstamp)
-Items/StatusIndicatorItem.lo: Items/$(am__dirstamp) \
-	Items/$(DEPDIR)/$(am__dirstamp)
 Items/UpdateManagerItem.lo: Items/$(am__dirstamp) \
 	Items/$(DEPDIR)/$(am__dirstamp)
 Items/TrayToggleItem.lo: Items/$(am__dirstamp) \
@@ -1181,8 +1175,6 @@ Services/Worker.lo: Services/$(am__dirstamp) \
 Widgets/CompositedWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
 Widgets/DockWindow.lo: Widgets/$(am__dirstamp) \
-	Widgets/$(DEPDIR)/$(am__dirstamp)
-Widgets/StatusPanelWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
 Widgets/WindowPreviewWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
@@ -1264,7 +1256,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/LauncherItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/PlaceholderDockItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/PlankDockItem.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/StatusIndicatorItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/TransientDockItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/TrayToggleItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/UpdateManagerItem.Plo@am__quote@ # am--include-marker
@@ -1298,7 +1289,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/LauncherWindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/PoofWindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/PreferencesWindow.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/StatusPanelWindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/WindowPreviewWindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/WorkspacePreviewWindow.Plo@am__quote@ # am--include-marker
@@ -1884,7 +1874,6 @@ distclean: distclean-am
 	-rm -f Items/$(DEPDIR)/LauncherItem.Plo
 	-rm -f Items/$(DEPDIR)/PlaceholderDockItem.Plo
 	-rm -f Items/$(DEPDIR)/PlankDockItem.Plo
-	-rm -f Items/$(DEPDIR)/StatusIndicatorItem.Plo
 	-rm -f Items/$(DEPDIR)/TransientDockItem.Plo
 	-rm -f Items/$(DEPDIR)/TrayToggleItem.Plo
 	-rm -f Items/$(DEPDIR)/UpdateManagerItem.Plo
@@ -1918,7 +1907,6 @@ distclean: distclean-am
 	-rm -f Widgets/$(DEPDIR)/LauncherWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/PoofWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/PreferencesWindow.Plo
-	-rm -f Widgets/$(DEPDIR)/StatusPanelWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo
 	-rm -f Widgets/$(DEPDIR)/WindowPreviewWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/WorkspacePreviewWindow.Plo
@@ -2011,7 +1999,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Items/$(DEPDIR)/LauncherItem.Plo
 	-rm -f Items/$(DEPDIR)/PlaceholderDockItem.Plo
 	-rm -f Items/$(DEPDIR)/PlankDockItem.Plo
-	-rm -f Items/$(DEPDIR)/StatusIndicatorItem.Plo
 	-rm -f Items/$(DEPDIR)/TransientDockItem.Plo
 	-rm -f Items/$(DEPDIR)/TrayToggleItem.Plo
 	-rm -f Items/$(DEPDIR)/UpdateManagerItem.Plo
@@ -2045,7 +2032,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Widgets/$(DEPDIR)/LauncherWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/PoofWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/PreferencesWindow.Plo
-	-rm -f Widgets/$(DEPDIR)/StatusPanelWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo
 	-rm -f Widgets/$(DEPDIR)/WindowPreviewWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/WorkspacePreviewWindow.Plo

@@ -41,7 +41,6 @@ namespace Plank
 		public DockWindow window { get; protected set; }
 		public HoverWindow hover { get; protected set; }
 		public LauncherWindow launcher { get; protected set; }
-		public StatusPanelWindow status_panel { get; protected set; }
 		public BackgroundAppsWindow background_apps { get; protected set; }
 		public WindowPreviewWindow window_previews { get; protected set; }
 		public WorkspacePreviewWindow workspace_previews { get; protected set; }
@@ -49,7 +48,7 @@ namespace Plank
 		
 		public DockItemProvider? default_provider { get; private set; }
 		LauncherProvider? launcher_provider;
-		StatusIndicatorProvider? status_indicator_provider;
+		DockActionsProvider? dock_actions_provider;
 		
 		DBusManager dbus_manager;
 		Gee.ArrayList<unowned DockItem> visible_items;
@@ -100,7 +99,6 @@ namespace Plank
 			
 			prefs.notify["Position"].connect (position_changed);
 			prefs.notify["ShowDockItem"].connect (update_show_dock_item);
-			prefs.notify["ShowSideSections"].connect (show_side_sections_changed);
 			
 			dbus_manager = new DBusManager (this);
 			
@@ -113,7 +111,6 @@ namespace Plank
 			launcher = new LauncherWindow (this);
 			super_key_binding = new SuperKeyBinding (window.get_display ());
 			super_key_binding.activated.connect (() => launcher.toggle_global ());
-			status_panel = new StatusPanelWindow (this);
 			background_apps = new BackgroundAppsWindow (this);
 			window_previews = new WindowPreviewWindow (this);
 			workspace_previews = new WorkspacePreviewWindow (this);
@@ -123,7 +120,6 @@ namespace Plank
 		{
 			prefs.notify["Position"].disconnect (position_changed);
 			prefs.notify["ShowDockItem"].disconnect (update_show_dock_item);
-			prefs.notify["ShowSideSections"].disconnect (show_side_sections_changed);
 			
 			positions_changed.disconnect (handle_positions_changed);
 			states_changed.disconnect (handle_states_changed);
@@ -140,7 +136,6 @@ namespace Plank
 		void position_changed ()
 		{
 			launcher.dismiss_immediately ();
-			status_panel.dismiss ();
 			background_apps.dismiss ();
 			window_previews.dismiss ();
 			workspace_previews.dismiss ();
@@ -158,14 +153,12 @@ namespace Plank
 			if (internal_elements.size <= 0)
 				add_default_provider ();
 
-			// Status indicators always live in their own fixed provider at the
-			// trailing edge, after application launchers and custom providers.
-			status_indicator_provider = new StatusIndicatorProvider ();
-			add (status_indicator_provider);
-			
 			update_show_dock_item ();
 			launcher_provider = new LauncherProvider ();
 			prepend (launcher_provider);
+			// Keep workspace, update, and tray actions after the application items.
+			dock_actions_provider = new DockActionsProvider ();
+			add (dock_actions_provider);
 			update_items ();
 			
 			AddTime = GLib.get_monotonic_time ();
@@ -246,37 +239,10 @@ namespace Plank
 			}
 		}
 
-		void show_side_sections_changed ()
+		internal static bool is_fixed_item (DockItem item)
 		{
-			if (!prefs.ShowSideSections) {
-				status_panel.dismiss ();
-				background_apps.dismiss ();
-				workspace_previews.dismiss ();
-			}
-
-			update_visible_elements ();
-			position_manager.update (renderer.theme);
-			window.update_icon_regions ();
-		}
-
-		internal static bool is_control_section_item (DockItem item)
-		{
-			// Left (leading) side section: workspace switcher and any docked tray
-			// status/overflow icons.
-			return item is WorkspaceItem || item is TrayStatusItem || item is TrayOverflowItem;
-		}
-
-		internal static bool is_status_section_item (DockItem item)
-		{
-			// Right (trailing) side section: the update and background-applications
-			// buttons followed by the system indicators.
-			return item is StatusIndicatorItem || item is UpdateManagerItem
-				|| item is TrayToggleItem;
-		}
-
-		internal static bool is_side_section_item (DockItem item)
-		{
-			return is_control_section_item (item) || is_status_section_item (item);
+			return item is UpdateManagerItem
+				|| item is TrayToggleItem || item is TrayStatusItem || item is TrayOverflowItem;
 		}
 		
 		protected override void connect_element (DockElement element)
@@ -359,9 +325,6 @@ namespace Plank
 			if (item == null)
 				return;
 
-			if (!prefs.ShowSideSections && is_side_section_item (item))
-				return;
-			
 			if (item.Position != current_position)
 				item.Position = current_position;
 			current_position++;
