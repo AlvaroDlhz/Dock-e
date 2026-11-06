@@ -6,7 +6,6 @@ namespace Plank
 {
 	public class LauncherWindow : Gtk.Window
 	{
-		const int RESULT_LIMIT = 9;
 		const int PANEL_WIDTH = 580;
 		const int PANEL_HEIGHT = 580;
 		const int ANIMATION_TIME = 140;
@@ -14,8 +13,6 @@ namespace Plank
 		unowned DockController controller;
 		Gtk.Entry search_entry;
 		Gtk.ListBox result_list;
-		Gtk.ToggleButton frequent_tab;
-		Gtk.ToggleButton all_tab;
 		Gtk.Menu power_menu;
 		StatusNoticeModel notice_model;
 		Gtk.Revealer notice_revealer;
@@ -23,19 +20,18 @@ namespace Plank
 		ulong notice_changed_id = 0UL;
 		Gee.ArrayList<AppInfo> applications;
 		Gee.ArrayList<AppInfo> visible_results;
-		Gee.HashMap<string, int> usage_counts;
 		LauncherItem? anchor_item;
 		Gtk.CssProvider? theme_provider;
 		uint animation_timer_id = 0U;
 		int panel_x = 0;
 		int panel_y = 0;
-		bool showing_all = false;
-		bool changing_tab = false;
 		bool context_menu_open = false;
 		bool context_dialog_open = false;
 		Gtk.Window? application_context;
 		ApplicationUninstallService uninstall_service;
 		Cancellable? uninstall_detection;
+		Gee.HashMap<string, string> uninstall_command_cache;
+		Gee.HashSet<string> uninstall_detection_pending;
 
 		public LauncherWindow (DockController controller)
 		{
@@ -43,8 +39,9 @@ namespace Plank
 			this.controller = controller;
 			applications = new Gee.ArrayList<AppInfo> ();
 			visible_results = new Gee.ArrayList<AppInfo> ();
-			usage_counts = new Gee.HashMap<string, int> ();
 			uninstall_service = new ApplicationUninstallService ();
+			uninstall_command_cache = new Gee.HashMap<string, string> ();
+			uninstall_detection_pending = new Gee.HashSet<string> ();
 			notice_model = new StatusNoticeModel ();
 			notice_changed_id = notice_model.changed.connect (sync_notice);
 			Accessibility.describe (this, _("Application launcher"));
@@ -83,20 +80,26 @@ namespace Plank
 			user_identity.pack_start (create_user_avatar (), false, false, 0);
 			navbar.pack_start (user_identity, false, false, 0);
 
-			var tabs = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
-			tabs.homogeneous = false;
-			tabs.valign = Gtk.Align.CENTER;
-			tabs.get_style_context ().add_class ("launcher-tabs");
-			frequent_tab = create_tab_button (_("Frequently used"));
-			all_tab = create_tab_button (_("All"));
-			Accessibility.describe (frequent_tab, _("Frequently used applications"));
-			Accessibility.describe (all_tab, _("All applications"));
-			frequent_tab.active = true;
-			frequent_tab.clicked.connect (() => select_tab (false));
-			all_tab.clicked.connect (() => select_tab (true));
-			tabs.pack_start (frequent_tab, true, true, 0);
-			tabs.pack_start (all_tab, true, true, 0);
-			navbar.pack_start (tabs, false, false, 0);
+			var search_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
+			search_box.valign = Gtk.Align.CENTER;
+			search_box.hexpand = true;
+			search_box.get_style_context ().add_class ("launcher-search");
+			search_entry = new Gtk.Entry ();
+			search_entry.placeholder_text = _("Search applications…");
+			Accessibility.describe (search_entry, _("Search applications"),
+				_("Type to filter the application list"));
+			search_entry.has_frame = false;
+			search_entry.changed.connect (refresh_results);
+			search_entry.focus_in_event.connect (() => {
+				search_box.get_style_context ().add_class ("launcher-search-focused");
+				return false;
+			});
+			search_entry.focus_out_event.connect (() => {
+				search_box.get_style_context ().remove_class ("launcher-search-focused");
+				return false;
+			});
+			search_box.pack_start (search_entry, true, true, 0);
+			navbar.pack_start (search_box, true, true, 0);
 
 			var power_button = new Gtk.Button ();
 			power_button.tooltip_text = _("Session and power options");
@@ -119,26 +122,6 @@ namespace Plank
 			});
 			navbar.pack_end (power_button, false, false, 0);
 			panel.pack_start (navbar, false, false, 0);
-
-			var search_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
-			search_box.margin = 10;
-			search_box.get_style_context ().add_class ("launcher-search");
-			search_entry = new Gtk.Entry ();
-			search_entry.placeholder_text = _("Search applications…");
-			Accessibility.describe (search_entry, _("Search applications"),
-				_("Type to filter the application list"));
-			search_entry.has_frame = false;
-			search_entry.changed.connect (refresh_results);
-			search_entry.focus_in_event.connect (() => {
-				search_box.get_style_context ().add_class ("launcher-search-focused");
-				return false;
-			});
-			search_entry.focus_out_event.connect (() => {
-				search_box.get_style_context ().remove_class ("launcher-search-focused");
-				return false;
-			});
-			search_box.pack_start (search_entry, true, true, 0);
-			panel.pack_start (search_box, false, false, 0);
 
 			notice_revealer = new Gtk.Revealer ();
 			notice_revealer.transition_type = Gtk.RevealerTransitionType.NONE;
@@ -164,6 +147,19 @@ namespace Plank
 			result_list.selection_mode = Gtk.SelectionMode.SINGLE;
 			result_list.activate_on_single_click = true;
 			result_list.row_activated.connect ((row) => activate_row (row));
+			result_list.set_header_func ((row, before) => {
+				var index = row.get_index ();
+				if (search_entry.text.strip () != "" || index < 0 || index >= visible_results.size) {
+					row.set_header (null);
+					return;
+				}
+				var initial = alphabet_initial (visible_results[index]);
+				if (index > 0 && alphabet_initial (visible_results[index - 1]) == initial) {
+					row.set_header (null);
+					return;
+				}
+				row.set_header (create_alphabet_header (initial));
+			});
 			result_list.button_press_event.connect ((event) => {
 				Accessibility.set_keyboard_navigation (this, false);
 				if (event.button != 3U)
@@ -194,9 +190,7 @@ namespace Plank
 				return false;
 			});
 			index_applications ();
-			load_usage ();
 			sync_notice ();
-			Matcher.get_default ().active_application_changed.connect_after (track_active_application);
 		}
 
 		~LauncherWindow ()
@@ -209,15 +203,14 @@ namespace Plank
 				Source.remove (animation_timer_id);
 			if (theme_provider != null)
 				Gtk.StyleContext.remove_provider_for_screen (get_screen (), theme_provider);
-			Matcher.get_default ().active_application_changed.disconnect (track_active_application);
 		}
 
 		Gtk.Widget create_user_avatar ()
 		{
-			const int avatar_size = 72;
-			const double corner_radius = 8.0;
+			const int avatar_size = 48;
+			const double corner_radius = 6.0;
 			var fallback = new Gtk.Image.from_icon_name ("avatar-default-symbolic", Gtk.IconSize.BUTTON);
-			fallback.pixel_size = 56;
+			fallback.pixel_size = 36;
 			fallback.get_style_context ().add_class ("launcher-user-avatar-fallback");
 
 			var home = Environment.get_home_dir ();
@@ -269,39 +262,6 @@ namespace Plank
 			}
 
 			return fallback;
-		}
-
-		Gtk.ToggleButton create_tab_button (string label_text)
-		{
-			var button = new Gtk.ToggleButton ();
-			button.valign = Gtk.Align.CENTER;
-			var content = new Gtk.Box (Gtk.Orientation.VERTICAL, 3);
-			content.halign = Gtk.Align.CENTER;
-			content.valign = Gtk.Align.CENTER;
-			var label = new Gtk.Label (label_text);
-			label.halign = Gtk.Align.CENTER;
-			content.pack_start (label, false, false, 0);
-			var dot = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-			dot.set_size_request (5, 5);
-			dot.halign = Gtk.Align.CENTER;
-			dot.get_style_context ().add_class ("launcher-tab-dot");
-			content.pack_start (dot, false, false, 0);
-			button.add (content);
-			return button;
-		}
-
-		void select_tab (bool all)
-		{
-			if (changing_tab)
-				return;
-			changing_tab = true;
-			showing_all = all;
-			frequent_tab.active = !all;
-			all_tab.active = all;
-			changing_tab = false;
-			refresh_results ();
-			search_entry.grab_focus ();
-			search_entry.set_position (-1);
 		}
 
 		Gtk.Menu create_power_menu ()
@@ -480,25 +440,13 @@ namespace Plank
 			var query = search_entry.text.strip ().down ();
 			var matches = new Gee.ArrayList<AppInfo> ();
 			foreach (var app in applications)
-				if ((query != "" || showing_all || usage_count (app) > 0)
-					&& (query == "" || fuzzy_score (searchable_text (app), query) >= 0))
+				if (query == "" || fuzzy_score (searchable_text (app), query) >= 0)
 					matches.add (app);
 			matches.sort ((a, b) => compare_results (a, b, query));
 
-			var result_count = (showing_all || query != "") ? matches.size : int.min (RESULT_LIMIT, matches.size);
-			string previous_initial = "";
-			for (var i = 0; i < result_count; i++) {
-				var app = matches[i];
+			foreach (var app in matches) {
 				visible_results.add (app);
-				var row = create_result_row (app);
-				if (showing_all && query == "") {
-					var initial = app.get_display_name ().substring (0, 1).up ();
-					if (initial != previous_initial) {
-						row.set_header (create_alphabet_header (initial));
-						previous_initial = initial;
-					}
-				}
-				result_list.add (row);
+				result_list.add (create_result_row (app));
 			}
 			if (visible_results.size == 0) {
 				var empty_row = new Gtk.ListBoxRow () { selectable = false, activatable = false };
@@ -510,6 +458,17 @@ namespace Plank
 			}
 
 			result_list.show_all ();
+			Timeout.add (250, () => {
+				var probe = result_list.get_row_at_index (0);
+				var header = probe == null ? null : probe.get_header ();
+				if (header != null)
+					debug ("Launcher header alloc: %dx%d visible=%s mapped=%s",
+						header.get_allocated_width (), header.get_allocated_height (),
+						header.get_visible ().to_string (), header.get_mapped ().to_string ());
+				else
+					debug ("Launcher header alloc: no header on first row");
+				return false;
+			});
 			if (result_list.get_row_at_index (0) != null)
 				result_list.select_row (result_list.get_row_at_index (0));
 			if (visible)
@@ -531,68 +490,8 @@ namespace Plank
 				var b_score = fuzzy_score (b_name, query);
 				if (a_score != b_score)
 					return a_score > b_score ? -1 : 1;
-			} else if (!showing_all) {
-				var a_count = usage_count (a);
-				var b_count = usage_count (b);
-				if (a_count != b_count)
-					return a_count > b_count ? -1 : 1;
 			}
 			return a.get_display_name ().collate (b.get_display_name ());
-		}
-
-		string usage_path ()
-		{
-			return controller.config_folder.get_child ("launcher-usage.ini").get_path ();
-		}
-
-		void load_usage ()
-		{
-			var keyfile = new KeyFile ();
-			try {
-				keyfile.load_from_file (usage_path (), KeyFileFlags.NONE);
-				foreach (var key in keyfile.get_keys ("Usage"))
-					usage_counts[key] = keyfile.get_integer ("Usage", key);
-			} catch (Error e) {
-				// The file does not exist until the first application is recorded.
-			}
-		}
-
-		void save_usage ()
-		{
-			var keyfile = new KeyFile ();
-			foreach (var entry in usage_counts.entries)
-				keyfile.set_integer ("Usage", entry.key, entry.value);
-			try {
-				FileUtils.set_contents (usage_path (), keyfile.to_data ());
-			} catch (FileError e) {
-				warning ("Unable to save launcher usage: %s", e.message);
-			}
-		}
-
-		void track_active_application (Bamf.Application? old_app, Bamf.Application? new_app)
-		{
-			if (new_app == null)
-				return;
-			unowned string? desktop_file = new_app.get_desktop_file ();
-			if (desktop_file == null || desktop_file == "")
-				return;
-			var desktop_id = Path.get_basename (desktop_file);
-			foreach (var app in applications) {
-				var id = app.get_id () ?? app.get_name ();
-				if (id != desktop_id)
-					continue;
-				usage_counts[id] = usage_count (app) + 1;
-				save_usage ();
-				if (visible && !showing_all && search_entry.text == "")
-					refresh_results ();
-				break;
-			}
-		}
-
-		int usage_count (AppInfo app)
-		{
-			var id = app.get_id () ?? app.get_name ();
-			return usage_counts.has_key (id) ? usage_counts[id] : 0;
 		}
 
 		int fuzzy_score (string text, string query)
@@ -649,12 +548,208 @@ namespace Plank
 			description.max_width_chars = 34;
 			description.get_style_context ().add_class (Gtk.STYLE_CLASS_DIM_LABEL);
 			labels.pack_start (description, false, false, 0);
+
+			var status = new Gtk.Label ("");
+			status.get_style_context ().add_class ("launcher-command-status");
+			status.visible = false;
+			var actions = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 6);
+			actions.get_style_context ().add_class ("launcher-command-actions");
+			actions.pack_start (create_copy_command_button (_("Ejecutar"),
+				build_launch_command (app), status), false, false, 0);
+			actions.pack_start (create_copy_command_button (_("Reiniciar"),
+				build_restart_command (app), status), false, false, 0);
+			actions.pack_start (create_copy_command_button (_("Matar"),
+				build_kill_command (app), status), false, false, 0);
+			actions.pack_start (create_copy_uninstall_button (app, status), false, false, 0);
+			actions.pack_start (status, false, false, 0);
+			labels.pack_start (actions, false, false, 0);
+
 			box.pack_start (labels, true, true, 0);
 			var enter_hint = new Gtk.Label ("↵");
 			enter_hint.get_style_context ().add_class ("launcher-enter");
 			box.pack_end (enter_hint, false, false, 0);
 			row.add (box);
 			return row;
+		}
+
+		string build_launch_command (AppInfo app)
+		{
+			string command = app.get_commandline () ?? "";
+			if (command.strip () == "")
+				command = app.get_executable () ?? "";
+			if (command.strip () == "")
+				return "";
+			try {
+				string[] argv;
+				Shell.parse_argv (command, out argv);
+				var parts = new Gee.ArrayList<string> ();
+				foreach (unowned string argument in argv) {
+					if (argument == "" || argument.contains ("%"))
+						continue;
+					parts.add (Shell.quote (argument));
+				}
+				if (parts.size > 0)
+					return string.joinv (" ", parts.to_array ());
+			} catch (ShellError e) {
+				debug ("Unable to parse launch command '%s': %s", command, e.message);
+			}
+			return command.strip ();
+		}
+
+		string build_kill_command (AppInfo app)
+		{
+			var launch = build_launch_command (app);
+			if (launch == "")
+				return "";
+			string[] argv;
+			try {
+				Shell.parse_argv (launch, out argv);
+			} catch (ShellError e) {
+				return "pkill -x %s".printf (Shell.quote (Path.get_basename (app.get_executable () ?? "")));
+			}
+			if (argv.length == 0)
+				return "";
+			var binary = Path.get_basename (argv[0]);
+			var app_id = app.get_id () ?? "";
+			if (app_id.has_suffix (".desktop"))
+				app_id = app_id.substring (0, app_id.length - 8);
+			if (binary == "flatpak" && argv.length >= 3 && argv[1] == "run") {
+				var id = app_id != "" ? app_id : argv[2];
+				return "flatpak kill %s".printf (Shell.quote (id));
+			}
+			if (binary == "snap" && argv.length >= 3 && argv[1] == "run") {
+				var id = app_id != "" ? app_id : argv[2];
+				return "snap stop %s".printf (Shell.quote (id));
+			}
+			return "pkill -x %s".printf (Shell.quote (binary));
+		}
+
+		string build_restart_command (AppInfo app)
+		{
+			var launch = build_launch_command (app);
+			if (launch == "")
+				return "";
+			var kill = build_kill_command (app);
+			if (kill == "")
+				return launch;
+			return "%s; %s".printf (kill, launch);
+		}
+
+		string build_uninstall_command (UninstallTarget target)
+		{
+			var parts = new Gee.ArrayList<string> ();
+			foreach (unowned string argument in target.argv)
+				parts.add (Shell.quote (argument));
+			return string.joinv (" ", parts.to_array ());
+		}
+
+		string app_command_key (AppInfo app)
+		{
+			var id = app.get_id ();
+			if (id != null && id != "")
+				return id;
+			var executable = app.get_executable ();
+			if (executable != null && executable != "")
+				return executable;
+			return app.get_display_name ();
+		}
+
+		Gtk.Button create_copy_command_button (string label, string command, Gtk.Label status)
+		{
+			var button = new Gtk.Button ();
+			button.get_style_context ().add_class ("launcher-command-button");
+			var content = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 5);
+			content.pack_start (new Gtk.Image.from_icon_name ("edit-copy-symbolic",
+				Gtk.IconSize.MENU), false, false, 0);
+			content.pack_start (new Gtk.Label (label) { xalign = 0.0f }, false, false, 0);
+			button.add (content);
+			button.sensitive = command != "";
+			button.tooltip_text = command != ""
+				? _("Copiar: %s").printf (command) : _("Comando no disponible");
+			Accessibility.describe (button, _("Copy %s command").printf (label), command);
+			if (command != "")
+				button.clicked.connect (() => copy_command (command, status));
+			return button;
+		}
+
+		Gtk.Button create_copy_uninstall_button (AppInfo app, Gtk.Label status)
+		{
+			var button = new Gtk.Button ();
+			button.get_style_context ().add_class ("launcher-command-button");
+			var content = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 5);
+			content.pack_start (new Gtk.Image.from_icon_name ("edit-copy-symbolic",
+				Gtk.IconSize.MENU), false, false, 0);
+			content.pack_start (new Gtk.Label (_("Desinstalar")) { xalign = 0.0f }, false, false, 0);
+			button.add (content);
+			button.tooltip_text = _("Copiar comando de desinstalación");
+			Accessibility.describe (button, _("Copy uninstall command"));
+			var key = app_command_key (app);
+			string cached_command = "";
+			if (uninstall_command_cache.has_key (key))
+				cached_command = uninstall_command_cache[key];
+			if (cached_command != "") {
+				button.tooltip_text = _("Copiar: %s").printf (cached_command);
+				button.clicked.connect (() => copy_command (cached_command, status));
+			} else {
+				button.clicked.connect (() => copy_uninstall_command (app, key, button, status));
+			}
+			return button;
+		}
+
+		void copy_uninstall_command (AppInfo app, string key, Gtk.Button button, Gtk.Label status)
+		{
+			if (uninstall_command_cache.has_key (key)) {
+				copy_command (uninstall_command_cache[key], status);
+				return;
+			}
+			if (uninstall_detection_pending.contains (key)) {
+				set_command_status (status, _("Detectando…"), false);
+				return;
+			}
+			uninstall_detection_pending.add (key);
+			set_command_status (status, _("Detectando…"), false);
+			button.sensitive = false;
+			var desktop = (app as DesktopAppInfo)?.get_filename ();
+			uninstall_service.detect.begin (app.get_id () ?? "", app.get_executable () ?? "",
+				desktop, null, (obj, result) => {
+					uninstall_detection_pending.remove (key);
+					button.sensitive = true;
+					UninstallTarget? target = null;
+					try {
+						target = uninstall_service.detect.end (result);
+					} catch (Error e) {
+						debug ("Unable to detect uninstall command: %s", e.message);
+					}
+					if (target == null) {
+						set_command_status (status, _("No disponible"), true);
+						return;
+					}
+					var command = build_uninstall_command (target);
+					uninstall_command_cache[key] = command;
+					button.tooltip_text = _("Copiar: %s").printf (command);
+					copy_command (command, status);
+				});
+		}
+
+		void copy_command (string command, Gtk.Label status)
+		{
+			if (command.strip () == "")
+				return;
+			var clipboard = Gtk.Clipboard.get (Gdk.SELECTION_CLIPBOARD);
+			clipboard.set_text (command, -1);
+			clipboard.store ();
+			set_command_status (status, _("Copiado"), true);
+		}
+
+		void set_command_status (Gtk.Label status, string text, bool auto_hide)
+		{
+			status.label = text;
+			status.visible = true;
+			if (auto_hide)
+				Timeout.add (1600, () => {
+					status.visible = false;
+					return false;
+				});
 		}
 
 		void show_application_context_menu (AppInfo app, Gdk.EventButton event)
@@ -862,6 +957,7 @@ namespace Plank
 			var divider = new Gtk.Separator (Gtk.Orientation.HORIZONTAL);
 			divider.get_style_context ().add_class ("launcher-alpha-divider");
 			header.pack_start (divider, true, true, 0);
+			header.show_all ();
 			return header;
 		}
 
@@ -911,9 +1007,6 @@ namespace Plank
 				var app = visible_results[index];
 				app.launch (null, null);
 				notice_model.dismiss ();
-				var id = app.get_id () ?? app.get_name ();
-				usage_counts[id] = usage_count (app) + 1;
-				save_usage ();
 				hide_animated ();
 			} catch (Error e) {
 				warning ("Unable to launch '%s': %s", visible_results[index].get_name (), e.message);
@@ -946,11 +1039,10 @@ namespace Plank
 			var css = ".plank-native-launcher { background-color: transparent; }";
 			css += ".plank-native-launcher .launcher-panel { background-color: rgb(%d,%d,%d); border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; padding: 5px; box-shadow: none; }"
 				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255));
-			css += ".plank-native-launcher .launcher-tabs { margin: 0 0 0 16px; }";
 			css += ".plank-native-launcher .launcher-navbar { min-height: 46px; margin: 10px 9px 0 9px; }";
 			css += ".plank-native-launcher .launcher-user-identity { color: white; }";
 			css += ".plank-native-launcher .launcher-user-avatar { margin: 1px 0; }";
-			css += ".plank-native-launcher .launcher-user-avatar-fallback { color: rgba(255,255,255,0.78); background-color: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 7px; }";
+			css += ".plank-native-launcher .launcher-user-avatar-fallback { color: rgba(255,255,255,0.78); background-color: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 6px; }";
 			css += ".plank-native-launcher .launcher-power-button { color: rgba(255,255,255,0.68); background: transparent; background-image: none; border: none; border-radius: 10px; box-shadow: none; padding: 7px; }";
 			css += ".plank-native-launcher .launcher-power-button:hover { color: white; background-color: rgba(255,255,255,0.09); }";
 			css += ".plank-native-launcher .launcher-notice { color: white; background-color: rgba(224,70,70,0.20); border: 1px solid rgba(255,120,120,0.30); border-radius: 8px; padding: 7px 9px; margin: 2px 7px 5px 7px; }";
@@ -958,12 +1050,7 @@ namespace Plank
 			css += ".plank-native-launcher .launcher-notice-dismiss:hover { background-color: rgba(255,255,255,0.12); border-radius: 5px; }";
 			css += ".plank-native-launcher.keyboard-navigation button:focus { color: white; box-shadow: 0 0 0 2px rgba(115,210,22,0.85); }";
 			css += ".plank-native-launcher.keyboard-navigation row:focus { box-shadow: inset 0 0 0 2px rgba(115,210,22,0.85); }";
-			css += ".plank-native-launcher .launcher-tabs button { color: rgba(255,255,255,0.50); background: transparent; background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 8px 14px; min-width: 0; min-height: 0; font-size: 13px; }";
-			css += ".plank-native-launcher .launcher-tabs button:hover { color: rgba(255,255,255,0.80); }";
-			css += ".plank-native-launcher .launcher-tabs button:checked { color: white; }";
-			css += ".plank-native-launcher .launcher-tabs button .launcher-tab-dot { min-width: 5px; min-height: 5px; background-color: transparent; border-radius: 3px; }";
-			css += ".plank-native-launcher .launcher-tabs button:checked .launcher-tab-dot { background-color: #73d216; }";
-			css += ".plank-native-launcher .launcher-results-scroll { background: transparent; border: none; box-shadow: none; outline-style: none; outline-width: 0; }";
+			css += ".plank-native-launcher .launcher-results-scroll { background: transparent; border: none; box-shadow: none; outline-style: none; outline-width: 0; margin-top: 6px; }";
 			css += ".plank-native-launcher .launcher-results-scroll undershoot.top, .plank-native-launcher .launcher-results-scroll undershoot.bottom, .plank-native-launcher .launcher-results-scroll undershoot.left, .plank-native-launcher .launcher-results-scroll undershoot.right { background-image: none; background-color: transparent; border: none; box-shadow: none; }";
 			css += ".plank-native-launcher .launcher-results-scroll list, .plank-native-launcher .launcher-results-scroll row { outline-style: none; outline-width: 0; }";
 			css += ".plank-native-launcher scrollbar { background: transparent; border: none; }";
@@ -973,13 +1060,18 @@ namespace Plank
 			css += ".plank-native-launcher .launcher-alpha-divider { min-height: 1px; background-color: rgba(255,255,255,0.10); border: none; }";
 			css += ".plank-native-launcher .launcher-panel list, .plank-native-launcher .launcher-panel row, .plank-native-launcher .launcher-search { background-color: rgb(%d,%d,%d); background-image: none; border: none; }"
 				.printf ((int) (color.red * 255), (int) (color.green * 255), (int) (color.blue * 255));
-			css += ".plank-native-launcher .launcher-search { padding: 7px 12px; margin: 4px 7px 7px 7px; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; }";
+			css += ".plank-native-launcher .launcher-search { padding: 6px 12px; margin: 0 10px; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; }";
 			css += ".plank-native-launcher entry, .plank-native-launcher entry:focus { color: white; background: transparent; background-image: none; border: none; border-radius: 0; box-shadow: none; outline: none; font-size: 14px; }";
 			css += ".plank-native-launcher .launcher-search.launcher-search-focused { border-color: #73d216; box-shadow: 0 0 0 1px rgba(115,210,22,0.28); }";
 			css += ".plank-native-launcher row { color: white; border-radius: 8px; margin: 1px 5px; transition: background-color 120ms ease; }";
 			css += ".plank-native-launcher row:hover { background-color: rgba(255,255,255,0.07); }";
 			css += ".plank-native-launcher row:selected { background-color: rgba(255,255,255,0.15); }";
 			css += ".plank-native-launcher row:selected:hover { background-color: rgba(255,255,255,0.18); }";
+			css += ".plank-native-launcher .launcher-command-actions { margin-top: 2px; }";
+			css += ".plank-native-launcher .launcher-command-button { color: rgba(255,255,255,0.50); background: transparent; background-image: none; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; box-shadow: none; padding: 1px 6px; min-width: 0; min-height: 0; font-size: 11px; }";
+			css += ".plank-native-launcher .launcher-command-button:hover { color: white; background-color: rgba(255,255,255,0.08); }";
+			css += ".plank-native-launcher .launcher-command-button:disabled { color: rgba(255,255,255,0.25); }";
+			css += ".plank-native-launcher .launcher-command-status { color: rgba(115,210,22,0.90); font-size: 11px; margin-left: 2px; }";
 			css += ".plank-native-launcher .launcher-enter { color: rgba(255,255,255,0.28); font-size: 16px; }";
 			css += ".plank-native-launcher row:selected .launcher-enter { color: rgba(255,255,255,0.85); }";
 			css += ".plank-native-launcher .launcher-empty { color: rgba(255,255,255,0.55); }";
