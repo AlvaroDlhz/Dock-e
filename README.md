@@ -3,7 +3,8 @@
 Dock-e is a floating desktop dock for Linux based on
 [Plank](https://launchpad.net/plank). It retains Plank's window integration,
 rendering engine, and Vala architecture while extending the interface with a
-built-in application launcher and native system controls.
+built-in application launcher, a background applications list, and a system
+update indicator.
 
 The goal is to provide a compact, visually consistent dock whose core features
 do not depend on external launchers or desktop panels.
@@ -12,104 +13,116 @@ do not depend on external launchers or desktop panels.
 
 The dock spans nearly the full width of the screen while preserving side and
 bottom margins to create a floating appearance. Its contents are divided into
-three sections:
+fixed sections:
 
-- **Left:** the Dock-e button and native application launcher.
-- **Center:** pinned applications and open windows, with animated magnification,
-  solid indicators for active applications, and interaction areas that extend
-  all the way to the bottom edge.
-- **Right:** volume, Bluetooth, Wi-Fi, battery, and clock indicators.
+- **Launcher button:** opens the native application launcher.
+- **Applications:** pinned applications and open windows, with a configurable
+  hover zoom, launch and attention bounces, window previews, and indicators
+  that split when an application has several windows open.
+- **Dock actions:** the system update manager and the background applications
+  toggle.
 
 ## Native Application Launcher
 
 The Dock-e button opens an application launcher built directly into the
 project. It includes:
 
-- Fuzzy search across installed applications.
-- **Frequently used** and **All** tabs.
-- Persistent application usage tracking.
-- An alphabetical catalog with section dividers.
+- Fuzzy search across installed applications, next to the user's avatar.
+- An alphabetical catalog with section headers.
+- Commands, typed with a leading `/`: `/preferences`, `/lock`, `/suspend`,
+  `/logout`, `/restart`, and `/poweroff` (Spanish aliases such as `/apagar`
+  work as well). They replace the former power button.
+- An inline calculator whose result can be copied with Enter.
+- Per-application actions: copy the launch, terminate, restart, or uninstall
+  command, and uninstall packages installed through dpkg, rpm, Flatpak, or Snap.
 - Full mouse and keyboard navigation.
-- Session controls for locking, suspending, logging out, restarting, and
-  powering off the system.
-- Stable dimensions and positioning above the dock.
 
-The button artwork is stored in `data/dock-menu.jpg` and embedded in the binary
-through GLib resources.
+Session commands currently rely on `xflock4` and `xfce4-session-logout`, so
+they require an XFCE session.
 
-## Native System Panels
+## Background Applications and Updates
 
-The indicators on the right use a shared native window instead of relying on
-the visual appearance of standard GTK menus. Its contents change according to
-the selected indicator:
+- **Background applications:** a tray replacement that lists applications
+  still running without a window (StatusNotifier and XApp status icons, such as
+  Discord or Telegram) and highlights the ones that need attention.
+- **Update manager:** shows the number of pending system updates and opens the
+  system's update application. Update checks currently use `apt`.
 
-- **Volume:** output device selection, output volume and mute controls,
-  microphone input controls, per-application volume, and access to advanced
-  sound settings.
-- **Bluetooth:** power control and paired devices.
-- **Wi-Fi:** power control and detected networks.
-- **Battery:** charge percentage and charging state.
-- **Clock:** current date and calendar.
+The former volume, Bluetooth, Wi-Fi, battery, and clock panels were removed
+from the dock, along with their backends.
 
-These panels keep the dock visible while they are in use and share the same
-background, borders, spacing, and positioning.
+## Animations
+
+The **Animations** page of the preferences window (`/preferences` in the
+launcher) controls how application icons move:
+
+- Zoom on hover, and how much (100–150%).
+- Bounce on launch.
+- Bounce when an application needs attention, optionally repeating until it is
+  focused.
+- Animation speed (slow, normal, fast).
+- Reduce motion, which disables icon zoom and bounces altogether.
+
+The settings are stored per dock in GSettings
+(`net.launchpad.plank.dock.settings`).
 
 ## Project Structure
 
 ```text
 data/
-  dock-menu.jpg                 Main button artwork
+  menu-2.svg                    Launcher button artwork
   plank.gresource.xml           Resources embedded in the binary
+  net.launchpad.plank.gschema.xml.in   Dock settings schema
+  ui/preferences.ui             Preferences window layout
   themes/                       Dock themes and visual settings
 
 lib/
-  DockController.vala           Creates and coordinates the dock and panels
+  DockController.vala           Creates and coordinates the dock and its providers
   DockRenderer.vala             Rendering, visual states, and animations
-  PositionManager.vala          Geometry for the dock's three sections
-  HideManager.vala              Auto-hide behavior and panel inhibition
+  PositionManager.vala          Geometry for the dock's sections
+  HideManager.vala              Auto-hide behavior
+  DockPreferences.vala          Per-dock settings
 
   Items/
-    LauncherItem.vala           Fixed Dock-e launcher button
-    StatusIndicatorItem.vala    Volume, network, battery, and clock indicators
+    LauncherItem.vala           Fixed launcher button and fixed item providers
     ApplicationDockItem.vala    Pinned applications and open windows
+    TrayToggleItem.vala         Background applications toggle, tray items, and list
+    UpdateManagerItem.vala      System update indicator
 
   Widgets/
     DockWindow.vala             Main window and pointer input handling
-    LauncherWindow.vala         Native application launcher
-    StatusPanelWindow.vala      Shared panel for native system controls
+    LauncherWindow.vala         Native application launcher and commands
+    HoverWindow.vala            Item labels shown on hover
+    PreferencesWindow.vala      Preferences window
+
+  Services/
+    CommandRunner.vala          Cancellable asynchronous command execution
+    UpdateService.vala          Pending update checks
+    ApplicationUninstallService.vala   Package owner detection for uninstalls
+    CalculatorService.vala      Launcher calculator
 
 docklets/                       Docklets inherited from Plank
+scripts/                        Build, test, and run helpers
 src/                            Application entry point
 tests/                          Test suite and supporting test components
 vapi/                           Vala interface definitions
 ```
 
-The main execution flow is:
-
-1. `DockController` creates the dock window and registers its fixed providers.
-2. `PositionManager` separates the launcher button, applications, and system
-   indicators.
-3. `DockRenderer` draws each section and animates its visual states.
-4. `DockWindow` routes input to either `LauncherWindow` or
-   `StatusPanelWindow`.
-5. The native panels interact with desktop services through PipeWire and
-   WirePlumber, PulseAudio, NetworkManager, BlueZ, and XFCE Power Manager.
-
 ## Building
 
-Dock-e uses Autotools, Vala, and GTK 3. On a system with Plank's build
-dependencies installed, run:
+Dock-e uses Autotools, Vala, and GTK 3, and runs on X11. On a system with
+Plank's build dependencies installed, the helper scripts build out of tree in
+`.build/`:
 
 ```bash
-./autogen.sh
-make -j$(nproc)
+scripts/build-dock-e    # configure (first run) and build
+scripts/test-dock-e     # build and run the test suite (uses xvfb-run if present)
+scripts/run-dock-e      # run the local build without installing it
+scripts/clean-dock-e    # remove the build's generated files
 ```
 
-To run the local build without installing it:
-
-```bash
-LD_LIBRARY_PATH="$PWD/lib/.libs" "$PWD/src/.libs/plank" -n dev -d
-```
+If `configure` is missing, generate it first with `./autogen.sh` and remove the
+in-source configuration it leaves behind with `make distclean`.
 
 ## Origin and License
 

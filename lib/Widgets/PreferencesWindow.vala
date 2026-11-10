@@ -38,6 +38,8 @@ namespace Plank
 		Gtk.ComboBoxText cb_alignment;
 		[GtkChild]
 		Gtk.ComboBoxText cb_items_alignment;
+		[GtkChild]
+		Gtk.ComboBoxText cb_animation_speed;
 		
 		[GtkChild]
 		Gtk.SpinButton sp_hide_delay;
@@ -45,6 +47,8 @@ namespace Plank
 		Gtk.SpinButton sp_unhide_delay;
 		[GtkChild]
 		Gtk.Scale s_offset;
+		[GtkChild]
+		Gtk.Scale s_hover_zoom;
 		[GtkChild]
 		Gtk.ColorButton btn_background_color;
 		
@@ -56,6 +60,8 @@ namespace Plank
 		Gtk.Adjustment adj_iconsize;
 		[GtkChild]
 		Gtk.Adjustment adj_offset;
+		[GtkChild]
+		Gtk.Adjustment adj_hover_zoom;
 		
 		[GtkChild]
 		Gtk.Switch sw_hide;
@@ -73,6 +79,16 @@ namespace Plank
 		Gtk.Switch sw_window_previews;
 		[GtkChild]
 		Gtk.Switch sw_custom_background;
+		[GtkChild]
+		Gtk.Switch sw_hover_zoom;
+		[GtkChild]
+		Gtk.Switch sw_launch_bounce;
+		[GtkChild]
+		Gtk.Switch sw_urgent_bounce;
+		[GtkChild]
+		Gtk.Switch sw_repeat_urgent_bounce;
+		[GtkChild]
+		Gtk.Switch sw_reduce_motion;
 		
 		[GtkChild]
 		Gtk.IconView view_docklets;
@@ -201,6 +217,30 @@ namespace Plank
 			case "WindowPreviewsEnabled":
 				sw_window_previews.set_active (prefs.WindowPreviewsEnabled);
 				break;
+			case "HoverZoomEnabled":
+				sw_hover_zoom.set_active (prefs.HoverZoomEnabled);
+				update_animation_control_sensitivity ();
+				break;
+			case "HoverZoomPercent":
+				adj_hover_zoom.value = prefs.HoverZoomPercent;
+				break;
+			case "LaunchBounceEnabled":
+				sw_launch_bounce.set_active (prefs.LaunchBounceEnabled);
+				break;
+			case "UrgentBounceEnabled":
+				sw_urgent_bounce.set_active (prefs.UrgentBounceEnabled);
+				update_animation_control_sensitivity ();
+				break;
+			case "UrgentBounceRepeat":
+				sw_repeat_urgent_bounce.set_active (prefs.UrgentBounceRepeat);
+				break;
+			case "AnimationSpeed":
+				cb_animation_speed.active_id = prefs.AnimationSpeed.to_string ();
+				break;
+			case "ReduceMotion":
+				sw_reduce_motion.set_active (prefs.ReduceMotion);
+				update_animation_control_sensitivity ();
+				break;
 			case "Theme":
 				break;
 			case "HideDelay":
@@ -309,6 +349,50 @@ namespace Plank
 			prefs.WindowPreviewsEnabled = ((Gtk.Switch) widget).get_active ();
 		}
 
+		void hover_zoom_toggled (GLib.Object widget, ParamSpec param)
+		{
+			prefs.HoverZoomEnabled = ((Gtk.Switch) widget).get_active ();
+			update_animation_control_sensitivity ();
+		}
+
+		void launch_bounce_toggled (GLib.Object widget, ParamSpec param)
+		{
+			prefs.LaunchBounceEnabled = ((Gtk.Switch) widget).get_active ();
+		}
+
+		void urgent_bounce_toggled (GLib.Object widget, ParamSpec param)
+		{
+			prefs.UrgentBounceEnabled = ((Gtk.Switch) widget).get_active ();
+			update_animation_control_sensitivity ();
+		}
+
+		void repeat_urgent_bounce_toggled (GLib.Object widget, ParamSpec param)
+		{
+			prefs.UrgentBounceRepeat = ((Gtk.Switch) widget).get_active ();
+		}
+
+		void reduce_motion_toggled (GLib.Object widget, ParamSpec param)
+		{
+			prefs.ReduceMotion = ((Gtk.Switch) widget).get_active ();
+			update_animation_control_sensitivity ();
+		}
+
+		void animation_speed_changed (Gtk.ComboBox widget)
+		{
+			prefs.AnimationSpeed = int.parse (widget.get_active_id ());
+		}
+
+		void hover_zoom_changed (Gtk.Adjustment adj)
+		{
+			prefs.HoverZoomPercent = (int) adj.value;
+		}
+
+		void update_animation_control_sensitivity ()
+		{
+			s_hover_zoom.sensitive = prefs.HoverZoomEnabled && !prefs.ReduceMotion;
+			sw_repeat_urgent_bounce.sensitive = prefs.UrgentBounceEnabled && !prefs.ReduceMotion;
+		}
+
 		void iconsize_changed (Gtk.Adjustment adj)
 		{
 			prefs.IconSize = (int) adj.value;
@@ -352,6 +436,13 @@ namespace Plank
 			sw_lock_items.notify["active"].connect (lock_items_toggled);
 			sw_pressure_reveal.notify["active"].connect (pressure_reveal_toggled);
 			sw_window_previews.notify["active"].connect (window_previews_toggled);
+			sw_hover_zoom.notify["active"].connect (hover_zoom_toggled);
+			sw_launch_bounce.notify["active"].connect (launch_bounce_toggled);
+			sw_urgent_bounce.notify["active"].connect (urgent_bounce_toggled);
+			sw_repeat_urgent_bounce.notify["active"].connect (repeat_urgent_bounce_toggled);
+			sw_reduce_motion.notify["active"].connect (reduce_motion_toggled);
+			cb_animation_speed.changed.connect (animation_speed_changed);
+			adj_hover_zoom.value_changed.connect (hover_zoom_changed);
 			sw_custom_background.notify["active"].connect (custom_background_toggled);
 			cb_alignment.changed.connect (alignment_changed);
 			cb_items_alignment.changed.connect (items_alignment_changed);
@@ -375,6 +466,13 @@ namespace Plank
 			sw_lock_items.notify["active"].disconnect (lock_items_toggled);
 			sw_pressure_reveal.notify["active"].disconnect (pressure_reveal_toggled);
 			sw_window_previews.notify["active"].disconnect (window_previews_toggled);
+			sw_hover_zoom.notify["active"].disconnect (hover_zoom_toggled);
+			sw_launch_bounce.notify["active"].disconnect (launch_bounce_toggled);
+			sw_urgent_bounce.notify["active"].disconnect (urgent_bounce_toggled);
+			sw_repeat_urgent_bounce.notify["active"].disconnect (repeat_urgent_bounce_toggled);
+			sw_reduce_motion.notify["active"].disconnect (reduce_motion_toggled);
+			cb_animation_speed.changed.disconnect (animation_speed_changed);
+			adj_hover_zoom.value_changed.disconnect (hover_zoom_changed);
 			sw_custom_background.notify["active"].disconnect (custom_background_toggled);
 			cb_alignment.changed.disconnect (alignment_changed);
 			cb_items_alignment.changed.disconnect (items_alignment_changed);
@@ -415,6 +513,14 @@ namespace Plank
 			sw_lock_items.set_active (prefs.LockItems);
 			sw_pressure_reveal.set_active (prefs.PressureReveal);
 			sw_window_previews.set_active (prefs.WindowPreviewsEnabled);
+			sw_hover_zoom.set_active (prefs.HoverZoomEnabled);
+			adj_hover_zoom.value = prefs.HoverZoomPercent;
+			sw_launch_bounce.set_active (prefs.LaunchBounceEnabled);
+			sw_urgent_bounce.set_active (prefs.UrgentBounceEnabled);
+			sw_repeat_urgent_bounce.set_active (prefs.UrgentBounceRepeat);
+			cb_animation_speed.active_id = prefs.AnimationSpeed.to_string ();
+			sw_reduce_motion.set_active (prefs.ReduceMotion);
+			update_animation_control_sensitivity ();
 			cb_alignment.active_id = ((int) prefs.Alignment).to_string ();
 			cb_items_alignment.active_id = ((int) prefs.ItemsAlignment).to_string ();
 			cb_items_alignment.sensitive = (prefs.Alignment == Gtk.Align.FILL);

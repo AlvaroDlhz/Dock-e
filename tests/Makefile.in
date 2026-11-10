@@ -146,16 +146,14 @@ gmock_tests_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 am__objects_3 = tests-Accessibility.$(OBJEXT) \
 	tests-ApplicationUninstallService.$(OBJEXT) \
-	tests-AudioService.$(OBJEXT) tests-BluetoothService.$(OBJEXT) \
-	tests-BrightnessService.$(OBJEXT) \
 	tests-CalculatorService.$(OBJEXT) \
-	tests-CommandRunner.$(OBJEXT) tests-NetworkService.$(OBJEXT) \
-	tests-PowerService.$(OBJEXT) tests-StatusNoticeModel.$(OBJEXT) \
-	tests-System.$(OBJEXT) tests-UpdateService.$(OBJEXT) \
-	tests-Controller.$(OBJEXT) tests-Drawing.$(OBJEXT) \
-	tests-Items.$(OBJEXT) tests-Preferences.$(OBJEXT) \
-	tests-Widgets.$(OBJEXT) tests-Main.$(OBJEXT) \
-	tests-TestHelper.$(OBJEXT) $(am__objects_1)
+	tests-CommandRunner.$(OBJEXT) \
+	tests-StatusNoticeModel.$(OBJEXT) tests-System.$(OBJEXT) \
+	tests-UpdateService.$(OBJEXT) tests-Controller.$(OBJEXT) \
+	tests-Drawing.$(OBJEXT) tests-Items.$(OBJEXT) \
+	tests-Preferences.$(OBJEXT) tests-Widgets.$(OBJEXT) \
+	tests-Main.$(OBJEXT) tests-TestHelper.$(OBJEXT) \
+	$(am__objects_1)
 nodist_tests_OBJECTS = $(am__objects_3) $(am__objects_1)
 tests_OBJECTS = $(nodist_tests_OBJECTS)
 tests_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -182,15 +180,10 @@ am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/dock-Dock.Po \
 	./$(DEPDIR)/tests-Accessibility.Po \
 	./$(DEPDIR)/tests-ApplicationUninstallService.Po \
-	./$(DEPDIR)/tests-AudioService.Po \
-	./$(DEPDIR)/tests-BluetoothService.Po \
-	./$(DEPDIR)/tests-BrightnessService.Po \
 	./$(DEPDIR)/tests-CalculatorService.Po \
 	./$(DEPDIR)/tests-CommandRunner.Po \
 	./$(DEPDIR)/tests-Controller.Po ./$(DEPDIR)/tests-Drawing.Po \
 	./$(DEPDIR)/tests-Items.Po ./$(DEPDIR)/tests-Main.Po \
-	./$(DEPDIR)/tests-NetworkService.Po \
-	./$(DEPDIR)/tests-PowerService.Po \
 	./$(DEPDIR)/tests-Preferences.Po \
 	./$(DEPDIR)/tests-StatusNoticeModel.Po \
 	./$(DEPDIR)/tests-System.Po ./$(DEPDIR)/tests-TestHelper.Po \
@@ -498,13 +491,8 @@ tests_LDADD = \
 tests_VALASOURCES = \
 	Accessibility.vala \
 	ApplicationUninstallService.vala \
-	AudioService.vala \
-	BluetoothService.vala \
-	BrightnessService.vala \
 	CalculatorService.vala \
 	CommandRunner.vala \
-	NetworkService.vala \
-	PowerService.vala \
 	StatusNoticeModel.vala \
 	System.vala \
 	UpdateService.vala \
@@ -661,17 +649,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dock-Dock.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Accessibility.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-ApplicationUninstallService.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-AudioService.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-BluetoothService.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-BrightnessService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-CalculatorService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-CommandRunner.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Controller.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Drawing.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Items.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Main.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-NetworkService.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-PowerService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Preferences.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-StatusNoticeModel.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-System.Po@am__quote@ # am--include-marker
@@ -753,48 +736,6 @@ tests-ApplicationUninstallService.obj: ApplicationUninstallService.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-ApplicationUninstallService.obj `if test -f 'ApplicationUninstallService.c'; then $(CYGPATH_W) 'ApplicationUninstallService.c'; else $(CYGPATH_W) '$(srcdir)/ApplicationUninstallService.c'; fi`
 
-tests-AudioService.o: AudioService.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-AudioService.o -MD -MP -MF $(DEPDIR)/tests-AudioService.Tpo -c -o tests-AudioService.o `test -f 'AudioService.c' || echo '$(srcdir)/'`AudioService.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-AudioService.Tpo $(DEPDIR)/tests-AudioService.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='AudioService.c' object='tests-AudioService.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-AudioService.o `test -f 'AudioService.c' || echo '$(srcdir)/'`AudioService.c
-
-tests-AudioService.obj: AudioService.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-AudioService.obj -MD -MP -MF $(DEPDIR)/tests-AudioService.Tpo -c -o tests-AudioService.obj `if test -f 'AudioService.c'; then $(CYGPATH_W) 'AudioService.c'; else $(CYGPATH_W) '$(srcdir)/AudioService.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-AudioService.Tpo $(DEPDIR)/tests-AudioService.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='AudioService.c' object='tests-AudioService.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-AudioService.obj `if test -f 'AudioService.c'; then $(CYGPATH_W) 'AudioService.c'; else $(CYGPATH_W) '$(srcdir)/AudioService.c'; fi`
-
-tests-BluetoothService.o: BluetoothService.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-BluetoothService.o -MD -MP -MF $(DEPDIR)/tests-BluetoothService.Tpo -c -o tests-BluetoothService.o `test -f 'BluetoothService.c' || echo '$(srcdir)/'`BluetoothService.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-BluetoothService.Tpo $(DEPDIR)/tests-BluetoothService.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='BluetoothService.c' object='tests-BluetoothService.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-BluetoothService.o `test -f 'BluetoothService.c' || echo '$(srcdir)/'`BluetoothService.c
-
-tests-BluetoothService.obj: BluetoothService.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-BluetoothService.obj -MD -MP -MF $(DEPDIR)/tests-BluetoothService.Tpo -c -o tests-BluetoothService.obj `if test -f 'BluetoothService.c'; then $(CYGPATH_W) 'BluetoothService.c'; else $(CYGPATH_W) '$(srcdir)/BluetoothService.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-BluetoothService.Tpo $(DEPDIR)/tests-BluetoothService.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='BluetoothService.c' object='tests-BluetoothService.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-BluetoothService.obj `if test -f 'BluetoothService.c'; then $(CYGPATH_W) 'BluetoothService.c'; else $(CYGPATH_W) '$(srcdir)/BluetoothService.c'; fi`
-
-tests-BrightnessService.o: BrightnessService.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-BrightnessService.o -MD -MP -MF $(DEPDIR)/tests-BrightnessService.Tpo -c -o tests-BrightnessService.o `test -f 'BrightnessService.c' || echo '$(srcdir)/'`BrightnessService.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-BrightnessService.Tpo $(DEPDIR)/tests-BrightnessService.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='BrightnessService.c' object='tests-BrightnessService.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-BrightnessService.o `test -f 'BrightnessService.c' || echo '$(srcdir)/'`BrightnessService.c
-
-tests-BrightnessService.obj: BrightnessService.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-BrightnessService.obj -MD -MP -MF $(DEPDIR)/tests-BrightnessService.Tpo -c -o tests-BrightnessService.obj `if test -f 'BrightnessService.c'; then $(CYGPATH_W) 'BrightnessService.c'; else $(CYGPATH_W) '$(srcdir)/BrightnessService.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-BrightnessService.Tpo $(DEPDIR)/tests-BrightnessService.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='BrightnessService.c' object='tests-BrightnessService.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-BrightnessService.obj `if test -f 'BrightnessService.c'; then $(CYGPATH_W) 'BrightnessService.c'; else $(CYGPATH_W) '$(srcdir)/BrightnessService.c'; fi`
-
 tests-CalculatorService.o: CalculatorService.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-CalculatorService.o -MD -MP -MF $(DEPDIR)/tests-CalculatorService.Tpo -c -o tests-CalculatorService.o `test -f 'CalculatorService.c' || echo '$(srcdir)/'`CalculatorService.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-CalculatorService.Tpo $(DEPDIR)/tests-CalculatorService.Po
@@ -822,34 +763,6 @@ tests-CommandRunner.obj: CommandRunner.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='CommandRunner.c' object='tests-CommandRunner.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-CommandRunner.obj `if test -f 'CommandRunner.c'; then $(CYGPATH_W) 'CommandRunner.c'; else $(CYGPATH_W) '$(srcdir)/CommandRunner.c'; fi`
-
-tests-NetworkService.o: NetworkService.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-NetworkService.o -MD -MP -MF $(DEPDIR)/tests-NetworkService.Tpo -c -o tests-NetworkService.o `test -f 'NetworkService.c' || echo '$(srcdir)/'`NetworkService.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-NetworkService.Tpo $(DEPDIR)/tests-NetworkService.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='NetworkService.c' object='tests-NetworkService.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-NetworkService.o `test -f 'NetworkService.c' || echo '$(srcdir)/'`NetworkService.c
-
-tests-NetworkService.obj: NetworkService.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-NetworkService.obj -MD -MP -MF $(DEPDIR)/tests-NetworkService.Tpo -c -o tests-NetworkService.obj `if test -f 'NetworkService.c'; then $(CYGPATH_W) 'NetworkService.c'; else $(CYGPATH_W) '$(srcdir)/NetworkService.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-NetworkService.Tpo $(DEPDIR)/tests-NetworkService.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='NetworkService.c' object='tests-NetworkService.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-NetworkService.obj `if test -f 'NetworkService.c'; then $(CYGPATH_W) 'NetworkService.c'; else $(CYGPATH_W) '$(srcdir)/NetworkService.c'; fi`
-
-tests-PowerService.o: PowerService.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-PowerService.o -MD -MP -MF $(DEPDIR)/tests-PowerService.Tpo -c -o tests-PowerService.o `test -f 'PowerService.c' || echo '$(srcdir)/'`PowerService.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-PowerService.Tpo $(DEPDIR)/tests-PowerService.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='PowerService.c' object='tests-PowerService.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-PowerService.o `test -f 'PowerService.c' || echo '$(srcdir)/'`PowerService.c
-
-tests-PowerService.obj: PowerService.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-PowerService.obj -MD -MP -MF $(DEPDIR)/tests-PowerService.Tpo -c -o tests-PowerService.obj `if test -f 'PowerService.c'; then $(CYGPATH_W) 'PowerService.c'; else $(CYGPATH_W) '$(srcdir)/PowerService.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-PowerService.Tpo $(DEPDIR)/tests-PowerService.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='PowerService.c' object='tests-PowerService.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-PowerService.obj `if test -f 'PowerService.c'; then $(CYGPATH_W) 'PowerService.c'; else $(CYGPATH_W) '$(srcdir)/PowerService.c'; fi`
 
 tests-StatusNoticeModel.o: StatusNoticeModel.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-StatusNoticeModel.o -MD -MP -MF $(DEPDIR)/tests-StatusNoticeModel.Tpo -c -o tests-StatusNoticeModel.o `test -f 'StatusNoticeModel.c' || echo '$(srcdir)/'`StatusNoticeModel.c
@@ -1185,17 +1098,12 @@ distclean: distclean-am
 		-rm -f ./$(DEPDIR)/dock-Dock.Po
 	-rm -f ./$(DEPDIR)/tests-Accessibility.Po
 	-rm -f ./$(DEPDIR)/tests-ApplicationUninstallService.Po
-	-rm -f ./$(DEPDIR)/tests-AudioService.Po
-	-rm -f ./$(DEPDIR)/tests-BluetoothService.Po
-	-rm -f ./$(DEPDIR)/tests-BrightnessService.Po
 	-rm -f ./$(DEPDIR)/tests-CalculatorService.Po
 	-rm -f ./$(DEPDIR)/tests-CommandRunner.Po
 	-rm -f ./$(DEPDIR)/tests-Controller.Po
 	-rm -f ./$(DEPDIR)/tests-Drawing.Po
 	-rm -f ./$(DEPDIR)/tests-Items.Po
 	-rm -f ./$(DEPDIR)/tests-Main.Po
-	-rm -f ./$(DEPDIR)/tests-NetworkService.Po
-	-rm -f ./$(DEPDIR)/tests-PowerService.Po
 	-rm -f ./$(DEPDIR)/tests-Preferences.Po
 	-rm -f ./$(DEPDIR)/tests-StatusNoticeModel.Po
 	-rm -f ./$(DEPDIR)/tests-System.Po
@@ -1252,17 +1160,12 @@ maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/dock-Dock.Po
 	-rm -f ./$(DEPDIR)/tests-Accessibility.Po
 	-rm -f ./$(DEPDIR)/tests-ApplicationUninstallService.Po
-	-rm -f ./$(DEPDIR)/tests-AudioService.Po
-	-rm -f ./$(DEPDIR)/tests-BluetoothService.Po
-	-rm -f ./$(DEPDIR)/tests-BrightnessService.Po
 	-rm -f ./$(DEPDIR)/tests-CalculatorService.Po
 	-rm -f ./$(DEPDIR)/tests-CommandRunner.Po
 	-rm -f ./$(DEPDIR)/tests-Controller.Po
 	-rm -f ./$(DEPDIR)/tests-Drawing.Po
 	-rm -f ./$(DEPDIR)/tests-Items.Po
 	-rm -f ./$(DEPDIR)/tests-Main.Po
-	-rm -f ./$(DEPDIR)/tests-NetworkService.Po
-	-rm -f ./$(DEPDIR)/tests-PowerService.Po
 	-rm -f ./$(DEPDIR)/tests-Preferences.Po
 	-rm -f ./$(DEPDIR)/tests-StatusNoticeModel.Po
 	-rm -f ./$(DEPDIR)/tests-System.Po

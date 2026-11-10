@@ -25,8 +25,9 @@ namespace Plank
 	public class DockRenderer : Renderer
 	{
 		const double CLOSED_APPLICATION_OPACITY = 0.60;
-		const double CENTRAL_ITEM_HOVER_SCALE = 1.12;
 		const double CENTRAL_ITEM_HOVER_LIFT = 3.0;
+		// Pause between repeated attention bounces, in milliseconds
+		const uint URGENT_BOUNCE_REPEAT_PAUSE = 700;
 
 		static Color active_indicator_color = { 0.450980, 0.823529, 0.086275, 1.0 };
 
@@ -78,6 +79,8 @@ namespace Plank
 		bool screen_is_composited = false;
 		bool show_notifications = true;
 		uint reset_position_manager_timer_id = 0U;
+		uint urgent_repeat_timer_id = 0U;
+		int64 next_urgent_repeat = 0LL;
 		int window_scale_factor = 1;
 		bool is_first_frame = true;
 		
@@ -135,6 +138,11 @@ namespace Plank
 			controller.hide_manager.notify["Hidden"].disconnect (hidden_changed);
 			controller.hide_manager.notify["Hovered"].disconnect (hovered_changed);
 			controller.window.notify["HoveredItem"].disconnect (animated_draw);
+			
+			if (urgent_repeat_timer_id > 0U) {
+				Source.remove (urgent_repeat_timer_id);
+				urgent_repeat_timer_id = 0U;
+			}
 		}
 		
 		void prefs_changed (Object prefs, ParamSpec prop)
@@ -154,6 +162,15 @@ namespace Plank
 			case "BackgroundColor":
 				apply_background_preferences ();
 				reset_buffers ();
+				break;
+			case "HoverZoomEnabled":
+			case "HoverZoomPercent":
+			case "LaunchBounceEnabled":
+			case "UrgentBounceEnabled":
+			case "UrgentBounceRepeat":
+			case "AnimationSpeed":
+			case "ReduceMotion":
+				animated_draw ();
 				break;
 			default:
 				// Nothing important for us changed
@@ -579,8 +596,7 @@ namespace Plank
 			var x_offset = 0.0, y_offset = 0.0;
 			
 			// check for and calculate click-animation
-			var max_click_time = item.ClickedAnimation == AnimationType.BOUNCE ? theme.LaunchBounceTime : theme.ClickTime;
-			max_click_time *= 1000;
+			var max_click_time = item_click_duration (item);
 			var click_time = int64.max (0LL, frame_time - item.LastClicked);
 			if (click_time < max_click_time) {
 				var click_animation_progress = click_time / (double) max_click_time;
@@ -622,11 +638,11 @@ namespace Plank
 			}
 			
 			// check for and calculate hover-animation
-			var max_hover_time = ITEM_HOVER_DURATION * 1000;
+			var max_hover_time = item_hover_duration ();
 			var hover_time = int64.max (0LL, frame_time - item.LastHovered);
 			var hover_animation_progress = 0.0;
 			var hover_scale_progress = 0.0;
-			var animations_enabled = Gtk.Settings.get_default ().gtk_enable_animations;
+			var animations_enabled = is_application_motion_enabled ();
 			var is_application_item = item is ApplicationDockItem;
 			if (is_application_item && hover_time < max_hover_time) {
 				if (hovered_item == item) {
@@ -655,12 +671,15 @@ namespace Plank
 				hover_animation_progress = hovered_item == item ? 1.0 : 0.0;
 			}
 
-			if (is_application_item && hover_scale_progress > 0.0) {
-				var hover_scale = 1.0 + (CENTRAL_ITEM_HOVER_SCALE - 1.0)
-					* hover_scale_progress;
-				draw_value.icon_size *= hover_scale;
-				draw_value.icon_width *= hover_scale;
-				y_offset += CENTRAL_ITEM_HOVER_LIFT * hover_scale_progress;
+			if (is_application_item && controller.prefs.HoverZoomEnabled
+				&& hover_scale_progress > 0.0) {
+				if (controller.prefs.HoverZoomPercent > 100) {
+					var hover_scale = 1.0
+						+ (controller.prefs.HoverZoomPercent / 100.0 - 1.0) * hover_scale_progress;
+					draw_value.icon_size *= hover_scale;
+					draw_value.icon_width *= hover_scale;
+					y_offset += CENTRAL_ITEM_HOVER_LIFT * hover_scale_progress;
+				}
 			}
 			
 			if (is_application_item && hovered_item == item && controller.window.menu_is_visible ())
@@ -671,11 +690,14 @@ namespace Plank
 				draw_value.darken += 0.6;
 			
 			// bounce icon on urgent state
-			if (screen_is_composited && show_notifications && (item.State & ItemState.URGENT) != 0) {
-				var urgent_duration = theme.UrgentBounceTime * 1000;
+			if (item_urgent_bounce_enabled (item) && (item.State & ItemState.URGENT) != 0) {
+				var urgent_duration = urgent_bounce_duration ();
 				var urgent_time = int64.max (0LL, frame_time - item.LastUrgent);
+				if (controller.prefs.UrgentBounceRepeat)
+					urgent_time %= urgent_bounce_cycle_duration ();
 				if (urgent_time < urgent_duration)
-					y_offset += position_manager.UrgentBounceHeight * easing_bounce (urgent_time, urgent_duration, 1.0);
+					y_offset += position_manager.UrgentBounceHeight
+						* easing_bounce (urgent_time, urgent_duration, 1.0);
 			}
 			
 			// animate addition/removal
@@ -1266,29 +1288,66 @@ namespace Plank
 			if (transient_items.size > 0)
 				return true;
 
+			next_urgent_repeat = 0LL;
 			foreach (var item in current_items)
 				if (item_animation_needed (item, frame_time))
 					return true;
 			
+			// Nothing is animating right now, so let the frame clock rest and
+			// wake up again when the next repeated attention bounce is due.
+			if (next_urgent_repeat > 0LL)
+				schedule_urgent_repeat (next_urgent_repeat - frame_time);
+			
 			return false;
+		}
+
+		void schedule_urgent_repeat (int64 delay)
+		{
+			if (urgent_repeat_timer_id > 0U)
+				return;
+			
+			urgent_repeat_timer_id = Gdk.threads_add_timeout ((uint) (int64.max (0LL, delay) / 1000) + 1, () => {
+				urgent_repeat_timer_id = 0U;
+				animated_draw ();
+				return Source.REMOVE;
+			});
 		}
 
 		inline bool item_animation_needed (DockItem item, int64 render_time)
 		{
 			if (item.ClickedAnimation != AnimationType.NONE
-				&& render_time - item.LastClicked <= (item.ClickedAnimation == AnimationType.BOUNCE ? theme.LaunchBounceTime : theme.ClickTime) * 1000)
+				&& render_time - item.LastClicked <= item_click_duration (item))
 				return true;
 			if (item is ApplicationDockItem && item.HoveredAnimation != AnimationType.NONE
-				&& render_time - item.LastHovered <= ITEM_HOVER_DURATION * 1000)
+				&& is_application_motion_enabled ()
+				&& render_time - item.LastHovered <= item_hover_duration ())
 				return true;
 			if (item.ScrolledAnimation != AnimationType.NONE
 				&& render_time - item.LastScrolled <= ITEM_SCROLL_DURATION * 1000)
 				return true;
 			if (render_time - item.LastActive <= theme.ActiveTime * 1000)
 				return true;
-			if (show_notifications
-				&& render_time - item.LastUrgent <= (hide_progress == 1.0 ? theme.GlowTime : theme.UrgentBounceTime) * 1000)
-				return true;
+			if (show_notifications) {
+				var urgent_elapsed = render_time - item.LastUrgent;
+				if (hide_progress == 1.0
+					&& urgent_elapsed <= theme.GlowTime * 1000)
+					return true;
+				if (theme.UrgentBounceTime > 0 && item_urgent_bounce_enabled (item)) {
+					var urgent_duration = urgent_bounce_duration ();
+					if (urgent_elapsed <= urgent_duration)
+						return true;
+					if (controller.prefs.UrgentBounceRepeat && (item.State & ItemState.URGENT) != 0) {
+						var cycle_duration = urgent_bounce_cycle_duration ();
+						var cycle_time = urgent_elapsed % cycle_duration;
+						if (cycle_time <= urgent_duration)
+							return true;
+						// Resting between two bounces, remember when the next one starts
+						var next_repeat = render_time + cycle_duration - cycle_time;
+						if (next_urgent_repeat == 0LL || next_repeat < next_urgent_repeat)
+							next_urgent_repeat = next_repeat;
+					}
+				}
+			}
 			if (render_time - item.LastMove <= theme.ItemMoveTime * 1000)
 				return true;
 			if (render_time - item.AddTime <= theme.ItemMoveTime * 1000)
@@ -1299,6 +1358,76 @@ namespace Plank
 				return true;
 			
 			return false;
+		}
+
+		/**
+		 * Whether application icons are allowed to move (zoom and bounce).
+		 */
+		bool is_application_motion_enabled ()
+		{
+			return Gtk.Settings.get_default ().gtk_enable_animations
+				&& !controller.prefs.ReduceMotion;
+		}
+
+		/**
+		 * The duration of the click-animation of an item, in microseconds.
+		 */
+		int64 item_click_duration (DockItem item)
+		{
+			if (item.ClickedAnimation != AnimationType.BOUNCE)
+				return theme.ClickTime * 1000LL;
+			
+			if (!(item is ApplicationDockItem))
+				return theme.LaunchBounceTime * 1000LL;
+			
+			if (!is_application_motion_enabled () || !controller.prefs.LaunchBounceEnabled)
+				return 0LL;
+			
+			return (int64) (theme.LaunchBounceTime * 1000 * application_animation_duration_scale ());
+		}
+
+		/**
+		 * The duration of the hover-animation of application items, in microseconds.
+		 */
+		int64 item_hover_duration ()
+		{
+			return (int64) (ITEM_HOVER_DURATION * 1000 * application_animation_duration_scale ());
+		}
+
+		/**
+		 * Whether the given item bounces while it is demanding attention.
+		 */
+		bool item_urgent_bounce_enabled (DockItem item)
+		{
+			return screen_is_composited && show_notifications
+				&& item is ApplicationDockItem
+				&& controller.prefs.UrgentBounceEnabled
+				&& is_application_motion_enabled ();
+		}
+
+		/**
+		 * The duration of a single attention bounce, in microseconds.
+		 */
+		int64 urgent_bounce_duration ()
+		{
+			return (int64) (theme.UrgentBounceTime * 1000 * application_animation_duration_scale ());
+		}
+
+		/**
+		 * The duration of an attention bounce and the pause before it repeats, in microseconds.
+		 */
+		int64 urgent_bounce_cycle_duration ()
+		{
+			return urgent_bounce_duration () + URGENT_BOUNCE_REPEAT_PAUSE * 1000LL;
+		}
+
+		double application_animation_duration_scale ()
+		{
+			switch (controller.prefs.AnimationSpeed) {
+			case 0: return 1.5;
+			case 2: return 0.65;
+			default: return 1.0;
+			}
 		}
 		
 		static int compare_dock_item_position (DockItem i1, DockItem i2)

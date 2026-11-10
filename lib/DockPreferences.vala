@@ -102,6 +102,27 @@ namespace Plank
 		[Description(nick = "window-previews-enabled", blurb = "Whether to show previews of open windows when application items are hovered.")]
 		public bool WindowPreviewsEnabled { get; set; }
 
+		[Description(nick = "hover-zoom-enabled", blurb = "Whether application icons zoom when hovered.")]
+		public bool HoverZoomEnabled { get; set; }
+
+		[Description(nick = "hover-zoom-percent", blurb = "The size of application icons while hovered (in percent).")]
+		public int HoverZoomPercent { get; set; }
+
+		[Description(nick = "launch-bounce-enabled", blurb = "Whether application icons bounce when launched.")]
+		public bool LaunchBounceEnabled { get; set; }
+
+		[Description(nick = "urgent-bounce-enabled", blurb = "Whether application icons bounce when they need attention.")]
+		public bool UrgentBounceEnabled { get; set; }
+
+		[Description(nick = "urgent-bounce-repeat", blurb = "Whether attention bounces repeat until the application is focused.")]
+		public bool UrgentBounceRepeat { get; set; }
+
+		[Description(nick = "animation-speed", blurb = "The speed of application animations: 0 slow, 1 normal, 2 fast.")]
+		public int AnimationSpeed { get; set; }
+
+		[Description(nick = "reduce-motion", blurb = "Whether to reduce application animation and motion effects.")]
+		public bool ReduceMotion { get; set; }
+
 		/**
 		 * {@inheritDoc}
 		 */

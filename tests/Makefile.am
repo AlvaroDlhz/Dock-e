@@ -36,13 +36,8 @@ tests_LDADD = \
 tests_VALASOURCES = \
 	Accessibility.vala \
 	ApplicationUninstallService.vala \
-	AudioService.vala \
-	BluetoothService.vala \
-	BrightnessService.vala \
 	CalculatorService.vala \
 	CommandRunner.vala \
-	NetworkService.vala \
-	PowerService.vala \
 	StatusNoticeModel.vala \
 	System.vala \
 	UpdateService.vala \

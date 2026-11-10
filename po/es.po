@@ -256,3 +256,15 @@ msgstr "_Traducir esta aplicación…"
 #: ../lib/Widgets/PreferencesWindow.vala:90
 msgid "Preferences"
 msgstr "Preferencias"
+
+#: ../lib/Widgets/LauncherWindow.vala:856
+msgid "Detecting…"
+msgstr "Detectando…"
+
+#: ../lib/Widgets/LauncherWindow.vala:872
+msgid "Unavailable"
+msgstr "No disponible"
+
+#: ../lib/Widgets/LauncherWindow.vala:888
+msgid "Copied"
+msgstr "Copiado"

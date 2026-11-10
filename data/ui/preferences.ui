@@ -33,6 +33,12 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
     <property name="upper">128</property>
     <property name="step_increment">2</property>
   </object>
+  <object class="GtkAdjustment" id="adj_hover_zoom">
+    <property name="lower">100</property>
+    <property name="upper">150</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">5</property>
+  </object>
   <object class="GtkAdjustment" id="adj_offset">
     <property name="lower">-100</property>
     <property name="upper">100</property>
@@ -582,6 +588,185 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
           </packing>
         </child>
         <child>
+          <object class="GtkGrid" id="grid_animations">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="valign">start</property>
+            <property name="margin_left">32</property>
+            <property name="margin_right">32</property>
+            <property name="margin_top">28</property>
+            <property name="margin_bottom">28</property>
+            <property name="row_spacing">18</property>
+            <property name="column_spacing">20</property>
+            <child>
+              <object class="GtkLabel" id="l_hover_zoom">
+                <property name="visible">True</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Zoom on Hover:</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSwitch" id="sw_hover_zoom">
+                <property name="visible">True</property>
+                <property name="halign">start</property>
+                <property name="valign">center</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="l_hover_zoom_percent">
+                <property name="visible">True</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Zoom Amount:</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScale" id="s_hover_zoom">
+                <property name="visible">True</property>
+                <property name="hexpand">True</property>
+                <property name="adjustment">adj_hover_zoom</property>
+                <property name="digits">0</property>
+                <property name="value_pos">right</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="l_launch_bounce">
+                <property name="visible">True</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Bounce on Launch:</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSwitch" id="sw_launch_bounce">
+                <property name="visible">True</property>
+                <property name="halign">start</property>
+                <property name="valign">center</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="l_urgent_bounce">
+                <property name="visible">True</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Bounce for Attention:</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSwitch" id="sw_urgent_bounce">
+                <property name="visible">True</property>
+                <property name="halign">start</property>
+                <property name="valign">center</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="l_repeat_urgent_bounce">
+                <property name="visible">True</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Repeat Until Focused:</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSwitch" id="sw_repeat_urgent_bounce">
+                <property name="visible">True</property>
+                <property name="halign">start</property>
+                <property name="valign">center</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="l_animation_speed">
+                <property name="visible">True</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Animation Speed:</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBoxText" id="cb_animation_speed">
+                <property name="visible">True</property>
+                <items>
+                  <item id="0" translatable="yes">Slow</item>
+                  <item id="1" translatable="yes">Normal</item>
+                  <item id="2" translatable="yes">Fast</item>
+                </items>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="l_reduce_motion">
+                <property name="visible">True</property>
+                <property name="halign">end</property>
+                <property name="label" translatable="yes">Reduce Motion:</property>
+                <property name="tooltip_text" translatable="yes">Disable icon zoom and bounce animations while keeping your other animation settings</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">6</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSwitch" id="sw_reduce_motion">
+                <property name="visible">True</property>
+                <property name="halign">start</property>
+                <property name="valign">center</property>
+                <property name="tooltip_text" translatable="yes">Disable icon zoom and bounce animations while keeping your other animation settings</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">6</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="name">grid_animations</property>
+            <property name="title" translatable="yes">Animations</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkScrolledWindow" id="sw_docklets">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -602,7 +787,7 @@ along with plank.  If not, see <http://www.gnu.org/licenses/>.
           <packing>
             <property name="name">view_docklets</property>
             <property name="title" translatable="yes">Docklets</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
       </object>

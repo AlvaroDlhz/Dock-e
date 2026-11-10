@@ -31,6 +31,52 @@ namespace PlankTests
 		Test.add_func ("/Services/Preferences/signals4", preferences_signals4);
 		Test.add_func ("/Services/Preferences/signals5", preferences_signals5);
 		Test.add_func ("/Services/Preferences/subclass", preferences_subclass);
+		Test.add_func ("/Services/Preferences/dock-animations", preferences_dock_animations);
+	}
+	
+	void preferences_dock_animations ()
+	{
+		const string DOCK_NAME = "animation-test";
+		
+		var prefs = new DockPreferences (DOCK_NAME);
+		
+		// defaults as declared in the gsettings schema
+		assert (prefs.HoverZoomEnabled);
+		assert (prefs.HoverZoomPercent == 112);
+		assert (prefs.LaunchBounceEnabled);
+		assert (prefs.UrgentBounceEnabled);
+		assert (!prefs.UrgentBounceRepeat);
+		assert (prefs.AnimationSpeed == 1);
+		assert (!prefs.ReduceMotion);
+		
+		var changed = new Gee.HashSet<string> ();
+		prefs.notify.connect ((pspec) => {
+			changed.add (pspec.get_name ());
+		});
+		
+		prefs.HoverZoomEnabled = false;
+		prefs.HoverZoomPercent = 150;
+		prefs.LaunchBounceEnabled = false;
+		prefs.UrgentBounceEnabled = false;
+		prefs.UrgentBounceRepeat = true;
+		prefs.AnimationSpeed = 2;
+		prefs.ReduceMotion = true;
+		
+		// the renderer and the preferences window rely on these notifications
+		string[] names = { "HoverZoomEnabled", "HoverZoomPercent", "LaunchBounceEnabled",
+			"UrgentBounceEnabled", "UrgentBounceRepeat", "AnimationSpeed", "ReduceMotion" };
+		foreach (unowned string name in names)
+			assert (changed.contains (name));
+		
+		// a second instance of the same dock has to see the stored values
+		var prefs2 = new DockPreferences (DOCK_NAME);
+		assert (!prefs2.HoverZoomEnabled);
+		assert (prefs2.HoverZoomPercent == 150);
+		assert (!prefs2.LaunchBounceEnabled);
+		assert (!prefs2.UrgentBounceEnabled);
+		assert (prefs2.UrgentBounceRepeat);
+		assert (prefs2.AnimationSpeed == 2);
+		assert (prefs2.ReduceMotion);
 	}
 	
 	class TestPreferences : Preferences

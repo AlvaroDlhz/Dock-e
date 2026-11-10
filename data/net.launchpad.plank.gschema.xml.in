@@ -78,6 +78,17 @@
 			<summary>Hidemode of the dock</summary>
 			<description>Possible values are "none", "intelligent", "auto", "dodge-maximized", "window-dodge", and "dodge-active".</description>
 		</key>
+		<key name="hover-zoom-enabled" type="b">
+			<default>true</default>
+			<summary>Zoom application icons when hovered</summary>
+			<description>If true, application icons scale up when the pointer hovers over them.</description>
+		</key>
+		<key name="hover-zoom-percent" type="i">
+			<range min="100" max="150"/>
+			<default>112</default>
+			<summary>Application icon hover size</summary>
+			<description>The hovered icon size in percent of its normal size.</description>
+		</key>
 		<key name="icon-size" type="i">
 			<range min="24" max="128"/>
 			<default>48</default>
@@ -88,6 +99,11 @@
 			<default>'center'</default>
 			<summary>The alignment of dock items</summary>
 			<description>Possible values are "fill", "start", "end", and "center".</description>
+		</key>
+		<key name="launch-bounce-enabled" type="b">
+			<default>true</default>
+			<summary>Bounce application icons when launched</summary>
+			<description>If true, application icons bounce when their application is launched.</description>
 		</key>
 		<key name="lock-items" type="b">
 			<default>false</default>
@@ -120,6 +136,11 @@
 			<summary>Pressure Reveal</summary>
 			<description>If true, use pressure-based revealing of the dock if the input device supports it.</description>
 		</key>
+		<key name="reduce-motion" type="b">
+			<default>false</default>
+			<summary>Reduce application motion effects</summary>
+			<description>If true, disable application icon scaling and bouncing animations.</description>
+		</key>
 		<key name="show-dock-item" type="b">
 			<default>false</default>
 			<summary>Show the item for the dock itself</summary>
@@ -146,6 +167,16 @@
 			<summary>Dock unhide delay</summary>
 			<description>Length of the delay before unhiding the dock, in milliseconds.</description>
 		</key>
+		<key name="urgent-bounce-enabled" type="b">
+			<default>true</default>
+			<summary>Bounce application icons that need attention</summary>
+			<description>If true, application icons bounce when the application requests attention.</description>
+		</key>
+		<key name="urgent-bounce-repeat" type="b">
+			<default>false</default>
+			<summary>Repeat attention bounces</summary>
+			<description>If true, repeat the attention bounce until the application is focused.</description>
+		</key>
 		<key name="zoom-enabled" type="b">
 			<default>false</default>
 			<summary>Zoom dock items when hovered</summary>
@@ -156,6 +187,12 @@
 			<default>150</default>
 			<summary>Icon zoom percentage</summary>
 			<description>The amount to zoom dock items, in percent.</description>
+		</key>
+		<key name="animation-speed" type="i">
+			<range min="0" max="2"/>
+			<default>1</default>
+			<summary>Application animation speed</summary>
+			<description>0 is slow, 1 is normal, and 2 is fast.</description>
 		</key>
 	</schema>
 </schemalist>

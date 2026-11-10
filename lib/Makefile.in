@@ -150,13 +150,8 @@ am__objects_2 = libplank_internal_la-InternalConsts.lo \
 	libplank_internal_la-InternalQuarks.lo \
 	Services/libplank_internal_la-Accessibility.lo \
 	Services/libplank_internal_la-ApplicationUninstallService.lo \
-	Services/libplank_internal_la-AudioService.lo \
-	Services/libplank_internal_la-BluetoothService.lo \
-	Services/libplank_internal_la-BrightnessService.lo \
 	Services/libplank_internal_la-CalculatorService.lo \
 	Services/libplank_internal_la-CommandRunner.lo \
-	Services/libplank_internal_la-NetworkService.lo \
-	Services/libplank_internal_la-PowerService.lo \
 	Services/libplank_internal_la-StatusNoticeModel.lo \
 	Services/libplank_internal_la-UpdateService.lo \
 	Services/libplank_internal_la-Matcher.lo \
@@ -278,14 +273,9 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Services/$(DEPDIR)/Worker.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-Accessibility.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo \
-	Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo \
-	Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo \
-	Services/$(DEPDIR)/libplank_internal_la-BrightnessService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo \
-	Services/$(DEPDIR)/libplank_internal_la-NetworkService.Plo \
-	Services/$(DEPDIR)/libplank_internal_la-PowerService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-UpdateService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-Utils.Plo \
@@ -881,13 +871,8 @@ libplank_internal_la_VALASOURCES = \
 	InternalQuarks.vala \
 	Services/Accessibility.vala \
 	Services/ApplicationUninstallService.vala \
-	Services/AudioService.vala \
-	Services/BluetoothService.vala \
-	Services/BrightnessService.vala \
 	Services/CalculatorService.vala \
 	Services/CommandRunner.vala \
-	Services/NetworkService.vala \
-	Services/PowerService.vala \
 	Services/StatusNoticeModel.vala \
 	Services/UpdateService.vala \
 	Services/Matcher.vala \
@@ -1025,19 +1010,9 @@ Services/libplank_internal_la-Accessibility.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-ApplicationUninstallService.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
-Services/libplank_internal_la-AudioService.lo:  \
-	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
-Services/libplank_internal_la-BluetoothService.lo:  \
-	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
-Services/libplank_internal_la-BrightnessService.lo:  \
-	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-CalculatorService.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-CommandRunner.lo:  \
-	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
-Services/libplank_internal_la-NetworkService.lo:  \
-	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
-Services/libplank_internal_la-PowerService.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-StatusNoticeModel.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
@@ -1276,14 +1251,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Worker.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-Accessibility.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-BrightnessService.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-NetworkService.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-PowerService.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-UpdateService.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-Utils.Plo@am__quote@ # am--include-marker
@@ -1364,27 +1334,6 @@ Services/libplank_internal_la-ApplicationUninstallService.lo: Services/Applicati
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-ApplicationUninstallService.lo `test -f 'Services/ApplicationUninstallService.c' || echo '$(srcdir)/'`Services/ApplicationUninstallService.c
 
-Services/libplank_internal_la-AudioService.lo: Services/AudioService.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-AudioService.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-AudioService.Tpo -c -o Services/libplank_internal_la-AudioService.lo `test -f 'Services/AudioService.c' || echo '$(srcdir)/'`Services/AudioService.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-AudioService.Tpo Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/AudioService.c' object='Services/libplank_internal_la-AudioService.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-AudioService.lo `test -f 'Services/AudioService.c' || echo '$(srcdir)/'`Services/AudioService.c
-
-Services/libplank_internal_la-BluetoothService.lo: Services/BluetoothService.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-BluetoothService.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Tpo -c -o Services/libplank_internal_la-BluetoothService.lo `test -f 'Services/BluetoothService.c' || echo '$(srcdir)/'`Services/BluetoothService.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Tpo Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/BluetoothService.c' object='Services/libplank_internal_la-BluetoothService.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-BluetoothService.lo `test -f 'Services/BluetoothService.c' || echo '$(srcdir)/'`Services/BluetoothService.c
-
-Services/libplank_internal_la-BrightnessService.lo: Services/BrightnessService.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-BrightnessService.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-BrightnessService.Tpo -c -o Services/libplank_internal_la-BrightnessService.lo `test -f 'Services/BrightnessService.c' || echo '$(srcdir)/'`Services/BrightnessService.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-BrightnessService.Tpo Services/$(DEPDIR)/libplank_internal_la-BrightnessService.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/BrightnessService.c' object='Services/libplank_internal_la-BrightnessService.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-BrightnessService.lo `test -f 'Services/BrightnessService.c' || echo '$(srcdir)/'`Services/BrightnessService.c
-
 Services/libplank_internal_la-CalculatorService.lo: Services/CalculatorService.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-CalculatorService.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Tpo -c -o Services/libplank_internal_la-CalculatorService.lo `test -f 'Services/CalculatorService.c' || echo '$(srcdir)/'`Services/CalculatorService.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Tpo Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Plo
@@ -1398,20 +1347,6 @@ Services/libplank_internal_la-CommandRunner.lo: Services/CommandRunner.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/CommandRunner.c' object='Services/libplank_internal_la-CommandRunner.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-CommandRunner.lo `test -f 'Services/CommandRunner.c' || echo '$(srcdir)/'`Services/CommandRunner.c
-
-Services/libplank_internal_la-NetworkService.lo: Services/NetworkService.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-NetworkService.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-NetworkService.Tpo -c -o Services/libplank_internal_la-NetworkService.lo `test -f 'Services/NetworkService.c' || echo '$(srcdir)/'`Services/NetworkService.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-NetworkService.Tpo Services/$(DEPDIR)/libplank_internal_la-NetworkService.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/NetworkService.c' object='Services/libplank_internal_la-NetworkService.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-NetworkService.lo `test -f 'Services/NetworkService.c' || echo '$(srcdir)/'`Services/NetworkService.c
-
-Services/libplank_internal_la-PowerService.lo: Services/PowerService.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-PowerService.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-PowerService.Tpo -c -o Services/libplank_internal_la-PowerService.lo `test -f 'Services/PowerService.c' || echo '$(srcdir)/'`Services/PowerService.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-PowerService.Tpo Services/$(DEPDIR)/libplank_internal_la-PowerService.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/PowerService.c' object='Services/libplank_internal_la-PowerService.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-PowerService.lo `test -f 'Services/PowerService.c' || echo '$(srcdir)/'`Services/PowerService.c
 
 Services/libplank_internal_la-StatusNoticeModel.lo: Services/StatusNoticeModel.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-StatusNoticeModel.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Tpo -c -o Services/libplank_internal_la-StatusNoticeModel.lo `test -f 'Services/StatusNoticeModel.c' || echo '$(srcdir)/'`Services/StatusNoticeModel.c
@@ -1902,14 +1837,9 @@ distclean: distclean-am
 	-rm -f Services/$(DEPDIR)/Worker.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Accessibility.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo
-	-rm -f Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo
-	-rm -f Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo
-	-rm -f Services/$(DEPDIR)/libplank_internal_la-BrightnessService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo
-	-rm -f Services/$(DEPDIR)/libplank_internal_la-NetworkService.Plo
-	-rm -f Services/$(DEPDIR)/libplank_internal_la-PowerService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-UpdateService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Utils.Plo
@@ -2028,14 +1958,9 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Services/$(DEPDIR)/Worker.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Accessibility.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo
-	-rm -f Services/$(DEPDIR)/libplank_internal_la-AudioService.Plo
-	-rm -f Services/$(DEPDIR)/libplank_internal_la-BluetoothService.Plo
-	-rm -f Services/$(DEPDIR)/libplank_internal_la-BrightnessService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo
-	-rm -f Services/$(DEPDIR)/libplank_internal_la-NetworkService.Plo
-	-rm -f Services/$(DEPDIR)/libplank_internal_la-PowerService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-UpdateService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Utils.Plo

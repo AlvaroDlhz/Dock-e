@@ -174,13 +174,8 @@ libplank_internal_la_VALASOURCES = \
 	InternalQuarks.vala \
 	Services/Accessibility.vala \
 	Services/ApplicationUninstallService.vala \
-	Services/AudioService.vala \
-	Services/BluetoothService.vala \
-	Services/BrightnessService.vala \
 	Services/CalculatorService.vala \
 	Services/CommandRunner.vala \
-	Services/NetworkService.vala \
-	Services/PowerService.vala \
 	Services/StatusNoticeModel.vala \
 	Services/UpdateService.vala \
 	Services/Matcher.vala \

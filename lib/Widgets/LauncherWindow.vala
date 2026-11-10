@@ -9,6 +9,10 @@ namespace Plank
 		const int PANEL_WIDTH = 580;
 		const int PANEL_HEIGHT = 580;
 		const int ANIMATION_TIME = 140;
+		// Opening has to feel immediate, so it fades in faster than it fades out
+		const int OPEN_ANIMATION_TIME = 70;
+		// Installing a package touches several desktop files in a row
+		const uint REINDEX_DELAY = 750;
 
 		unowned DockController controller;
 		Gtk.Entry search_entry;
@@ -24,6 +28,14 @@ namespace Plank
 		Gee.ArrayList<AppInfo> applications;
 		Gee.ArrayList<AppInfo> visible_results;
 		Gee.ArrayList<string> visible_commands;
+		// Rows are expensive to build, so each application keeps its own
+		Gee.HashMap<AppInfo, Gtk.ListBoxRow> application_rows;
+		AppInfoMonitor application_monitor;
+		uint reindex_timer_id = 0U;
+		uint prepare_catalog_id = 0U;
+		// Whether the list currently shows the complete, unfiltered catalog
+		bool catalog_ready = false;
+		string applied_css = "";
 		bool showing_commands = false;
 		bool showing_calculation = false;
 		string calculation_result = "";
@@ -47,10 +59,13 @@ namespace Plank
 			hide.connect (() => {
 				if (anchor_item != null)
 					anchor_item.set_menu_active (false);
+				// Leave the catalog ready so the next opening has nothing to build
+				schedule_prepare_catalog ();
 			});
 			applications = new Gee.ArrayList<AppInfo> ();
 			visible_results = new Gee.ArrayList<AppInfo> ();
 			visible_commands = new Gee.ArrayList<string> ();
+			application_rows = new Gee.HashMap<AppInfo, Gtk.ListBoxRow> ();
 			uninstall_service = new ApplicationUninstallService ();
 			uninstall_command_cache = new Gee.HashMap<string, string> ();
 			uninstall_detection_pending = new Gee.HashSet<string> ();
@@ -200,6 +215,11 @@ namespace Plank
 			});
 			index_applications ();
 			sync_notice ();
+			panel.show_all ();
+
+			application_monitor = AppInfoMonitor.get ();
+			application_monitor.changed.connect (schedule_reindex);
+			schedule_prepare_catalog ();
 		}
 
 		~LauncherWindow ()
@@ -210,6 +230,11 @@ namespace Plank
 				SignalHandler.disconnect (notice_model, notice_changed_id);
 			if (animation_timer_id > 0U)
 				Source.remove (animation_timer_id);
+			if (reindex_timer_id > 0U)
+				Source.remove (reindex_timer_id);
+			if (prepare_catalog_id > 0U)
+				Source.remove (prepare_catalog_id);
+			application_monitor.changed.disconnect (schedule_reindex);
 			if (theme_provider != null)
 				Gtk.StyleContext.remove_provider_for_screen (get_screen (), theme_provider);
 		}
@@ -414,9 +439,54 @@ namespace Plank
 			notice_revealer.reveal_child = notice_model.visible;
 		}
 
+		void schedule_reindex ()
+		{
+			if (reindex_timer_id > 0U)
+				Source.remove (reindex_timer_id);
+			reindex_timer_id = Timeout.add (REINDEX_DELAY, () => {
+				reindex_timer_id = 0U;
+				index_applications ();
+				// Do not swap the list under the user; it is rebuilt once hidden
+				if (!visible)
+					schedule_prepare_catalog ();
+				return false;
+			});
+		}
+
+		void schedule_prepare_catalog ()
+		{
+			if (prepare_catalog_id > 0U)
+				return;
+			prepare_catalog_id = Idle.add_full (Priority.LOW, () => {
+				prepare_catalog_id = 0U;
+				if (!visible)
+					prepare_catalog ();
+				return false;
+			});
+		}
+
+		/**
+		 * Makes sure the list shows the complete catalog, scrolled to its top.
+		 * This is a no-op if it already does.
+		 */
+		void prepare_catalog ()
+		{
+			apply_theme ();
+			if (search_entry.text != "")
+				search_entry.text = "";
+			if (!catalog_ready)
+				refresh_results ();
+			var first_row = result_list.get_row_at_index (0);
+			if (first_row != null && first_row.selectable)
+				result_list.select_row (first_row);
+			result_scroll.get_vadjustment ().value = 0.0;
+		}
+
 		void index_applications ()
 		{
 			applications.clear ();
+			application_rows.clear ();
+			catalog_ready = false;
 			var seen = new Gee.HashSet<string> ();
 			foreach (unowned AppInfo app in AppInfo.get_all ()) {
 				var id = app.get_id () ?? app.get_name ();
@@ -510,12 +580,9 @@ namespace Plank
 				anchor_item.set_menu_active (false);
 			anchor_item = item;
 			anchor_item.set_menu_active (true);
-			index_applications ();
-			search_entry.text = "";
-			refresh_results ();
-			apply_theme ();
+			prepare_catalog ();
 			opacity = 0.0;
-			show_all ();
+			show ();
 			controller.renderer.animated_draw ();
 			present ();
 			search_entry.grab_focus ();
@@ -524,7 +591,7 @@ namespace Plank
 				int slide_x, slide_y;
 				controller.position_manager.get_popup_slide_offset (8, out slide_x, out slide_y);
 				move (panel_x + slide_x, panel_y + slide_y);
-				animate_to (1.0, false);
+				animate_to (1.0, false, OPEN_ANIMATION_TIME);
 				return false;
 			});
 		}
@@ -540,6 +607,7 @@ namespace Plank
 			calculation_status_label = null;
 
 			var query = search_entry.text.strip ().down ();
+			catalog_ready = query == "";
 			showing_commands = query.has_prefix ("/");
 			if (showing_commands) {
 				var command_query = query.substring (1).strip ();
@@ -575,7 +643,12 @@ namespace Plank
 
 			foreach (var app in matches) {
 				visible_results.add (app);
-				result_list.add (create_result_row (app));
+				Gtk.ListBoxRow? row = application_rows[app];
+				if (row == null) {
+					row = create_result_row (app);
+					application_rows[app] = row;
+				}
+				result_list.add (row);
 			}
 			if (visible_results.size == 0) {
 				result_list.add (create_empty_row (_("No matching applications")));
@@ -627,17 +700,6 @@ namespace Plank
 		void finish_refresh_results ()
 		{
 			result_list.show_all ();
-			Timeout.add (250, () => {
-				var probe = result_list.get_row_at_index (0);
-				var header = probe == null ? null : probe.get_header ();
-				if (header != null)
-					debug ("Launcher header alloc: %dx%d visible=%s mapped=%s",
-						header.get_allocated_width (), header.get_allocated_height (),
-						header.get_visible ().to_string (), header.get_mapped ().to_string ());
-				else
-					debug ("Launcher header alloc: no header on first row");
-				return false;
-			});
 			var first_row = result_list.get_row_at_index (0);
 			if (first_row != null && first_row.selectable)
 				result_list.select_row (first_row);
@@ -853,11 +915,11 @@ namespace Plank
 				return;
 			}
 			if (uninstall_detection_pending.contains (key)) {
-				set_command_status (status, _("Detectando…"), false);
+				set_command_status (status, _("Detecting…"), false);
 				return;
 			}
 			uninstall_detection_pending.add (key);
-			set_command_status (status, _("Detectando…"), false);
+			set_command_status (status, _("Detecting…"), false);
 			var desktop = (app as DesktopAppInfo)?.get_filename ();
 			uninstall_service.detect.begin (app.get_id () ?? "", app.get_executable () ?? "",
 				desktop, null, (obj, result) => {
@@ -869,7 +931,7 @@ namespace Plank
 						debug ("Unable to detect uninstall command: %s", e.message);
 					}
 					if (target == null) {
-						set_command_status (status, _("No disponible"), true);
+						set_command_status (status, _("Unavailable"), true);
 						return;
 					}
 					var command = build_uninstall_command (target);
@@ -885,7 +947,7 @@ namespace Plank
 			var clipboard = Gtk.Clipboard.get (Gdk.SELECTION_CLIPBOARD);
 			clipboard.set_text (command, -1);
 			clipboard.store ();
-			set_command_status (status, _("Copiado"), true);
+			set_command_status (status, _("Copied"), true);
 		}
 
 		void set_command_status (Gtk.Label status, string text, bool auto_hide)
@@ -1410,6 +1472,10 @@ namespace Plank
 			css += ".launcher-app-context .app-context-action:hover { background-color: rgba(%s,0.12); }".printf (foreground);
 			css += ".launcher-app-context.keyboard-navigation .app-context-action:focus { box-shadow: inset 0 0 0 2px #73d216; }";
 			css += ".launcher-app-context .destructive-action { color: %s; }".printf (destructive_color);
+			// Swapping the provider restyles every widget, only do it for real changes
+			if (css == applied_css)
+				return;
+			applied_css = css;
 			if (theme_provider != null)
 				Gtk.StyleContext.remove_provider_for_screen (get_screen (), theme_provider);
 			theme_provider = new Gtk.CssProvider ();
@@ -1438,7 +1504,7 @@ namespace Plank
 			animate_to (0.0, true);
 		}
 
-		void animate_to (double target, bool hide_when_done)
+		void animate_to (double target, bool hide_when_done, int duration = ANIMATION_TIME)
 		{
 			if (animation_timer_id > 0U)
 				Source.remove (animation_timer_id);
@@ -1452,7 +1518,7 @@ namespace Plank
 			var end_y = panel_y + slide_y;
 			var started = GLib.get_monotonic_time ();
 			animation_timer_id = Timeout.add (16, () => {
-				var progress = double.min (1.0, (GLib.get_monotonic_time () - started) / (ANIMATION_TIME * 1000.0));
+				var progress = double.min (1.0, (GLib.get_monotonic_time () - started) / (duration * 1000.0));
 				var eased = 1.0 - Math.pow (1.0 - progress, 3.0);
 				opacity = start + (target - start) * eased;
 				move ((int) Math.round (start_x + (end_x - start_x) * eased),
