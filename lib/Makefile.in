@@ -200,7 +200,8 @@ am__objects_5 = DBusManager.lo DockController.lo DockPreferences.lo \
 	Services/Settings.lo Services/System.lo \
 	Services/SuperKeyBinding.lo Services/Unity.lo \
 	Services/Worker.lo Widgets/CompositedWindow.lo \
-	Widgets/DockWindow.lo Widgets/WindowPreviewWindow.lo \
+	Widgets/ContextMenuStyle.lo Widgets/DockWindow.lo \
+	Widgets/WindowPreviewWindow.lo \
 	Widgets/WorkspacePreviewWindow.lo Widgets/HoverWindow.lo \
 	Widgets/LauncherWindow.lo Widgets/PoofWindow.lo \
 	Widgets/PreferencesWindow.lo \
@@ -279,6 +280,7 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-Utils.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo \
 	Widgets/$(DEPDIR)/CompositedWindow.Plo \
+	Widgets/$(DEPDIR)/ContextMenuStyle.Plo \
 	Widgets/$(DEPDIR)/DockWindow.Plo \
 	Widgets/$(DEPDIR)/HoverWindow.Plo \
 	Widgets/$(DEPDIR)/LauncherWindow.Plo \
@@ -827,6 +829,7 @@ libplank_la_VALASOURCES = \
 	Services/Unity.vala \
 	Services/Worker.vala \
 	Widgets/CompositedWindow.vala \
+	Widgets/ContextMenuStyle.vala \
 	Widgets/DockWindow.vala \
 	Widgets/WindowPreviewWindow.vala \
 	Widgets/WorkspacePreviewWindow.vala \
@@ -1151,6 +1154,8 @@ Services/Worker.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
 Widgets/CompositedWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
+Widgets/ContextMenuStyle.lo: Widgets/$(am__dirstamp) \
+	Widgets/$(DEPDIR)/$(am__dirstamp)
 Widgets/DockWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
 Widgets/WindowPreviewWindow.lo: Widgets/$(am__dirstamp) \
@@ -1257,6 +1262,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-Utils.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/CompositedWindow.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/ContextMenuStyle.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/DockWindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/HoverWindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/LauncherWindow.Plo@am__quote@ # am--include-marker
@@ -1843,6 +1849,7 @@ distclean: distclean-am
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Utils.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo
 	-rm -f Widgets/$(DEPDIR)/CompositedWindow.Plo
+	-rm -f Widgets/$(DEPDIR)/ContextMenuStyle.Plo
 	-rm -f Widgets/$(DEPDIR)/DockWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/HoverWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/LauncherWindow.Plo
@@ -1964,6 +1971,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Utils.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo
 	-rm -f Widgets/$(DEPDIR)/CompositedWindow.Plo
+	-rm -f Widgets/$(DEPDIR)/ContextMenuStyle.Plo
 	-rm -f Widgets/$(DEPDIR)/DockWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/HoverWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/LauncherWindow.Plo

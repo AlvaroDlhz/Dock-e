@@ -713,9 +713,11 @@ namespace Plank
 						return usage_scores[a] > usage_scores[b] ? -1 : 1;
 					return a.get_display_name ().collate (b.get_display_name ());
 				});
-				foreach (var app in frequent) {
-					if (frequent_count >= FREQUENT_ROWS)
-						break;
+				// The list asks for the header of a row as soon as it is added,
+				// so how many of them are frequent has to be known before that
+				frequent_count = int.min (FREQUENT_ROWS, frequent.size);
+				for (var i = 0; i < frequent_count; i++) {
+					var app = frequent[i];
 					Gtk.ListBoxRow? row = frequent_rows[app];
 					if (row == null) {
 						row = create_result_row (app);
@@ -723,7 +725,6 @@ namespace Plank
 					}
 					visible_results.add (app);
 					result_list.add (row);
-					frequent_count++;
 				}
 
 				foreach (var app in applications) {
@@ -911,6 +912,8 @@ namespace Plank
 
 		void finish_refresh_results ()
 		{
+			// Headers depend on the whole list, which is only complete now
+			result_list.invalidate_headers ();
 			result_list.show_all ();
 			var first_row = result_list.get_row_at_index (0);
 			if (first_row != null && first_row.selectable)
@@ -1157,8 +1160,8 @@ namespace Plank
 			context.get_style_context ().add_class ("launcher-app-context");
 			Accessibility.set_keyboard_navigation (context, true);
 
-			var card = new Gtk.Box (Gtk.Orientation.VERTICAL, 4);
-			card.margin = 8;
+			var card = new Gtk.Box (Gtk.Orientation.VERTICAL, 2);
+			card.margin = ContextMenuStyle.PADDING + 1;
 			context.add (card);
 			var header = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
 			header.get_style_context ().add_class ("app-context-header");
@@ -1199,21 +1202,28 @@ namespace Plank
 			var launch_command = build_launch_command (app);
 			var restart_command = build_restart_command (app);
 			var kill_command = build_kill_command (app);
-			var copy_launch = context_action_button (_("Copy launch command"),
-				"edit-copy-symbolic", () => copy_command (launch_command, command_status));
+			// One row copies any of the commands, instead of a row for each
+			var copy_caption = new Gtk.Label (_("Copy command")) { xalign = 0.0f };
+			copy_caption.get_style_context ().add_class ("app-context-caption");
+			card.pack_start (copy_caption, false, false, 0);
+			var copy_row = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 4);
+			copy_row.homogeneous = true;
+			copy_row.get_style_context ().add_class ("app-context-chips");
+			var copy_launch = context_chip_button (_("Open"), _("Copy launch command"),
+				() => copy_command (launch_command, command_status));
 			copy_launch.sensitive = launch_command != "";
-			card.pack_start (copy_launch, false, false, 0);
-			var copy_restart = context_action_button (_("Copy restart command"),
-				"edit-copy-symbolic", () => copy_command (restart_command, command_status));
+			copy_row.pack_start (copy_launch, true, true, 0);
+			var copy_restart = context_chip_button (_("Restart"), _("Copy restart command"),
+				() => copy_command (restart_command, command_status));
 			copy_restart.sensitive = restart_command != "";
-			card.pack_start (copy_restart, false, false, 0);
-			var copy_kill = context_action_button (_("Copy terminate command"),
-				"edit-copy-symbolic", () => copy_command (kill_command, command_status));
+			copy_row.pack_start (copy_restart, true, true, 0);
+			var copy_kill = context_chip_button (_("Terminate"), _("Copy terminate command"),
+				() => copy_command (kill_command, command_status));
 			copy_kill.sensitive = kill_command != "";
-			card.pack_start (copy_kill, false, false, 0);
-			card.pack_start (context_action_button (_("Copy uninstall command"),
-				"edit-copy-symbolic", () => copy_uninstall_command (app, command_status)),
-				false, false, 0);
+			copy_row.pack_start (copy_kill, true, true, 0);
+			copy_row.pack_start (context_chip_button (_("Uninstall"), _("Copy uninstall command"),
+				() => copy_uninstall_command (app, command_status)), true, true, 0);
+			card.pack_start (copy_row, false, false, 0);
 			card.pack_start (command_status, false, false, 0);
 			card.pack_start (new Gtk.Separator (Gtk.Orientation.HORIZONTAL), false, false, 2);
 
@@ -1252,10 +1262,36 @@ namespace Plank
 				}
 				return false;
 			});
+			// Grows out of the place which was clicked, like the launcher does out of its button
+			var context_transition = new WindowTransition (context);
+			context.set_data<WindowTransition> ("launcher-context-transition", context_transition);
+			unowned WindowTransition appearing = context_transition;
+			context.draw.connect ((cr) => {
+				if (appearing.progress != 1.0 && Motion.movement_enabled (controller.prefs)) {
+					int context_x, context_y;
+					context.get_position (out context_x, out context_y);
+					var origin_x = (root_x - context_x).clamp (0.0, context.get_allocated_width ());
+					var origin_y = (root_y - context_y).clamp (0.0, context.get_allocated_height ());
+					var scale = Motion.POPUP_SCALE + (1.0 - Motion.POPUP_SCALE) * appearing.progress;
+					cr.translate (origin_x, origin_y);
+					cr.scale (scale, scale);
+					cr.translate (-origin_x, -origin_y);
+				}
+				// A window which paints itself gets no background from GTK
+				unowned Gtk.StyleContext style = context.get_style_context ();
+				var width = context.get_allocated_width ();
+				var height = context.get_allocated_height ();
+				style.render_background (cr, 0, 0, width, height);
+				style.render_frame (cr, 0, 0, width, height);
+				return false;
+			});
+			context_transition.jump_to (0.0);
 			context.show_all ();
 			context.present ();
 			Idle.add (() => {
 				position_application_context (context, root_x, root_y);
+				appearing.animate_to (1.0,
+					Motion.duration (controller.prefs, Motion.POPUP_OPEN_TIME), false, true);
 				return false;
 			});
 
@@ -1295,6 +1331,16 @@ namespace Plank
 		}
 
 		delegate void ContextAction ();
+
+		Gtk.Button context_chip_button (string label, string description, owned ContextAction action)
+		{
+			var button = new Gtk.Button.with_label (label);
+			button.get_style_context ().add_class ("app-context-chip");
+			button.tooltip_text = description;
+			Accessibility.describe (button, description);
+			button.clicked.connect (() => { action (); });
+			return button;
+		}
 
 		Gtk.Button context_action_button (string label, string icon, owned ContextAction action)
 		{
@@ -1659,15 +1705,30 @@ namespace Plank
 			css += ".plank-native-launcher .launcher-enter { color: rgba(%s,0.62); font-size: 16px; }".printf (muted_foreground);
 			css += ".plank-native-launcher row:selected .launcher-enter { color: rgba(%s,0.90); }".printf (foreground);
 			css += ".plank-native-launcher .launcher-empty { color: rgba(%s,0.78); }".printf (muted_foreground);
-			css += ".launcher-app-context { background-color: rgba(%d,%d,%d,%s); color: rgb(%s); border: 1px solid rgba(%s,0.18); border-radius: 11px; padding: 5px; }"
-				.printf (red, green, blue, opacity_css, foreground, foreground);
-			css += ".launcher-app-context .app-context-header { color: rgb(%s); padding: 7px; min-width: 250px; }".printf (foreground);
+			// The same measures as the menus of the dock, see ContextMenuStyle
+			css += ".launcher-app-context { background-color: rgba(%d,%d,%d,%s); color: rgb(%s); border: 1px solid rgba(%s,0.16); border-radius: %dpx; padding: %dpx; }"
+				.printf (red, green, blue, opacity_css, foreground, foreground,
+					ContextMenuStyle.RADIUS, ContextMenuStyle.PADDING);
+			css += ".launcher-app-context .app-context-header { color: rgb(%s); padding: 7px 8px 8px 8px; min-width: 260px; border-radius: %dpx; background-color: rgba(%s,0.06); }"
+				.printf (foreground, ContextMenuStyle.ROW_RADIUS, foreground);
 			css += ".launcher-app-context .app-context-title { font-weight: bold; font-size: 14px; }";
-			css += ".launcher-app-context .dim-label { color: rgba(%s,0.78); }".printf (muted_foreground);
-			css += ".launcher-app-context .app-context-action { color: rgb(%s); background: transparent; background-image: none; border: none; border-radius: 8px; box-shadow: none; padding: 7px 9px; }".printf (foreground);
-			css += ".launcher-app-context .app-context-action:hover { background-color: rgba(%s,0.12); }".printf (foreground);
-			css += ".launcher-app-context.keyboard-navigation .app-context-action:focus { box-shadow: inset 0 0 0 2px #73d216; }";
-			css += ".launcher-app-context .destructive-action { color: %s; }".printf (destructive_color);
+			css += ".launcher-app-context .dim-label { color: rgba(%s,0.60); font-size: 11px; }".printf (foreground);
+			css += ".launcher-app-context separator { min-height: 1px; margin: 3px 9px; background-color: rgba(%s,0.10); }".printf (foreground);
+			css += ".launcher-app-context .app-context-action { color: rgba(%s,0.92); background: transparent; background-image: none; border: none; border-radius: %dpx; box-shadow: none; padding: 7px 10px; transition: background-color 120ms ease; }"
+				.printf (foreground, ContextMenuStyle.ROW_RADIUS);
+			css += ".launcher-app-context .app-context-action image { color: rgba(%s,0.80); }".printf (foreground);
+			css += ".launcher-app-context .app-context-action:hover { color: rgb(%s); background-color: rgba(%s,0.11); }".printf (foreground, foreground);
+			css += ".launcher-app-context .app-context-action:disabled { color: rgba(%s,0.40); }".printf (foreground);
+			css += ".launcher-app-context .app-context-caption { color: rgba(%s,0.60); font-size: 11px; margin: 4px 10px 2px 10px; }".printf (foreground);
+			css += ".launcher-app-context .app-context-chips { margin: 0 6px 4px 6px; }";
+			css += ".launcher-app-context .app-context-chip { color: rgba(%s,0.92); background-color: rgba(%s,0.07); background-image: none; border: none; border-radius: %dpx; box-shadow: none; padding: 5px 4px; font-size: 12px; min-height: 0; min-width: 0; transition: background-color 120ms ease; }"
+				.printf (foreground, foreground, ContextMenuStyle.ROW_RADIUS);
+			css += ".launcher-app-context .app-context-chip:hover { color: rgb(%s); background-color: rgba(%s,0.16); }".printf (foreground, foreground);
+			css += ".launcher-app-context .app-context-chip:disabled { color: rgba(%s,0.35); background-color: rgba(%s,0.04); }".printf (foreground, foreground);
+			css += ".launcher-app-context.keyboard-navigation .app-context-action:focus, .launcher-app-context.keyboard-navigation .app-context-chip:focus { box-shadow: inset 0 0 0 2px #73d216; }";
+			css += ".launcher-app-context .destructive-action, .launcher-app-context .destructive-action image { color: %s; }".printf (destructive_color);
+			css += ".launcher-app-context .destructive-action:hover, .launcher-app-context .destructive-action:hover image { color: white; }";
+			css += ".launcher-app-context .destructive-action:hover { background-color: rgba(220,65,65,0.55); }";
 			// Swapping the provider restyles every widget, only do it for real changes
 			if (css == applied_css)
 				return;

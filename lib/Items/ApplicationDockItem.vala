@@ -178,6 +178,22 @@ namespace Plank
 			update_indicator ();
 		}
 		
+		/**
+		 * The number of windows the application has open.
+		 */
+		internal int get_window_count ()
+		{
+			if (App == null)
+				return 0;
+			var count = 0;
+			foreach (unowned Bamf.View view in App.get_windows ()) {
+				unowned Bamf.Window? window = (view as Bamf.Window);
+				if (window != null && window.get_transient () == null)
+					count++;
+			}
+			return count;
+		}
+		
 		public bool is_running ()
 		{
 			return (App != null && App.is_running ());
@@ -416,12 +432,6 @@ namespace Plank
 			}
 			
 			var event_time = Gtk.get_current_event_time ();
-			if (is_running () && window_count > 0) {
-				var item = create_menu_item ((window_count > 1 ? _("_Close All") : _("_Close")), "window-close-symbolic;;window-close");
-				item.get_style_context ().add_class ("destructive-action");
-				item.activate.connect (() => WindowControl.close_all (App, event_time));
-				items.add (item);
-			}
 			
 #if HAVE_DBUSMENU
 			if (Quicklist != null) {
@@ -482,6 +492,17 @@ namespace Plank
 					
 					items.add (window_item);
 				}
+			}
+			
+			// What cannot be undone comes last, apart from everything else
+			if (is_running () && window_count > 0) {
+				if (items.size > 0)
+					items.add (new Gtk.SeparatorMenuItem ());
+				
+				var item = create_menu_item ((window_count > 1 ? _("_Close All") : _("_Close")), "window-close-symbolic;;window-close");
+				item.get_style_context ().add_class ("destructive-action");
+				item.activate.connect (() => WindowControl.close_all (App, event_time));
+				items.add (item);
 			}
 			
 			return items;

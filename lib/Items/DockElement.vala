@@ -310,6 +310,10 @@ namespace Plank
 			if (icon == null || icon == "")
 				return new Gtk.MenuItem.with_mnemonic (title);
 			
+			var symbolic = find_symbolic_icon (icon);
+			if (symbolic != null)
+				return create_symbolic_menu_item (title, symbolic, true);
+			
 			int width, height;
 			Gtk.icon_size_lookup (Gtk.IconSize.MENU, out width, out height);
 			
@@ -348,6 +352,10 @@ namespace Plank
 			if (icon == null || icon == "")
 				return new Gtk.MenuItem.with_label (title);
 			
+			var symbolic = find_symbolic_icon (icon);
+			if (symbolic != null)
+				return create_symbolic_menu_item (title, symbolic, false);
+			
 			int width, height;
 			Gtk.icon_size_lookup (Gtk.IconSize.MENU, out width, out height);
 			
@@ -371,6 +379,31 @@ namespace Plank
 				pixbuf = DrawingService.ar_scale (pixbuf, width, height);
 			
 			return create_menu_item_iternal (title, pixbuf, force_show_icon, false);
+		}
+		
+		/**
+		 * The first symbolic icon among the given names (separated by ";;")
+		 * which the icon theme has.
+		 */
+		static string? find_symbolic_icon (string names)
+		{
+			unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_default ();
+			foreach (unowned string name in names.split (";;"))
+				if (name.has_suffix ("-symbolic") && icon_theme.has_icon (name))
+					return name;
+			return null;
+		}
+		
+		/**
+		 * A menu item whose icon takes the color of its text, which keeps
+		 * it visible whatever the color of the menu is.
+		 */
+		static Gtk.MenuItem create_symbolic_menu_item (string title, string icon, bool mnemonics)
+		{
+			var item = (mnemonics ? new Gtk.ImageMenuItem.with_mnemonic (title) : new Gtk.ImageMenuItem.with_label (title));
+			item.set_image (new Gtk.Image.from_icon_name (icon, Gtk.IconSize.MENU));
+			item.always_show_image = true;
+			return item;
 		}
 		
 		static Gtk.MenuItem create_menu_item_iternal (string title, owned Gdk.Pixbuf pixbuf, bool force_show_icon, bool mnemonics)

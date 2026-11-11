@@ -110,6 +110,7 @@ libplank_la_VALASOURCES = \
 	Services/Unity.vala \
 	Services/Worker.vala \
 	Widgets/CompositedWindow.vala \
+	Widgets/ContextMenuStyle.vala \
 	Widgets/DockWindow.vala \
 	Widgets/WindowPreviewWindow.vala \
 	Widgets/WorkspacePreviewWindow.vala \

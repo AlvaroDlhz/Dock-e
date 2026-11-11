@@ -1261,6 +1261,7 @@ namespace Plank
 				return false;
 			disconnect_context_menu_loader ();
 			menu.show_all ();
+			ContextMenuStyle.prepare (menu, controller);
 			menu.popup (null, null, (Gtk.MenuPositionFunc) position_context_menu,
 				context_menu_button, context_menu_time);
 			return true;

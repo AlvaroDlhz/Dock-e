@@ -161,6 +161,9 @@ namespace Plank
 
 		uint tick_id = 0U;
 		ulong hide_handler_id = 0UL;
+		ulong destroy_handler_id = 0UL;
+		// The window may be gone before this is, e.g. the one of a menu
+		bool window_alive = true;
 		double from = 0.0;
 		double to = 0.0;
 		int64 start_time = 0LL;
@@ -176,13 +179,22 @@ namespace Plank
 		construct
 		{
 			hide_handler_id = window.hide.connect (stop);
+			destroy_handler_id = window.destroy.connect (on_window_destroyed);
+		}
+
+		void on_window_destroyed ()
+		{
+			stop ();
+			window_alive = false;
 		}
 
 		~WindowTransition ()
 		{
+			if (!window_alive)
+				return;
 			stop ();
-			if (hide_handler_id > 0UL)
-				window.disconnect (hide_handler_id);
+			window.disconnect (hide_handler_id);
+			window.disconnect (destroy_handler_id);
 		}
 
 		/**
@@ -190,10 +202,9 @@ namespace Plank
 		 */
 		public void stop ()
 		{
-			if (tick_id > 0U) {
+			if (tick_id > 0U && window_alive)
 				window.remove_tick_callback (tick_id);
-				tick_id = 0U;
-			}
+			tick_id = 0U;
 		}
 
 		/**
@@ -217,6 +228,8 @@ namespace Plank
 			bool springy = false)
 		{
 			stop ();
+			if (!window_alive)
+				return;
 
 			if (duration <= 0LL || !Motion.animations_enabled () || !window.visible) {
 				apply (target);
@@ -261,6 +274,8 @@ namespace Plank
 		void apply (double value)
 		{
 			progress = value;
+			if (!window_alive)
+				return;
 			window.opacity = value.clamp (0.0, 1.0);
 			window.queue_draw ();
 		}
