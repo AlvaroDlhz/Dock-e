@@ -37,6 +37,7 @@ namespace Plank
 		Gtk.Box box;
 		Gtk.Label label;
 		Gtk.PositionType dock_position;
+		WindowTransition transition;
 		
 		// Shared by all hover windows, so it is only registered once
 		static Gtk.CssProvider? css_provider = null;
@@ -51,6 +52,7 @@ namespace Plank
 			app_paintable = true;
 			resizable = false;
 			opacity = 1.0;
+			transition = new WindowTransition (this);
 			
 			unowned Gdk.Screen screen = get_screen ();
 			set_visual (screen.get_rgba_visual () ?? screen.get_system_visual ());
@@ -112,6 +114,10 @@ namespace Plank
 			// realize and show the window early to have current allocation-dimensions
 			// this is also needed for being able to move override-redirect windows
 			// on mutter-derived window-managers
+			var was_visible = visible;
+			// Stays invisible until it is in place, so it never flashes at the previous item
+			if (!was_visible)
+				transition.jump_to (0.0);
 			show ();
 			
 			var width = get_allocated_width ();
@@ -140,6 +146,10 @@ namespace Plank
 			y = y.clamp (monitor.y, monitor.y + monitor.height - height);
 			
 			move (x, y);
+			
+			// Every item gets its label fading in at its own place
+			if (!was_visible)
+				transition.animate_to (1.0, Motion.LABEL_OPEN_TIME * 1000);
 		}
 		
 		/**

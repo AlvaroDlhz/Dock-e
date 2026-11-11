@@ -129,12 +129,12 @@ namespace Plank
 			ActiveTime = 300;
 			SlideTime = 300;
 			FadeTime = 250;
-			HideTime = 35;
+			HideTime = 120;
 			GlowSize = 30;
 			GlowTime = 10000;
 			GlowPulseTime = 2000;
 			UrgentHueShift = 150;
-			ItemMoveTime = 450;
+			ItemMoveTime = 230;
 			CascadeHide = true;
 			BadgeColor = { 0.0, 0.0, 0.0, 0.0 };
 		}
@@ -294,7 +294,7 @@ namespace Plank
 		 * @param pos the dock's position
 		 * @param multiple whether the item has multiple windows open
 		 */
-		public void draw_active_glow (Surface surface, Gdk.Rectangle clip_rect, Gdk.Rectangle rect, Color color, double opacity, Gtk.PositionType pos, bool multiple = false)
+		public void draw_active_glow (Surface surface, Gdk.Rectangle clip_rect, Gdk.Rectangle rect, Color color, double opacity, Gtk.PositionType pos, bool multiple = false, double extent = 1.0)
 		{
 			if (opacity <= 0.0 || rect.width <= 0 || rect.height <= 0)
 				return;
@@ -343,7 +343,7 @@ namespace Plank
 			cr.set_line_width (LineWidth);
 			cr.clip ();
 
-			var indicator_width = rect.width * 0.42;
+			var indicator_width = rect.width * 0.42 * extent.clamp (0.0, 1.0);
 			var indicator_height = double.max (2.0, rect.height * 0.04);
 			var indicator_radius = indicator_height / 2.0;
 			var indicator_y = rect.y + rect.height + 2.0;

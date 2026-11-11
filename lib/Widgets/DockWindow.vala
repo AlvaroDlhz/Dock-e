@@ -25,7 +25,10 @@ namespace Plank
 	public class DockWindow : CompositedWindow
 	{
 		const uint LONG_PRESS_TIME = 750U;
-		const uint HOVER_DELAY_TIME = 200U;
+		// How long the pointer has to rest on an item before its label shows up
+		const uint HOVER_DELAY_TIME = 60U;
+		// Moving on from an item that already shows its label is faster still
+		const uint HOVER_SWITCH_DELAY_TIME = 20U;
 		
 		/**
 		 * The controller for this dock.
@@ -47,7 +50,7 @@ namespace Plank
 		/**
 		 * The item which "received" the button-pressed signal (if any).
 		 */
-		unowned DockItem? ClickedItem { get; private set; }
+		internal unowned DockItem? ClickedItem { get; private set; }
 		
 		/**
 		 * The popup menu for this dock.
@@ -143,6 +146,8 @@ namespace Plank
 				controller.background_apps.dismiss ();
 			
 			ClickedItem = HoveredItem;
+			// Shows the item giving way under the pointer
+			controller.renderer.animated_draw ();
 			controller.launcher.dismiss_application_context ();
 
 			// A click anywhere else on the dock dismisses the native launcher,
@@ -151,19 +156,6 @@ namespace Plank
 				controller.launcher.dismiss ();
 			if (controller.workspace_previews.visible && !(HoveredItem is WorkspaceItem))
 				controller.workspace_previews.dismiss ();
-
-			// Fixed controls can be repositioned independently of the central dock
-			// items.  Activate the update manager on press so a layout/hover refresh
-			// between press and release cannot discard the click.
-			if (HoveredItem is UpdateManagerItem && event.button == 1U) {
-				var update_item = (UpdateManagerItem) HoveredItem;
-				ClickedItem = null;
-				Idle.add (() => {
-					update_item.launch ();
-					return false;
-				});
-				return Gdk.EVENT_STOP;
-			}
 
 			// Workspace controls are repositioned with the other fixed left-side
 			// items. Activate on press so a layout/hover refresh before release
@@ -231,6 +223,7 @@ namespace Plank
 			}
 			
 			ClickedItem = null;
+			controller.renderer.animated_draw ();
 			
 			return Gdk.EVENT_PROPAGATE;
 		}
@@ -410,6 +403,7 @@ namespace Plank
 			if (controller.drag_manager.ExternalDragActive)
 				return;
 			
+			var label_was_shown = controller.hover.visible;
 			controller.hover.hide ();
 			
 			if (HoveredItem == null
@@ -420,7 +414,8 @@ namespace Plank
 				return;
 			
 			// don't be that demanding this delay is still fast enough
-			hover_reposition_timer_id = Gdk.threads_add_timeout (HOVER_DELAY_TIME, () => {
+			var delay = (label_was_shown ? HOVER_SWITCH_DELAY_TIME : HOVER_DELAY_TIME);
+			hover_reposition_timer_id = Gdk.threads_add_timeout (delay, () => {
 				if (HoveredItem == null) {
 					hover_reposition_timer_id = 0U;
 					return false;

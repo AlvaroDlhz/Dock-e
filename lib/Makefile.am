@@ -74,6 +74,7 @@ libplank_la_VALASOURCES = \
 	Drawing/DrawingService.vala \
 	Drawing/DockTheme.vala \
 	Drawing/Easing.vala \
+	Drawing/Motion.vala \
 	Drawing/Renderer.vala \
 	Drawing/Surface.vala \
 	Drawing/SurfaceCache.vala \
@@ -94,7 +95,6 @@ libplank_la_VALASOURCES = \
 	Items/FileDockItem.vala \
 	Items/PlaceholderDockItem.vala \
 	Items/PlankDockItem.vala \
-	Items/UpdateManagerItem.vala \
 	Items/TrayToggleItem.vala \
 	Items/TransientDockItem.vala \
 	Items/WorkspaceItem.vala \
@@ -175,9 +175,9 @@ libplank_internal_la_VALASOURCES = \
 	Services/Accessibility.vala \
 	Services/ApplicationUninstallService.vala \
 	Services/CalculatorService.vala \
+	Services/LauncherSearch.vala \
 	Services/CommandRunner.vala \
 	Services/StatusNoticeModel.vala \
-	Services/UpdateService.vala \
 	Services/Matcher.vala \
 	Services/WindowControl.vala \
 	Services/Utils.vala \

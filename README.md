@@ -3,8 +3,7 @@
 Dock-e is a floating desktop dock for Linux based on
 [Plank](https://launchpad.net/plank). It retains Plank's window integration,
 rendering engine, and Vala architecture while extending the interface with a
-built-in application launcher, a background applications list, and a system
-update indicator.
+built-in application launcher and a background applications list.
 
 The goal is to provide a compact, visually consistent dock whose core features
 do not depend on external launchers or desktop panels.
@@ -19,8 +18,7 @@ fixed sections:
 - **Applications:** pinned applications and open windows, with a configurable
   hover zoom, launch and attention bounces, window previews, and indicators
   that split when an application has several windows open.
-- **Dock actions:** the system update manager and the background applications
-  toggle.
+- **Dock actions:** the background applications toggle.
 
 ## Native Application Launcher
 
@@ -40,13 +38,11 @@ project. It includes:
 Session commands currently rely on `xflock4` and `xfce4-session-logout`, so
 they require an XFCE session.
 
-## Background Applications and Updates
+## Background Applications
 
 - **Background applications:** a tray replacement that lists applications
   still running without a window (StatusNotifier and XApp status icons, such as
   Discord or Telegram) and highlights the ones that need attention.
-- **Update manager:** shows the number of pending system updates and opens the
-  system's update application. Update checks currently use `apt`.
 
 The former volume, Bluetooth, Wi-Fi, battery, and clock panels were removed
 from the dock, along with their backends.
@@ -87,7 +83,6 @@ lib/
     LauncherItem.vala           Fixed launcher button and fixed item providers
     ApplicationDockItem.vala    Pinned applications and open windows
     TrayToggleItem.vala         Background applications toggle, tray items, and list
-    UpdateManagerItem.vala      System update indicator
 
   Widgets/
     DockWindow.vala             Main window and pointer input handling
@@ -97,7 +92,6 @@ lib/
 
   Services/
     CommandRunner.vala          Cancellable asynchronous command execution
-    UpdateService.vala          Pending update checks
     ApplicationUninstallService.vala   Package owner detection for uninstalls
     CalculatorService.vala      Launcher calculator
 

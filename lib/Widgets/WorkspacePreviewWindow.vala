@@ -9,6 +9,7 @@ namespace Plank
 		const int GAP = 10;
 
 		unowned DockController controller;
+		WindowTransition transition;
 		WorkspaceItem? current_item;
 		Gtk.FlowBox flow;
 		unowned Wnck.Screen? wnck_screen;
@@ -19,6 +20,18 @@ namespace Plank
 		{
 			Object (type: Gtk.WindowType.TOPLEVEL);
 			this.controller = controller;
+			transition = new WindowTransition (this);
+			transition.finished.connect ((hidden) => {
+				if (!hidden)
+					return;
+				// Release the composited X11 surface instead of keeping a hidden
+				// translucent buffer that XFCE can leave visible as a ghost.
+				Idle.add (() => {
+					if (!visible)
+						unrealize ();
+					return false;
+				});
+			});
 			wnck_screen = Wnck.Screen.get_default ();
 			decorated = false;
 			resizable = false;
@@ -107,11 +120,15 @@ namespace Plank
 			controller.window_previews.dismiss ();
 			rebuild ();
 			apply_theme ();
-			opacity = 1.0;
+			if (!visible)
+				transition.jump_to (0.0);
 			show_all ();
 			present ();
 			Idle.add (() => {
 				position_over_item ();
+				if (current_item != null)
+					transition.animate_to (1.0,
+						Motion.duration (controller.prefs, Motion.POPUP_OPEN_TIME), false, true);
 				flow.child_focus (Gtk.DirectionType.TAB_FORWARD);
 				return false;
 			});
@@ -122,12 +139,9 @@ namespace Plank
 		{
 			stop_refresh ();
 			current_item = null;
-			if (visible) {
-				hide ();
-				// Release the composited X11 surface instead of keeping a hidden
-				// translucent buffer that XFCE can leave visible as a ghost.
-				unrealize ();
-			}
+			if (visible)
+				transition.animate_to (0.0,
+					Motion.duration (controller.prefs, Motion.POPUP_CLOSE_TIME), true);
 		}
 
 		void rebuild ()

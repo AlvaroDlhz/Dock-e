@@ -93,6 +93,16 @@ namespace Plank
 		 */
 		public int64 LastHovered { get; protected set; }
 		
+		// Hover animation state kept by the renderer, so that an interrupted
+		// animation continues from where it was instead of jumping
+		internal double hover_value = 0.0;
+		internal int64 hover_stamp = 0LL;
+		internal int64 hover_shift = 0LL;
+		internal Spring zoom_spring;
+		internal Spring press_spring;
+		internal int64 spring_time = 0LL;
+		internal bool spring_active = false;
+		
 		/**
 		 * The last time the item was scrolled.
 		 */

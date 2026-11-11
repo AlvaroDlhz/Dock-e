@@ -241,8 +241,7 @@ namespace Plank
 
 		internal static bool is_fixed_item (DockItem item)
 		{
-			return item is UpdateManagerItem
-				|| item is TrayToggleItem || item is TrayStatusItem || item is TrayOverflowItem;
+			return item is TrayToggleItem || item is TrayStatusItem || item is TrayOverflowItem;
 		}
 		
 		protected override void connect_element (DockElement element)

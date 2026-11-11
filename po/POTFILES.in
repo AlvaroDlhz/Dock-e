@@ -8,7 +8,6 @@ lib/Items/FileDockItem.vala
 lib/Items/PlaceholderDockItem.vala
 lib/Items/PlankDockItem.vala
 lib/Items/TrayToggleItem.vala
-lib/Items/UpdateManagerItem.vala
 lib/Widgets/LauncherWindow.vala
 lib/Widgets/PreferencesWindow.vala
 src/Main.vala

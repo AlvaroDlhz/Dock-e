@@ -427,7 +427,6 @@ EXTRA_DIST = \
 	lucide/battery-full.svg \
 	lucide/battery-charging.svg \
 	lucide/clock.svg \
-	lucide/refresh-cw.svg \
 	plank.appdata.xml.in \
 	net.launchpad.plank.gschema.xml.in \
 	plank.desktop.in \

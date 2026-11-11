@@ -13,6 +13,7 @@ namespace Plank
 		const int GAP = 10;
 
 		unowned DockController controller;
+		WindowTransition transition;
 		ApplicationDockItem? current_item;
 		Gtk.FlowBox flow;
 		uint open_timer = 0U;
@@ -26,6 +27,7 @@ namespace Plank
 		{
 			Object (type: Gtk.WindowType.TOPLEVEL);
 			this.controller = controller;
+			transition = new WindowTransition (this);
 			decorated = false;
 			resizable = false;
 			skip_taskbar_hint = true;
@@ -195,10 +197,12 @@ namespace Plank
 				dismiss ();
 				return;
 			}
-			opacity = 0.0;
+			// Switching between items keeps the preview up, only a new one fades in
+			if (!visible)
+				transition.jump_to (0.0);
 			show_all ();
 			position_over_item ();
-			opacity = 1.0;
+			transition.animate_to (1.0, Motion.duration (controller.prefs, Motion.POPUP_OPEN_TIME), false, true);
 			start_refresh ();
 		}
 
@@ -383,7 +387,8 @@ namespace Plank
 			stop_refresh ();
 			current_item = null;
 			if (visible)
-				hide ();
+				transition.animate_to (0.0,
+					Motion.duration (controller.prefs, Motion.POPUP_CLOSE_TIME), true);
 		}
 
 		void position_over_item ()

@@ -37,10 +37,10 @@ tests_VALASOURCES = \
 	Accessibility.vala \
 	ApplicationUninstallService.vala \
 	CalculatorService.vala \
+	LauncherSearch.vala \
 	CommandRunner.vala \
 	StatusNoticeModel.vala \
 	System.vala \
-	UpdateService.vala \
 	Controller.vala \
 	Drawing.vala \
 	Items.vala \

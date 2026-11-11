@@ -130,9 +130,6 @@ namespace Plank
 		public DockActionsProvider ()
 		{
 			Object ();
-			var update_command = UpdateManagerItem.available_command ();
-			if (update_command != null)
-				add (new UpdateManagerItem (update_command));
 			add (new TrayToggleItem ());
 		}
 

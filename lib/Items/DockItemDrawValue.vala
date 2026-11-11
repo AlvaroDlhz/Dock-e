@@ -50,6 +50,11 @@ namespace Plank
 		public double icon_size;
 		public double icon_width;
 		
+		// Applied while painting only, so the icon can be any fractional size
+		// without changing its place or the regions that depend on it
+		public double scale = 1.0;
+		public double lift = 0.0;
+		
 		public Gdk.Rectangle hover_region;
 		public Gdk.Rectangle draw_region;
 		public Gdk.Rectangle background_region;

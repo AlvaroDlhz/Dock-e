@@ -26,6 +26,23 @@ namespace Plank
 	{
 		const double CLOSED_APPLICATION_OPACITY = 0.60;
 		const double CENTRAL_ITEM_HOVER_LIFT = 3.0;
+		// How far the hover zoom reaches around the pointer, in icons
+		const double HOVER_ZOOM_REACH = 2.0;
+		// The springs moving the icons: seconds to respond, and how little they bounce
+		const double HOVER_SPRING_RESPONSE = 0.17;
+		const double HOVER_SPRING_DAMPING = 0.74;
+		const double PRESS_SPRING_RESPONSE = 0.15;
+		const double PRESS_SPRING_DAMPING = 0.55;
+		// How much an icon shrinks while it is pressed
+		const double PRESS_SHRINK = 0.12;
+		// A click shorter than this (in microseconds) still shows the whole press
+		const int64 PRESS_MIN_TIME = 80 * 1000;
+		// The curves used to open and close the gap of an added or removed item.
+		// The neighbours moving aside use them too, so they have to stay in step.
+		const AnimationMode ITEM_ADD_MODE = AnimationMode.EASE_OUT_CUBIC;
+		const AnimationMode ITEM_REMOVE_MODE = AnimationMode.EASE_IN_OUT_CUBIC;
+		// How much height is left after each bounce on the dock
+		const double BOUNCE_RESTITUTION = 0.4;
 		// Pause between repeated attention bounces, in milliseconds
 		const uint URGENT_BOUNCE_REPEAT_PAUSE = 700;
 
@@ -310,13 +327,13 @@ namespace Plank
 			var fade_opacity = theme.FadeOpacity;
 			
 			if (screen_is_composited) {
-				var hide_duration = (fade_opacity == 1.0 ? theme.HideTime : theme.FadeTime) * 1000;
+				var hide_length = hide_duration ();
 				var hide_time = int64.max (0LL, frame_time - last_hide);
-				if (hide_time < hide_duration) {
+				if (hide_time < hide_length) {
 					if (controller.hide_manager.Hidden)
-						hide_progress = easing_for_mode (AnimationMode.EASE_IN_CUBIC, hide_time, hide_duration);
+						hide_progress = easing_for_mode (AnimationMode.EASE_IN_CUBIC, hide_time, hide_length);
 					else
-						hide_progress = 1.0 - easing_for_mode (AnimationMode.EASE_OUT_CUBIC, hide_time, hide_duration);
+						hide_progress = 1.0 - easing_for_mode (AnimationMode.EASE_OUT_CUBIC, hide_time, hide_length);
 				} else {
 					hide_progress = (controller.hide_manager.Hidden ? 1.0 : 0.0);
 				}
@@ -340,7 +357,7 @@ namespace Plank
 				var add_time = 0LL;
 				var remove_time = 0LL;
 				var move_time = 0LL;
-				var move_duration = theme.ItemMoveTime * 1000;
+				var move_duration = item_move_duration ();
 				
 				var transient_items_it = transient_items.iterator ();
 				while (transient_items_it.next ()) {
@@ -607,10 +624,12 @@ namespace Plank
 					break;
 				case AnimationType.BOUNCE:
 					if (screen_is_composited)
-						y_offset += position_manager.LaunchBounceHeight * easing_bounce (click_time, max_click_time, 2);
+						draw_value.lift += position_manager.LaunchBounceHeight * easing_bounce (click_time, max_click_time, 2);
 					break;
 				case AnimationType.DARKEN:
-					draw_value.darken = double.max (0, Math.sin (Math.PI * click_animation_progress)) * 0.5;
+					// The press animation already answers the click when icons may move
+					if (!is_application_motion_enabled ())
+						draw_value.darken = double.max (0, Math.sin (Math.PI * click_animation_progress)) * 0.5;
 					break;
 				case AnimationType.LIGHTEN:
 					draw_value.lighten = double.max (0, Math.sin (Math.PI * click_animation_progress)) * 0.5;
@@ -639,48 +658,77 @@ namespace Plank
 			
 			// check for and calculate hover-animation
 			var max_hover_time = item_hover_duration ();
-			var hover_time = int64.max (0LL, frame_time - item.LastHovered);
-			var hover_animation_progress = 0.0;
-			var hover_scale_progress = 0.0;
 			var animations_enabled = is_application_motion_enabled ();
 			var is_application_item = item is ApplicationDockItem;
-			if (is_application_item && hover_time < max_hover_time) {
-				if (hovered_item == item) {
-					hover_animation_progress = easing_for_mode (AnimationMode.LINEAR, hover_time, max_hover_time);
-					hover_scale_progress = easing_for_mode (AnimationMode.EASE_OUT_CUBIC, hover_time, max_hover_time);
-				} else {
-					hover_animation_progress = 1.0 - easing_for_mode (AnimationMode.LINEAR, hover_time, max_hover_time);
-					hover_scale_progress = 1.0 - easing_for_mode (AnimationMode.EASE_OUT_CUBIC, hover_time, max_hover_time);
+			var hovering = (hovered_item == item);
+			var hover_animation_progress = (hovering ? 1.0 : 0.0);
+			if (is_application_item) {
+				if (item.hover_stamp != item.LastHovered) {
+					// The pointer just entered or left. Continue from wherever the
+					// previous animation got to instead of restarting from its end.
+					item.hover_stamp = item.LastHovered;
+					var reached = (hovering ? item.hover_value : 1.0 - item.hover_value);
+					item.hover_shift = (int64) (Motion.ease_out_cubic_inverse (reached) * max_hover_time);
 				}
 				
-				switch (item.HoveredAnimation) {
-				default:
-				case AnimationType.NONE:
-					break;
-				case AnimationType.LIGHTEN:
+				var hover_time = int64.max (0LL, frame_time - item.LastHovered) + item.hover_shift;
+				if (animations_enabled && hover_time < max_hover_time) {
+					var eased = easing_for_mode (AnimationMode.EASE_OUT_CUBIC, hover_time, max_hover_time);
+					hover_animation_progress = (hovering ? eased : 1.0 - eased);
+				}
+				item.hover_value = hover_animation_progress;
+				
+				if (hover_animation_progress > 0.0)
 					draw_value.lighten = hover_animation_progress * 0.2;
-					break;
+			}
+			// The time passed since this item's springs were last advanced
+			var spring_elapsed = frame_time - item.spring_time;
+			item.spring_time = frame_time;
+			var spring_dt = (spring_elapsed <= 0LL ? 0.0 : int64.min (spring_elapsed, 32000LL) / 1000000.0);
+			var spring_speed = application_animation_duration_scale ();
+			
+			// Icons grow with their distance to the pointer rather than only when
+			// it is on them, so the zoom travels along the dock with the pointer
+			var zoom_target = 0.0;
+			if (is_application_item && animations_enabled && hovered_item != null
+				&& controller.prefs.HoverZoomEnabled && controller.prefs.HoverZoomPercent > 100) {
+				var cursor = local_cursor;
+				var distance = position_manager.is_horizontal_dock ()
+					? Math.fabs (cursor.x - draw_value.center.x)
+					: Math.fabs (cursor.y - draw_value.center.y);
+				var reach = (icon_size + position_manager.ItemPadding) * HOVER_ZOOM_REACH;
+				if (distance < reach) {
+					var falloff = Math.cos (Math.PI_2 * distance / reach);
+					zoom_target = falloff * falloff;
 				}
-			} else if (is_application_item && hovered_item == item) {
-				hover_animation_progress = 1.0;
-				hover_scale_progress = 1.0;
-				draw_value.lighten = 0.2;
 			}
-			if (!animations_enabled && is_application_item) {
-				hover_scale_progress = 0.0;
-				hover_animation_progress = hovered_item == item ? 1.0 : 0.0;
+			var zooming = item.zoom_spring.step (zoom_target, spring_dt,
+				HOVER_SPRING_RESPONSE * spring_speed, HOVER_SPRING_DAMPING);
+			if (!animations_enabled) {
+				item.zoom_spring = {};
+				zooming = false;
 			}
-
-			if (is_application_item && controller.prefs.HoverZoomEnabled
-				&& hover_scale_progress > 0.0) {
-				if (controller.prefs.HoverZoomPercent > 100) {
-					var hover_scale = 1.0
-						+ (controller.prefs.HoverZoomPercent / 100.0 - 1.0) * hover_scale_progress;
-					draw_value.icon_size *= hover_scale;
-					draw_value.icon_width *= hover_scale;
-					y_offset += CENTRAL_ITEM_HOVER_LIFT * hover_scale_progress;
-				}
+			if (item.zoom_spring.value != 0.0) {
+				draw_value.scale *= 1.0
+					+ (controller.prefs.HoverZoomPercent / 100.0 - 1.0) * item.zoom_spring.value;
+				draw_value.lift += CENTRAL_ITEM_HOVER_LIFT * item.zoom_spring.value;
 			}
+			
+			// Icons give way while pressed and spring back when released
+			var press_target = 0.0;
+			if (animations_enabled && (controller.window.ClickedItem == item
+				|| (item.LastClicked > 0LL && frame_time - item.LastClicked < PRESS_MIN_TIME)))
+				press_target = 1.0;
+			var pressing = item.press_spring.step (press_target, spring_dt,
+				PRESS_SPRING_RESPONSE * spring_speed, PRESS_SPRING_DAMPING);
+			if (!animations_enabled) {
+				item.press_spring = {};
+				pressing = false;
+			}
+			if (item.press_spring.value != 0.0)
+				draw_value.scale *= 1.0 - PRESS_SHRINK * item.press_spring.value;
+			
+			item.spring_active = (zooming || pressing);
 			
 			if (is_application_item && hovered_item == item && controller.window.menu_is_visible ())
 				draw_value.darken += 0.4;
@@ -696,7 +744,7 @@ namespace Plank
 				if (controller.prefs.UrgentBounceRepeat)
 					urgent_time %= urgent_bounce_cycle_duration ();
 				if (urgent_time < urgent_duration)
-					y_offset += position_manager.UrgentBounceHeight
+					draw_value.lift += position_manager.UrgentBounceHeight
 						* easing_bounce (urgent_time, urgent_duration, 1.0);
 			}
 			
@@ -711,30 +759,31 @@ namespace Plank
 			var allow_animation = (screen_is_composited && !is_dynamic_tray_item
 				&& (container == null || container.AddTime < item.AddTime));
 			if (allow_animation && item.AddTime > item.RemoveTime) {
-				var move_duration = theme.ItemMoveTime * 1000;
+				var move_duration = item_move_duration ();
 				var move_time = int64.max (0LL, frame_time - item.AddTime);
 				if (move_time < move_duration) {
-					var move_animation_progress = 1.0 - easing_for_mode (AnimationMode.LINEAR, move_time, move_duration);
-					draw_value.opacity = easing_for_mode (AnimationMode.EASE_IN_EXPO, move_time, move_duration);
+					// The icon fades and slides in on the same curve that opens its gap
+					var move_animation_progress = 1.0 - easing_for_mode (ITEM_ADD_MODE, move_time, move_duration);
+					draw_value.opacity = 1.0 - move_animation_progress;
 					y_offset -= move_animation_progress * (icon_size + position_manager.BottomPadding);
 					draw_value.show_indicator = false;
 					
 					// calculate the resulting incremental dynamic-animation-offset used to animate the background-resize and icon-offset
-					move_animation_progress = 1.0 - easing_for_mode (AnimationMode.EASE_OUT_QUINT, move_time, move_duration);
 					dynamic_animation_offset -= move_animation_progress * (icon_size + position_manager.ItemPadding);
 					x_offset += dynamic_animation_offset;
 				}
 			} else if (allow_animation && item.RemoveTime > 0) {
-				var move_duration = theme.ItemMoveTime * 1000;
+				var move_duration = item_move_duration ();
 				var move_time = int64.max (0LL, frame_time - item.RemoveTime);
 				if (move_time < move_duration) {
-					var move_animation_progress = easing_for_mode (AnimationMode.LINEAR, move_time, move_duration);
-					draw_value.opacity = 1.0 - easing_for_mode (AnimationMode.EASE_OUT_EXPO, move_time, move_duration);
+					// The icon leaves first, its gap closes right behind it
+					var move_animation_progress = easing_for_mode (AnimationMode.EASE_OUT_CUBIC, move_time, move_duration);
+					draw_value.opacity = 1.0 - move_animation_progress;
 					y_offset -= move_animation_progress * (icon_size + position_manager.BottomPadding);
 					draw_value.show_indicator = false;
 					
 					// calculate the resulting incremental dynamic-animation-offset used to animate the background-resize and icon-offset
-					move_animation_progress = 1.0 - easing_for_mode (AnimationMode.EASE_IN_QUINT, move_time, move_duration);
+					move_animation_progress = 1.0 - easing_for_mode (ITEM_REMOVE_MODE, move_time, move_duration);
 					dynamic_animation_offset += move_animation_progress * (icon_size + position_manager.ItemPadding);
 					x_offset += dynamic_animation_offset - (icon_size + position_manager.ItemPadding);
 				}
@@ -742,17 +791,17 @@ namespace Plank
 			
 			// animate icon movement on move state
 			if (!is_dynamic_tray_item && (item.State & ItemState.MOVE) != 0) {
-				var move_duration = theme.ItemMoveTime * 1000;
+				var move_duration = item_move_duration ();
 				var move_time = int64.max (0LL, frame_time - item.LastMove);
 				if (move_time < move_duration) {
 					var move_animation_progress = 0.0;
 					if (transient_items.size > 0) {
 						if (dynamic_animation_offset > 0)
-							move_animation_progress = 1.0 - easing_for_mode (AnimationMode.EASE_IN_QUINT, move_time, move_duration);
+							move_animation_progress = 1.0 - easing_for_mode (ITEM_REMOVE_MODE, move_time, move_duration);
 						else
-							move_animation_progress = 1.0 - easing_for_mode (AnimationMode.EASE_OUT_QUINT, move_time, move_duration);
+							move_animation_progress = 1.0 - easing_for_mode (ITEM_ADD_MODE, move_time, move_duration);
 					} else {
-						move_animation_progress = 1.0 - easing_for_mode (AnimationMode.EASE_OUT_CIRC, move_time, move_duration);
+						move_animation_progress = 1.0 - easing_for_mode (AnimationMode.EASE_OUT_CUBIC, move_time, move_duration);
 					}
 					var change = move_animation_progress * (icon_size + position_manager.ItemPadding);
 					x_offset += (item.Position < item.LastPosition ? change : -change);
@@ -905,8 +954,13 @@ namespace Plank
 		void draw_item (Cairo.Context cr, DockItem item, DockItemDrawValue draw_value, int64 frame_time)
 		{
 			unowned PositionManager position_manager = controller.position_manager;
-			var icon_size = (int) draw_value.icon_size * window_scale_factor;
-			var icon_width = (int) draw_value.icon_width * window_scale_factor;
+			// An enlarged icon is rendered at its largest size and scaled down
+			// while painting, which keeps it sharp at every size in between
+			var render_scale = 1.0;
+			if (draw_value.scale > 1.0)
+				render_scale = double.max (1.0, controller.prefs.HoverZoomPercent / 100.0);
+			var icon_size = (int) (draw_value.icon_size * render_scale) * window_scale_factor;
+			var icon_width = (int) (draw_value.icon_width * render_scale) * window_scale_factor;
 			var position = position_manager.Position;
 			
 			// load the icon
@@ -955,25 +1009,32 @@ namespace Plank
 			if ((item.State & ItemState.ACTIVE) == 0)
 				opacity = 1 - opacity;
 			if (opacity > 0) {
+				// The indicator grows out of its middle while it fades in
+				var extent = easing_for_mode (AnimationMode.EASE_OUT_CUBIC, opacity, 1.0);
 				theme.draw_active_glow (item_buffer, background_rect, draw_value.draw_region,
 					active_indicator_color, opacity, position,
-					item.Indicator == IndicatorState.SINGLE_PLUS);
+					item.Indicator == IndicatorState.SINGLE_PLUS, extent);
 			}
 			
 			// draw the icon
-			if (window_scale_factor > 1) {
-				cr.save ();
-				cr.scale (1.0 / window_scale_factor, 1.0 / window_scale_factor);
-			}
 			var draw_region = draw_value.draw_region;
-			cr.set_source_surface (icon_surface.Internal, draw_region.x * window_scale_factor, draw_region.y * window_scale_factor);
 			var item_opacity = get_item_opacity (item, draw_value);
+			cr.save ();
+			if (draw_value.scale != 1.0 || draw_value.lift != 0.0) {
+				transform_to_item (cr, draw_value, position);
+				var paint_scale = draw_value.scale / (render_scale * window_scale_factor);
+				cr.scale (paint_scale, paint_scale);
+				cr.set_source_surface (icon_surface.Internal, -icon_width / 2.0, -icon_size / 2.0);
+			} else {
+				if (window_scale_factor > 1)
+					cr.scale (1.0 / window_scale_factor, 1.0 / window_scale_factor);
+				cr.set_source_surface (icon_surface.Internal, draw_region.x * window_scale_factor, draw_region.y * window_scale_factor);
+			}
 			if (item_opacity < 1.0)
 				cr.paint_with_alpha (item_opacity);
 			else
 				cr.paint ();
-			if (window_scale_factor > 1)
-				cr.restore ();
+			cr.restore ();
 			
 			// draw indicators
 			if (!(item is ApplicationDockItem) && draw_value.show_indicator && item.Indicator != IndicatorState.NONE)
@@ -994,21 +1055,47 @@ namespace Plank
 				icon_shadow_surface = item.get_background_surface (icon_width, icon_size, item_buffer, (DrawDataFunc<DockItem>) draw_item_background);
 			
 			if (icon_shadow_surface != null) {
-				if (window_scale_factor > 1) {
-					cr.save ();
-					cr.scale (1.0 / window_scale_factor, 1.0 / window_scale_factor);
-				}
 				var draw_region = draw_value.draw_region;
+				cr.save ();
 				cr.set_operator (Cairo.Operator.OVER);
-				cr.set_source_surface (icon_shadow_surface.Internal, (draw_region.x - shadow_size) * window_scale_factor, (draw_region.y - shadow_size) * window_scale_factor);
+				if (draw_value.scale != 1.0 || draw_value.lift != 0.0) {
+					transform_to_item (cr, draw_value, position_manager.Position);
+					var paint_scale = draw_value.scale / window_scale_factor;
+					cr.scale (paint_scale, paint_scale);
+					cr.set_source_surface (icon_shadow_surface.Internal, -icon_width / 2.0, -icon_size / 2.0);
+				} else {
+					if (window_scale_factor > 1)
+						cr.scale (1.0 / window_scale_factor, 1.0 / window_scale_factor);
+					cr.set_source_surface (icon_shadow_surface.Internal, (draw_region.x - shadow_size) * window_scale_factor, (draw_region.y - shadow_size) * window_scale_factor);
+				}
 				var item_opacity = get_item_opacity (item, draw_value);
 				if (item_opacity < 1.0)
 					cr.paint_with_alpha (item_opacity);
 				else
 					cr.paint ();
-				if (window_scale_factor > 1)
-					cr.restore ();
+				cr.restore ();
 			}
+		}
+
+		/**
+		 * Moves the origin to the middle of where the item is painted,
+		 * including how far it is lifted off the dock.
+		 */
+		static void transform_to_item (Cairo.Context cr, DockItemDrawValue draw_value, Gtk.PositionType position)
+		{
+			var draw_region = draw_value.draw_region;
+			var x = draw_region.x + draw_region.width / 2.0;
+			var y = draw_region.y + draw_region.height / 2.0;
+			
+			switch (position) {
+			default:
+			case Gtk.PositionType.BOTTOM: y -= draw_value.lift; break;
+			case Gtk.PositionType.TOP: y += draw_value.lift; break;
+			case Gtk.PositionType.LEFT: x += draw_value.lift; break;
+			case Gtk.PositionType.RIGHT: x -= draw_value.lift; break;
+			}
+			
+			cr.translate (x, y);
 		}
 
 		[CCode (instance_pos = -1)]
@@ -1025,9 +1112,7 @@ namespace Plank
 			}
 			
 			if (item.CountVisible) {
-				if (item is UpdateManagerItem)
-					draw_update_count_badge (surface, icon_size, item.Count);
-				else if (item is TrayToggleItem)
+				if (item is TrayToggleItem)
 					draw_green_count_badge (surface, icon_size, item.Count);
 				else
 					theme.draw_item_count (surface, icon_size, urgent_color, item.Count);
@@ -1044,13 +1129,6 @@ namespace Plank
 		{
 			Color outline_color = { 0.10, 0.26, 0.04, 0.82 };
 			Color fill_color = { 0.45, 0.82, 0.08, 1.0 };
-			draw_count_badge (surface, icon_size, count, outline_color, fill_color);
-		}
-
-		void draw_update_count_badge (Surface surface, int icon_size, int64 count)
-		{
-			Color outline_color = { 0.38, 0.20, 0.02, 0.88 };
-			Color fill_color = { 0.96, 0.58, 0.12, 1.0 };
 			draw_count_badge (surface, icon_size, count, outline_color, fill_color);
 		}
 
@@ -1224,7 +1302,7 @@ namespace Plank
 			force_frame_time_update ();
 			var now = frame_time;
 			var diff = now - last_hide;
-			var time = (theme.FadeOpacity == 1.0 ? theme.HideTime : theme.FadeTime) * 1000;
+			var time = hide_duration ();
 			
 			if (diff < time)
 				last_hide = now + (diff - time);
@@ -1254,7 +1332,10 @@ namespace Plank
 				return;
 			
 			local_cursor = new_cursor;
-
+			
+			// The hover zoom follows the pointer
+			if (controller.prefs.HoverZoomEnabled && is_application_motion_enabled ())
+				animated_draw ();
 		}
 		
 		public void animate_items (Gee.List<DockElement> elements)
@@ -1277,13 +1358,8 @@ namespace Plank
 		 */
 		protected override bool animation_needed (int64 frame_time)
 		{
-			if (theme.FadeOpacity == 1.0) {
-				if (frame_time - last_hide <= theme.HideTime * 1000)
-					return true;
-			} else {
-				if (frame_time - last_hide <= theme.FadeTime * 1000)
-					return true;
-			}
+			if (frame_time - last_hide <= hide_duration ())
+				return true;
 			
 			if (transient_items.size > 0)
 				return true;
@@ -1348,11 +1424,15 @@ namespace Plank
 					}
 				}
 			}
-			if (render_time - item.LastMove <= theme.ItemMoveTime * 1000)
+			if (item.spring_active)
 				return true;
-			if (render_time - item.AddTime <= theme.ItemMoveTime * 1000)
+			if (item.LastClicked > 0LL && render_time - item.LastClicked <= PRESS_MIN_TIME)
 				return true;
-			if (render_time - item.RemoveTime <= theme.ItemMoveTime * 1000)
+			if (render_time - item.LastMove <= item_move_duration ())
+				return true;
+			if (render_time - item.AddTime <= item_move_duration ())
+				return true;
+			if (render_time - item.RemoveTime <= item_move_duration ())
 				return true;
 			if (render_time - item.LastValid <= ITEM_INVALID_DURATION * 1000)
 				return true;
@@ -1365,8 +1445,24 @@ namespace Plank
 		 */
 		bool is_application_motion_enabled ()
 		{
-			return Gtk.Settings.get_default ().gtk_enable_animations
-				&& !controller.prefs.ReduceMotion;
+			return Motion.movement_enabled (controller.prefs);
+		}
+
+		/**
+		 * The duration of the hide-animation of the dock, in microseconds.
+		 */
+		int64 hide_duration ()
+		{
+			return Motion.duration (controller.prefs,
+				theme.FadeOpacity == 1.0 ? theme.HideTime : theme.FadeTime);
+		}
+
+		/**
+		 * The duration of an item moving, being added or removed, in microseconds.
+		 */
+		int64 item_move_duration ()
+		{
+			return Motion.duration (controller.prefs, theme.ItemMoveTime);
 		}
 
 		/**
@@ -1423,11 +1519,7 @@ namespace Plank
 
 		double application_animation_duration_scale ()
 		{
-			switch (controller.prefs.AnimationSpeed) {
-			case 0: return 1.5;
-			case 2: return 0.65;
-			default: return 1.0;
-			}
+			return Motion.duration_scale (controller.prefs);
 		}
 		
 		static int compare_dock_item_position (DockItem i1, DockItem i2)
@@ -1447,12 +1539,34 @@ namespace Plank
 			return 1;
 		}
 		
+		/**
+		 * The height [0.0..1.0] of an icon thrown up from the dock, which then
+		 * bounces n times in total, each bounce lower and shorter than the last.
+		 */
 		static double easing_bounce (double t, double d, double n)
 			requires (t >= 0.0 && d > 0.0 && n >= 1.0)
 			requires (t <= d)
 		{
 			var p = t / d;
-			return Math.fabs (Math.sin (n * Math.PI * p) * double.min (1.0, (1.0 - p) * (2.0 * n) / (2.0 * n - 1.0)));
+			var count = (int) n;
+			
+			// A bounce lasts as long as the square root of its height
+			var total = 0.0;
+			for (var i = 0; i < count; i++)
+				total += Math.sqrt (Math.pow (BOUNCE_RESTITUTION, i));
+			
+			var start = 0.0;
+			for (var i = 0; i < count; i++) {
+				var height = Math.pow (BOUNCE_RESTITUTION, i);
+				var length = Math.sqrt (height) / total;
+				if (p < start + length || i == count - 1) {
+					var u = ((p - start) / length).clamp (0.0, 1.0);
+					return height * 4.0 * u * (1.0 - u);
+				}
+				start += length;
+			}
+			
+			return 0.0;
 		}
 		
 		static unowned string cairo_surface_type_to_string (Cairo.SurfaceType type)
