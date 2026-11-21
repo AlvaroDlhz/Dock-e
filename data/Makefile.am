@@ -34,6 +34,7 @@ EXTRA_DIST = \
 	poof.svg \
 	ui/preferences.ui \
 	$(NULL)
+	style/dock-e.css \
 
 CLEANFILES = \
 	plank.appdata.xml \

@@ -38,5 +38,6 @@
 		<file alias="lucide/clock.svg" compressed="true" preprocess="xml-stripblanks">lucide/clock.svg</file>
 		<file alias="img/poof.svg" compressed="true" preprocess="xml-stripblanks">poof.svg</file>
 		<file compressed="true" preprocess="xml-stripblanks">ui/preferences.ui</file>
+		<file compressed="true">style/dock-e.css</file>
 	</gresource>
 </gresources>

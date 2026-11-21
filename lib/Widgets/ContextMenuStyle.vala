@@ -25,9 +25,6 @@ namespace Plank
 		const string WINDOW_CLASS = "plank-context-menu-window";
 		const string TRANSITION_KEY = "plank-context-menu-transition";
 
-		static Gtk.CssProvider? provider = null;
-		static string applied_css = "";
-
 		/**
 		 * Whether dark text is needed to be readable on the given color.
 		 */
@@ -51,7 +48,7 @@ namespace Plank
 		 */
 		public static void prepare (Gtk.Menu menu, DockController controller)
 		{
-			apply (menu.get_screen (), controller.renderer.theme.FillStartColor);
+			DockStyle.update (controller);
 			mark (menu);
 
 			// Fades the menu in, set up once for menus which are shown again
@@ -88,63 +85,6 @@ namespace Plank
 				if (submenu != null)
 					mark (submenu);
 			}
-		}
-
-		static void apply (Gdk.Screen screen, Color background)
-		{
-			var light = is_light (background);
-			var foreground = light ? "24,27,32" : "255,255,255";
-			var destructive = light ? "#a61b1b" : "#ff8b82";
-
-			var menu = "." + STYLE_CLASS;
-			var window = "." + WINDOW_CLASS;
-			var css = "%s { background-color: rgb(%d,%d,%d); background-image: none; border: 1px solid rgba(%s,0.16); border-radius: %dpx; padding: %dpx; }"
-				.printf (menu, (int) (background.red * 255), (int) (background.green * 255),
-					(int) (background.blue * 255), foreground, RADIUS, PADDING);
-			css += "%s { background: none; background-color: transparent; border: none; border-radius: 0; box-shadow: none; }"
-				.printf (window);
-			css += "%s decoration { background: none; border: none; border-radius: 0; box-shadow: none; margin: 0; }"
-				.printf (window);
-			css += "%s menuitem { min-width: 230px; min-height: 22px; color: rgba(%s,0.92); border-radius: %dpx; padding: 7px 10px; margin: 1px; transition: background-color 120ms ease; }"
-				.printf (menu, foreground, ROW_RADIUS);
-			css += "%s menuitem:hover { color: rgb(%s); background-color: rgba(%s,0.11); }"
-				.printf (menu, foreground, foreground);
-			css += "%s menuitem:disabled { color: rgba(%s,0.40); }".printf (menu, foreground);
-			css += "%s menuitem image { color: rgba(%s,0.80); }".printf (menu, foreground);
-			css += "%s menuitem arrow { color: rgba(%s,0.60); }".printf (menu, foreground);
-			css += "%s .context-menu-header { min-height: 40px; padding: 7px 8px 8px 8px; margin-bottom: 4px; border-radius: %dpx; background-color: rgba(%s,0.06); }"
-				.printf (menu, ROW_RADIUS, foreground);
-			css += "%s .context-menu-header:disabled { color: rgb(%s); }".printf (menu, foreground);
-			css += "%s .context-menu-title { color: rgb(%s); font-size: 14px; font-weight: bold; }"
-				.printf (menu, foreground);
-			css += "%s .context-menu-subtitle { color: rgba(%s,0.60); font-size: 11px; }"
-				.printf (menu, foreground);
-			css += "%s separator { min-height: 1px; margin: 5px 9px; background-color: rgba(%s,0.10); }"
-				.printf (menu, foreground);
-			css += "%s check, %s radio { color: rgb(%s); background: transparent; border-color: rgba(%s,0.45); }"
-				.printf (menu, menu, foreground, foreground);
-			css += "%s check:checked, %s radio:checked { color: white; background-color: #73d216; border-color: #73d216; }"
-				.printf (menu, menu);
-			css += "%s .destructive-action, %s .destructive-action image { color: %s; }"
-				.printf (menu, menu, destructive);
-			css += "%s .destructive-action:hover, %s .destructive-action:hover image { color: white; background-color: rgba(220,65,65,0.55); }"
-				.printf (menu, menu);
-			css += "%s .destructive-action:hover image { background-color: transparent; }".printf (menu);
-
-			if (css == applied_css)
-				return;
-			applied_css = css;
-
-			if (provider != null)
-				Gtk.StyleContext.remove_provider_for_screen (screen, provider);
-			provider = new Gtk.CssProvider ();
-			try {
-				provider.load_from_data (css);
-			} catch (Error e) {
-				warning ("Unable to style context menus: %s", e.message);
-			}
-			Gtk.StyleContext.add_provider_for_screen (screen, provider,
-				Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
 		}
 	}
 }

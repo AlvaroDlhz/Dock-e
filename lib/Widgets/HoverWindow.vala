@@ -40,9 +40,7 @@ namespace Plank
 		WindowTransition transition;
 		
 		// Shared by all hover windows, so it is only registered once
-		static Gtk.CssProvider? css_provider = null;
-		
-		public HoverWindow ()
+public HoverWindow ()
 		{
 			GLib.Object (type: Gtk.WindowType.POPUP, type_hint: Gdk.WindowTypeHint.TOOLTIP);
 		}
@@ -60,7 +58,7 @@ namespace Plank
 			get_style_context ().add_class (Gtk.STYLE_CLASS_TOOLTIP);
 			get_style_context ().add_class ("plank-hover-label");
 
-			ensure_css_provider (screen);
+			DockStyle.ensure_base (screen);
 			
 			box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 6);
 			box.set_margin_left (4);
@@ -73,23 +71,6 @@ namespace Plank
 			label = new Gtk.Label (null);
 			label.set_line_wrap (true);
 			box.pack_start (label, false, false, 0);
-		}
-		
-		static void ensure_css_provider (Gdk.Screen screen)
-		{
-			if (css_provider != null)
-				return;
-			
-			css_provider = new Gtk.CssProvider ();
-			try {
-				css_provider.load_from_data (
-					".plank-hover-label { background-color: #000000; background-image: none; color: #ffffff; border: none; border-radius: 7px; padding: 0; } " +
-					".plank-hover-label label { color: #ffffff; font-size: 0.9em; }");
-				Gtk.StyleContext.add_provider_for_screen (screen, css_provider,
-					Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
-			} catch (Error e) {
-				warning ("Unable to style hover labels: %s", e.message);
-			}
 		}
 		
 		/**

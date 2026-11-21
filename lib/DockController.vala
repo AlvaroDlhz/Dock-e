@@ -41,6 +41,7 @@ namespace Plank
 		public DockWindow window { get; protected set; }
 		public HoverWindow hover { get; protected set; }
 		public LauncherWindow launcher { get; protected set; }
+		public AccentColor accent { get; protected set; }
 		public BackgroundAppsWindow background_apps { get; protected set; }
 		public WindowPreviewWindow window_previews { get; protected set; }
 		public WorkspacePreviewWindow workspace_previews { get; protected set; }
@@ -108,6 +109,13 @@ namespace Plank
 			window = new DockWindow (this);
 			hover = new HoverWindow ();
 			renderer = new DockRenderer (this, window);
+			accent = new AccentColor ();
+			accent.source = prefs.AccentColor;
+			prefs.notify["AccentColor"].connect (() => { accent.source = prefs.AccentColor; });
+			accent.changed.connect (() => DockStyle.update (this));
+			window.get_screen ().monitors_changed.connect (update_accent_monitors);
+			prefs.notify["Monitor"].connect (update_accent_monitors);
+			update_accent_monitors ();
 			launcher = new LauncherWindow (this);
 			super_key_binding = new SuperKeyBinding (window.get_display ());
 			super_key_binding.activated.connect (() => launcher.toggle_global ());
@@ -131,6 +139,28 @@ namespace Plank
 
 			items.clear ();
 			visible_items.clear ();
+		}
+
+		/**
+		 * Tells the accent which wallpapers are in view, the one behind the
+		 * dock first.
+		 */
+		void update_accent_monitors ()
+		{
+			unowned Gdk.Screen screen = window.get_screen ();
+			string[] names = {};
+			if (prefs.Monitor != "")
+				names += prefs.Monitor;
+			var primary = screen.get_primary_monitor ();
+			var primary_name = screen.get_monitor_plug_name (primary);
+			if (primary_name != null && !(primary_name in names))
+				names += primary_name;
+			for (var i = 0; i < screen.get_n_monitors (); i++) {
+				var name = screen.get_monitor_plug_name (i);
+				if (name != null && !(name in names))
+					names += name;
+			}
+			accent.set_monitors (names);
 		}
 
 		void position_changed ()

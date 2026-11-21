@@ -41,6 +41,11 @@
 			<summary>Automatically pin an application if it seems useful to do</summary>
 			<description>If true, automatically pin applications when it seems useful to do.</description>
 		</key>
+		<key name="accent-color" type="s">
+			<default>'auto'</default>
+			<summary>Accent color</summary>
+			<description>The color marking what is focused, active or checked. "auto" takes it from the desktop wallpaper, a color such as "#3584e4" fixes it, and an empty value keeps the default green.</description>
+		</key>
 		<key name="background-color" type="s">
 			<default>'#292929'</default>
 			<summary>Custom dock background color</summary>

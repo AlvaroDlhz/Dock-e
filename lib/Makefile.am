@@ -112,6 +112,8 @@ libplank_la_VALASOURCES = \
 	Services/Worker.vala \
 	Widgets/CompositedWindow.vala \
 	Widgets/ContextMenuStyle.vala \
+	Services/AccentColor.vala \
+	Widgets/DockStyle.vala \
 	Widgets/DockWindow.vala \
 	Widgets/WindowPreviewWindow.vala \
 	Widgets/WorkspacePreviewWindow.vala \

@@ -60,6 +60,9 @@ namespace Plank
 		[Description(nick = "theme", blurb = "The name of the dock's theme to use.")]
 		public string Theme { get; set; }
 
+		[Description(nick = "accent-color", blurb = "The color marking what is focused or active: 'auto' to take it from the wallpaper, a color, or nothing for the default.")]
+		public string AccentColor { get; set; }
+
 		[Description(nick = "custom-background-enabled", blurb = "Whether to use a custom color for the dock background.")]
 		public bool CustomBackgroundEnabled { get; set; }
 
@@ -196,6 +199,12 @@ namespace Plank
 				Gdk.RGBA color = {};
 				if (!color.parse (BackgroundColor))
 					BackgroundColor = "#292929";
+				break;
+
+			case "AccentColor":
+				Gdk.RGBA accent = {};
+				if (AccentColor != "" && AccentColor != Plank.AccentColor.AUTOMATIC && !accent.parse (AccentColor))
+					AccentColor = Plank.AccentColor.AUTOMATIC;
 				break;
 
 			case "BackgroundOpacity":
