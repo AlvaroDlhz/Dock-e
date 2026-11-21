@@ -181,6 +181,7 @@ libplank_internal_la_VALASOURCES = \
 	Platform/Backend.vala \
 	Platform/DockSurface.vala \
 	Platform/EdgeTrigger.vala \
+	Platform/PopupPlacer.vala \
 	Platform/SuperKeyTrigger.vala \
 	Platform/RunningApp.vala \
 	Platform/Toplevel.vala \

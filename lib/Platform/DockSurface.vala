@@ -25,6 +25,22 @@ namespace Plank.Platform
 	public interface DockSurface : Object
 	{
 		/**
+		 * Makes the window a dock: on every workspace, above or beside the
+		 * other windows.  Call it before the window is realized.
+		 */
+		public abstract void setup ();
+
+		/**
+		 * Moves the dock window.
+		 *
+		 * @param edge the edge the dock sits on
+		 * @param area the part of the screen the dock is placed in, as for
+		 *        {@link reserve}
+		 * @param rect the window in GDK screen coordinates
+		 */
+		public abstract void place (Gtk.PositionType edge, Gdk.Rectangle area, Gdk.Rectangle rect);
+
+		/**
 		 * Reserves space along one edge so maximized windows do not cover
 		 * the dock (struts on X11, an exclusive zone on layer-shell).
 		 *

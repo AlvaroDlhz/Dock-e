@@ -51,14 +51,14 @@ namespace Plank
 		 */
 		public PoofWindow ()
 		{
-			GLib.Object (type: Gtk.WindowType.TOPLEVEL, type_hint: Gdk.WindowTypeHint.DOCK);
+			GLib.Object (type: Gtk.WindowType.TOPLEVEL);
 		}
 		
 		construct
 		{
 			accept_focus = false;
 			can_focus = false;
-			set_keep_above (true);
+			Platform.get_popup_placer ().setup (this, Platform.PopupKind.OVERLAY);
 			
 			try {
 				poof_image = new Gdk.Pixbuf.from_resource ("%s/img/poof.svg".printf (Plank.G_RESOURCE_PATH));
@@ -101,7 +101,7 @@ namespace Plank
 			frame_time = start_time;
 						
 			show ();
-			move (x - (poof_size / 2), y - (poof_size / 2));
+			Platform.get_popup_placer ().place (this, x - (poof_size / 2), y - (poof_size / 2));
 
 			animation_timer_id = add_tick_callback ((widget, frame_clock) => {
 				frame_time = GLib.get_monotonic_time ();

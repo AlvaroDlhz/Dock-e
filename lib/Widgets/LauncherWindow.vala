@@ -120,8 +120,7 @@ namespace Plank
 			resizable = false;
 			skip_taskbar_hint = true;
 			skip_pager_hint = true;
-			set_keep_above (true);
-			type_hint = Gdk.WindowTypeHint.DIALOG;
+			Platform.get_popup_placer ().setup (this, Platform.PopupKind.PANEL);
 			set_default_size (PANEL_WIDTH, PANEL_HEIGHT);
 			Gdk.Geometry geometry = {};
 			geometry.min_width = PANEL_WIDTH;
@@ -1187,9 +1186,8 @@ namespace Plank
 			context.resizable = false;
 			context.skip_taskbar_hint = true;
 			context.skip_pager_hint = true;
-			context.set_keep_above (true);
 			context.transient_for = this;
-			context.type_hint = Gdk.WindowTypeHint.DIALOG;
+			Platform.get_popup_placer ().setup (context, Platform.PopupKind.PANEL);
 			context.get_style_context ().add_class ("launcher-app-context");
 			Accessibility.set_keyboard_navigation (context, true);
 
@@ -1360,7 +1358,7 @@ namespace Plank
 			var workarea = screen.get_monitor_workarea (monitor);
 			var x = int.max (workarea.x + 8, int.min (workarea.x + workarea.width - width - 8, (int) root_x));
 			var y = int.max (workarea.y + 8, int.min (workarea.y + workarea.height - height - 8, (int) root_y));
-			context.move (x, y);
+			Platform.get_popup_placer ().place (context, x, y);
 		}
 
 		delegate void ContextAction ();
@@ -1645,7 +1643,7 @@ namespace Plank
 			var workarea = screen.get_monitor_workarea (monitor);
 			PositionManager.calculate_centered_popup_position (workarea, width, height,
 				out panel_x, out panel_y);
-			move (panel_x, panel_y);
+			Platform.get_popup_placer ().place (this, panel_x, panel_y, bar_rect);
 
 			growth_x = width / 2.0;
 			growth_y = height / 2.0;

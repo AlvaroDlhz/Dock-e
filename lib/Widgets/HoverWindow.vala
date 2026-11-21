@@ -41,11 +41,12 @@ namespace Plank
 		
 		public HoverWindow ()
 		{
-			GLib.Object (type: Gtk.WindowType.POPUP, type_hint: Gdk.WindowTypeHint.TOOLTIP);
+			GLib.Object (type: Gtk.WindowType.POPUP);
 		}
 		
 		construct
 		{
+			Platform.get_popup_placer ().setup (this, Platform.PopupKind.TOOLTIP);
 			app_paintable = true;
 			resizable = false;
 			opacity = 1.0;
@@ -125,7 +126,7 @@ namespace Plank
 			x = x.clamp (monitor.x, monitor.x + monitor.width - width);
 			y = y.clamp (monitor.y, monitor.y + monitor.height - height);
 			
-			move (x, y);
+			Platform.get_popup_placer ().place (this, x, y);
 			
 			// Every item gets its label fading in at its own place
 			if (!was_visible)

@@ -39,10 +39,9 @@ namespace Plank
 			resizable = false;
 			skip_taskbar_hint = true;
 			skip_pager_hint = true;
-			set_keep_above (true);
 			// Treat previews as an owned popup, not as an application window.
 			// Otherwise BAMF exposes it as a second running "Plank" item.
-			type_hint = Gdk.WindowTypeHint.POPUP_MENU;
+			Platform.get_popup_placer ().setup (this, Platform.PopupKind.PREVIEW);
 			set_transient_for (controller.window);
 			destroy_with_parent = true;
 			app_paintable = true;
@@ -382,7 +381,7 @@ namespace Plank
 			int x, y;
 			controller.position_manager.get_popup_position (anchor, width, height,
 				GAP, workarea, out x, out y);
-			move (x, y);
+			Platform.get_popup_placer ().place (this, x, y, anchor);
 		}
 
 		void apply_theme ()

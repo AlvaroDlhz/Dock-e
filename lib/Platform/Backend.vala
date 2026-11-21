@@ -99,6 +99,11 @@ namespace Plank.Platform
 		public abstract DockSurface create_dock_surface (Gtk.Window dock);
 
 		/**
+		 * Shows the tooltips, previews and panels of the docks.
+		 */
+		public abstract PopupPlacer popups { get; }
+
+		/**
 		 * Creates a trigger for the screen edge the dock sits on.
 		 *
 		 * @return null if the backend has no {@link Capability.EDGE_PRESSURE}

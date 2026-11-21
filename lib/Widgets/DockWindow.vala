@@ -75,7 +75,7 @@ namespace Plank
 		 */
 		public DockWindow (DockController controller)
 		{
-			GLib.Object (controller: controller, type: Gtk.WindowType.TOPLEVEL, type_hint: Gdk.WindowTypeHint.DOCK);
+			GLib.Object (controller: controller, type: Gtk.WindowType.TOPLEVEL);
 		}
 		
 		construct
@@ -85,11 +85,15 @@ namespace Plank
 			skip_pager_hint = true;
 			skip_taskbar_hint = true;
 			
-			stick ();
-			
 			unowned Platform.Backend? backend = Platform.get_backend ();
 			if (backend != null)
 				dock_surface = backend.create_dock_surface (this);
+			if (dock_surface != null) {
+				dock_surface.setup ();
+			} else {
+				type_hint = Gdk.WindowTypeHint.DOCK;
+				stick ();
+			}
 			
 			add_events (Gdk.EventMask.BUTTON_PRESS_MASK |
 						Gdk.EventMask.BUTTON_RELEASE_MASK |
@@ -589,7 +593,10 @@ namespace Plank
 				Logger.verbose ("DockWindow.move (x = %i, y = %i)", win_rect.x, win_rect.y);
 				requested_x = win_rect.x;
 				requested_y = win_rect.y;
-				move (win_rect.x, win_rect.y);
+				if (dock_surface != null)
+					dock_surface.place (position_manager.Position, position_manager.get_monitor_area (), win_rect);
+				else
+					move (win_rect.x, win_rect.y);
 				
 				update_icon_regions ();
 				set_struts ();

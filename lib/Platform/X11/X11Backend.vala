@@ -100,6 +100,11 @@ namespace Plank.Platform
 			return new X11SuperKeyTrigger (display);
 		}
 
+		// Plain GTK places windows anywhere on X11
+		AbsolutePopupPlacer popup_placer = new AbsolutePopupPlacer ();
+
+		public PopupPlacer popups { get { return popup_placer; } }
+
 		public DockSurface create_dock_surface (Gtk.Window dock)
 		{
 			return new X11DockSurface (dock);

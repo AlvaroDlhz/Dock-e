@@ -40,6 +40,9 @@ namespace PlankTests
 			return null;
 		}
 
+		AbsolutePopupPlacer popup_placer = new AbsolutePopupPlacer ();
+		public PopupPlacer popups { get { return popup_placer; } }
+
 		public DockSurface create_dock_surface (Gtk.Window dock)
 		{
 			return new FakeDockSurface ();
@@ -86,6 +89,14 @@ namespace PlankTests
 	public class FakeDockSurface : Object, DockSurface
 	{
 		public int thickness = -1;
+
+		public void setup ()
+		{
+		}
+
+		public void place (Gtk.PositionType edge, Gdk.Rectangle area, Gdk.Rectangle rect)
+		{
+		}
 
 		public void reserve (Gtk.PositionType edge, Gdk.Rectangle area, int thickness)
 		{

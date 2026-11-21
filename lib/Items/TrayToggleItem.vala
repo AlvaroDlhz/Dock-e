@@ -1106,8 +1106,7 @@ namespace Plank
 			resizable = false;
 			skip_taskbar_hint = true;
 			skip_pager_hint = true;
-			set_keep_above (true);
-			type_hint = Gdk.WindowTypeHint.DIALOG;
+			Platform.get_popup_placer ().setup (this, Platform.PopupKind.PANEL);
 			// Not being resizable, the window is as high as its content asks for
 			set_size_request (PANEL_WIDTH, -1);
 			app_paintable = true;
@@ -1646,7 +1645,7 @@ namespace Plank
 			int x, y;
 			controller.position_manager.get_popup_position (item, PANEL_WIDTH, height,
 				PANEL_GAP, workarea, out x, out y);
-			move (x, y);
+			Platform.get_popup_placer ().place (this, x, y, item);
 
 			growth_x = ((double) (item.x + item.width / 2 - x)).clamp (PANEL_MARGIN,
 				PANEL_WIDTH - PANEL_MARGIN);

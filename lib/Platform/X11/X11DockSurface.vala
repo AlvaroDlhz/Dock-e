@@ -50,6 +50,17 @@ namespace Plank.Platform
 			this.dock = dock;
 		}
 
+		public void setup ()
+		{
+			dock.type_hint = Gdk.WindowTypeHint.DOCK;
+			dock.stick ();
+		}
+
+		public void place (Gtk.PositionType edge, Gdk.Rectangle area, Gdk.Rectangle rect)
+		{
+			dock.move (rect.x, rect.y);
+		}
+
 		public void reserve (Gtk.PositionType edge, Gdk.Rectangle area, int thickness)
 		{
 			if (!dock.get_realized ())
