@@ -148,6 +148,8 @@ am_libplank_internal_la_OBJECTS = libplank_internal_la-gtk-compat.lo \
 am__dirstamp = $(am__leading_dot)dirstamp
 am__objects_2 = libplank_internal_la-InternalConsts.lo \
 	libplank_internal_la-InternalQuarks.lo \
+	Platform/libplank_internal_la-Backend.lo \
+	Platform/X11/libplank_internal_la-X11Backend.lo \
 	Services/libplank_internal_la-Accessibility.lo \
 	Services/libplank_internal_la-ApplicationUninstallService.lo \
 	Services/libplank_internal_la-CalculatorService.lo \
@@ -267,6 +269,8 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Items/$(DEPDIR)/TransientDockItem.Plo \
 	Items/$(DEPDIR)/TrayToggleItem.Plo \
 	Items/$(DEPDIR)/WorkspaceItem.Plo \
+	Platform/$(DEPDIR)/libplank_internal_la-Backend.Plo \
+	Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo \
 	Services/$(DEPDIR)/AccentColor.Plo \
 	Services/$(DEPDIR)/Environment.Plo \
 	Services/$(DEPDIR)/EnvironmentSettings.Plo \
@@ -889,6 +893,8 @@ libplank_internal_la_LIBADD = \
 libplank_internal_la_VALASOURCES = \
 	InternalConsts.vala \
 	InternalQuarks.vala \
+	Platform/Backend.vala \
+	Platform/X11/X11Backend.vala \
 	Services/Accessibility.vala \
 	Services/ApplicationUninstallService.vala \
 	Services/CalculatorService.vala \
@@ -1024,6 +1030,23 @@ clean-noinstLTLIBRARIES:
 	  echo rm -f $${locs}; \
 	  rm -f $${locs}; \
 	}
+Platform/$(am__dirstamp):
+	@$(MKDIR_P) Platform
+	@: > Platform/$(am__dirstamp)
+Platform/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) Platform/$(DEPDIR)
+	@: > Platform/$(DEPDIR)/$(am__dirstamp)
+Platform/libplank_internal_la-Backend.lo: Platform/$(am__dirstamp) \
+	Platform/$(DEPDIR)/$(am__dirstamp)
+Platform/X11/$(am__dirstamp):
+	@$(MKDIR_P) Platform/X11
+	@: > Platform/X11/$(am__dirstamp)
+Platform/X11/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) Platform/X11/$(DEPDIR)
+	@: > Platform/X11/$(DEPDIR)/$(am__dirstamp)
+Platform/X11/libplank_internal_la-X11Backend.lo:  \
+	Platform/X11/$(am__dirstamp) \
+	Platform/X11/$(DEPDIR)/$(am__dirstamp)
 Services/$(am__dirstamp):
 	@$(MKDIR_P) Services
 	@: > Services/$(am__dirstamp)
@@ -1227,6 +1250,10 @@ mostlyclean-compile:
 	-rm -f Factories/*.lo
 	-rm -f Items/*.$(OBJEXT)
 	-rm -f Items/*.lo
+	-rm -f Platform/*.$(OBJEXT)
+	-rm -f Platform/*.lo
+	-rm -f Platform/X11/*.$(OBJEXT)
+	-rm -f Platform/X11/*.lo
 	-rm -f Services/*.$(OBJEXT)
 	-rm -f Services/*.lo
 	-rm -f Widgets/*.$(OBJEXT)
@@ -1281,6 +1308,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/TransientDockItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/TrayToggleItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/WorkspaceItem.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Platform/$(DEPDIR)/libplank_internal_la-Backend.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/AccentColor.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Environment.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/EnvironmentSettings.Plo@am__quote@ # am--include-marker
@@ -1370,6 +1399,20 @@ libplank_internal_la-InternalQuarks.lo: InternalQuarks.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='InternalQuarks.c' object='libplank_internal_la-InternalQuarks.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o libplank_internal_la-InternalQuarks.lo `test -f 'InternalQuarks.c' || echo '$(srcdir)/'`InternalQuarks.c
+
+Platform/libplank_internal_la-Backend.lo: Platform/Backend.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/libplank_internal_la-Backend.lo -MD -MP -MF Platform/$(DEPDIR)/libplank_internal_la-Backend.Tpo -c -o Platform/libplank_internal_la-Backend.lo `test -f 'Platform/Backend.c' || echo '$(srcdir)/'`Platform/Backend.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/$(DEPDIR)/libplank_internal_la-Backend.Tpo Platform/$(DEPDIR)/libplank_internal_la-Backend.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/Backend.c' object='Platform/libplank_internal_la-Backend.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/libplank_internal_la-Backend.lo `test -f 'Platform/Backend.c' || echo '$(srcdir)/'`Platform/Backend.c
+
+Platform/X11/libplank_internal_la-X11Backend.lo: Platform/X11/X11Backend.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11Backend.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Tpo -c -o Platform/X11/libplank_internal_la-X11Backend.lo `test -f 'Platform/X11/X11Backend.c' || echo '$(srcdir)/'`Platform/X11/X11Backend.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11Backend.c' object='Platform/X11/libplank_internal_la-X11Backend.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11Backend.lo `test -f 'Platform/X11/X11Backend.c' || echo '$(srcdir)/'`Platform/X11/X11Backend.c
 
 Services/libplank_internal_la-Accessibility.lo: Services/Accessibility.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-Accessibility.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-Accessibility.Tpo -c -o Services/libplank_internal_la-Accessibility.lo `test -f 'Services/Accessibility.c' || echo '$(srcdir)/'`Services/Accessibility.c
@@ -1479,6 +1522,8 @@ clean-libtool:
 	-rm -rf Drawing/.libs Drawing/_libs
 	-rm -rf Factories/.libs Factories/_libs
 	-rm -rf Items/.libs Items/_libs
+	-rm -rf Platform/.libs Platform/_libs
+	-rm -rf Platform/X11/.libs Platform/X11/_libs
 	-rm -rf Services/.libs Services/_libs
 	-rm -rf Widgets/.libs Widgets/_libs
 install-nodist_pkgconfigDATA: $(nodist_pkgconfig_DATA)
@@ -1843,6 +1888,10 @@ distclean-generic:
 	-rm -f Factories/$(am__dirstamp)
 	-rm -f Items/$(DEPDIR)/$(am__dirstamp)
 	-rm -f Items/$(am__dirstamp)
+	-rm -f Platform/$(DEPDIR)/$(am__dirstamp)
+	-rm -f Platform/$(am__dirstamp)
+	-rm -f Platform/X11/$(DEPDIR)/$(am__dirstamp)
+	-rm -f Platform/X11/$(am__dirstamp)
 	-rm -f Services/$(DEPDIR)/$(am__dirstamp)
 	-rm -f Services/$(am__dirstamp)
 	-rm -f Widgets/$(DEPDIR)/$(am__dirstamp)
@@ -1904,6 +1953,8 @@ distclean: distclean-am
 	-rm -f Items/$(DEPDIR)/TransientDockItem.Plo
 	-rm -f Items/$(DEPDIR)/TrayToggleItem.Plo
 	-rm -f Items/$(DEPDIR)/WorkspaceItem.Plo
+	-rm -f Platform/$(DEPDIR)/libplank_internal_la-Backend.Plo
+	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo
 	-rm -f Services/$(DEPDIR)/AccentColor.Plo
 	-rm -f Services/$(DEPDIR)/Environment.Plo
 	-rm -f Services/$(DEPDIR)/EnvironmentSettings.Plo
@@ -2034,6 +2085,8 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Items/$(DEPDIR)/TransientDockItem.Plo
 	-rm -f Items/$(DEPDIR)/TrayToggleItem.Plo
 	-rm -f Items/$(DEPDIR)/WorkspaceItem.Plo
+	-rm -f Platform/$(DEPDIR)/libplank_internal_la-Backend.Plo
+	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo
 	-rm -f Services/$(DEPDIR)/AccentColor.Plo
 	-rm -f Services/$(DEPDIR)/Environment.Plo
 	-rm -f Services/$(DEPDIR)/EnvironmentSettings.Plo

@@ -1,0 +1,62 @@
+//
+//  Copyright (C) 2026 Dock-E
+//
+//  This file is part of Plank.
+//
+//  Plank is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  Plank is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+
+namespace Plank.Platform
+{
+	/**
+	 * The X11 backend: Wnck, BAMF, Xlib, XDamage, XFixes and XInput live
+	 * below lib/Platform/X11/ and nowhere else.
+	 */
+	public class X11Backend : Object, Backend
+	{
+		public BackendKind kind { get { return BackendKind.X11; } }
+
+		public Capability capabilities { get { return supported; } }
+
+		public Gdk.X11.Display display { get; construct; }
+
+		Capability supported;
+
+		public X11Backend (Gdk.X11.Display display)
+		{
+			Object (display : display);
+		}
+
+		construct
+		{
+			supported = Capability.TOPLEVELS
+				| Capability.TOPLEVEL_GEOMETRY
+				| Capability.TOPLEVEL_PID
+				| Capability.STACKING_ORDER
+				| Capability.WINDOW_ICONS
+				| Capability.THUMBNAILS
+				| Capability.WORKSPACES
+				| Capability.WINDOW_WORKSPACE
+				| Capability.SHOW_DESKTOP
+				| Capability.ICON_GEOMETRY
+				| Capability.RESERVE_SPACE
+				| Capability.GLOBAL_SUPER_KEY
+				| Capability.GLOBAL_POINTER
+				| Capability.ABSOLUTE_PLACEMENT;
+#if HAVE_BARRIERS
+			supported |= Capability.EDGE_PRESSURE;
+#endif
+		}
+	}
+}
