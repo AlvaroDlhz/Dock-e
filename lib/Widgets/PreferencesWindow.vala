@@ -78,6 +78,8 @@ namespace Plank
 		[GtkChild]
 		Gtk.Switch sw_window_previews;
 		[GtkChild]
+		Gtk.Switch sw_session_actions;
+		[GtkChild]
 		Gtk.Switch sw_custom_background;
 		[GtkChild]
 		Gtk.Switch sw_hover_zoom;
@@ -217,6 +219,9 @@ namespace Plank
 			case "WindowPreviewsEnabled":
 				sw_window_previews.set_active (prefs.WindowPreviewsEnabled);
 				break;
+			case "ShowSessionActions":
+				sw_session_actions.set_active (prefs.ShowSessionActions);
+				break;
 			case "HoverZoomEnabled":
 				sw_hover_zoom.set_active (prefs.HoverZoomEnabled);
 				update_animation_control_sensitivity ();
@@ -349,6 +354,11 @@ namespace Plank
 			prefs.WindowPreviewsEnabled = ((Gtk.Switch) widget).get_active ();
 		}
 
+		void session_actions_toggled (GLib.Object widget, ParamSpec param)
+		{
+			prefs.ShowSessionActions = ((Gtk.Switch) widget).get_active ();
+		}
+
 		void hover_zoom_toggled (GLib.Object widget, ParamSpec param)
 		{
 			prefs.HoverZoomEnabled = ((Gtk.Switch) widget).get_active ();
@@ -436,6 +446,7 @@ namespace Plank
 			sw_lock_items.notify["active"].connect (lock_items_toggled);
 			sw_pressure_reveal.notify["active"].connect (pressure_reveal_toggled);
 			sw_window_previews.notify["active"].connect (window_previews_toggled);
+			sw_session_actions.notify["active"].connect (session_actions_toggled);
 			sw_hover_zoom.notify["active"].connect (hover_zoom_toggled);
 			sw_launch_bounce.notify["active"].connect (launch_bounce_toggled);
 			sw_urgent_bounce.notify["active"].connect (urgent_bounce_toggled);
@@ -466,6 +477,7 @@ namespace Plank
 			sw_lock_items.notify["active"].disconnect (lock_items_toggled);
 			sw_pressure_reveal.notify["active"].disconnect (pressure_reveal_toggled);
 			sw_window_previews.notify["active"].disconnect (window_previews_toggled);
+			sw_session_actions.notify["active"].disconnect (session_actions_toggled);
 			sw_hover_zoom.notify["active"].disconnect (hover_zoom_toggled);
 			sw_launch_bounce.notify["active"].disconnect (launch_bounce_toggled);
 			sw_urgent_bounce.notify["active"].disconnect (urgent_bounce_toggled);
@@ -513,6 +525,7 @@ namespace Plank
 			sw_lock_items.set_active (prefs.LockItems);
 			sw_pressure_reveal.set_active (prefs.PressureReveal);
 			sw_window_previews.set_active (prefs.WindowPreviewsEnabled);
+			sw_session_actions.set_active (prefs.ShowSessionActions);
 			sw_hover_zoom.set_active (prefs.HoverZoomEnabled);
 			adj_hover_zoom.value = prefs.HoverZoomPercent;
 			sw_launch_bounce.set_active (prefs.LaunchBounceEnabled);

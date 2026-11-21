@@ -725,6 +725,8 @@ namespace Plank
 			if (showing_commands) {
 				var command_query = query.substring (1).strip ();
 				foreach (unowned string action in POWER_ACTIONS) {
+					if (!SessionActions.is_listed (action, controller.prefs.ShowSessionActions))
+						continue;
 					if (command_query == ""
 						|| LauncherSearch.score (power_action_search_text (action), command_query) >= 0) {
 						visible_commands.add (action);
@@ -789,6 +791,8 @@ namespace Plank
 			// Session commands are found by their name too, without the slash
 			if (query.char_count () >= 2) {
 				foreach (unowned string action in POWER_ACTIONS) {
+					if (!SessionActions.is_listed (action, controller.prefs.ShowSessionActions))
+						continue;
 					if (LauncherSearch.matches_clearly (power_action_search_text (action), query)) {
 						visible_commands.add (action);
 						staged_rows.add (create_power_command_row (action));

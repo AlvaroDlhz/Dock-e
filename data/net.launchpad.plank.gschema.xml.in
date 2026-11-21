@@ -146,6 +146,11 @@
 			<summary>Reduce application motion effects</summary>
 			<description>If true, disable application icon scaling and bouncing animations.</description>
 		</key>
+		<key name="show-session-actions" type="b">
+			<default>true</default>
+			<summary>Show the session actions in the launcher</summary>
+			<description>If true, the launcher offers to lock, suspend, log out, restart and power off. Turn it off when the desktop already does this and the actions should only be in one place.</description>
+		</key>
 		<key name="show-dock-item" type="b">
 			<default>false</default>
 			<summary>Show the item for the dock itself</summary>

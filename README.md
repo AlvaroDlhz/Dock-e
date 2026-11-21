@@ -39,12 +39,29 @@ project. It includes:
 Session commands use the session manager of the running desktop (XFCE,
 Cinnamon, MATE, KDE Plasma, LXQt, LXDE, GNOME and its derivatives) and fall
 back to logind (`systemctl`, `loginctl`) anywhere else.
+Where the desktop's panel already offers them, they can be hidden with the
+*Session Actions* switch in the preferences (`show-session-actions`); they are
+shown by default.
 
 ## Background Applications
 
 - **Background applications:** a tray replacement that lists applications
   still running without a window (StatusNotifier and XApp status icons, such as
   Discord or Telegram) and highlights the ones that need attention.
+
+Only one process in a session can keep the list of StatusNotifierItems (the
+`org.kde.StatusNotifierWatcher` name), and the desktop comes first:
+
+- If the desktop keeps it (Plasma, `xapp-sn-watcher` on Cinnamon and MATE, the
+  XFCE systray plugin, the GNOME AppIndicator extension), Dock-e only reads it
+  and registers as one more host, so the same applications show in the panel
+  and in the dock. The XApp icons `xapp-sn-watcher` makes out of those items
+  are left out, so nothing shows twice.
+- If nothing keeps it, Dock-e waits three seconds after starting, in case the
+  desktop is about to, and then keeps it itself. It lets the desktop replace it
+  at any time, and keeps it again only once the name is free.
+- XEmbed (`_NET_SYSTEM_TRAY_S<n>`) is never taken, so a classic system tray in
+  the panel is not affected.
 
 The former volume, Bluetooth, Wi-Fi, battery, and clock panels were removed
 from the dock, along with their backends.
