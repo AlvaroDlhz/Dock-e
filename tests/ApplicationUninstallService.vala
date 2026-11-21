@@ -12,6 +12,12 @@ namespace PlankTests
 	{
 		public Gee.HashMap<string, string> answers = new Gee.HashMap<string, string> ();
 		public Gee.ArrayList<string> queries = new Gee.ArrayList<string> ();
+		public Gee.HashSet<string> programs = new Gee.HashSet<string> ();
+
+		public bool has_program (string program)
+		{
+			return programs.contains (program);
+		}
 
 		public async string? query (string[] argv, Cancellable? cancellable) throws Error
 		{
@@ -30,6 +36,8 @@ namespace PlankTests
 		Test.add_func ("/Services/ApplicationUninstallService/snap", uninstall_service_snap);
 		Test.add_func ("/Services/ApplicationUninstallService/dpkg", uninstall_service_dpkg);
 		Test.add_func ("/Services/ApplicationUninstallService/rpm", uninstall_service_rpm);
+		Test.add_func ("/Services/ApplicationUninstallService/pacman", uninstall_service_pacman);
+		Test.add_func ("/Services/ApplicationUninstallService/without-packagekit", uninstall_service_without_packagekit);
 		Test.add_func ("/Services/ApplicationUninstallService/no-owner", uninstall_service_no_owner);
 		Test.add_func ("/Services/ApplicationUninstallService/cancellation", uninstall_service_cancellation);
 		Test.add_func ("/Services/ApplicationUninstallService/parsers", uninstall_service_parsers);
@@ -74,6 +82,7 @@ namespace PlankTests
 		var backend = new FakeApplicationUninstallBackend ();
 		backend.answers["dpkg-query|-S|/usr/share/applications/foo.desktop"] =
 			"foo:amd64: /usr/share/applications/foo.desktop\n";
+		backend.programs.add ("pkcon");
 		var target = detect_target (new ApplicationUninstallService.with_backend (backend),
 			"foo.desktop", "/usr/bin/foo", "/usr/share/applications/foo.desktop");
 		assert (target != null && target.package_id == "foo:amd64");
@@ -87,6 +96,32 @@ namespace PlankTests
 		var target = detect_target (new ApplicationUninstallService.with_backend (backend),
 			"foo.desktop", "/usr/bin/foo", "/usr/share/applications/foo.desktop");
 		assert (target != null && target.package_id == "foo-1.0.x86_64");
+		assert (string.joinv ("|", target.argv) == "pkexec|zypper|--non-interactive|remove|foo-1.0.x86_64");
+
+		backend.programs.add ("dnf");
+		target = detect_target (new ApplicationUninstallService.with_backend (backend),
+			"foo.desktop", "/usr/bin/foo", "/usr/share/applications/foo.desktop");
+		assert (string.joinv ("|", target.argv) == "pkexec|dnf|remove|-y|foo-1.0.x86_64");
+	}
+
+	void uninstall_service_pacman ()
+	{
+		var backend = new FakeApplicationUninstallBackend ();
+		backend.answers["pacman|-Qqo|/usr/share/applications/foo.desktop"] = "foo\n";
+		var target = detect_target (new ApplicationUninstallService.with_backend (backend),
+			"foo.desktop", "/usr/bin/foo", "/usr/share/applications/foo.desktop");
+		assert (target != null && target.package_id == "foo");
+		assert (string.joinv ("|", target.argv) == "pkexec|pacman|-R|--noconfirm|foo");
+	}
+
+	void uninstall_service_without_packagekit ()
+	{
+		var backend = new FakeApplicationUninstallBackend ();
+		backend.answers["dpkg-query|-S|/usr/share/applications/foo.desktop"] =
+			"foo:amd64: /usr/share/applications/foo.desktop\n";
+		var target = detect_target (new ApplicationUninstallService.with_backend (backend),
+			"foo.desktop", "/usr/bin/foo", "/usr/share/applications/foo.desktop");
+		assert (string.joinv ("|", target.argv) == "pkexec|apt-get|remove|-y|foo:amd64");
 	}
 
 	void uninstall_service_no_owner ()

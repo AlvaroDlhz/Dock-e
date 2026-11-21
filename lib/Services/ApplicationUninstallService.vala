@@ -28,6 +28,7 @@ namespace Plank
 	public interface ApplicationUninstallBackend : Object
 	{
 		public abstract async string? query (string[] argv, Cancellable? cancellable) throws Error;
+		public abstract bool has_program (string program);
 	}
 
 	public class CommandApplicationUninstallBackend : Object, ApplicationUninstallBackend
@@ -40,9 +41,14 @@ namespace Plank
 			runner = new CommandRunner ();
 		}
 
+		public bool has_program (string program)
+		{
+			return Environment.find_program_in_path (program) != null;
+		}
+
 		public async string? query (string[] argv, Cancellable? cancellable) throws Error
 		{
-			if (argv.length == 0 || Environment.find_program_in_path (argv[0]) == null)
+			if (argv.length == 0 || !has_program (argv[0]))
 				return null;
 			var result = yield runner.run (argv, null, QUERY_TIMEOUT_MS, cancellable);
 			return result.successful ? result.standard_output : null;
@@ -92,17 +98,41 @@ namespace Plank
 			var output = yield safe_query ({ "dpkg-query", "-S", desktop_filename }, cancellable);
 			var debian_package = parse_dpkg_owner (output ?? "");
 			if (debian_package != "")
-				return new UninstallTarget (debian_package, "System package",
-					{ "pkcon", "remove", "-y", debian_package });
+				return system_package (debian_package, { "apt-get", "remove", "-y" });
 			if (cancellable != null && cancellable.is_cancelled ())
 				return null;
 
 			output = yield safe_query ({ "rpm", "-qf", desktop_filename }, cancellable);
 			var rpm_package = output != null ? output.strip () : "";
 			if (rpm_package != "")
-				return new UninstallTarget (rpm_package, "System package",
-					{ "pkcon", "remove", "-y", rpm_package });
+				return system_package (rpm_package, backend.has_program ("dnf")
+					? new string[] { "dnf", "remove", "-y" }
+					: new string[] { "zypper", "--non-interactive", "remove" });
+			if (cancellable != null && cancellable.is_cancelled ())
+				return null;
+
+			output = yield safe_query ({ "pacman", "-Qqo", desktop_filename }, cancellable);
+			var pacman_package = output != null ? output.strip () : "";
+			if (pacman_package != "")
+				return system_package (pacman_package, { "pacman", "-R", "--noconfirm" });
 			return null;
+		}
+
+		// PackageKit asks for the password by itself and knows every package
+		// manager. Without it, the package manager of the distribution is run
+		// as the administrator.
+		UninstallTarget system_package (string package, string[] native_remove)
+		{
+			string[] argv = {};
+			if (backend.has_program ("pkcon")) {
+				argv = { "pkcon", "remove", "-y" };
+			} else {
+				argv += "pkexec";
+				foreach (unowned string arg in native_remove)
+					argv += arg;
+			}
+			argv += package;
+			return new UninstallTarget (package, "System package", argv);
 		}
 
 		async string? safe_query (string[] argv, Cancellable? cancellable)

@@ -32,7 +32,8 @@ project. It includes:
   work as well). They replace the former power button.
 - An inline calculator whose result can be copied with Enter.
 - Per-application actions: copy the launch, terminate, restart, or uninstall
-  command, and uninstall packages installed through dpkg, rpm, Flatpak, or Snap.
+  command, and uninstall packages installed through dpkg, rpm, pacman, Flatpak,
+  or Snap.
 - Full mouse and keyboard navigation.
 
 Session commands use the session manager of the running desktop (XFCE,
