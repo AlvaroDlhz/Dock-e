@@ -105,6 +105,21 @@ namespace Plank.Platform
 			return toplevel_manager;
 		}
 
+		BamfAppTracker? app_tracker = null;
+
+		public AppTracker apps { get { return bamf_apps; } }
+
+		/**
+		 * The X11 view of {@link apps}, which also reports BAMF objects.
+		 */
+		public BamfAppTracker bamf_apps {
+			get {
+				if (app_tracker == null)
+					app_tracker = new BamfAppTracker (this);
+				return app_tracker;
+			}
+		}
+
 		public WindowThumbnailer? create_thumbnailer (int width, int height)
 		{
 			return new X11WindowThumbnailer (width, height);

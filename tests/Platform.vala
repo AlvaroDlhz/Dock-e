@@ -20,6 +20,10 @@ namespace PlankTests
 		Test.add_func ("/Platform/X11/device-to-logical-intersection", platform_x11_device_to_logical_intersection);
 		Test.add_func ("/Platform/X11/map-state", platform_x11_map_state);
 		Test.add_func ("/Platform/show-desktop", platform_show_desktop);
+		Test.add_func ("/Platform/ToplevelWaiter/known", platform_toplevel_waiter_known);
+		Test.add_func ("/Platform/ToplevelWaiter/later", platform_toplevel_waiter_later);
+		Test.add_func ("/Platform/ToplevelWaiter/cancel", platform_toplevel_waiter_cancel);
+		Test.add_func ("/Platform/AppTracker/fake", platform_app_tracker_fake);
 		Test.add_func ("/HideManager/WindowOverlap/no-focus", window_overlap_no_focus);
 		Test.add_func ("/HideManager/WindowOverlap/desktop-focused", window_overlap_desktop_focused);
 		Test.add_func ("/HideManager/WindowOverlap/active-maximized", window_overlap_active_maximized);
@@ -330,5 +334,69 @@ namespace PlankTests
 		assert (!backend.workspaces.showing_desktop);
 
 		set_backend_for_tests (null);
+	}
+
+	void platform_toplevel_waiter_known ()
+	{
+		var manager = new FakeToplevelManager ();
+		var known = manager.add (new FakeToplevel ());
+		var waiter = new ToplevelWaiter (manager);
+
+		Toplevel? got = null;
+		waiter.run (known.id, (toplevel) => got = toplevel);
+		assert (got == known);
+		assert (!waiter.is_waiting (known.id));
+	}
+
+	void platform_toplevel_waiter_later ()
+	{
+		var manager = new FakeToplevelManager ();
+		var waiter = new ToplevelWaiter (manager);
+		var window = new FakeToplevel.with_id (0x2a00007);
+
+		var runs = 0;
+		waiter.run (window.id, (toplevel) => {
+			assert (toplevel == window);
+			runs++;
+		});
+		waiter.run (window.id, () => runs++);
+		assert (runs == 0);
+		assert (waiter.is_waiting (window.id));
+
+		// Other windows do not wake it up
+		manager.add (new FakeToplevel ());
+		assert (runs == 0);
+
+		manager.add (window);
+		assert (runs == 2);
+		assert (!waiter.is_waiting (window.id));
+
+		// Each action runs once
+		manager.added (window);
+		assert (runs == 2);
+	}
+
+	void platform_toplevel_waiter_cancel ()
+	{
+		var manager = new FakeToplevelManager ();
+		var waiter = new ToplevelWaiter (manager);
+		var window = new FakeToplevel.with_id (0x2a00009);
+
+		var runs = 0;
+		waiter.run (window.id, () => runs++);
+		waiter.cancel (window.id);
+		manager.add (window);
+		assert (runs == 0);
+	}
+
+	void platform_app_tracker_fake ()
+	{
+		var backend = new FakeBackend (Capability.TOPLEVELS);
+		var favorites = new Gee.ArrayList<string> ();
+		favorites.add ("/usr/share/applications/example.desktop");
+		backend.apps.set_favorites (favorites);
+		assert (backend.fake_apps.favorites.size == 1);
+		assert (backend.apps.running_apps ().size == 0);
+		assert (backend.apps.app_for_desktop_file ("file:///usr/share/applications/example.desktop") == null);
 	}
 }

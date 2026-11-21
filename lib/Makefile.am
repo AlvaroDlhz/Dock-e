@@ -181,9 +181,12 @@ libplank_internal_la_VALASOURCES = \
 	Platform/DockSurface.vala \
 	Platform/EdgeTrigger.vala \
 	Platform/SuperKeyTrigger.vala \
+	Platform/RunningApp.vala \
 	Platform/Toplevel.vala \
+	Platform/ToplevelWaiter.vala \
 	Platform/WindowThumbnailer.vala \
 	Platform/Workspace.vala \
+	Platform/X11/BamfAppTracker.vala \
 	Platform/X11/X11Backend.vala \
 	Platform/X11/X11DockSurface.vala \
 	Platform/X11/X11EdgeTrigger.vala \

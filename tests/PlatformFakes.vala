@@ -41,6 +41,9 @@ namespace PlankTests
 			return new FakeDockSurface ();
 		}
 
+		public AppTracker apps { get { return fake_apps; } }
+		public FakeAppTracker fake_apps = new FakeAppTracker ();
+
 		public WindowThumbnailer? create_thumbnailer (int width, int height)
 		{
 			return null;
@@ -49,6 +52,30 @@ namespace PlankTests
 		public EdgeTrigger? create_edge_trigger (Gtk.Window dock)
 		{
 			return null;
+		}
+	}
+
+	public class FakeAppTracker : Object, AppTracker
+	{
+		public Gee.ArrayList<RunningApp> apps = new Gee.ArrayList<RunningApp> ();
+		public Gee.List<string> favorites = new Gee.ArrayList<string> ();
+
+		public Gee.List<RunningApp> running_apps ()
+		{
+			return apps.read_only_view;
+		}
+
+		public RunningApp? app_for_desktop_file (string uri)
+		{
+			foreach (var app in apps)
+				if (app.desktop_file != null && File.new_for_path (app.desktop_file).get_uri () == uri)
+					return app;
+			return null;
+		}
+
+		public void set_favorites (Gee.List<string> desktop_files)
+		{
+			favorites = desktop_files;
 		}
 	}
 

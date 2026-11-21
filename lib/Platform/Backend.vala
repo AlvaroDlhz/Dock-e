@@ -123,6 +123,11 @@ namespace Plank.Platform
 		public abstract WindowThumbnailer? create_thumbnailer (int width, int height);
 
 		/**
+		 * The running applications.  Created on first use.
+		 */
+		public abstract AppTracker apps { get; }
+
+		/**
 		 * Whether this backend supports the given capability.
 		 */
 		public bool has (Capability capability)
