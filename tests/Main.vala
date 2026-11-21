@@ -44,6 +44,7 @@ namespace PlankTests
 		register_calculator_service_tests ();
 		register_launcher_search_tests ();
 		register_command_runner_tests ();
+		register_platform_tests ();
 		register_dock_profiles_tests ();
 		register_launcher_catalog_tests ();
 		register_session_actions_tests ();

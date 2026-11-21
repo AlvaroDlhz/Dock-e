@@ -180,10 +180,14 @@ libplank_internal_la_VALASOURCES = \
 	Platform/DockSurface.vala \
 	Platform/EdgeTrigger.vala \
 	Platform/SuperKeyTrigger.vala \
+	Platform/Toplevel.vala \
+	Platform/Workspace.vala \
 	Platform/X11/X11Backend.vala \
 	Platform/X11/X11DockSurface.vala \
 	Platform/X11/X11EdgeTrigger.vala \
 	Platform/X11/X11SuperKeyTrigger.vala \
+	Platform/X11/X11Toplevel.vala \
+	Platform/X11/X11Workspace.vala \
 	Services/Accessibility.vala \
 	Services/ApplicationUninstallService.vala \
 	Services/CalculatorService.vala \

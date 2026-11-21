@@ -102,6 +102,17 @@ namespace Plank.Platform
 		public abstract EdgeTrigger? create_edge_trigger (Gtk.Window dock);
 
 		/**
+		 * The windows of other clients.  Created on first use.
+		 */
+		public abstract ToplevelManager toplevels { get; }
+
+		/**
+		 * The virtual desktops, or null without {@link Capability.WORKSPACES}.
+		 * Created on first use.
+		 */
+		public abstract WorkspaceManager? workspaces { get; }
+
+		/**
 		 * Whether this backend supports the given capability.
 		 */
 		public bool has (Capability capability)

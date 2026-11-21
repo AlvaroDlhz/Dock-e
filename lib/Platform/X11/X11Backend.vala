@@ -77,6 +77,34 @@ namespace Plank.Platform
 			return new X11DockSurface (dock);
 		}
 
+		X11ToplevelManager? toplevel_manager = null;
+		X11WorkspaceManager? workspace_manager = null;
+
+		// Created lazily: Wnck must not be touched before WindowControl
+		// made us a pager
+		public ToplevelManager toplevels { get { return ensure_toplevels (); } }
+
+		public WorkspaceManager? workspaces {
+			get {
+				if (workspace_manager == null)
+					workspace_manager = new X11WorkspaceManager (Wnck.Screen.get_default ());
+				return workspace_manager;
+			}
+		}
+
+		/**
+		 * The X11 view of {@link toplevels}, for the parts of the X11 backend
+		 * which start from an XID.
+		 */
+		public X11ToplevelManager x11_toplevels { get { return ensure_toplevels (); } }
+
+		unowned X11ToplevelManager ensure_toplevels ()
+		{
+			if (toplevel_manager == null)
+				toplevel_manager = new X11ToplevelManager (Wnck.Screen.get_default ());
+			return toplevel_manager;
+		}
+
 		public EdgeTrigger? create_edge_trigger (Gtk.Window dock)
 		{
 #if HAVE_BARRIERS
