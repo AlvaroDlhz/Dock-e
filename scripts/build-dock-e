@@ -13,13 +13,39 @@ if [ -f "$PROJECT_DIR/config.status" ]; then
 	exit 2
 fi
 
+# The local build is the dock which is used every day, so it is optimized
+# while keeping its debug symbols. GObject verifies the type of an instance on
+# every cast, which Vala emits all over the drawing code; the checks are for
+# hand-written C and are left out. Sections nothing refers to are dropped.
+# Set CFLAGS or LDFLAGS to replace these, DOCK_E_LTO=1 to optimize across files
+# as well, which makes every build considerably slower.
+: "${CFLAGS=-g -O2 -DG_DISABLE_CAST_CHECKS -ffunction-sections -fdata-sections}"
+: "${LDFLAGS=-Wl,-O1,--as-needed,--gc-sections}"
+if [ "${DOCK_E_LTO:-0}" = 1 ]; then
+	CFLAGS="$CFLAGS -flto=auto"
+	LDFLAGS="$LDFLAGS -flto=auto"
+fi
+
 mkdir -p "$BUILD_DIR"
 
-if [ ! -f "$BUILD_DIR/Makefile" ]; then
+# Objects do not notice that their flags changed, so they are built anew
+FLAGS_STAMP="$BUILD_DIR/.dock-e-flags"
+FLAGS="$CFLAGS|$LDFLAGS|${DOCK_E_CONFIGURE_FLAGS:-}"
+FLAGS_CHANGED=0
+if [ -f "$BUILD_DIR/Makefile" ] && [ "$(cat "$FLAGS_STAMP" 2>/dev/null || true)" != "$FLAGS" ]; then
+	FLAGS_CHANGED=1
+fi
+
+if [ ! -f "$BUILD_DIR/Makefile" ] || [ "$FLAGS_CHANGED" = 1 ]; then
 	echo "Configuring Dock-E in $BUILD_DIR"
 	# DOCK_E_CONFIGURE_FLAGS is intentionally word-split to accept several flags.
 	# shellcheck disable=SC2086
-	(cd "$BUILD_DIR" && "$PROJECT_DIR/configure" ${DOCK_E_CONFIGURE_FLAGS:-})
+	(cd "$BUILD_DIR" && "$PROJECT_DIR/configure" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" \
+		${DOCK_E_CONFIGURE_FLAGS:-})
+	if [ "$FLAGS_CHANGED" = 1 ]; then
+		make -C "$BUILD_DIR" clean >/dev/null
+	fi
+	printf '%s' "$FLAGS" > "$FLAGS_STAMP"
 fi
 
 echo "Building Dock-E with $JOBS job(s)"

@@ -1,0 +1,36 @@
+#!/usr/bin/env sh
+
+# Reports what the running dock costs while nothing happens: its memory, how
+# often it wakes up and how much processor time it takes. Run it before and
+# after a change, without touching the dock meanwhile, and compare.
+#
+#   scripts/measure-dock-e [seconds]
+
+set -eu
+
+SECONDS_TO_WATCH=${1:-30}
+PID=$(pgrep -x plank | head -n 1 || true)
+if [ -z "$PID" ]; then
+	echo "Dock-E is not running." >&2
+	exit 1
+fi
+
+field() { awk -v key="$1" '$1 == key ":" { print $2 }' "/proc/$PID/$2"; }
+ticks() { awk '{ print $14 + $15 }' "/proc/$PID/stat"; }
+
+WAKEUPS_BEFORE=$(field voluntary_ctxt_switches status)
+TICKS_BEFORE=$(ticks)
+sleep "$SECONDS_TO_WATCH"
+WAKEUPS_AFTER=$(field voluntary_ctxt_switches status)
+TICKS_AFTER=$(ticks)
+TICKS_PER_SECOND=$(getconf CLK_TCK)
+
+echo "Dock-E, process $PID, watched for $SECONDS_TO_WATCH s"
+echo "  memory in use (RSS)......: $(field VmRSS status) kB"
+echo "  memory of its own........: $(field Private_Dirty smaps_rollup) kB"
+echo "  threads..................: $(field Threads status)"
+awk -v w="$((WAKEUPS_AFTER - WAKEUPS_BEFORE))" -v t="$((TICKS_AFTER - TICKS_BEFORE))" \
+	-v s="$SECONDS_TO_WATCH" -v hz="$TICKS_PER_SECOND" 'BEGIN {
+		printf "  wakeups per second.......: %.2f\n", w / s
+		printf "  processor time...........: %.3f %%\n", 100 * t / hz / s
+	}'
