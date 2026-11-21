@@ -6,8 +6,140 @@ namespace Plank
 	interface StatusNotifierWatcher : Object
 	{
 		public abstract string[] RegisteredStatusNotifierItems { owned get; }
+		public abstract async void RegisterStatusNotifierHost (string service) throws Error;
 		public signal void StatusNotifierItemRegistered (string item);
 		public signal void StatusNotifierItemUnregistered (string item);
+	}
+
+	/**
+	 * What Dock-E is to the StatusNotifierWatcher of the session.
+	 */
+	public enum TrayWatcherRole
+	{
+		/**
+		 * Nobody keeps the list yet. Dock-E gives the desktop a moment to
+		 * start its own before keeping it itself.
+		 */
+		WAITING,
+		/**
+		 * Dock-E asked for the name and waits for the answer.
+		 */
+		CLAIMING,
+		/**
+		 * Dock-E keeps the list, and lets the desktop take it over.
+		 */
+		OWNER,
+		/**
+		 * The desktop (Plasma, xapp-sn-watcher, the panel...) keeps the
+		 * list and Dock-E only shows what is in it, like any other host.
+		 */
+		HOST
+	}
+
+	/**
+	 * Decides whether Dock-E keeps the StatusNotifierWatcher or leaves it to
+	 * the desktop.
+	 *
+	 * There can only be one watcher in a session. The one of the desktop
+	 * comes first: Dock-E never takes the name from it, waits a moment at
+	 * start in case it is about to appear, and gives the name up whenever it
+	 * asks for it. Only where nothing else keeps the list does Dock-E keep
+	 * it, so that the applications still have somewhere to register.
+	 *
+	 * This only decides. Asking the bus and timing are left to the caller,
+	 * so that the decisions can be tested without a bus.
+	 */
+	public class TrayWatcherArbiter : Object
+	{
+		/**
+		 * How long the name has to be free before Dock-E takes it.
+		 */
+		public const uint CLAIM_DELAY_MS = 3000U;
+
+		/**
+		 * Flags to ask for the name with: the desktop may replace Dock-E, and
+		 * Dock-E does not wait in line to get it back behind the desktop's
+		 * back, it decides again when the name is free.
+		 */
+		public const BusNameOwnerFlags OWNER_FLAGS =
+			BusNameOwnerFlags.ALLOW_REPLACEMENT | BusNameOwnerFlags.DO_NOT_QUEUE;
+
+		public TrayWatcherRole role { get; private set; default = TrayWatcherRole.WAITING; }
+
+		// Whether Dock-E asked for the name and has not given it up since
+		bool asking = false;
+
+		/**
+		 * The name is free: whether a claim has to be scheduled.
+		 */
+		public bool name_vanished ()
+		{
+			if (role == TrayWatcherRole.CLAIMING || role == TrayWatcherRole.OWNER)
+				return false;
+			role = TrayWatcherRole.WAITING;
+			return true;
+		}
+
+		/**
+		 * Somebody owns the name. When it is not Dock-E, Dock-E is a host.
+		 */
+		public void name_appeared (bool owned_by_us)
+		{
+			if (owned_by_us)
+				return;
+			role = TrayWatcherRole.HOST;
+		}
+
+		/**
+		 * The scheduled claim is due: whether to ask for the name now.
+		 *
+		 * @param name_has_owner whether somebody took the name in the meantime
+		 */
+		public bool claim_due (bool name_has_owner)
+		{
+			if (role != TrayWatcherRole.WAITING)
+				return false;
+			if (name_has_owner) {
+				role = TrayWatcherRole.HOST;
+				return false;
+			}
+			role = TrayWatcherRole.CLAIMING;
+			asking = true;
+			return true;
+		}
+
+		public void name_acquired ()
+		{
+			role = TrayWatcherRole.OWNER;
+		}
+
+		/**
+		 * Dock-E did not get the name, or the desktop replaced it.
+		 *
+		 * @return whether Dock-E has to stop asking for the name
+		 */
+		public bool name_lost ()
+		{
+			var was_asking = asking;
+			asking = false;
+			role = TrayWatcherRole.HOST;
+			return was_asking;
+		}
+
+		/**
+		 * Whether an XApp status icon only mirrors a StatusNotifierItem.
+		 *
+		 * xapp-sn-watcher, the watcher of Cinnamon and MATE, shows every
+		 * StatusNotifierItem as an XApp status icon of its own process.
+		 * Dock-E shows the item itself, so the mirror is left out.
+		 *
+		 * @param icon_pid the process that owns the XApp icon, 0 if unknown
+		 * @param watcher_pid the process of a watcher Dock-E does not keep, 0 if none
+		 */
+		public static bool is_mirrored_icon (uint32 icon_pid, uint32 watcher_pid)
+		{
+			return watcher_pid != 0U && icon_pid == watcher_pid;
+		}
 	}
 
 	public class TrayToggleItem : DockItem
@@ -29,10 +161,16 @@ namespace Plank
 		DBusConnection? watcher_connection;
 		Gdk.Pixbuf? closed_pixbuf;
 		Gdk.Pixbuf? open_pixbuf;
+		TrayWatcherArbiter arbiter;
 		bool owns_watcher = false;
 		bool destroying = false;
 		uint watcher_name_id = 0U;
 		uint watcher_watch_id = 0U;
+		uint claim_timeout_id = 0U;
+		uint host_name_id = 0U;
+		string host_name;
+		// The process of a watcher Dock-E does not keep, to leave out its mirrors
+		uint32 external_watcher_pid = 0U;
 		uint name_owner_subscription_id = 0U;
 		uint interfaces_added_subscription_id = 0U;
 		uint interfaces_removed_subscription_id = 0U;
@@ -46,8 +184,12 @@ namespace Plank
 			tray_items = new Gee.HashMap<string, TrayStatusItem> ();
 			xapp_items = new Gee.HashMap<string, TrayStatusItem> ();
 			load_state_icons ();
+			arbiter = new TrayWatcherArbiter ();
+			host_name = "org.kde.StatusNotifierHost-%d-dock-e".printf ((int) Posix.getpid ());
+			host_name_id = Bus.own_name (BusType.SESSION, host_name, BusNameOwnerFlags.NONE,
+				null, null, null);
 			connect_xapp_monitor ();
-			try_own_watcher ();
+			watch_watcher_name ();
 		}
 
 		~TrayToggleItem ()
@@ -57,6 +199,10 @@ namespace Plank
 				Bus.unown_name (watcher_name_id);
 			if (watcher_watch_id > 0U)
 				Bus.unwatch_name (watcher_watch_id);
+			if (claim_timeout_id > 0U)
+				Source.remove (claim_timeout_id);
+			if (host_name_id > 0U)
+				Bus.unown_name (host_name_id);
 			unregister_local_watcher ();
 			if (xapp_refresh_idle_id > 0U)
 				Source.remove (xapp_refresh_idle_id);
@@ -159,6 +305,9 @@ namespace Plank
 
 		void load_xapp_service (string service, Gee.HashSet<string> registered)
 		{
+			if (external_watcher_pid != 0U
+				&& TrayWatcherArbiter.is_mirrored_icon (pid_of (service), external_watcher_pid))
+				return;
 			try {
 				var reply = session_connection.call_sync (service, XAPP_ROOT,
 					OBJECT_MANAGER_IFACE, "GetManagedObjects", null,
@@ -198,10 +347,61 @@ namespace Plank
 			}
 		}
 
-		void try_own_watcher ()
+		/**
+		 * Follows who keeps the list of StatusNotifierItems, see TrayWatcherArbiter.
+		 */
+		void watch_watcher_name ()
 		{
+			watcher_watch_id = Bus.watch_name (BusType.SESSION, WATCHER_NAME,
+				BusNameWatcherFlags.NONE,
+				(connection, name, owner) => on_watcher_appeared (connection, owner),
+				(connection, name) => on_watcher_vanished ());
+		}
+
+		void on_watcher_appeared (DBusConnection connection, string owner)
+		{
+			if (destroying)
+				return;
+			var owned_by_us = owner == connection.get_unique_name ();
+			arbiter.name_appeared (owned_by_us);
+			if (owned_by_us)
+				return;
+			cancel_claim ();
+			// The desktop may replace Dock-E before Dock-E hears it lost the name
+			drop_local_watcher ();
+			connect_watcher ();
+		}
+
+		void on_watcher_vanished ()
+		{
+			if (destroying)
+				return;
+			if (watcher != null)
+				disconnect_watcher ();
+			if (!arbiter.name_vanished () || claim_timeout_id > 0U)
+				return;
+			claim_timeout_id = Timeout.add (TrayWatcherArbiter.CLAIM_DELAY_MS, () => {
+				claim_timeout_id = 0U;
+				if (arbiter.claim_due (watcher != null))
+					own_watcher ();
+				return false;
+			});
+		}
+
+		void cancel_claim ()
+		{
+			if (claim_timeout_id > 0U) {
+				Source.remove (claim_timeout_id);
+				claim_timeout_id = 0U;
+			}
+		}
+
+		void own_watcher ()
+		{
+			if (watcher_name_id > 0U)
+				return;
 			watcher_name_id = Bus.own_name (BusType.SESSION, WATCHER_NAME,
-				BusNameOwnerFlags.NONE,
+				TrayWatcherArbiter.OWNER_FLAGS,
 				(connection, name) => {},
 				(connection, name) => on_watcher_name_acquired (connection, name),
 				(connection, name) => on_watcher_name_lost (connection, name));
@@ -211,7 +411,10 @@ namespace Plank
 		{
 			if (destroying)
 				return;
+			arbiter.name_acquired ();
 			owns_watcher = true;
+			watcher = null;
+			external_watcher_pid = 0U;
 			watcher_connection = connection;
 			local_watcher = new LocalStatusNotifierWatcher (connection);
 			try {
@@ -224,18 +427,31 @@ namespace Plank
 			local_watcher.status_notifier_item_unregistered.connect (() => refresh ());
 			debug ("Dock-E is now the StatusNotifierWatcher");
 			refresh ();
+			schedule_xapp_refresh ();
 		}
 
 		void on_watcher_name_lost (DBusConnection connection, string name)
 		{
 			if (destroying)
 				return;
-			if (owns_watcher) {
-				owns_watcher = false;
-				unregister_local_watcher ();
+			drop_local_watcher ();
+			// Stop asking, the name watch tells when it is free again
+			if (arbiter.name_lost () && watcher_name_id > 0U) {
+				Bus.unown_name (watcher_name_id);
+				watcher_name_id = 0U;
 			}
-			// Someone else already owns the name or just took it over; track it as a client.
-			start_watcher_fallback ();
+		}
+
+		void drop_local_watcher ()
+		{
+			if (!owns_watcher)
+				return;
+			owns_watcher = false;
+			unregister_local_watcher ();
+			tray_items.clear ();
+			update_summary ();
+			tray_changed ();
+			debug ("The desktop took over the StatusNotifierWatcher, Dock-E is now a host");
 		}
 
 		void unregister_local_watcher ()
@@ -249,16 +465,9 @@ namespace Plank
 			watcher_connection = null;
 		}
 
-		void start_watcher_fallback ()
-		{
-			if (watcher_watch_id > 0U)
-				return;
-			watcher_watch_id = Bus.watch_name (BusType.SESSION, WATCHER_NAME,
-				BusNameWatcherFlags.NONE,
-				(connection, name, owner) => connect_watcher (),
-				(connection, name) => disconnect_watcher ());
-		}
-
+		/**
+		 * Shows what the desktop's watcher lists, as one more host.
+		 */
 		void connect_watcher ()
 		{
 			try {
@@ -267,16 +476,45 @@ namespace Plank
 				watcher.StatusNotifierItemRegistered.connect (() => refresh ());
 				watcher.StatusNotifierItemUnregistered.connect (() => refresh ());
 				watcher.notify["registered-status-notifier-items"].connect (() => refresh ());
+				// Applications only use StatusNotifierItem where a host says it is there
+				watcher.RegisterStatusNotifierHost.begin (host_name, (obj, res) => {
+					try {
+						((StatusNotifierWatcher) obj).RegisterStatusNotifierHost.end (res);
+					} catch (Error e) {
+						debug ("Unable to register as status notifier host: %s", e.message);
+					}
+				});
+				external_watcher_pid = pid_of (WATCHER_NAME);
+				debug ("Dock-E is a host of the desktop's StatusNotifierWatcher");
 				refresh ();
+				schedule_xapp_refresh ();
 			} catch (Error e) {
 				warning ("Status notifier watcher unavailable: %s", e.message);
 				disconnect_watcher ();
 			}
 		}
 
+		uint32 pid_of (string name)
+		{
+			if (session_connection == null)
+				return 0U;
+			try {
+				var reply = session_connection.call_sync ("org.freedesktop.DBus",
+					"/org/freedesktop/DBus", "org.freedesktop.DBus", "GetConnectionUnixProcessID",
+					new Variant ("(s)", name), new VariantType ("(u)"), DBusCallFlags.NONE, 1000, null);
+				return reply.get_child_value (0).get_uint32 ();
+			} catch (Error e) {
+				return 0U;
+			}
+		}
+
 		void disconnect_watcher ()
 		{
 			watcher = null;
+			if (external_watcher_pid != 0U) {
+				external_watcher_pid = 0U;
+				schedule_xapp_refresh ();
+			}
 			tray_items.clear ();
 			update_summary ();
 			tray_changed ();
