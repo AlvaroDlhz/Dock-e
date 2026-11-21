@@ -555,7 +555,18 @@ todas las capacidades siguen activas.
 
 ---
 
-## 5. Decisiones abiertas (corresponden al usuario)
+## 5. Decisiones (tomadas por el usuario el 2026-11-21)
+
+Resueltas, en todos los casos con la opción recomendada:
+
+- **D1:** modelo propio `RunningApp`/`Toplevel`; BAMF y Wnck quedan dentro del backend X11.
+- **D2:** se rompe la API pública de libplank en la etapa 10 (sube el soname y se actualizan los docklets incluidos).
+- **D3:** backend Wayland con gtk-layer-shell y los protocolos en C de `wayland-scanner` envueltos en GObject.
+- **D4:** GNOME en Wayland no se soporta en el backend nativo; mensaje claro al arrancar.
+
+Las opciones consideradas se conservan abajo como referencia.
+
+### Opciones consideradas
 
 **D1. Modelo de aplicaciones y ventanas**
 1. *(Recomendada)* Modelo propio `RunningApp`/`Toplevel` en `Plank.Platform`, con
