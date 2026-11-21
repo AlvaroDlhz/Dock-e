@@ -94,6 +94,14 @@ namespace Plank.Platform
 		public abstract DockSurface create_dock_surface (Gtk.Window dock);
 
 		/**
+		 * Creates a trigger for the screen edge the dock sits on.
+		 *
+		 * @return null if the backend has no {@link Capability.EDGE_PRESSURE}
+		 *         or the display server lacks it at runtime
+		 */
+		public abstract EdgeTrigger? create_edge_trigger (Gtk.Window dock);
+
+		/**
 		 * Whether this backend supports the given capability.
 		 */
 		public bool has (Capability capability)

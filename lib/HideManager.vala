@@ -60,11 +60,9 @@ namespace Plank
 		// the results of our update
 		const uint UPDATE_TIMEOUT = 200U;
 		
-#if HAVE_BARRIERS
 		// FIXME Use an IconSize-based value?
 		const double PRESSURE_THRESHOLD = 60.0;
 		const uint PRESSURE_TIMEOUT = 1000U;
-#endif
 		
 		static int plank_pid;
 		
@@ -107,13 +105,9 @@ namespace Plank
 		bool dialog_windows_intersect = false;
 		Gdk.Rectangle last_window_rect;
 		
-#if HAVE_BARRIERS
-		XFixes.PointerBarrier barrier = 0;
-		int opcode = 0;
+		Platform.EdgeTrigger? edge_trigger = null;
 		double pressure = 0.0;
 		uint pressure_timer_id = 0U;
-		bool barriers_supported = false;
-#endif
 		
 		/**
 		 * Creates a new instance of a HideManager, which handles
@@ -140,9 +134,7 @@ namespace Plank
 			unowned DockWindow window = controller.window;
 			unowned Wnck.Screen wnck_screen = Wnck.Screen.get_default ();
 			
-#if HAVE_BARRIERS
-			initialize_barriers_support ();
-#endif
+			initialize_edge_trigger ();
 			
 			window.enter_notify_event.connect (handle_enter_notify_event);
 			window.leave_notify_event.connect (handle_leave_notify_event);
@@ -173,16 +165,12 @@ namespace Plank
 			
 			stop_timers ();
 			
-#if HAVE_BARRIERS
-			gdk_window_remove_filter (null, (Gdk.FilterFunc)xevent_filter);
-			
-			if (barrier != 0) {
-				unowned Gdk.X11.Display gdk_display = (controller.window.get_display () as Gdk.X11.Display);
-				unowned X.Display display = gdk_display.get_xdisplay ();
-				XFixes.destroy_pointer_barrier (display, barrier);
-				barrier = 0;
+			if (edge_trigger != null) {
+				edge_trigger.hit.disconnect (handle_edge_hit);
+				edge_trigger.left.disconnect (handle_edge_left);
+				edge_trigger.clear ();
+				edge_trigger = null;
 			}
-#endif
 		}
 		
 		/**
@@ -261,17 +249,13 @@ namespace Plank
 				
 				prefs_changed_timer_id = Gdk.threads_add_timeout (UPDATE_TIMEOUT, () => {
 					update_window_intersect ();
-#if HAVE_BARRIERS
 					update_barrier ();
-#endif
 					prefs_changed_timer_id = 0U;
 					return false;
 				});
 				break;
 			case "PressureReveal":
-#if HAVE_BARRIERS
 				update_barrier ();
-#endif
 				break;
 			default:
 				// Nothing important for us changed
@@ -391,12 +375,10 @@ namespace Plank
 			if (event.detail == Gdk.NotifyType.INFERIOR)
 				return Hidden;
 			
-#if HAVE_BARRIERS
-			if (Hidden && barriers_supported
+			if (Hidden && edge_trigger != null
 				&& controller.prefs.PressureReveal
 				&& device_supports_pressure (event.get_source_device ()))
 				return Hidden;
-#endif
 			
 			if (!Hovered)
 				update_hovered_with_coords ((int) event.x, (int) event.y);
@@ -601,133 +583,80 @@ namespace Plank
 			}
 		}
 		
-#if HAVE_BARRIERS
-		void initialize_barriers_support ()
+		void initialize_edge_trigger ()
 		{
-			unowned Gdk.X11.Display gdk_display = (controller.window.get_display () as Gdk.X11.Display);
-			unowned X.Display display = gdk_display.get_xdisplay ();
-			int error_base, first_event_return;
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend == null)
+				return;
 			
-			gdk_window_remove_filter (null, (Gdk.FilterFunc)xevent_filter);
+			edge_trigger = backend.create_edge_trigger (controller.window);
+			if (edge_trigger == null)
+				return;
 			
-			if (!display.query_extension ("XInputExtension", out opcode, out first_event_return, out error_base)) {
-				debug ("Barriers disabled (XInput needed)");
-				barriers_supported = false;
-			} else {
-				int major = 2, minor = 3;
-				var has_xinput = (XInput.query_version (display, ref major, ref minor) == X.Success);
-				if (has_xinput && major >= 2 && minor >= 3) {
-					message ("Barriers enabled (XInput %i.%i support)\n", major, minor);
-					barriers_supported = true;
-					gdk_window_add_filter (null, (Gdk.FilterFunc)xevent_filter);
-				} else {
-					debug ("Barriers disabled (XInput %i.%i not sufficient)", major, minor);
-					barriers_supported = false;
+			edge_trigger.hit.connect (handle_edge_hit);
+			edge_trigger.left.connect (handle_edge_left);
+		}
+		
+		void handle_edge_hit (double dx, double dy, uint32 time)
+		{
+			double slide = 0.0, distance = 0.0;
+			switch (controller.position_manager.Position) {
+			default:
+			case Gtk.PositionType.BOTTOM:
+			case Gtk.PositionType.TOP:
+				distance = Math.fabs (dy);
+				slide = Math.fabs (dx);
+				break;
+			case Gtk.PositionType.LEFT:
+			case Gtk.PositionType.RIGHT:
+				distance = Math.fabs (dx);
+				slide = Math.fabs (dy);
+				break;
+			}
+			
+			if (slide < distance) {
+				distance = Math.fmin (15.0, distance);
+				pressure += distance;
+				Logger.verbose ("HideManager (pressure = %f)", pressure);
+			}
+			
+			if (pressure >= PRESSURE_THRESHOLD) {
+				pressure = 0.0;
+				
+				if (pressure_timer_id > 0U) {
+					GLib.Source.remove (pressure_timer_id);
+					pressure_timer_id = 0U;
 				}
+				
+				Logger.verbose ("HideManager (pressure-threshold reached > unhide (%f))", PRESSURE_THRESHOLD);
+				
+				freeze_notify ();
+				
+				if (!Hovered) {
+					Hovered = true;
+					update_hidden ();
+				}
+				
+				thaw_notify ();
 			}
 		}
-
-		/**
-		 * Event filter method needed to fetch X.Events
-		 */
-		[CCode (instance_pos = -1)]
-		Gdk.FilterReturn xevent_filter (Gdk.XEvent gdk_xevent, Gdk.Event gdk_event)
+		
+		void handle_edge_left ()
 		{
-			X.Event* xevent = (X.Event*) gdk_xevent;
-			X.GenericEventCookie* xcookie = &xevent.xcookie;
-			unowned X.Display display = xcookie.display;
-			
-			// Did we got a barrier-event?
-			if (barrier == 0
-				|| (xcookie.extension != opcode)
-				|| (xcookie.evtype != XInput.EventType.BARRIER_HIT && xcookie.evtype != XInput.EventType.BARRIER_LEAVE))
-				return Gdk.FilterReturn.CONTINUE;
-			
-			X.get_event_data (display, xcookie);
-			
-			// Does it match our registered barrier?
-			XInput.BarrierEvent* barrier_event = (XInput.BarrierEvent*) (xcookie.data);
-			if (barrier_event.barrier != barrier) {
-				X.free_event_data (display, xcookie);
-				return Gdk.FilterReturn.CONTINUE;
-			}
-			
-			switch (xcookie.evtype) {
-			case XInput.EventType.BARRIER_HIT:
-				double slide = 0.0, distance = 0.0;
-				switch (controller.position_manager.Position) {
-				default:
-				case Gtk.PositionType.BOTTOM:
-				case Gtk.PositionType.TOP:
-					distance = Math.fabs (barrier_event.dy);
-					slide = Math.fabs (barrier_event.dx);
-					break;
-				case Gtk.PositionType.LEFT:
-				case Gtk.PositionType.RIGHT:
-					distance = Math.fabs (barrier_event.dx);
-					slide = Math.fabs (barrier_event.dy);
-					break;
-				}
-				
-				if (slide < distance) {
-					distance = Math.fmin (15.0, distance);
-					pressure += distance;
-					Logger.verbose ("HideManager (pressure = %f)", pressure);
-				}
-				
-				if (pressure >= PRESSURE_THRESHOLD) {
+			if (pressure_timer_id == 0U)
+				pressure_timer_id = Gdk.threads_add_timeout (PRESSURE_TIMEOUT, () => {
 					pressure = 0.0;
-					
-					if (pressure_timer_id > 0U) {
-						GLib.Source.remove (pressure_timer_id);
-						pressure_timer_id = 0U;
-					}
-					
-					Logger.verbose ("HideManager (pressure-threshold reached > unhide (%f))", PRESSURE_THRESHOLD);
-					
-					freeze_notify ();
-					
-					if (!Hovered) {
-						Hovered = true;
-						update_hidden ();
-					}
-					
-					thaw_notify ();
-				}
-				break;
-			case XInput.EventType.BARRIER_LEAVE:
-				if (pressure_timer_id == 0U)
-					pressure_timer_id = Gdk.threads_add_timeout (PRESSURE_TIMEOUT, () => {
-						pressure = 0.0;
-						pressure_timer_id = 0U;
-						return false;
-					});
-				break;
-			default:
-				break;
-			}
-			
-			XInput.barrier_release_pointer (display, barrier_event.deviceid,
-				barrier, barrier_event.eventid);
-			
-			display.flush ();
-			
-			X.free_event_data (display, xcookie);
-			return Gdk.FilterReturn.REMOVE;
+					pressure_timer_id = 0U;
+					return false;
+				});
 		}
 		
 		public void update_barrier ()
 		{
-			if (!barriers_supported)
+			if (edge_trigger == null)
 				return;
 			
-			unowned Gdk.X11.Display gdk_display = (controller.window.get_display () as Gdk.X11.Display);
-			unowned X.Display display = gdk_display.get_xdisplay ();
-			
-			if (barrier > 0) {
-				XFixes.destroy_pointer_barrier (display, barrier);
-				barrier = 0;
-			}
+			edge_trigger.clear ();
 			
 			if (!controller.prefs.PressureReveal)
 				return;
@@ -735,27 +664,7 @@ namespace Plank
 			if (controller.prefs.HideMode == HideType.NONE)
 				return;
 			
-			var root_xwindow = display.default_root_window ();
-			var barrier_area = controller.position_manager.get_barrier ();
-			
-			// Enable barrier events
-			uchar[] mask_bits = new uchar[XInput.mask_length (XInput.EventType.LASTEVENT)];
-			XInput.EventMask mask = { XInput.ALL_MASTER_DEVICES, (int) (sizeof (uchar) * mask_bits.length), (owned) mask_bits };
-			XInput.set_mask (mask.mask, XInput.EventType.BARRIER_HIT);
-			XInput.set_mask (mask.mask, XInput.EventType.BARRIER_LEAVE);
-			XInput.select_events (display, root_xwindow, &mask, 1);
-
-			debug ("Barrier: %i,%i - %i,%i\n", barrier_area.x, barrier_area.y, barrier_area.x + barrier_area.width, barrier_area.y + barrier_area.height);
-			
-			barrier = XFixes.create_pointer_barrier (
-				display, root_xwindow,
-				barrier_area.x, barrier_area.y, barrier_area.x + barrier_area.width,
-				barrier_area.y + barrier_area.height,
-				0,
-				0, null);
-			
-			warn_if_fail (barrier > 0);
+			edge_trigger.set_edge (controller.position_manager.Position, controller.position_manager.get_barrier ());
 		}
-#endif
 	}
 }

@@ -178,9 +178,11 @@ libplank_internal_la_VALASOURCES = \
 	InternalQuarks.vala \
 	Platform/Backend.vala \
 	Platform/DockSurface.vala \
+	Platform/EdgeTrigger.vala \
 	Platform/SuperKeyTrigger.vala \
 	Platform/X11/X11Backend.vala \
 	Platform/X11/X11DockSurface.vala \
+	Platform/X11/X11EdgeTrigger.vala \
 	Platform/X11/X11SuperKeyTrigger.vala \
 	Services/Accessibility.vala \
 	Services/ApplicationUninstallService.vala \

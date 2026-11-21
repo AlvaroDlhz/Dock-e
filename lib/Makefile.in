@@ -150,9 +150,11 @@ am__objects_2 = libplank_internal_la-InternalConsts.lo \
 	libplank_internal_la-InternalQuarks.lo \
 	Platform/libplank_internal_la-Backend.lo \
 	Platform/libplank_internal_la-DockSurface.lo \
+	Platform/libplank_internal_la-EdgeTrigger.lo \
 	Platform/libplank_internal_la-SuperKeyTrigger.lo \
 	Platform/X11/libplank_internal_la-X11Backend.lo \
 	Platform/X11/libplank_internal_la-X11DockSurface.lo \
+	Platform/X11/libplank_internal_la-X11EdgeTrigger.lo \
 	Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo \
 	Services/libplank_internal_la-Accessibility.lo \
 	Services/libplank_internal_la-ApplicationUninstallService.lo \
@@ -274,9 +276,11 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Items/$(DEPDIR)/WorkspaceItem.Plo \
 	Platform/$(DEPDIR)/libplank_internal_la-Backend.Plo \
 	Platform/$(DEPDIR)/libplank_internal_la-DockSurface.Plo \
+	Platform/$(DEPDIR)/libplank_internal_la-EdgeTrigger.Plo \
 	Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Plo \
 	Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo \
 	Platform/X11/$(DEPDIR)/libplank_internal_la-X11DockSurface.Plo \
+	Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Plo \
 	Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Plo \
 	Services/$(DEPDIR)/AccentColor.Plo \
 	Services/$(DEPDIR)/Environment.Plo \
@@ -899,9 +903,11 @@ libplank_internal_la_VALASOURCES = \
 	InternalQuarks.vala \
 	Platform/Backend.vala \
 	Platform/DockSurface.vala \
+	Platform/EdgeTrigger.vala \
 	Platform/SuperKeyTrigger.vala \
 	Platform/X11/X11Backend.vala \
 	Platform/X11/X11DockSurface.vala \
+	Platform/X11/X11EdgeTrigger.vala \
 	Platform/X11/X11SuperKeyTrigger.vala \
 	Services/Accessibility.vala \
 	Services/ApplicationUninstallService.vala \
@@ -1048,6 +1054,8 @@ Platform/libplank_internal_la-Backend.lo: Platform/$(am__dirstamp) \
 	Platform/$(DEPDIR)/$(am__dirstamp)
 Platform/libplank_internal_la-DockSurface.lo:  \
 	Platform/$(am__dirstamp) Platform/$(DEPDIR)/$(am__dirstamp)
+Platform/libplank_internal_la-EdgeTrigger.lo:  \
+	Platform/$(am__dirstamp) Platform/$(DEPDIR)/$(am__dirstamp)
 Platform/libplank_internal_la-SuperKeyTrigger.lo:  \
 	Platform/$(am__dirstamp) Platform/$(DEPDIR)/$(am__dirstamp)
 Platform/X11/$(am__dirstamp):
@@ -1060,6 +1068,9 @@ Platform/X11/libplank_internal_la-X11Backend.lo:  \
 	Platform/X11/$(am__dirstamp) \
 	Platform/X11/$(DEPDIR)/$(am__dirstamp)
 Platform/X11/libplank_internal_la-X11DockSurface.lo:  \
+	Platform/X11/$(am__dirstamp) \
+	Platform/X11/$(DEPDIR)/$(am__dirstamp)
+Platform/X11/libplank_internal_la-X11EdgeTrigger.lo:  \
 	Platform/X11/$(am__dirstamp) \
 	Platform/X11/$(DEPDIR)/$(am__dirstamp)
 Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo:  \
@@ -1326,9 +1337,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/WorkspaceItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/$(DEPDIR)/libplank_internal_la-Backend.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/$(DEPDIR)/libplank_internal_la-DockSurface.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Platform/$(DEPDIR)/libplank_internal_la-EdgeTrigger.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/X11/$(DEPDIR)/libplank_internal_la-X11DockSurface.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/AccentColor.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Environment.Plo@am__quote@ # am--include-marker
@@ -1433,6 +1446,13 @@ Platform/libplank_internal_la-DockSurface.lo: Platform/DockSurface.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/libplank_internal_la-DockSurface.lo `test -f 'Platform/DockSurface.c' || echo '$(srcdir)/'`Platform/DockSurface.c
 
+Platform/libplank_internal_la-EdgeTrigger.lo: Platform/EdgeTrigger.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/libplank_internal_la-EdgeTrigger.lo -MD -MP -MF Platform/$(DEPDIR)/libplank_internal_la-EdgeTrigger.Tpo -c -o Platform/libplank_internal_la-EdgeTrigger.lo `test -f 'Platform/EdgeTrigger.c' || echo '$(srcdir)/'`Platform/EdgeTrigger.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/$(DEPDIR)/libplank_internal_la-EdgeTrigger.Tpo Platform/$(DEPDIR)/libplank_internal_la-EdgeTrigger.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/EdgeTrigger.c' object='Platform/libplank_internal_la-EdgeTrigger.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/libplank_internal_la-EdgeTrigger.lo `test -f 'Platform/EdgeTrigger.c' || echo '$(srcdir)/'`Platform/EdgeTrigger.c
+
 Platform/libplank_internal_la-SuperKeyTrigger.lo: Platform/SuperKeyTrigger.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/libplank_internal_la-SuperKeyTrigger.lo -MD -MP -MF Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Tpo -c -o Platform/libplank_internal_la-SuperKeyTrigger.lo `test -f 'Platform/SuperKeyTrigger.c' || echo '$(srcdir)/'`Platform/SuperKeyTrigger.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Tpo Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Plo
@@ -1453,6 +1473,13 @@ Platform/X11/libplank_internal_la-X11DockSurface.lo: Platform/X11/X11DockSurface
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11DockSurface.c' object='Platform/X11/libplank_internal_la-X11DockSurface.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11DockSurface.lo `test -f 'Platform/X11/X11DockSurface.c' || echo '$(srcdir)/'`Platform/X11/X11DockSurface.c
+
+Platform/X11/libplank_internal_la-X11EdgeTrigger.lo: Platform/X11/X11EdgeTrigger.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11EdgeTrigger.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Tpo -c -o Platform/X11/libplank_internal_la-X11EdgeTrigger.lo `test -f 'Platform/X11/X11EdgeTrigger.c' || echo '$(srcdir)/'`Platform/X11/X11EdgeTrigger.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11EdgeTrigger.c' object='Platform/X11/libplank_internal_la-X11EdgeTrigger.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11EdgeTrigger.lo `test -f 'Platform/X11/X11EdgeTrigger.c' || echo '$(srcdir)/'`Platform/X11/X11EdgeTrigger.c
 
 Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo: Platform/X11/X11SuperKeyTrigger.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Tpo -c -o Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo `test -f 'Platform/X11/X11SuperKeyTrigger.c' || echo '$(srcdir)/'`Platform/X11/X11SuperKeyTrigger.c
@@ -2002,9 +2029,11 @@ distclean: distclean-am
 	-rm -f Items/$(DEPDIR)/WorkspaceItem.Plo
 	-rm -f Platform/$(DEPDIR)/libplank_internal_la-Backend.Plo
 	-rm -f Platform/$(DEPDIR)/libplank_internal_la-DockSurface.Plo
+	-rm -f Platform/$(DEPDIR)/libplank_internal_la-EdgeTrigger.Plo
 	-rm -f Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11DockSurface.Plo
+	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Plo
 	-rm -f Services/$(DEPDIR)/AccentColor.Plo
 	-rm -f Services/$(DEPDIR)/Environment.Plo
@@ -2137,9 +2166,11 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Items/$(DEPDIR)/WorkspaceItem.Plo
 	-rm -f Platform/$(DEPDIR)/libplank_internal_la-Backend.Plo
 	-rm -f Platform/$(DEPDIR)/libplank_internal_la-DockSurface.Plo
+	-rm -f Platform/$(DEPDIR)/libplank_internal_la-EdgeTrigger.Plo
 	-rm -f Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11DockSurface.Plo
+	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Plo
 	-rm -f Services/$(DEPDIR)/AccentColor.Plo
 	-rm -f Services/$(DEPDIR)/Environment.Plo

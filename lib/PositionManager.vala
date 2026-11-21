@@ -665,9 +665,7 @@ namespace Plank
 				|| old_region.width != static_dock_region.width
 				|| old_region.height != static_dock_region.height) {
 				controller.window.update_size_and_position ();
-#if HAVE_BARRIERS
 				controller.hide_manager.update_barrier ();
-#endif
 				
 				// With active compositing support update_size_and_position () won't trigger a redraw
 				// (a changed static_dock_region doesn't implicate the window-size changed)
@@ -1701,7 +1699,6 @@ namespace Plank
 			}
 		}
 		
-#if HAVE_BARRIERS
 		public Gdk.Rectangle get_barrier ()
 		{
 			Gdk.Rectangle barrier = {};
@@ -1738,6 +1735,5 @@ namespace Plank
 			
 			return barrier;
 		}
-#endif
 	}
 }

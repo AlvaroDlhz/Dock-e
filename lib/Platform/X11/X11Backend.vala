@@ -76,5 +76,14 @@ namespace Plank.Platform
 		{
 			return new X11DockSurface (dock);
 		}
+
+		public EdgeTrigger? create_edge_trigger (Gtk.Window dock)
+		{
+#if HAVE_BARRIERS
+			return X11EdgeTrigger.try_create (display);
+#else
+			return null;
+#endif
+		}
 	}
 }
