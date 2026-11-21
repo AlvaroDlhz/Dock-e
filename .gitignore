@@ -78,3 +78,6 @@
 /docs/c-doc/
 /docs/vala-doc/
 /docs/web-doc/
+
+# Copias de respaldo de autoconf/autoheader
+*~
