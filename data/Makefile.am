@@ -29,23 +29,37 @@ EXTRA_DIST = \
 	plank.appdata.xml.in \
 	net.launchpad.plank.gschema.xml.in \
 	plank.desktop.in \
+	dock-e.desktop.in \
+	dock-e-autostart.desktop.in \
 	plank.gresource.xml \
 	menu-2.svg \
 	poof.svg \
+	style/dock-e.css \
 	ui/preferences.ui \
 	$(NULL)
-	style/dock-e.css \
 
 CLEANFILES = \
 	plank.appdata.xml \
 	plank.desktop \
+	dock-e.desktop \
+	dock-e-autostart.desktop \
 	$(gsettings_SCHEMAS) \
 	gschemas.compiled \
 	net.launchpad.plank.gschema.valid \
 	$(NULL)
 
 applicationsdir = $(datadir)/applications
-applications_DATA = plank.desktop
+applications_DATA = dock-e.desktop
+
+# Not started for everybody: it is there to be copied into ~/.config/autostart,
+# which scripts/install-dock-e does
+autostartdir = $(pkgdatadir)/autostart
+autostart_DATA = dock-e-autostart.desktop
+
+# The entries name the program by its full path, since a prefix like ~/.local
+# is not always in the PATH of the session
+dock-e.desktop dock-e-autostart.desktop: %.desktop: %.desktop.in Makefile
+	$(AM_V_GEN) sed -e 's|@bindir[@]|$(bindir)|g' $< > $@ || rm $@
 
 appdatadir = $(datadir)/metainfo
 appdata_DATA = plank.appdata.xml

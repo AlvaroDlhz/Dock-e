@@ -104,11 +104,27 @@ tests/                          Test suite and supporting test components
 vapi/                           Vala interface definitions
 ```
 
+## Requirements
+
+Dock-e runs on any distribution with an **X11 session**; it does not start
+under Wayland. It is developed on Linux Mint with XFCE, and has not been tried
+yet on other desktops.
+
+Building needs Autotools, a C compiler, Vala, and the development files of
+GTK 3, libgee, BAMF, libwnck 3, gnome-menus, and libX11. libdbusmenu-gtk3,
+libXdamage, libXi, and libXfixes are optional. On Debian, Ubuntu, and Mint:
+
+```bash
+sudo apt install build-essential automake libtool gettext valac libgtk-3-dev libgee-0.8-dev libbamf3-dev libwnck-3-dev libgnome-menu-3-dev libdbusmenu-gtk3-dev libx11-dev libxdamage-dev libxi-dev libxfixes-dev libxml2-utils
+```
+
+Other distributions carry the same libraries under their own names (for
+example `bamf-devel` and `libwnck3-devel` on Fedora, `bamf` and `libwnck3` on
+Arch); those names have not been verified against a build.
+
 ## Building
 
-Dock-e uses Autotools, Vala, and GTK 3, and runs on X11. On a system with
-Plank's build dependencies installed, the helper scripts build out of tree in
-`.build/`:
+The helper scripts build out of tree in `.build/`:
 
 ```bash
 scripts/build-dock-e    # configure (first run) and build
@@ -119,6 +135,17 @@ scripts/clean-dock-e    # remove the build's generated files
 
 If `configure` is missing, generate it first with `./autogen.sh` and remove the
 in-source configuration it leaves behind with `make distclean`.
+
+## Installing
+
+```bash
+scripts/install-dock-e
+```
+
+installs into `~/.local` (set `DOCK_E_PREFIX` for another prefix), adds Dock-e
+to the applications menu, and starts it with the session on any desktop (set
+`DOCK_E_AUTOSTART=0` to skip that). The program is still named `plank`, so it
+should not share a prefix with an installation of Plank.
 
 ## Origin and License
 

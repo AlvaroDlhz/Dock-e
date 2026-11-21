@@ -12,6 +12,7 @@
 
 # Compiler and libtool output
 /.build/
+/.build-install/
 /.libs/
 /**/.libs/
 /.deps/

@@ -1,0 +1,33 @@
+#!/usr/bin/env sh
+
+# Builds Dock-E for a prefix and installs it there, together with its menu
+# entry and, for an installation of the user, the entry which starts it with
+# the session. Nothing of the distribution is touched by default:
+#
+#   scripts/install-dock-e                         # into ~/.local
+#   DOCK_E_PREFIX=/usr/local sudo -E scripts/install-dock-e
+#   DOCK_E_AUTOSTART=0 scripts/install-dock-e      # do not start with the session
+
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PROJECT_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+PREFIX=${DOCK_E_PREFIX:-"$HOME/.local"}
+
+# The prefix is compiled into the dock, so this build is kept apart from the
+# one of scripts/build-dock-e, which is run from where it was built
+DOCK_E_BUILD_DIR=${DOCK_E_BUILD_DIR:-"$PROJECT_DIR/.build-install"}
+DOCK_E_CONFIGURE_FLAGS="--prefix=$PREFIX ${DOCK_E_CONFIGURE_FLAGS:-}"
+export DOCK_E_BUILD_DIR DOCK_E_CONFIGURE_FLAGS
+
+"$SCRIPT_DIR/build-dock-e"
+"$SCRIPT_DIR/build-dock-e" install
+
+if [ "${DOCK_E_AUTOSTART:-1}" = 1 ]; then
+	AUTOSTART_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/autostart"
+	mkdir -p "$AUTOSTART_DIR"
+	cp "$PREFIX/share/plank/autostart/dock-e-autostart.desktop" "$AUTOSTART_DIR/dock-e.desktop"
+	echo "Dock-E starts with the session: $AUTOSTART_DIR/dock-e.desktop"
+fi
+
+echo "Dock-E was installed in $PREFIX. Start it with $PREFIX/bin/plank"
