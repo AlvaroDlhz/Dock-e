@@ -109,6 +109,9 @@ namespace Plank
 		Platform.ToplevelManager? toplevels = null;
 		Platform.WorkspaceManager? workspaces = null;
 		Platform.Toplevel? watched_window = null;
+		// Where the dock window last saw the pointer, relative to it; -1 outside
+		int last_pointer_x = -1;
+		int last_pointer_y = -1;
 		double pressure = 0.0;
 		uint pressure_timer_id = 0U;
 		
@@ -193,6 +196,13 @@ namespace Plank
 			unowned PositionManager position_manager = controller.position_manager;
 			unowned DockWindow window = controller.window;
 			
+			// Without a global pointer only our own windows report where it is
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend != null && !backend.has (Platform.Capability.GLOBAL_POINTER)) {
+				update_hovered_with_coords (last_pointer_x, last_pointer_y);
+				return;
+			}
+			
 			// get current mouse pointer location
 			int x, y;
 			
@@ -218,6 +228,9 @@ namespace Plank
 			unowned PositionManager position_manager = controller.position_manager;
 			unowned DockWindow window = controller.window;
 			unowned DragManager drag_manager = controller.drag_manager;
+			
+			last_pointer_x = x;
+			last_pointer_y = y;
 			
 			freeze_notify ();
 			

@@ -226,8 +226,12 @@ namespace Plank
 				set_drag_icon (context, DragItem, 0.8);
 			});
 			
-			context.get_device ().grab (window.get_window (), Gdk.GrabOwnership.APPLICATION, true,
-				Gdk.EventMask.ALL_EVENTS_MASK, null, Gtk.get_current_event_time ());
+			// Grabbing the pointer needs a display server which lets us see it
+			// outside our own windows
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend == null || backend.has (Platform.Capability.GLOBAL_POINTER))
+				context.get_device ().grab (window.get_window (), Gdk.GrabOwnership.APPLICATION, true,
+					Gdk.EventMask.ALL_EVENTS_MASK, null, Gtk.get_current_event_time ());
 		}
 
 		[CCode (instance_pos = -1)]
