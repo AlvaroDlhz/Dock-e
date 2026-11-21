@@ -171,6 +171,7 @@ am__objects_2 = libplank_internal_la-InternalConsts.lo \
 	Services/libplank_internal_la-StatusNoticeModel.lo \
 	Services/libplank_internal_la-Matcher.lo \
 	Services/libplank_internal_la-WindowControl.lo \
+	Services/libplank_internal_la-WindowOverlap.lo \
 	Services/libplank_internal_la-WindowThumbnails.lo \
 	Services/libplank_internal_la-Utils.lo \
 	Widgets/libplank_internal_la-DockletViewModel.lo \
@@ -310,6 +311,7 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-Utils.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo \
+	Services/$(DEPDIR)/libplank_internal_la-WindowOverlap.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Plo \
 	Widgets/$(DEPDIR)/CompositedWindow.Plo \
 	Widgets/$(DEPDIR)/ContextMenuStyle.Plo \
@@ -932,6 +934,7 @@ libplank_internal_la_VALASOURCES = \
 	Services/StatusNoticeModel.vala \
 	Services/Matcher.vala \
 	Services/WindowControl.vala \
+	Services/WindowOverlap.vala \
 	Services/WindowThumbnails.vala \
 	Services/Utils.vala \
 	Widgets/DockletViewModel.vala \
@@ -1125,6 +1128,8 @@ Services/libplank_internal_la-StatusNoticeModel.lo:  \
 Services/libplank_internal_la-Matcher.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-WindowControl.lo:  \
+	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
+Services/libplank_internal_la-WindowOverlap.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-WindowThumbnails.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
@@ -1392,6 +1397,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-Utils.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-WindowOverlap.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/CompositedWindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/ContextMenuStyle.Plo@am__quote@ # am--include-marker
@@ -1618,6 +1624,13 @@ Services/libplank_internal_la-WindowControl.lo: Services/WindowControl.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/WindowControl.c' object='Services/libplank_internal_la-WindowControl.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-WindowControl.lo `test -f 'Services/WindowControl.c' || echo '$(srcdir)/'`Services/WindowControl.c
+
+Services/libplank_internal_la-WindowOverlap.lo: Services/WindowOverlap.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-WindowOverlap.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-WindowOverlap.Tpo -c -o Services/libplank_internal_la-WindowOverlap.lo `test -f 'Services/WindowOverlap.c' || echo '$(srcdir)/'`Services/WindowOverlap.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-WindowOverlap.Tpo Services/$(DEPDIR)/libplank_internal_la-WindowOverlap.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/WindowOverlap.c' object='Services/libplank_internal_la-WindowOverlap.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-WindowOverlap.lo `test -f 'Services/WindowOverlap.c' || echo '$(srcdir)/'`Services/WindowOverlap.c
 
 Services/libplank_internal_la-WindowThumbnails.lo: Services/WindowThumbnails.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-WindowThumbnails.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Tpo -c -o Services/libplank_internal_la-WindowThumbnails.lo `test -f 'Services/WindowThumbnails.c' || echo '$(srcdir)/'`Services/WindowThumbnails.c
@@ -2116,6 +2129,7 @@ distclean: distclean-am
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Utils.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowOverlap.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Plo
 	-rm -f Widgets/$(DEPDIR)/CompositedWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/ContextMenuStyle.Plo
@@ -2257,6 +2271,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Utils.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowOverlap.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Plo
 	-rm -f Widgets/$(DEPDIR)/CompositedWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/ContextMenuStyle.Plo

@@ -106,6 +106,9 @@ namespace Plank
 		Gdk.Rectangle last_window_rect;
 		
 		Platform.EdgeTrigger? edge_trigger = null;
+		Platform.ToplevelManager? toplevels = null;
+		Platform.WorkspaceManager? workspaces = null;
+		Platform.Toplevel? watched_window = null;
 		double pressure = 0.0;
 		uint pressure_timer_id = 0U;
 		
@@ -132,36 +135,45 @@ namespace Plank
 			requires (controller.window != null)
 		{
 			unowned DockWindow window = controller.window;
-			unowned Wnck.Screen wnck_screen = Wnck.Screen.get_default ();
+			unowned Platform.Backend? backend = Platform.get_backend ();
 			
 			initialize_edge_trigger ();
 			
 			window.enter_notify_event.connect (handle_enter_notify_event);
 			window.leave_notify_event.connect (handle_leave_notify_event);
 			
-			wnck_screen.window_opened.connect_after (schedule_update);
-			wnck_screen.window_closed.connect_after (schedule_update);
-			wnck_screen.active_window_changed.connect_after (handle_active_window_changed);
-			wnck_screen.active_workspace_changed.connect_after (handle_workspace_changed);
+			if (backend == null)
+				return;
 			
-			setup_active_window (wnck_screen);
+			toplevels = backend.toplevels;
+			workspaces = backend.workspaces;
+			
+			toplevels.added.connect (handle_toplevels_changed);
+			toplevels.removed.connect (handle_toplevels_changed);
+			toplevels.active_changed.connect (handle_active_window_changed);
+			if (workspaces != null)
+				workspaces.active_changed.connect (handle_workspace_changed);
+			
+			setup_active_window ();
 		}
 		
 		~HideManager ()
 		{
 			unowned DockWindow window = controller.window;
-			unowned DragManager drag_manager = controller.drag_manager;
-			unowned Wnck.Screen wnck_screen = Wnck.Screen.get_default ();
 			
 			controller.prefs.notify.disconnect (prefs_changed);
 			
 			window.enter_notify_event.disconnect (handle_enter_notify_event);
 			window.leave_notify_event.disconnect (handle_leave_notify_event);
 			
-			wnck_screen.window_opened.disconnect (schedule_update);
-			wnck_screen.window_closed.disconnect (schedule_update);
-			wnck_screen.active_window_changed.disconnect (handle_active_window_changed);
-			wnck_screen.active_workspace_changed.disconnect (handle_workspace_changed);
+			if (toplevels != null) {
+				toplevels.added.disconnect (handle_toplevels_changed);
+				toplevels.removed.disconnect (handle_toplevels_changed);
+				toplevels.active_changed.disconnect (handle_active_window_changed);
+			}
+			if (workspaces != null)
+				workspaces.active_changed.disconnect (handle_workspace_changed);
+			unwatch_active_window ();
 			
 			stop_timers ();
 			
@@ -414,65 +426,17 @@ namespace Plank
 		
 		void update_window_intersect ()
 		{
-			var dock_rect = controller.position_manager.get_static_dock_region ();
-			var window_scale_factor = controller.window.get_window ().get_scale_factor ();
-			if (window_scale_factor > 1) {
-				dock_rect.x *= window_scale_factor;
-				dock_rect.y *= window_scale_factor;
-				dock_rect.width *= window_scale_factor;
-				dock_rect.height *= window_scale_factor;
-			}
+			WindowOverlap overlap = {};
 			
-			var intersect = false;
-			var dialog_intersect = false;
-			var active_intersect = false;
-			var new_active_window_intersect = false;
-			var active_maximized_intersect = false;
-			unowned Wnck.Screen screen = Wnck.Screen.get_default ();
-			unowned Wnck.Window? active_window = screen.get_active_window ();
-			unowned Wnck.Workspace? active_workspace = screen.get_active_workspace ();
+			if (toplevels != null)
+				overlap = WindowOverlap.compute (toplevels, workspaces,
+					controller.position_manager.get_static_dock_region (), plank_pid);
 			
-			if (active_window != null && active_workspace != null) {
-				var active_pid = active_window.get_pid ();
-				foreach (var w in screen.get_windows ()) {
-					if (w.is_minimized ())
-						continue;
-					var type = w.get_window_type ();
-					if (type == Wnck.WindowType.DESKTOP || type == Wnck.WindowType.DOCK
-						|| type == Wnck.WindowType.MENU || type == Wnck.WindowType.SPLASHSCREEN)
-						continue;
-					if (!w.is_visible_on_workspace (active_workspace))
-						continue;
-					var pid = w.get_pid ();
-					if (pid == plank_pid)
-						continue;
-					
-					if (window_geometry (w).intersect (dock_rect, null)) {
-						intersect = true;
-						
-						if (pid != active_pid)
-							continue;
-						
-						active_intersect = true;
-						
-						new_active_window_intersect = new_active_window_intersect || (active_window == w);
-						
-						active_maximized_intersect = active_maximized_intersect || (active_window == w
-							&& (w.is_maximized () || w.is_maximized_vertically () || w.is_maximized_horizontally ()));
-						
-						dialog_intersect = dialog_intersect || type == Wnck.WindowType.DIALOG;
-						
-						if (active_maximized_intersect && dialog_intersect)
-							break;
-					}
-				}
-			}
-			
-			window_intersect = intersect;
-			dialog_windows_intersect = dialog_intersect;
-			active_application_intersect = active_intersect;
-			active_window_intersect = new_active_window_intersect;
-			active_maximized_window_intersect = active_maximized_intersect;
+			window_intersect = overlap.any_window;
+			dialog_windows_intersect = overlap.dialog_window;
+			active_application_intersect = overlap.active_application;
+			active_window_intersect = overlap.active_window;
+			active_maximized_window_intersect = overlap.active_maximized_window;
 			
 			pointer_update = false;
 			update_hidden ();
@@ -490,49 +454,57 @@ namespace Plank
 			});
 		}
 		
-		[CCode (instance_pos = -1)]
-		void handle_workspace_changed (Wnck.Screen screen, Wnck.Workspace? previous)
+		void handle_toplevels_changed (Platform.Toplevel toplevel)
 		{
 			schedule_update ();
 		}
 		
-		[CCode (instance_pos = -1)]
-		void handle_active_window_changed (Wnck.Screen screen, Wnck.Window? previous)
+		void handle_workspace_changed (Platform.Workspace? previous)
 		{
-			if (previous != null) {
-				previous.geometry_changed.disconnect (handle_geometry_changed);
-				previous.state_changed.disconnect (handle_state_changed);
-			}
-			
-			setup_active_window (screen);
+			schedule_update ();
 		}
 		
-		void setup_active_window (Wnck.Screen screen)
+		void handle_active_window_changed (Platform.Toplevel? previous)
 		{
-			var active_window = screen.get_active_window ();
+			setup_active_window ();
+		}
+		
+		void unwatch_active_window ()
+		{
+			if (watched_window == null)
+				return;
 			
-			if (active_window != null) {
-				last_window_rect = window_geometry (active_window);
-				active_window.geometry_changed.connect_after (handle_geometry_changed);
-				active_window.state_changed.connect_after (handle_state_changed);
+			watched_window.geometry_changed.disconnect (handle_geometry_changed);
+			watched_window.state_changed.disconnect (handle_state_changed);
+			watched_window = null;
+		}
+		
+		void setup_active_window ()
+		{
+			unwatch_active_window ();
+			
+			watched_window = toplevels.active;
+			
+			if (watched_window != null) {
+				last_window_rect = window_geometry (watched_window);
+				watched_window.geometry_changed.connect (handle_geometry_changed);
+				watched_window.state_changed.connect (handle_state_changed);
 			}
 			
 			schedule_update ();
 		}
 		
-		[CCode (instance_pos = -1)]
-		void handle_state_changed (Wnck.Window window, Wnck.WindowState changed_mask, Wnck.WindowState new_state)
+		void handle_state_changed (Platform.ToplevelState changed_mask)
 		{
-			if ((changed_mask & Wnck.WindowState.MINIMIZED) == 0)
+			if (!(Platform.ToplevelState.MINIMIZED in changed_mask))
 				return;
 			
 			schedule_update ();
 		}
 		
-		[CCode (instance_pos = -1)]
-		void handle_geometry_changed (Wnck.Window window)
+		void handle_geometry_changed ()
 		{
-			var geo = window_geometry (window);
+			var geo = window_geometry (watched_window);
 			if (geo == last_window_rect)
 				return;
 			
@@ -548,10 +520,11 @@ namespace Plank
 			});
 		}
 		
-		static Gdk.Rectangle window_geometry (Wnck.Window window)
+		static Gdk.Rectangle window_geometry (Platform.Toplevel window)
 		{
-			Gdk.Rectangle win_rect = {};
-			window.get_geometry (out win_rect.x, out win_rect.y, out win_rect.width, out win_rect.height);
+			Gdk.Rectangle win_rect;
+			if (!window.get_geometry (out win_rect))
+				win_rect = {};
 			return win_rect;
 		}
 		

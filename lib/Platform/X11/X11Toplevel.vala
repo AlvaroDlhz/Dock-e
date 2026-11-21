@@ -212,6 +212,9 @@ namespace Plank.Platform
 
 		public Toplevel? active { get { return active_toplevel; } }
 
+		public bool non_toplevel_focused { get { return focus_elsewhere; } }
+		bool focus_elsewhere = false;
+
 		internal int scale_factor {
 			get {
 				unowned Gdk.Screen? gdk_screen = Gdk.Screen.get_default ();
@@ -226,7 +229,7 @@ namespace Plank.Platform
 
 			foreach (unowned Wnck.Window window in screen.get_windows ())
 				add_window (window);
-			active_toplevel = lookup_or_null (screen.get_active_window ());
+			update_active ();
 
 			screen.window_opened.connect (handle_window_opened);
 			screen.window_closed.connect (handle_window_closed);
@@ -268,6 +271,13 @@ namespace Plank.Platform
 		{
 			unowned Wnck.Window? window = Wnck.Window.@get (xid);
 			return (window != null ? toplevels.get (window) : null);
+		}
+
+		void update_active ()
+		{
+			unowned Wnck.Window? window = screen.get_active_window ();
+			active_toplevel = lookup_or_null (window);
+			focus_elsewhere = (window != null && active_toplevel == null);
 		}
 
 		X11Toplevel? lookup_or_null (Wnck.Window? window)
@@ -313,15 +323,18 @@ namespace Plank.Platform
 		void handle_active_window_changed (Wnck.Screen screen, Wnck.Window? previous_window)
 		{
 			var previous = active_toplevel;
-			active_toplevel = lookup_or_null (screen.get_active_window ());
+			var was_non_toplevel_focused = non_toplevel_focused;
+			update_active ();
 
-			if (previous == active_toplevel)
+			if (previous == active_toplevel && was_non_toplevel_focused == non_toplevel_focused)
 				return;
 
-			if (previous != null)
-				previous.state_changed (ToplevelState.ACTIVE);
-			if (active_toplevel != null)
-				active_toplevel.state_changed (ToplevelState.ACTIVE);
+			if (previous != active_toplevel) {
+				if (previous != null)
+					previous.state_changed (ToplevelState.ACTIVE);
+				if (active_toplevel != null)
+					active_toplevel.state_changed (ToplevelState.ACTIVE);
+			}
 
 			active_changed (previous);
 		}

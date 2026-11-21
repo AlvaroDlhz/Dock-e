@@ -4,6 +4,7 @@
 //  This file is part of Plank.
 //
 
+using Plank;
 using Plank.Platform;
 
 namespace PlankTests
@@ -18,6 +19,12 @@ namespace PlankTests
 		Test.add_func ("/Platform/X11/device-to-logical", platform_x11_device_to_logical);
 		Test.add_func ("/Platform/X11/device-to-logical-intersection", platform_x11_device_to_logical_intersection);
 		Test.add_func ("/Platform/X11/map-state", platform_x11_map_state);
+		Test.add_func ("/HideManager/WindowOverlap/no-focus", window_overlap_no_focus);
+		Test.add_func ("/HideManager/WindowOverlap/desktop-focused", window_overlap_desktop_focused);
+		Test.add_func ("/HideManager/WindowOverlap/active-maximized", window_overlap_active_maximized);
+		Test.add_func ("/HideManager/WindowOverlap/application-dialog", window_overlap_application_dialog);
+		Test.add_func ("/HideManager/WindowOverlap/ignored-windows", window_overlap_ignored_windows);
+		Test.add_func ("/HideManager/WindowOverlap/workspaces", window_overlap_workspaces);
 	}
 
 	void platform_backend_capabilities ()
@@ -180,5 +187,128 @@ namespace PlankTests
 		assert (state == (ToplevelState.MINIMIZED | ToplevelState.MAXIMIZED_VERTICALLY
 			| ToplevelState.URGENT | ToplevelState.SKIP_TASKBAR));
 		assert (X11Toplevel.map_state (0) == 0);
+	}
+
+	const int DOCK_PID = 4242;
+	const Gdk.Rectangle OVERLAP_DOCK = { 400, 730, 480, 70 };
+	const Gdk.Rectangle OVERLAP_COVERING = { 0, 0, 1280, 800 };
+	const Gdk.Rectangle OVERLAP_ASIDE = { 40, 40, 300, 200 };
+
+	FakeToplevel overlap_window (FakeBackend backend, int pid, Gdk.Rectangle geometry,
+		ToplevelKind kind = ToplevelKind.NORMAL)
+	{
+		var toplevel = new FakeToplevel ();
+		toplevel.fake_pid = pid;
+		toplevel.geometry = geometry;
+		toplevel.fake_kind = kind;
+		toplevel.on_workspaces.add (backend.fake_workspaces.active);
+		return backend.fake_toplevels.add (toplevel);
+	}
+
+	FakeBackend overlap_backend ()
+	{
+		var backend = new FakeBackend (Capability.TOPLEVELS | Capability.TOPLEVEL_GEOMETRY | Capability.WORKSPACES);
+		backend.fake_workspaces.add ();
+		backend.fake_workspaces.add ();
+		return backend;
+	}
+
+	WindowOverlap overlap_of (FakeBackend backend)
+	{
+		return WindowOverlap.compute (backend.toplevels, backend.workspaces, OVERLAP_DOCK, DOCK_PID);
+	}
+
+	void window_overlap_no_focus ()
+	{
+		var backend = overlap_backend ();
+		overlap_window (backend, 10, OVERLAP_COVERING);
+
+		var overlap = overlap_of (backend);
+		assert (!overlap.any_window && !overlap.active_application);
+	}
+
+	void window_overlap_desktop_focused ()
+	{
+		var backend = overlap_backend ();
+		overlap_window (backend, 10, OVERLAP_COVERING);
+		backend.fake_toplevels.desktop_focused = true;
+
+		var overlap = overlap_of (backend);
+		assert (overlap.any_window);
+		assert (!overlap.active_application && !overlap.active_window);
+	}
+
+	void window_overlap_active_maximized ()
+	{
+		var backend = overlap_backend ();
+		var window = overlap_window (backend, 10, OVERLAP_COVERING);
+		window.activate (0U);
+
+		var overlap = overlap_of (backend);
+		assert (overlap.any_window && overlap.active_application && overlap.active_window);
+		assert (!overlap.active_maximized_window && !overlap.dialog_window);
+
+		window.fake_state = ToplevelState.MAXIMIZED_VERTICALLY;
+		overlap = overlap_of (backend);
+		assert (overlap.active_maximized_window);
+
+		window.move (OVERLAP_ASIDE);
+		overlap = overlap_of (backend);
+		assert (!overlap.any_window && !overlap.active_maximized_window);
+	}
+
+	void window_overlap_application_dialog ()
+	{
+		var backend = overlap_backend ();
+		var main_window = overlap_window (backend, 10, OVERLAP_ASIDE);
+		overlap_window (backend, 10, OVERLAP_COVERING, ToplevelKind.DIALOG);
+		main_window.activate (0U);
+
+		var overlap = overlap_of (backend);
+		assert (overlap.any_window && overlap.active_application && overlap.dialog_window);
+		assert (!overlap.active_window);
+
+		var other = overlap_window (backend, 11, OVERLAP_COVERING);
+		other.activate (0U);
+		overlap = overlap_of (backend);
+		assert (overlap.any_window && overlap.active_application && overlap.active_window);
+		assert (!overlap.dialog_window);
+	}
+
+	void window_overlap_ignored_windows ()
+	{
+		var backend = overlap_backend ();
+		var active = overlap_window (backend, 10, OVERLAP_ASIDE);
+		active.activate (0U);
+
+		var minimized = overlap_window (backend, 11, OVERLAP_COVERING);
+		minimized.fake_state = ToplevelState.MINIMIZED;
+		overlap_window (backend, DOCK_PID, OVERLAP_COVERING);
+		var unknown_geometry = overlap_window (backend, 12, OVERLAP_COVERING);
+		unknown_geometry.knows_geometry = false;
+
+		var overlap = overlap_of (backend);
+		assert (!overlap.any_window);
+	}
+
+	void window_overlap_workspaces ()
+	{
+		var backend = overlap_backend ();
+		var active = overlap_window (backend, 10, OVERLAP_ASIDE);
+		active.activate (0U);
+		var elsewhere = overlap_window (backend, 11, OVERLAP_COVERING);
+		elsewhere.on_workspaces.clear ();
+		elsewhere.on_workspaces.add (backend.fake_workspaces.list ()[1]);
+
+		assert (!overlap_of (backend).any_window);
+
+		backend.fake_workspaces.list ()[1].activate (0U);
+		active.on_workspaces.add (backend.fake_workspaces.list ()[1]);
+		assert (overlap_of (backend).any_window);
+
+		// Without workspaces every window counts; without an active one none does
+		assert (WindowOverlap.compute (backend.toplevels, null, OVERLAP_DOCK, DOCK_PID).any_window);
+		backend.fake_workspaces.set_active (null);
+		assert (!overlap_of (backend).any_window);
 	}
 }

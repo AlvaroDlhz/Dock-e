@@ -199,6 +199,7 @@ libplank_internal_la_VALASOURCES = \
 	Services/StatusNoticeModel.vala \
 	Services/Matcher.vala \
 	Services/WindowControl.vala \
+	Services/WindowOverlap.vala \
 	Services/WindowThumbnails.vala \
 	Services/Utils.vala \
 	Widgets/DockletViewModel.vala \

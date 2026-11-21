@@ -120,6 +120,12 @@ namespace Plank.Platform
 		public abstract Toplevel? active { get; }
 
 		/**
+		 * The focus is on a window which is not a toplevel, such as the
+		 * desktop; {@link active} is null then.
+		 */
+		public abstract bool non_toplevel_focused { get; }
+
+		/**
 		 * All toplevels, from the bottom to the top if the backend has
 		 * {@link Capability.STACKING_ORDER}, in order of appearance otherwise.
 		 */
@@ -127,6 +133,10 @@ namespace Plank.Platform
 
 		public signal void added (Toplevel toplevel);
 		public signal void removed (Toplevel toplevel);
+		/**
+		 * The active toplevel changed, or the focus moved between
+		 * {@link non_toplevel_focused} and no window at all.
+		 */
 		public signal void active_changed (Toplevel? previous);
 	}
 }

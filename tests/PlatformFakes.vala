@@ -217,6 +217,8 @@ namespace PlankTests
 		Toplevel? current = null;
 
 		public Toplevel? active { get { return current; } }
+		public bool non_toplevel_focused { get { return desktop_focused; } }
+		public bool desktop_focused = false;
 
 		public Gee.List<Toplevel> list ()
 		{
