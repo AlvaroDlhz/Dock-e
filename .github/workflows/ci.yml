@@ -32,7 +32,8 @@ jobs:
             libgee-0.8-dev libbamf3-dev libwnck-3-dev libgnome-menu-3-dev \
             libdbusmenu-gtk3-dev libx11-dev libxdamage-dev libxi-dev libxfixes-dev \
             libxml2-utils \
-            xvfb xauth dbus dbus-x11 at-spi2-core
+            xvfb xauth dbus dbus-x11 at-spi2-core \
+            librsvg2-common
 
       # configure and the Makefile.in files are versioned, so autogen.sh is
       # not needed. Autotools are installed anyway: maintainer mode may
