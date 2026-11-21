@@ -28,7 +28,7 @@ namespace PlankTests
 		Test.add_func ("/Widgets/HoverWindow/basics", hover_window_basics);
 		Test.add_func ("/Widgets/PopupPosition/all-edges", popup_position_all_edges);
 		Test.add_func ("/Widgets/PopupPosition/centered", popup_position_centered);
-		Test.add_func ("/Services/WindowThumbnails/follows-changes", window_thumbnails_follow_changes);
+		Test.add_func ("/Platform/X11/WindowThumbnailer/follows-changes", window_thumbnails_follow_changes);
 	}
 
 	void window_thumbnails_follow_changes ()
@@ -49,18 +49,19 @@ namespace PlankTests
 		wait (X_WAIT_MS);
 
 		var xid = (uint32) ((Gdk.X11.Window) window.get_window ()).get_xid ();
-		var thumbnails = new WindowThumbnails (100, 100);
-		var first = thumbnails.lookup (xid);
+		var toplevel = new FakeToplevel.with_id (xid);
+		var thumbnails = new Plank.Platform.X11WindowThumbnailer (100, 100);
+		var first = thumbnails.lookup (toplevel);
 		assert (first != null);
 		// Fit into the room it was given, keeping its proportions
 		assert (first.width == 100);
 		assert (first.height == 50);
 		// Nothing was painted in between, so the window is not read again
-		assert (thumbnails.lookup (xid) == first);
+		assert (thumbnails.lookup (toplevel) == first);
 
 		var announced = 0;
-		thumbnails.changed.connect ((changed_xid) => {
-			if (changed_xid == xid)
+		thumbnails.changed.connect ((changed) => {
+			if (changed == toplevel)
 				announced++;
 		});
 		shade = 0.8;
@@ -69,7 +70,7 @@ namespace PlankTests
 		wait (1500);
 
 		assert (announced >= 1);
-		var second = thumbnails.lookup (xid);
+		var second = thumbnails.lookup (toplevel);
 		assert (second != null);
 		assert (second != first);
 		// The picture shows what the window paints now

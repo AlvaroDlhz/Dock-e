@@ -495,6 +495,109 @@ semanas.
 | 13 | **Puntero global:** `HideManager.update_hovered` y `DragManager.vala:229` usan eventos de entrada/salida de la propia ventana cuando no hay `GLOBAL_POINTER`. | 2 archivos | S |
 | 14 | **Compilación:** `--with-x11` (por defecto sí) agrupa Wnck/BAMF/X11/XI/XFixes/XDamage; `Platform/X11/` sólo compila con él; `lib/plank.deps` deja de exportar `libbamf3`. Comprobar con `grep` que fuera de `Platform/X11/` no queda ni `Wnck`, ni `Bamf`, ni `Gdk.X11`, ni `X.`. | `configure.ac`, `lib/Makefile.am`, `plank.deps` | S |
 
+### 3.1 Ajustes hechos al ejecutar las etapas 0–4
+
+Rama `claude/refactor-x11-73a736`. Cambios respecto a las interfaces de la
+sección 2, con el motivo:
+
+- **Dónde vive `Plank.Platform`:** en `libplank-internal` (no se exporta), no en
+  `libplank`. Así las etapas 0–9 no añaden API pública ni símbolos a
+  `plank.vapi`; los consumidores de `libplank` guardan los objetos del backend
+  en campos privados. Se revisará en la etapa 10, cuando se rompa la API (D2).
+- **`get_backend ()`** devuelve `Backend?`: `null` si no hay backend para el
+  display (hoy, cualquier cosa que no sea X11). **`detect_backend`** es
+  `bool detect_backend (out BackendKind kind)`, porque «sin backend» no es un
+  `BackendKind`. `Backend` gana `log_details ()` para el log de versiones de
+  Wnck y de barreras que antes hacía `AbstractMain`.
+- **Comprobación de sesión (etapa 1):** se arranca si hay backend para el
+  `Gdk.Display`, y el backend X11 se rechaza dentro de una sesión con
+  `XDG_SESSION_TYPE=wayland` (Xwayland, D4) con el mismo mensaje de antes.
+  Única diferencia: un display X11 con `XDG_SESSION_TYPE=tty` o sin
+  especificar (p. ej. `startx` desde una consola) antes se rechazaba y ahora
+  arranca.
+- **Tecla Super (etapa 2):** en vez de una propiedad `super_key`, el backend
+  tiene `create_super_key_trigger ()` y cada dock pide el suyo, igual que antes
+  cada `DockController` creaba su `SuperKeyBinding` (con varios docks, sólo el
+  primero consigue la tecla). La clase pública `SuperKeyBinding` desaparece de
+  `libplank`; la había añadido este fork, no estaba en `libplank.symbols` y
+  ningún docklet la usaba. `activated` lleva la marca de tiempo de la tecla.
+- **Reserva de espacio (etapa 3):** `DockSurface.reserve (edge, area,
+  thickness)` en lugar de `(edge, monitor, thickness, start, end)`. `area` es la
+  zona donde se coloca el dock (el área de trabajo del monitor, o el monitor
+  entero en GNOME, tal como la calcula `PositionManager`) en coordenadas lógicas
+  de GDK; un índice de monitor no basta para reproducir el cálculo actual, y
+  la reserva parcial (`start`/`end`) no se usa hoy. `create_dock_surface ()`
+  sólo tiene `reserve`; `setup`/`place` llegan en la etapa 12.
+  `PositionManager.get_struts` queda marcado obsoleto y sin uso, sólo por el
+  ABI, hasta la etapa 10.
+- **Barreras (etapa 4):** `EdgeTrigger.set_edge (edge, line)` recibe la línea en
+  coordenadas de pantalla de GDK, como hoy (sin índice de monitor). La señal es
+  `hit (double dx, double dy, uint32 time)` en vez de `hit (delta, time)`,
+  porque `HideManager` compara el empuje contra el desplazamiento a lo largo
+  del borde. No hay `release_pointer ()`: el backend suelta el puntero después
+  de emitir cada evento, como antes. `update_barrier ()` y `get_barrier ()`
+  existen ahora aunque no haya barreras; el backend devuelve `null` desde
+  `create_edge_trigger ()`.
+
+### 3.2 Ajustes hechos al ejecutar las etapas 5–9
+
+- **`Workspace` y `WorkspaceManager` entran en la etapa 5**, no en la 7:
+  `Toplevel.is_on_workspace (Workspace)` los necesita, y el ocultado
+  inteligente (etapa 6) necesita el escritorio activo. La etapa 7 sólo migra a
+  los consumidores. `list ()` llama a `Wnck.Screen.force_update ()`, como hacía
+  la vista de escritorios antes de reconstruirse.
+- **`Toplevel`:**
+  - `ToplevelState` separa `MAXIMIZED_HORIZONTALLY` y `MAXIMIZED_VERTICALLY`
+    (`MAXIMIZED` es la suma), porque el ocultado cuenta cualquiera de las dos.
+  - `has_any_state ()` facilita las consultas.
+  - `get_icon ()` no tiene tamaño y puede devolver el icono genérico del
+    backend, como la vista de escritorios hacía con Wnck.
+  - `set_minimized` recibe la marca de tiempo (Wnck la pide para restaurar).
+  - `set_icon_geometry (rect)` recibe las coordenadas que ya da
+    `PositionManager.get_icon_geometry`, sin la ventana del dock.
+  - `transient_for` y `WorkspaceManager.active` son `owned get`.
+- **Geometría en píxeles lógicos redondeada hacia fuera** en `X11Toplevel`.
+  Así, una ventana toca el dock exactamente en los mismos casos que antes,
+  cuando `HideManager` escalaba el dock a píxeles de dispositivo; hay un test
+  que lo comprueba posición por posición con escala 2 y 3.
+- **`ToplevelManager`:**
+  - `non_toplevel_focused` existe porque, con el foco en el escritorio
+    (xfdesktop, que no es toplevel), el ocultado sigue calculando.
+  - `active_changed` también se emite cuando el foco pasa entre el escritorio y
+    ninguna ventana.
+  - `lookup_id ()` lleva de un XID de BAMF a su `Toplevel` hasta la etapa 10.
+  - Única diferencia con el código viejo: con el foco en el escritorio, el PID
+    «activo» ya no es el de xfdesktop. Sólo cambiaría algo si xfdesktop tuviera
+    ventanas normales sobre el dock.
+- **Ocultado (etapa 6):** el cálculo pasa a `WindowOverlap.compute ()`
+  (`lib/Services/WindowOverlap.vala`), neutral y con tests sobre el backend
+  falso. Ya no se recalcula al abrir o cerrar ventanas que no son toplevels
+  (escritorio, docks, menús, splash), que nunca contaban.
+- **Escritorios (etapa 7):**
+  - En Compiz, un cambio de viewport llega como `active_changed` del escritorio
+    activo, así que `DefaultApplicationDockItemProvider` ya no distingue entre
+    las dos señales de Wnck.
+  - Al cambiar la ventana activa, comprueba `previous.is_on_workspace (activo)`
+    en vez de `get_workspace () == activo`. Sólo difiere con ventanas fijadas
+    en todos los escritorios.
+  - El filtro por aplicación (`WindowControl.has_window_on_workspace`) sigue
+    con BAMF y recibe un `Platform.Workspace` hasta la etapa 10.
+  - «Mostrar escritorio» llega al docklet por la nueva función pública
+    `Plank.toggle_showing_desktop ()` (y `can_show_desktop ()`): los docklets
+    sólo ven la API pública de libplank.
+- **Miniaturas (etapa 8):** `create_thumbnailer (width, height)` en vez de una
+  propiedad `thumbnailer`. Cada previsualización tiene su tamaño y vacía su
+  caché al ocultarse, como antes con su propio `WindowThumbnails`.
+- **Aplicaciones (etapa 9):**
+  - `BamfAppTracker` emite las señales neutrales y, hasta la etapa 10, también
+    las de BAMF (`bamf_*`), que `Matcher` sólo reemite.
+  - BAMF puede anunciar una ventana antes que Wnck: `window_opened` y
+    `RunningApp.window_added` esperan a que exista el `Toplevel`
+    (`ToplevelWaiter`), y `get_windows ()` omite las que Wnck aún no conoce.
+  - `RunningApp.name` es `owned get`.
+- **Tests:** `Platform.set_backend_for_tests ()` cambia el backend del proceso
+  por uno falso (`tests/PlatformFakes.vala`).
+
 Al terminar la etapa 14 el dock es idéntico en X11 y la compilación sin X11
 debería fallar sólo por falta de backend. A partir de ahí, el backend Wayland, en
 este orden (cada paso usable por sí solo):

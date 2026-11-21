@@ -148,6 +148,7 @@ am__objects_3 = tests-Accessibility.$(OBJEXT) \
 	tests-ApplicationUninstallService.$(OBJEXT) \
 	tests-CalculatorService.$(OBJEXT) \
 	tests-LauncherSearch.$(OBJEXT) tests-CommandRunner.$(OBJEXT) \
+	tests-Platform.$(OBJEXT) tests-PlatformFakes.$(OBJEXT) \
 	tests-DockProfiles.$(OBJEXT) tests-LauncherCatalog.$(OBJEXT) \
 	tests-SessionActions.$(OBJEXT) \
 	tests-StatusNoticeModel.$(OBJEXT) tests-System.$(OBJEXT) \
@@ -188,6 +189,8 @@ am__depfiles_remade = ./$(DEPDIR)/dock-Dock.Po \
 	./$(DEPDIR)/tests-Items.Po \
 	./$(DEPDIR)/tests-LauncherCatalog.Po \
 	./$(DEPDIR)/tests-LauncherSearch.Po ./$(DEPDIR)/tests-Main.Po \
+	./$(DEPDIR)/tests-Platform.Po \
+	./$(DEPDIR)/tests-PlatformFakes.Po \
 	./$(DEPDIR)/tests-Preferences.Po \
 	./$(DEPDIR)/tests-SessionActions.Po \
 	./$(DEPDIR)/tests-StatusNoticeModel.Po \
@@ -500,6 +503,8 @@ tests_VALASOURCES = \
 	CalculatorService.vala \
 	LauncherSearch.vala \
 	CommandRunner.vala \
+	Platform.vala \
+	PlatformFakes.vala \
 	DockProfiles.vala \
 	LauncherCatalog.vala \
 	SessionActions.vala \
@@ -667,6 +672,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-LauncherCatalog.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-LauncherSearch.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Main.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Platform.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-PlatformFakes.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Preferences.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-SessionActions.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-StatusNoticeModel.Po@am__quote@ # am--include-marker
@@ -789,6 +796,34 @@ tests-CommandRunner.obj: CommandRunner.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='CommandRunner.c' object='tests-CommandRunner.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-CommandRunner.obj `if test -f 'CommandRunner.c'; then $(CYGPATH_W) 'CommandRunner.c'; else $(CYGPATH_W) '$(srcdir)/CommandRunner.c'; fi`
+
+tests-Platform.o: Platform.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-Platform.o -MD -MP -MF $(DEPDIR)/tests-Platform.Tpo -c -o tests-Platform.o `test -f 'Platform.c' || echo '$(srcdir)/'`Platform.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-Platform.Tpo $(DEPDIR)/tests-Platform.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform.c' object='tests-Platform.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-Platform.o `test -f 'Platform.c' || echo '$(srcdir)/'`Platform.c
+
+tests-Platform.obj: Platform.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-Platform.obj -MD -MP -MF $(DEPDIR)/tests-Platform.Tpo -c -o tests-Platform.obj `if test -f 'Platform.c'; then $(CYGPATH_W) 'Platform.c'; else $(CYGPATH_W) '$(srcdir)/Platform.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-Platform.Tpo $(DEPDIR)/tests-Platform.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform.c' object='tests-Platform.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-Platform.obj `if test -f 'Platform.c'; then $(CYGPATH_W) 'Platform.c'; else $(CYGPATH_W) '$(srcdir)/Platform.c'; fi`
+
+tests-PlatformFakes.o: PlatformFakes.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-PlatformFakes.o -MD -MP -MF $(DEPDIR)/tests-PlatformFakes.Tpo -c -o tests-PlatformFakes.o `test -f 'PlatformFakes.c' || echo '$(srcdir)/'`PlatformFakes.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-PlatformFakes.Tpo $(DEPDIR)/tests-PlatformFakes.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='PlatformFakes.c' object='tests-PlatformFakes.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-PlatformFakes.o `test -f 'PlatformFakes.c' || echo '$(srcdir)/'`PlatformFakes.c
+
+tests-PlatformFakes.obj: PlatformFakes.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-PlatformFakes.obj -MD -MP -MF $(DEPDIR)/tests-PlatformFakes.Tpo -c -o tests-PlatformFakes.obj `if test -f 'PlatformFakes.c'; then $(CYGPATH_W) 'PlatformFakes.c'; else $(CYGPATH_W) '$(srcdir)/PlatformFakes.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-PlatformFakes.Tpo $(DEPDIR)/tests-PlatformFakes.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='PlatformFakes.c' object='tests-PlatformFakes.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-PlatformFakes.obj `if test -f 'PlatformFakes.c'; then $(CYGPATH_W) 'PlatformFakes.c'; else $(CYGPATH_W) '$(srcdir)/PlatformFakes.c'; fi`
 
 tests-DockProfiles.o: DockProfiles.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-DockProfiles.o -MD -MP -MF $(DEPDIR)/tests-DockProfiles.Tpo -c -o tests-DockProfiles.o `test -f 'DockProfiles.c' || echo '$(srcdir)/'`DockProfiles.c
@@ -1161,6 +1196,8 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/tests-LauncherCatalog.Po
 	-rm -f ./$(DEPDIR)/tests-LauncherSearch.Po
 	-rm -f ./$(DEPDIR)/tests-Main.Po
+	-rm -f ./$(DEPDIR)/tests-Platform.Po
+	-rm -f ./$(DEPDIR)/tests-PlatformFakes.Po
 	-rm -f ./$(DEPDIR)/tests-Preferences.Po
 	-rm -f ./$(DEPDIR)/tests-SessionActions.Po
 	-rm -f ./$(DEPDIR)/tests-StatusNoticeModel.Po
@@ -1226,6 +1263,8 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/tests-LauncherCatalog.Po
 	-rm -f ./$(DEPDIR)/tests-LauncherSearch.Po
 	-rm -f ./$(DEPDIR)/tests-Main.Po
+	-rm -f ./$(DEPDIR)/tests-Platform.Po
+	-rm -f ./$(DEPDIR)/tests-PlatformFakes.Po
 	-rm -f ./$(DEPDIR)/tests-Preferences.Po
 	-rm -f ./$(DEPDIR)/tests-SessionActions.Po
 	-rm -f ./$(DEPDIR)/tests-StatusNoticeModel.Po

@@ -20,7 +20,11 @@
 namespace Plank
 {
 	/**
-	 * Wrapper for Bamf.Matcher
+	 * The applications of BAMF, as the dock items still use them.
+	 *
+	 * Only a facade of {@link Platform.BamfAppTracker} now, kept until the
+	 * dock items work with {@link Platform.RunningApp} (stage 10 in
+	 * docs/x11-aislamiento.md).
 	 */
 	public class Matcher : GLib.Object
 	{
@@ -41,8 +45,7 @@ namespace Plank
 			return matcher;
 		}
 		
-		Gee.HashSet<Bamf.View> pending_views;
-		Bamf.Matcher? bamf_matcher;
+		Platform.BamfAppTracker tracker;
 		
 		private Matcher ()
 		{
@@ -50,127 +53,70 @@ namespace Plank
 		
 		construct
 		{
-			bamf_matcher = Bamf.Matcher.get_default ();
-			bamf_matcher.active_application_changed.connect_after (handle_active_application_changed);
-			bamf_matcher.active_window_changed.connect_after (handle_active_window_changed);
-			bamf_matcher.view_opened.connect_after (handle_view_opened);
-			bamf_matcher.view_closed.connect_after (handle_view_closed);
+			unowned Platform.X11Backend? x11 = (Platform.get_backend () as Platform.X11Backend);
+			tracker = (x11 != null ? x11.bamf_apps : new Platform.BamfAppTracker (null));
 			
-			pending_views = new Gee.HashSet<Bamf.View> ();
+			tracker.bamf_active_application_changed.connect (forward_active_application_changed);
+			tracker.bamf_active_window_changed.connect (forward_active_window_changed);
+			tracker.bamf_window_opened.connect (forward_window_opened);
+			tracker.bamf_window_closed.connect (forward_window_closed);
+			tracker.bamf_application_opened.connect (forward_application_opened);
+			tracker.bamf_application_closed.connect (forward_application_closed);
 		}
 		
 		~Matcher ()
 		{
-			foreach (var view in pending_views)
-				view.user_visible_changed.disconnect (handle_view_user_visible_changed);
-			
-			bamf_matcher.active_application_changed.disconnect (handle_active_application_changed);
-			bamf_matcher.active_window_changed.disconnect (handle_active_window_changed);
-			bamf_matcher.view_opened.disconnect (handle_view_opened);
-			bamf_matcher.view_closed.disconnect (handle_view_closed);
-			bamf_matcher = null;
+			tracker.bamf_active_application_changed.disconnect (forward_active_application_changed);
+			tracker.bamf_active_window_changed.disconnect (forward_active_window_changed);
+			tracker.bamf_window_opened.disconnect (forward_window_opened);
+			tracker.bamf_window_closed.disconnect (forward_window_closed);
+			tracker.bamf_application_opened.disconnect (forward_application_opened);
+			tracker.bamf_application_closed.disconnect (forward_application_closed);
 		}
 		
-		void handle_active_application_changed (Bamf.Application? arg1, Bamf.Application? arg2)
+		void forward_active_application_changed (Bamf.Application? old_app, Bamf.Application? new_app)
 		{
-			active_application_changed (arg1, arg2);
+			active_application_changed (old_app, new_app);
 		}
 		
-		void handle_active_window_changed (Bamf.Window? arg1, Bamf.Window? arg2)
+		void forward_active_window_changed (Bamf.Window? old_win, Bamf.Window? new_win)
 		{
-			active_window_changed (arg1, arg2);
+			active_window_changed (old_win, new_win);
 		}
 		
-		void handle_view_user_visible_changed (Bamf.View view, bool user_visible)
+		void forward_window_opened (Bamf.Window w)
 		{
-			if (!user_visible)
-				return;
-			
-			promote_pending_view (view);
-		}
-
-		void promote_pending_view (Bamf.View view)
-		{
-			if (!pending_views.remove (view))
-				return;
-
-			view.user_visible_changed.disconnect (handle_view_user_visible_changed);
-			handle_view_opened (view);
+			window_opened (w);
 		}
 		
-		void handle_view_opened (Bamf.View arg1)
+		void forward_window_closed (Bamf.Window w)
 		{
-			if (arg1 is Bamf.Application && !arg1.is_user_visible ()) {
-				if (pending_views.add (arg1))
-					arg1.user_visible_changed.connect_after (handle_view_user_visible_changed);
-
-				// The visibility can change while is_user_visible() performs its
-				// D-Bus roundtrip. Re-check after connecting so that transition
-				// cannot be missed and leave the application pending forever.
-				if (arg1.is_user_visible ())
-					promote_pending_view (arg1);
-				return;
-			}
-			
-			if (arg1 is Bamf.Window)
-				window_opened ((Bamf.Window) arg1);
-			else if (arg1 is Bamf.Application)
-				application_opened ((Bamf.Application) arg1);
+			window_closed (w);
 		}
 		
-		void handle_view_closed (Bamf.View arg1)
+		void forward_application_opened (Bamf.Application app)
 		{
-			if (pending_views.remove (arg1)) {
-				arg1.user_visible_changed.disconnect (handle_view_user_visible_changed);
-				return;
-			}
-			
-			if (arg1 is Bamf.Window)
-				window_closed ((Bamf.Window) arg1);
-			else if (arg1 is Bamf.Application)
-				application_closed ((Bamf.Application) arg1);
+			application_opened (app);
+		}
+		
+		void forward_application_closed (Bamf.Application app)
+		{
+			application_closed (app);
 		}
 		
 		public Gee.ArrayList<Bamf.Application> active_launchers ()
 		{
-			var apps = bamf_matcher.get_running_applications ();
-			var list = new Gee.ArrayList<Bamf.Application> ();
-			
-			warn_if_fail (apps != null);
-			if (apps == null)
-				return list;
-			
-			foreach (var app in apps)
-				list.add (app);
-			
-			return list;
+			return tracker.bamf_running_applications ();
 		}
 		
 		public Bamf.Application? app_for_uri (string uri)
 		{
-			string launcher;
-			try {
-				launcher = Filename.from_uri (uri);
-			} catch (ConvertError e) {
-				warning (e.message);
-				return null;
-			}
-			
-			unowned Bamf.Application app = bamf_matcher.get_application_for_desktop_file (launcher, false);
-			
-			warn_if_fail (app != null);
-			
-			return app;
+			return tracker.bamf_app_for_uri (uri);
 		}
 		
 		public void set_favorites (Gee.ArrayList<string> favs)
 		{
-			var paths = new string[favs.size];
-			
-			for (var i = 0; i < favs.size; i++)
-				paths [i] = favs.get (i);
-			
-			bamf_matcher.register_favorites (paths);
+			tracker.set_favorites (favs);
 		}
 	}
 }

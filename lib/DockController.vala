@@ -45,7 +45,7 @@ namespace Plank
 		public BackgroundAppsWindow background_apps { get; protected set; }
 		public WindowPreviewWindow window_previews { get; protected set; }
 		public WorkspacePreviewWindow workspace_previews { get; protected set; }
-		SuperKeyBinding? super_key_binding;
+		Platform.SuperKeyTrigger? super_key_trigger;
 		
 		public DockItemProvider? default_provider { get; private set; }
 		LauncherProvider? launcher_provider;
@@ -117,8 +117,12 @@ namespace Plank
 			prefs.notify["Monitor"].connect (update_accent_monitors);
 			update_accent_monitors ();
 			launcher = new LauncherWindow (this);
-			super_key_binding = new SuperKeyBinding (window.get_display ());
-			super_key_binding.activated.connect (() => launcher.toggle_global ());
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			super_key_trigger = (backend != null ? backend.create_super_key_trigger () : null);
+			if (super_key_trigger != null)
+				super_key_trigger.activated.connect (() => launcher.toggle_global ());
+			else
+				warning ("The Super shortcut is not available on this display");
 			background_apps = new BackgroundAppsWindow (this);
 			window_previews = new WindowPreviewWindow (this);
 			workspace_previews = new WorkspacePreviewWindow (this);

@@ -171,8 +171,14 @@ namespace Plank
 			return false;
 		}
 		
-		public static bool has_window_on_workspace (Bamf.Application app, Wnck.Workspace workspace)
+		public static bool has_window_on_workspace (Bamf.Application app, Platform.Workspace platform_workspace)
 		{
+			// Until applications go through the backend (stage 10 in docs/x11-aislamiento.md)
+			unowned Platform.X11Workspace? x11_workspace = (platform_workspace as Platform.X11Workspace);
+			if (x11_workspace == null)
+				return true;
+			unowned Wnck.Workspace workspace = x11_workspace.workspace;
+			
 			Wnck.Screen.get_default ();
 			Array<uint32>? xids = app.get_xids ();
 			

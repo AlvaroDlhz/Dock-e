@@ -237,15 +237,14 @@ namespace Plank
 			message ("GTK+ version: %u.%u.%u (%i.%i.%i)",
 				Gtk.get_major_version (), Gtk.get_minor_version () , Gtk.get_micro_version (),
 				Gtk.MAJOR_VERSION, Gtk.MINOR_VERSION, Gtk.MICRO_VERSION);
-			message ("Wnck version: %d.%d.%d", Wnck.Version.MAJOR_VERSION, Wnck.Version.MINOR_VERSION, Wnck.Version.MICRO_VERSION);
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend != null)
+				backend.log_details ();
 			message ("Cairo version: %s", Cairo.version_string ());
 			message ("Pango version: %s", Pango.version_string ());
 			message ("+ Cairo/Gtk+ HiDPI support enabled");
 #if HAVE_DBUSMENU
 			message ("+ Dynamic Quicklists support enabled");
-#endif
-#if HAVE_BARRIERS
-			message ("+ XInput Barriers support enabled");
 #endif
 			if (Gtk.Widget.get_default_direction () == Gtk.TextDirection.RTL)
 				message ("+ RTL support enabled");
@@ -253,8 +252,11 @@ namespace Plank
 			internal_quarks_initialize ();
 			environment_initialize ();
 			
-			// Make sure we are not doing silly things like trying to run in a wayland-session!
-			if (!environment_is_session_type (XdgSessionType.X11)) {
+			// Make sure there is a backend for this display.  The X11 backend is
+			// not used through Xwayland inside a Wayland session (decision D4
+			// in docs/x11-aislamiento.md).
+			if (backend == null
+				|| (backend.kind == Platform.BackendKind.X11 && environment_is_session_type (XdgSessionType.WAYLAND))) {
 				critical ("Only X11 environments are supported.");
 				quit ();
 				return;

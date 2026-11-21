@@ -68,6 +68,7 @@ namespace Plank
 		int requested_x;
 		int requested_y;
 		int window_position_retry = 0;
+		Platform.DockSurface? dock_surface;
 		
 		/**
 		 * Creates a new dock window.
@@ -85,6 +86,10 @@ namespace Plank
 			skip_taskbar_hint = true;
 			
 			stick ();
+			
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend != null)
+				dock_surface = backend.create_dock_surface (this);
 			
 			add_events (Gdk.EventMask.BUTTON_PRESS_MASK |
 						Gdk.EventMask.BUTTON_RELEASE_MASK |
@@ -869,36 +874,16 @@ namespace Plank
 		
 		void set_struts ()
 		{
-			if (!get_realized ())
-				return;
-			
-			unowned Gdk.X11.Display gdk_display = (get_display () as Gdk.X11.Display);
-			if (gdk_display == null)
+			if (dock_surface == null || !get_realized ())
 				return;
 
-			unowned Gdk.X11.Window gdk_window = (get_window () as Gdk.X11.Window);
-			if (gdk_window == null)
-				return;
-			
-			var struts = new ulong [Struts.N_VALUES];
+			unowned PositionManager position_manager = controller.position_manager;
+			var thickness = 0;
 			
 			if (controller.prefs.HideMode == HideType.NONE)
-				controller.position_manager.get_struts (ref struts);
+				thickness = position_manager.get_reserved_thickness ();
 			
-			var first_struts = new ulong [Struts.BOTTOM + 1];
-			for (var i = 0; i < first_struts.length; i++)
-				first_struts [i] = struts [i];
-			
-			unowned X.Display display = gdk_display.get_xdisplay ();
-			var xid = gdk_window.get_xid ();
-			
-			gdk_display.error_trap_push ();
-			display.change_property (xid, display.intern_atom ("_NET_WM_STRUT_PARTIAL", false), X.XA_CARDINAL,
-			                      32, X.PropMode.Replace, (uchar[]) struts, struts.length);
-			display.change_property (xid, display.intern_atom ("_NET_WM_STRUT", false), X.XA_CARDINAL,
-			                      32, X.PropMode.Replace, (uchar[]) first_struts, first_struts.length);
-			if (gdk_display.error_trap_pop () != X.Success)
-				critical ("Error while setting struts");
+			dock_surface.reserve (position_manager.Position, position_manager.get_monitor_area (), thickness);
 		}
 	}
 }

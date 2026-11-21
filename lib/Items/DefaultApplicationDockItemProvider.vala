@@ -49,7 +49,7 @@ namespace Plank
 			current_workspace_only = Prefs.CurrentWorkspaceOnly;
 			
 			if (current_workspace_only)
-				connect_wnck ();
+				connect_window_signals ();
 		}
 		
 		~DefaultApplicationDockItemProvider ()
@@ -65,7 +65,7 @@ namespace Plank
 			}
 			
 			if (current_workspace_only)
-				disconnect_wnck ();
+				disconnect_window_signals ();
 		}
 		
 		protected override void update_visible_elements ()
@@ -73,7 +73,8 @@ namespace Plank
 			Logger.verbose ("DefaultDockItemProvider.update_visible_items ()");
 			
 			if (Prefs.CurrentWorkspaceOnly) {
-				unowned Wnck.Workspace? active_workspace = Wnck.Screen.get_default ().get_active_workspace ();
+				unowned Platform.Backend? backend = Platform.get_backend ();
+				var active_workspace = (backend != null && backend.workspaces != null ? backend.workspaces.active : null);
 				foreach (var item in internal_elements) {
 					unowned TransientDockItem? transient = (item as TransientDockItem);
 					item.IsAttached = (transient == null || transient.App == null || active_workspace == null
@@ -129,52 +130,42 @@ namespace Plank
 				remove (item);
 		}
 		
-		void connect_wnck ()
+		void connect_window_signals ()
 		{
-			unowned Wnck.Screen screen = Wnck.Screen.get_default ();
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend == null)
+				return;
 			
-			screen.active_window_changed.connect_after (handle_window_changed);
-			screen.active_workspace_changed.connect_after (handle_workspace_changed);
-			screen.viewports_changed.connect_after (handle_viewports_changed);
+			backend.toplevels.active_changed.connect (handle_window_changed);
+			if (backend.workspaces != null)
+				backend.workspaces.active_changed.connect (handle_workspace_changed);
 		}
 		
-		void disconnect_wnck ()
+		void disconnect_window_signals ()
 		{
-			unowned Wnck.Screen screen = Wnck.Screen.get_default ();
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend == null)
+				return;
 			
-			screen.active_window_changed.disconnect (handle_window_changed);
-			screen.active_workspace_changed.disconnect (handle_workspace_changed);
-			screen.viewports_changed.disconnect (handle_viewports_changed);
+			backend.toplevels.active_changed.disconnect (handle_window_changed);
+			if (backend.workspaces != null)
+				backend.workspaces.active_changed.disconnect (handle_workspace_changed);
 		}
 		
-		[CCode (instance_pos = -1)]
-		void handle_window_changed (Wnck.Screen screen, Wnck.Window? previous)
+		void handle_window_changed (Platform.Toplevel? previous)
 		{
-			unowned Wnck.Workspace? active_workspace = screen.get_active_workspace ();
+			// A window which left the workspace usually loses the focus
+			unowned Platform.Backend backend = Platform.get_backend ();
+			var active_workspace = (backend.workspaces != null ? backend.workspaces.active : null);
 			if (previous == null || active_workspace == null
-				|| previous.get_workspace () == active_workspace)
+				|| previous.is_on_workspace (active_workspace))
 				return;
 			
 			update_visible_elements ();
 		}
 		
-		[CCode (instance_pos = -1)]
-		void handle_workspace_changed (Wnck.Screen screen, Wnck.Workspace? previous)
+		void handle_workspace_changed (Platform.Workspace? previous)
 		{
-			unowned Wnck.Workspace? active_workspace = screen.get_active_workspace ();
-			if (active_workspace != null && active_workspace.is_virtual ())
-				return;
-			
-			update_visible_elements ();
-		}
-		
-		[CCode (instance_pos = -1)]
-		void handle_viewports_changed (Wnck.Screen screen)
-		{
-			unowned Wnck.Workspace? active_workspace = screen.get_active_workspace ();
-			if (active_workspace != null && !active_workspace.is_virtual ())
-				return;
-			
 			update_visible_elements ();
 		}
 		
@@ -186,9 +177,9 @@ namespace Plank
 			current_workspace_only = Prefs.CurrentWorkspaceOnly;
 			
 			if (current_workspace_only)
-				connect_wnck ();
+				connect_window_signals ();
 			else
-				disconnect_wnck ();
+				disconnect_window_signals ();
 			
 			update_visible_elements ();
 		}

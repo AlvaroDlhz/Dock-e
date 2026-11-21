@@ -106,8 +106,8 @@ libplank_la_VALASOURCES = \
 	Services/Paths.vala \
 	Services/Preferences.vala \
 	Services/Settings.vala \
+	Services/ShowDesktop.vala \
 	Services/System.vala \
-	Services/SuperKeyBinding.vala \
 	Services/Unity.vala \
 	Services/Worker.vala \
 	Widgets/CompositedWindow.vala \
@@ -177,6 +177,23 @@ libplank_internal_la_LIBADD = \
 libplank_internal_la_VALASOURCES = \
 	InternalConsts.vala \
 	InternalQuarks.vala \
+	Platform/Backend.vala \
+	Platform/DockSurface.vala \
+	Platform/EdgeTrigger.vala \
+	Platform/SuperKeyTrigger.vala \
+	Platform/RunningApp.vala \
+	Platform/Toplevel.vala \
+	Platform/ToplevelWaiter.vala \
+	Platform/WindowThumbnailer.vala \
+	Platform/Workspace.vala \
+	Platform/X11/BamfAppTracker.vala \
+	Platform/X11/X11Backend.vala \
+	Platform/X11/X11DockSurface.vala \
+	Platform/X11/X11EdgeTrigger.vala \
+	Platform/X11/X11SuperKeyTrigger.vala \
+	Platform/X11/X11Toplevel.vala \
+	Platform/X11/X11WindowThumbnailer.vala \
+	Platform/X11/X11Workspace.vala \
 	Services/Accessibility.vala \
 	Services/ApplicationUninstallService.vala \
 	Services/CalculatorService.vala \
@@ -188,7 +205,7 @@ libplank_internal_la_VALASOURCES = \
 	Services/StatusNoticeModel.vala \
 	Services/Matcher.vala \
 	Services/WindowControl.vala \
-	Services/WindowThumbnails.vala \
+	Services/WindowOverlap.vala \
 	Services/Utils.vala \
 	Widgets/DockletViewModel.vala \
 	$(NULL)
