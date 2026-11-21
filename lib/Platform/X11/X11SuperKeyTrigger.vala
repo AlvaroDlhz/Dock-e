@@ -2,7 +2,7 @@
 // Global Super-key binding for Dock-E on X11.
 //
 
-namespace Plank
+namespace Plank.Platform
 {
 	/**
 	 * Owns a passive X11 grab for the left and right Super keys.
@@ -11,7 +11,7 @@ namespace Plank
 	 * Super without pressing another key activates the binding; any other key
 	 * is replayed so shortcuts such as Super+L keep working normally.
 	 */
-	public class SuperKeyBinding : Object
+	public class X11SuperKeyTrigger : Object, SuperKeyTrigger
 	{
 		const uint[] IGNORED_MODIFIER_COMBINATIONS = {
 			0U,
@@ -20,7 +20,7 @@ namespace Plank
 			(uint) (X.KeyMask.LockMask | X.KeyMask.Mod2Mask)
 		};
 
-		unowned Gdk.Display gdk_display;
+		unowned Gdk.X11.Display x11_display;
 		unowned X.Display xdisplay;
 		X.Window root;
 		uint left_keycode;
@@ -28,16 +28,11 @@ namespace Plank
 		bool installed = false;
 		bool super_pending = false;
 
-		public signal void activated ();
+		public bool available { get { return installed; } }
 
-		public SuperKeyBinding (Gdk.Display display)
+		public X11SuperKeyTrigger (Gdk.X11.Display display)
 		{
-			gdk_display = display;
-			var x11_display = display as Gdk.X11.Display;
-			if (x11_display == null) {
-				warning ("The Super shortcut is only available on X11");
-				return;
-			}
+			x11_display = display;
 
 			xdisplay = x11_display.get_xdisplay ();
 			root = xdisplay.default_root_window ();
@@ -64,7 +59,7 @@ namespace Plank
 			gdk_window_add_filter (null, (Gdk.FilterFunc) xevent_filter);
 		}
 
-		~SuperKeyBinding ()
+		~X11SuperKeyTrigger ()
 		{
 			if (!installed)
 				return;
@@ -118,8 +113,9 @@ namespace Plank
 				super_pending = false;
 				xdisplay.allow_events (X.AllowEventsMode.AsyncKeyboard, (int) key.time);
 				xdisplay.flush ();
+				var time = (uint32) key.time;
 				Idle.add (() => {
-					activated ();
+					activated (time);
 					return false;
 				});
 				return Gdk.FilterReturn.REMOVE;

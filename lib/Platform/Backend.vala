@@ -80,6 +80,14 @@ namespace Plank.Platform
 		public abstract void log_details ();
 
 		/**
+		 * Claims the global Super key for one dock.  Every dock asks for its
+		 * own trigger; only the first one gets the key on X11.
+		 *
+		 * @return null if the backend has no {@link Capability.GLOBAL_SUPER_KEY}
+		 */
+		public abstract SuperKeyTrigger? create_super_key_trigger ();
+
+		/**
 		 * Whether this backend supports the given capability.
 		 */
 		public bool has (Capability capability)

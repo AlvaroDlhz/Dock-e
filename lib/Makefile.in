@@ -149,7 +149,9 @@ am__dirstamp = $(am__leading_dot)dirstamp
 am__objects_2 = libplank_internal_la-InternalConsts.lo \
 	libplank_internal_la-InternalQuarks.lo \
 	Platform/libplank_internal_la-Backend.lo \
+	Platform/libplank_internal_la-SuperKeyTrigger.lo \
 	Platform/X11/libplank_internal_la-X11Backend.lo \
+	Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo \
 	Services/libplank_internal_la-Accessibility.lo \
 	Services/libplank_internal_la-ApplicationUninstallService.lo \
 	Services/libplank_internal_la-CalculatorService.lo \
@@ -204,8 +206,7 @@ am__objects_5 = DBusManager.lo DockController.lo DockPreferences.lo \
 	Services/Environment.lo Services/SessionActions.lo \
 	Services/EnvironmentSettings.lo Services/Logger.lo \
 	Services/Paths.lo Services/Preferences.lo Services/Settings.lo \
-	Services/System.lo Services/SuperKeyBinding.lo \
-	Services/Unity.lo Services/Worker.lo \
+	Services/System.lo Services/Unity.lo Services/Worker.lo \
 	Widgets/CompositedWindow.lo Widgets/ContextMenuStyle.lo \
 	Services/AccentColor.lo Widgets/DockStyle.lo \
 	Widgets/DockWindow.lo Widgets/WindowPreviewWindow.lo \
@@ -270,17 +271,17 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Items/$(DEPDIR)/TrayToggleItem.Plo \
 	Items/$(DEPDIR)/WorkspaceItem.Plo \
 	Platform/$(DEPDIR)/libplank_internal_la-Backend.Plo \
+	Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Plo \
 	Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo \
+	Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Plo \
 	Services/$(DEPDIR)/AccentColor.Plo \
 	Services/$(DEPDIR)/Environment.Plo \
 	Services/$(DEPDIR)/EnvironmentSettings.Plo \
 	Services/$(DEPDIR)/Logger.Plo Services/$(DEPDIR)/Paths.Plo \
 	Services/$(DEPDIR)/Preferences.Plo \
 	Services/$(DEPDIR)/SessionActions.Plo \
-	Services/$(DEPDIR)/Settings.Plo \
-	Services/$(DEPDIR)/SuperKeyBinding.Plo \
-	Services/$(DEPDIR)/System.Plo Services/$(DEPDIR)/Unity.Plo \
-	Services/$(DEPDIR)/Worker.Plo \
+	Services/$(DEPDIR)/Settings.Plo Services/$(DEPDIR)/System.Plo \
+	Services/$(DEPDIR)/Unity.Plo Services/$(DEPDIR)/Worker.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-Accessibility.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Plo \
@@ -845,7 +846,6 @@ libplank_la_VALASOURCES = \
 	Services/Preferences.vala \
 	Services/Settings.vala \
 	Services/System.vala \
-	Services/SuperKeyBinding.vala \
 	Services/Unity.vala \
 	Services/Worker.vala \
 	Widgets/CompositedWindow.vala \
@@ -894,7 +894,9 @@ libplank_internal_la_VALASOURCES = \
 	InternalConsts.vala \
 	InternalQuarks.vala \
 	Platform/Backend.vala \
+	Platform/SuperKeyTrigger.vala \
 	Platform/X11/X11Backend.vala \
+	Platform/X11/X11SuperKeyTrigger.vala \
 	Services/Accessibility.vala \
 	Services/ApplicationUninstallService.vala \
 	Services/CalculatorService.vala \
@@ -1038,6 +1040,8 @@ Platform/$(DEPDIR)/$(am__dirstamp):
 	@: > Platform/$(DEPDIR)/$(am__dirstamp)
 Platform/libplank_internal_la-Backend.lo: Platform/$(am__dirstamp) \
 	Platform/$(DEPDIR)/$(am__dirstamp)
+Platform/libplank_internal_la-SuperKeyTrigger.lo:  \
+	Platform/$(am__dirstamp) Platform/$(DEPDIR)/$(am__dirstamp)
 Platform/X11/$(am__dirstamp):
 	@$(MKDIR_P) Platform/X11
 	@: > Platform/X11/$(am__dirstamp)
@@ -1045,6 +1049,9 @@ Platform/X11/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) Platform/X11/$(DEPDIR)
 	@: > Platform/X11/$(DEPDIR)/$(am__dirstamp)
 Platform/X11/libplank_internal_la-X11Backend.lo:  \
+	Platform/X11/$(am__dirstamp) \
+	Platform/X11/$(DEPDIR)/$(am__dirstamp)
+Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo:  \
 	Platform/X11/$(am__dirstamp) \
 	Platform/X11/$(DEPDIR)/$(am__dirstamp)
 Services/$(am__dirstamp):
@@ -1202,8 +1209,6 @@ Services/Settings.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
 Services/System.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
-Services/SuperKeyBinding.lo: Services/$(am__dirstamp) \
-	Services/$(DEPDIR)/$(am__dirstamp)
 Services/Unity.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
 Services/Worker.lo: Services/$(am__dirstamp) \
@@ -1309,7 +1314,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/TrayToggleItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/WorkspaceItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/$(DEPDIR)/libplank_internal_la-Backend.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/AccentColor.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Environment.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/EnvironmentSettings.Plo@am__quote@ # am--include-marker
@@ -1318,7 +1325,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Preferences.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/SessionActions.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Settings.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/SuperKeyBinding.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/System.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Unity.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Worker.Plo@am__quote@ # am--include-marker
@@ -1407,12 +1413,26 @@ Platform/libplank_internal_la-Backend.lo: Platform/Backend.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/libplank_internal_la-Backend.lo `test -f 'Platform/Backend.c' || echo '$(srcdir)/'`Platform/Backend.c
 
+Platform/libplank_internal_la-SuperKeyTrigger.lo: Platform/SuperKeyTrigger.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/libplank_internal_la-SuperKeyTrigger.lo -MD -MP -MF Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Tpo -c -o Platform/libplank_internal_la-SuperKeyTrigger.lo `test -f 'Platform/SuperKeyTrigger.c' || echo '$(srcdir)/'`Platform/SuperKeyTrigger.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Tpo Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/SuperKeyTrigger.c' object='Platform/libplank_internal_la-SuperKeyTrigger.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/libplank_internal_la-SuperKeyTrigger.lo `test -f 'Platform/SuperKeyTrigger.c' || echo '$(srcdir)/'`Platform/SuperKeyTrigger.c
+
 Platform/X11/libplank_internal_la-X11Backend.lo: Platform/X11/X11Backend.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11Backend.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Tpo -c -o Platform/X11/libplank_internal_la-X11Backend.lo `test -f 'Platform/X11/X11Backend.c' || echo '$(srcdir)/'`Platform/X11/X11Backend.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11Backend.c' object='Platform/X11/libplank_internal_la-X11Backend.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11Backend.lo `test -f 'Platform/X11/X11Backend.c' || echo '$(srcdir)/'`Platform/X11/X11Backend.c
+
+Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo: Platform/X11/X11SuperKeyTrigger.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Tpo -c -o Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo `test -f 'Platform/X11/X11SuperKeyTrigger.c' || echo '$(srcdir)/'`Platform/X11/X11SuperKeyTrigger.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11SuperKeyTrigger.c' object='Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo `test -f 'Platform/X11/X11SuperKeyTrigger.c' || echo '$(srcdir)/'`Platform/X11/X11SuperKeyTrigger.c
 
 Services/libplank_internal_la-Accessibility.lo: Services/Accessibility.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-Accessibility.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-Accessibility.Tpo -c -o Services/libplank_internal_la-Accessibility.lo `test -f 'Services/Accessibility.c' || echo '$(srcdir)/'`Services/Accessibility.c
@@ -1954,7 +1974,9 @@ distclean: distclean-am
 	-rm -f Items/$(DEPDIR)/TrayToggleItem.Plo
 	-rm -f Items/$(DEPDIR)/WorkspaceItem.Plo
 	-rm -f Platform/$(DEPDIR)/libplank_internal_la-Backend.Plo
+	-rm -f Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo
+	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Plo
 	-rm -f Services/$(DEPDIR)/AccentColor.Plo
 	-rm -f Services/$(DEPDIR)/Environment.Plo
 	-rm -f Services/$(DEPDIR)/EnvironmentSettings.Plo
@@ -1963,7 +1985,6 @@ distclean: distclean-am
 	-rm -f Services/$(DEPDIR)/Preferences.Plo
 	-rm -f Services/$(DEPDIR)/SessionActions.Plo
 	-rm -f Services/$(DEPDIR)/Settings.Plo
-	-rm -f Services/$(DEPDIR)/SuperKeyBinding.Plo
 	-rm -f Services/$(DEPDIR)/System.Plo
 	-rm -f Services/$(DEPDIR)/Unity.Plo
 	-rm -f Services/$(DEPDIR)/Worker.Plo
@@ -2086,7 +2107,9 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Items/$(DEPDIR)/TrayToggleItem.Plo
 	-rm -f Items/$(DEPDIR)/WorkspaceItem.Plo
 	-rm -f Platform/$(DEPDIR)/libplank_internal_la-Backend.Plo
+	-rm -f Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo
+	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Plo
 	-rm -f Services/$(DEPDIR)/AccentColor.Plo
 	-rm -f Services/$(DEPDIR)/Environment.Plo
 	-rm -f Services/$(DEPDIR)/EnvironmentSettings.Plo
@@ -2095,7 +2118,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Services/$(DEPDIR)/Preferences.Plo
 	-rm -f Services/$(DEPDIR)/SessionActions.Plo
 	-rm -f Services/$(DEPDIR)/Settings.Plo
-	-rm -f Services/$(DEPDIR)/SuperKeyBinding.Plo
 	-rm -f Services/$(DEPDIR)/System.Plo
 	-rm -f Services/$(DEPDIR)/Unity.Plo
 	-rm -f Services/$(DEPDIR)/Worker.Plo

@@ -107,7 +107,6 @@ libplank_la_VALASOURCES = \
 	Services/Preferences.vala \
 	Services/Settings.vala \
 	Services/System.vala \
-	Services/SuperKeyBinding.vala \
 	Services/Unity.vala \
 	Services/Worker.vala \
 	Widgets/CompositedWindow.vala \
@@ -178,7 +177,9 @@ libplank_internal_la_VALASOURCES = \
 	InternalConsts.vala \
 	InternalQuarks.vala \
 	Platform/Backend.vala \
+	Platform/SuperKeyTrigger.vala \
 	Platform/X11/X11Backend.vala \
+	Platform/X11/X11SuperKeyTrigger.vala \
 	Services/Accessibility.vala \
 	Services/ApplicationUninstallService.vala \
 	Services/CalculatorService.vala \

@@ -66,5 +66,10 @@ namespace Plank.Platform
 			message ("+ XInput Barriers support enabled");
 #endif
 		}
+
+		public SuperKeyTrigger? create_super_key_trigger ()
+		{
+			return new X11SuperKeyTrigger (display);
+		}
 	}
 }
