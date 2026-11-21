@@ -58,7 +58,9 @@ namespace Plank
 		CINNAMON = 1 << 10,
 		PANTHEON = 1 << 11,
 		OLD = 1 << 12,
-		UBUNTU = 1 << 13;
+		UBUNTU = 1 << 13,
+		LXQT = 1 << 14,
+		BUDGIE = 1 << 15;
 		
 		static XdgSessionDesktop from_single_string (string s)
 		{
@@ -79,6 +81,11 @@ namespace Plank
 			case "xfce": result = XdgSessionDesktop.XFCE; break;
 			case "ede": result = XdgSessionDesktop.EDE; break;
 			case "cinnamon": result = XdgSessionDesktop.CINNAMON; break;
+			case "x-cinnamon": result = XdgSessionDesktop.CINNAMON; break;
+			case "lxqt": result = XdgSessionDesktop.LXQT; break;
+			case "budgie": result = XdgSessionDesktop.BUDGIE; break;
+			case "budgie-desktop": result = XdgSessionDesktop.BUDGIE; break;
+			case "plasma": result = XdgSessionDesktop.KDE; break;
 			case "pantheon": result = XdgSessionDesktop.PANTHEON; break;
 			case "old": result = XdgSessionDesktop.OLD; break;
 			default: result = 0; break;
@@ -91,13 +98,10 @@ namespace Plank
 		{
 			XdgSessionDesktop result = 0;
 			
-			if (s.contains (";")) {
-				foreach (unowned string e in s.split (";"))
-					if (e != null)
-						result |= from_single_string (e);
-			} else {
-				result = from_single_string (s);
-			}
+			// XDG_CURRENT_DESKTOP separates its entries with colons, e.g. "ubuntu:GNOME"
+			foreach (unowned string e in s.split_set (";:"))
+				if (e != null && e != "")
+					result |= from_single_string (e);
 			
 			return result;
 		}
@@ -149,6 +153,14 @@ namespace Plank
 		return (type in session_desktop);
 	}
 	
+	/**
+	 * The desktops which the running session claims to be.
+	 */
+	public static XdgSessionDesktop environment_session_desktop ()
+	{
+		return session_desktop;
+	}
+	
 	public static bool environment_is_session_type (XdgSessionType type)
 	{
 		return (type == session_type);
@@ -169,16 +181,20 @@ namespace Plank
 	
 	static XdgSessionDesktop get_xdg_session_desktop ()
 	{
-		unowned string? result;
+		// The variables do not always agree, "XDG_SESSION_DESKTOP=plasma" for
+		// example, so that what every one of them says is put together
+		XdgSessionDesktop result = 0;
+		var found = false;
+		foreach (unowned string name in new string[] { "XDG_SESSION_DESKTOP", "XDG_CURRENT_DESKTOP", "DESKTOP_SESSION" }) {
+			unowned string? val = Environment.get_variable (name);
+			if (val == null)
+				continue;
+			found = true;
+			result |= XdgSessionDesktop.from_string (val);
+		}
 		
-		result = Environment.get_variable ("XDG_SESSION_DESKTOP");
-		if (result == null)
-			result = Environment.get_variable ("XDG_CURRENT_DESKTOP");
-		if (result == null)
-			result = Environment.get_variable ("DESKTOP_SESSION");
-		
-		if (result != null)
-			return XdgSessionDesktop.from_string (result);
+		if (found)
+			return result;
 		
 		warning ("Neither of XDG_SESSION_DESKTOP, XDG_CURRENT_DESKTOP or DESKTOP_SESSION is set in this environment!");
 		
