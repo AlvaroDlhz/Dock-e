@@ -39,8 +39,7 @@ namespace Plank
 		Gtk.PositionType dock_position;
 		WindowTransition transition;
 		
-		// Shared by all hover windows, so it is only registered once
-public HoverWindow ()
+		public HoverWindow ()
 		{
 			GLib.Object (type: Gtk.WindowType.POPUP, type_hint: Gdk.WindowTypeHint.TOOLTIP);
 		}
