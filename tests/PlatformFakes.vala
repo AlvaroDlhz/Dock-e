@@ -41,6 +41,11 @@ namespace PlankTests
 			return new FakeDockSurface ();
 		}
 
+		public WindowThumbnailer? create_thumbnailer (int width, int height)
+		{
+			return null;
+		}
+
 		public EdgeTrigger? create_edge_trigger (Gtk.Window dock)
 		{
 			return null;
@@ -154,6 +159,15 @@ namespace PlankTests
 			fake_title = title;
 		}
 
+		/**
+		 * A toplevel standing for a real window of the backend, such as an
+		 * XID on X11.
+		 */
+		public FakeToplevel.with_id (uint64 id)
+		{
+			number = id;
+		}
+
 		public override bool get_geometry (out Gdk.Rectangle rect)
 		{
 			rect = geometry;
@@ -223,6 +237,14 @@ namespace PlankTests
 		public Gee.List<Toplevel> list ()
 		{
 			return toplevels.read_only_view;
+		}
+
+		public Toplevel? lookup_id (uint64 id)
+		{
+			foreach (var toplevel in toplevels)
+				if (toplevel.id == id)
+					return toplevel;
+			return null;
 		}
 
 		public FakeToplevel add (FakeToplevel toplevel)

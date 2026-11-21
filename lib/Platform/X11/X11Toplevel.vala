@@ -262,12 +262,9 @@ namespace Plank.Platform
 			return toplevels.get (window);
 		}
 
-		/**
-		 * The toplevel of an XID, or null if it is not a toplevel.
-		 */
-		public X11Toplevel? lookup_xid (ulong xid)
+		public Toplevel? lookup_id (uint64 id)
 		{
-			unowned Wnck.Window? window = Wnck.Window.@get (xid);
+			unowned Wnck.Window? window = Wnck.Window.@get ((ulong) id);
 			return (window != null ? toplevels.get (window) : null);
 		}
 

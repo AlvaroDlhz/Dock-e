@@ -153,12 +153,14 @@ am__objects_2 = libplank_internal_la-InternalConsts.lo \
 	Platform/libplank_internal_la-EdgeTrigger.lo \
 	Platform/libplank_internal_la-SuperKeyTrigger.lo \
 	Platform/libplank_internal_la-Toplevel.lo \
+	Platform/libplank_internal_la-WindowThumbnailer.lo \
 	Platform/libplank_internal_la-Workspace.lo \
 	Platform/X11/libplank_internal_la-X11Backend.lo \
 	Platform/X11/libplank_internal_la-X11DockSurface.lo \
 	Platform/X11/libplank_internal_la-X11EdgeTrigger.lo \
 	Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo \
 	Platform/X11/libplank_internal_la-X11Toplevel.lo \
+	Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo \
 	Platform/X11/libplank_internal_la-X11Workspace.lo \
 	Services/libplank_internal_la-Accessibility.lo \
 	Services/libplank_internal_la-ApplicationUninstallService.lo \
@@ -172,7 +174,6 @@ am__objects_2 = libplank_internal_la-InternalConsts.lo \
 	Services/libplank_internal_la-Matcher.lo \
 	Services/libplank_internal_la-WindowControl.lo \
 	Services/libplank_internal_la-WindowOverlap.lo \
-	Services/libplank_internal_la-WindowThumbnails.lo \
 	Services/libplank_internal_la-Utils.lo \
 	Widgets/libplank_internal_la-DockletViewModel.lo \
 	$(am__objects_1)
@@ -285,12 +286,14 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Platform/$(DEPDIR)/libplank_internal_la-EdgeTrigger.Plo \
 	Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Plo \
 	Platform/$(DEPDIR)/libplank_internal_la-Toplevel.Plo \
+	Platform/$(DEPDIR)/libplank_internal_la-WindowThumbnailer.Plo \
 	Platform/$(DEPDIR)/libplank_internal_la-Workspace.Plo \
 	Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo \
 	Platform/X11/$(DEPDIR)/libplank_internal_la-X11DockSurface.Plo \
 	Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Plo \
 	Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Plo \
 	Platform/X11/$(DEPDIR)/libplank_internal_la-X11Toplevel.Plo \
+	Platform/X11/$(DEPDIR)/libplank_internal_la-X11WindowThumbnailer.Plo \
 	Platform/X11/$(DEPDIR)/libplank_internal_la-X11Workspace.Plo \
 	Services/$(DEPDIR)/AccentColor.Plo \
 	Services/$(DEPDIR)/Environment.Plo \
@@ -315,7 +318,6 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-Utils.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-WindowOverlap.Plo \
-	Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Plo \
 	Widgets/$(DEPDIR)/CompositedWindow.Plo \
 	Widgets/$(DEPDIR)/ContextMenuStyle.Plo \
 	Widgets/$(DEPDIR)/DockStyle.Plo \
@@ -920,12 +922,14 @@ libplank_internal_la_VALASOURCES = \
 	Platform/EdgeTrigger.vala \
 	Platform/SuperKeyTrigger.vala \
 	Platform/Toplevel.vala \
+	Platform/WindowThumbnailer.vala \
 	Platform/Workspace.vala \
 	Platform/X11/X11Backend.vala \
 	Platform/X11/X11DockSurface.vala \
 	Platform/X11/X11EdgeTrigger.vala \
 	Platform/X11/X11SuperKeyTrigger.vala \
 	Platform/X11/X11Toplevel.vala \
+	Platform/X11/X11WindowThumbnailer.vala \
 	Platform/X11/X11Workspace.vala \
 	Services/Accessibility.vala \
 	Services/ApplicationUninstallService.vala \
@@ -939,7 +943,6 @@ libplank_internal_la_VALASOURCES = \
 	Services/Matcher.vala \
 	Services/WindowControl.vala \
 	Services/WindowOverlap.vala \
-	Services/WindowThumbnails.vala \
 	Services/Utils.vala \
 	Widgets/DockletViewModel.vala \
 	$(NULL)
@@ -1079,6 +1082,8 @@ Platform/libplank_internal_la-SuperKeyTrigger.lo:  \
 	Platform/$(am__dirstamp) Platform/$(DEPDIR)/$(am__dirstamp)
 Platform/libplank_internal_la-Toplevel.lo: Platform/$(am__dirstamp) \
 	Platform/$(DEPDIR)/$(am__dirstamp)
+Platform/libplank_internal_la-WindowThumbnailer.lo:  \
+	Platform/$(am__dirstamp) Platform/$(DEPDIR)/$(am__dirstamp)
 Platform/libplank_internal_la-Workspace.lo: Platform/$(am__dirstamp) \
 	Platform/$(DEPDIR)/$(am__dirstamp)
 Platform/X11/$(am__dirstamp):
@@ -1100,6 +1105,9 @@ Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo:  \
 	Platform/X11/$(am__dirstamp) \
 	Platform/X11/$(DEPDIR)/$(am__dirstamp)
 Platform/X11/libplank_internal_la-X11Toplevel.lo:  \
+	Platform/X11/$(am__dirstamp) \
+	Platform/X11/$(DEPDIR)/$(am__dirstamp)
+Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo:  \
 	Platform/X11/$(am__dirstamp) \
 	Platform/X11/$(DEPDIR)/$(am__dirstamp)
 Platform/X11/libplank_internal_la-X11Workspace.lo:  \
@@ -1134,8 +1142,6 @@ Services/libplank_internal_la-Matcher.lo: Services/$(am__dirstamp) \
 Services/libplank_internal_la-WindowControl.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-WindowOverlap.lo:  \
-	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
-Services/libplank_internal_la-WindowThumbnails.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-Utils.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
@@ -1373,12 +1379,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/$(DEPDIR)/libplank_internal_la-EdgeTrigger.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/$(DEPDIR)/libplank_internal_la-Toplevel.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Platform/$(DEPDIR)/libplank_internal_la-WindowThumbnailer.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/$(DEPDIR)/libplank_internal_la-Workspace.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/X11/$(DEPDIR)/libplank_internal_la-X11DockSurface.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/X11/$(DEPDIR)/libplank_internal_la-X11Toplevel.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Platform/X11/$(DEPDIR)/libplank_internal_la-X11WindowThumbnailer.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Platform/X11/$(DEPDIR)/libplank_internal_la-X11Workspace.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/AccentColor.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Environment.Plo@am__quote@ # am--include-marker
@@ -1405,7 +1413,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-Utils.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-WindowOverlap.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/CompositedWindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/ContextMenuStyle.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/DockStyle.Plo@am__quote@ # am--include-marker
@@ -1506,6 +1513,13 @@ Platform/libplank_internal_la-Toplevel.lo: Platform/Toplevel.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/libplank_internal_la-Toplevel.lo `test -f 'Platform/Toplevel.c' || echo '$(srcdir)/'`Platform/Toplevel.c
 
+Platform/libplank_internal_la-WindowThumbnailer.lo: Platform/WindowThumbnailer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/libplank_internal_la-WindowThumbnailer.lo -MD -MP -MF Platform/$(DEPDIR)/libplank_internal_la-WindowThumbnailer.Tpo -c -o Platform/libplank_internal_la-WindowThumbnailer.lo `test -f 'Platform/WindowThumbnailer.c' || echo '$(srcdir)/'`Platform/WindowThumbnailer.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/$(DEPDIR)/libplank_internal_la-WindowThumbnailer.Tpo Platform/$(DEPDIR)/libplank_internal_la-WindowThumbnailer.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/WindowThumbnailer.c' object='Platform/libplank_internal_la-WindowThumbnailer.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/libplank_internal_la-WindowThumbnailer.lo `test -f 'Platform/WindowThumbnailer.c' || echo '$(srcdir)/'`Platform/WindowThumbnailer.c
+
 Platform/libplank_internal_la-Workspace.lo: Platform/Workspace.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/libplank_internal_la-Workspace.lo -MD -MP -MF Platform/$(DEPDIR)/libplank_internal_la-Workspace.Tpo -c -o Platform/libplank_internal_la-Workspace.lo `test -f 'Platform/Workspace.c' || echo '$(srcdir)/'`Platform/Workspace.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/$(DEPDIR)/libplank_internal_la-Workspace.Tpo Platform/$(DEPDIR)/libplank_internal_la-Workspace.Plo
@@ -1547,6 +1561,13 @@ Platform/X11/libplank_internal_la-X11Toplevel.lo: Platform/X11/X11Toplevel.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11Toplevel.c' object='Platform/X11/libplank_internal_la-X11Toplevel.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11Toplevel.lo `test -f 'Platform/X11/X11Toplevel.c' || echo '$(srcdir)/'`Platform/X11/X11Toplevel.c
+
+Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo: Platform/X11/X11WindowThumbnailer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11WindowThumbnailer.Tpo -c -o Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo `test -f 'Platform/X11/X11WindowThumbnailer.c' || echo '$(srcdir)/'`Platform/X11/X11WindowThumbnailer.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11WindowThumbnailer.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11WindowThumbnailer.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11WindowThumbnailer.c' object='Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo `test -f 'Platform/X11/X11WindowThumbnailer.c' || echo '$(srcdir)/'`Platform/X11/X11WindowThumbnailer.c
 
 Platform/X11/libplank_internal_la-X11Workspace.lo: Platform/X11/X11Workspace.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11Workspace.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11Workspace.Tpo -c -o Platform/X11/libplank_internal_la-X11Workspace.lo `test -f 'Platform/X11/X11Workspace.c' || echo '$(srcdir)/'`Platform/X11/X11Workspace.c
@@ -1638,13 +1659,6 @@ Services/libplank_internal_la-WindowOverlap.lo: Services/WindowOverlap.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/WindowOverlap.c' object='Services/libplank_internal_la-WindowOverlap.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-WindowOverlap.lo `test -f 'Services/WindowOverlap.c' || echo '$(srcdir)/'`Services/WindowOverlap.c
-
-Services/libplank_internal_la-WindowThumbnails.lo: Services/WindowThumbnails.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-WindowThumbnails.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Tpo -c -o Services/libplank_internal_la-WindowThumbnails.lo `test -f 'Services/WindowThumbnails.c' || echo '$(srcdir)/'`Services/WindowThumbnails.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Tpo Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/WindowThumbnails.c' object='Services/libplank_internal_la-WindowThumbnails.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-WindowThumbnails.lo `test -f 'Services/WindowThumbnails.c' || echo '$(srcdir)/'`Services/WindowThumbnails.c
 
 Services/libplank_internal_la-Utils.lo: Services/Utils.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-Utils.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-Utils.Tpo -c -o Services/libplank_internal_la-Utils.lo `test -f 'Services/Utils.c' || echo '$(srcdir)/'`Services/Utils.c
@@ -2106,12 +2120,14 @@ distclean: distclean-am
 	-rm -f Platform/$(DEPDIR)/libplank_internal_la-EdgeTrigger.Plo
 	-rm -f Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Plo
 	-rm -f Platform/$(DEPDIR)/libplank_internal_la-Toplevel.Plo
+	-rm -f Platform/$(DEPDIR)/libplank_internal_la-WindowThumbnailer.Plo
 	-rm -f Platform/$(DEPDIR)/libplank_internal_la-Workspace.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11DockSurface.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11Toplevel.Plo
+	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11WindowThumbnailer.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11Workspace.Plo
 	-rm -f Services/$(DEPDIR)/AccentColor.Plo
 	-rm -f Services/$(DEPDIR)/Environment.Plo
@@ -2138,7 +2154,6 @@ distclean: distclean-am
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Utils.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowOverlap.Plo
-	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Plo
 	-rm -f Widgets/$(DEPDIR)/CompositedWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/ContextMenuStyle.Plo
 	-rm -f Widgets/$(DEPDIR)/DockStyle.Plo
@@ -2249,12 +2264,14 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Platform/$(DEPDIR)/libplank_internal_la-EdgeTrigger.Plo
 	-rm -f Platform/$(DEPDIR)/libplank_internal_la-SuperKeyTrigger.Plo
 	-rm -f Platform/$(DEPDIR)/libplank_internal_la-Toplevel.Plo
+	-rm -f Platform/$(DEPDIR)/libplank_internal_la-WindowThumbnailer.Plo
 	-rm -f Platform/$(DEPDIR)/libplank_internal_la-Workspace.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11DockSurface.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11Toplevel.Plo
+	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11WindowThumbnailer.Plo
 	-rm -f Platform/X11/$(DEPDIR)/libplank_internal_la-X11Workspace.Plo
 	-rm -f Services/$(DEPDIR)/AccentColor.Plo
 	-rm -f Services/$(DEPDIR)/Environment.Plo
@@ -2281,7 +2298,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Utils.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowOverlap.Plo
-	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Plo
 	-rm -f Widgets/$(DEPDIR)/CompositedWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/ContextMenuStyle.Plo
 	-rm -f Widgets/$(DEPDIR)/DockStyle.Plo

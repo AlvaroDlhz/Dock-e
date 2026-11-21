@@ -19,7 +19,8 @@ namespace Plank
 		uint open_timer = 0U;
 		uint close_timer = 0U;
 		// Pictures of the windows, taken again only once a window has changed
-		WindowThumbnails thumbnails;
+		Platform.WindowThumbnailer? thumbnails;
+		Platform.ToplevelManager? toplevels;
 		ulong thumbnail_changed_id = 0UL;
 		ulong previews_enabled_changed_id = 0UL;
 		bool pointer_inside = false;
@@ -29,8 +30,13 @@ namespace Plank
 			Object (type: Gtk.WindowType.TOPLEVEL);
 			this.controller = controller;
 			transition = new WindowTransition (this);
-			thumbnails = new WindowThumbnails (CARD_WIDTH - 10, PREVIEW_HEIGHT);
-			thumbnail_changed_id = thumbnails.changed.connect (refresh_image);
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend != null) {
+				toplevels = backend.toplevels;
+				thumbnails = backend.create_thumbnailer (CARD_WIDTH - 10, PREVIEW_HEIGHT);
+			}
+			if (thumbnails != null)
+				thumbnail_changed_id = thumbnails.changed.connect (refresh_image);
 			decorated = false;
 			resizable = false;
 			skip_taskbar_hint = true;
@@ -96,7 +102,8 @@ namespace Plank
 			});
 			hide.connect (() => {
 				// Nothing is watched or kept in memory while there is nothing to show
-				thumbnails.clear ();
+				if (thumbnails != null)
+					thumbnails.clear ();
 				controller.hide_manager.ExternalMenuVisible = false;
 				controller.hide_manager.update_hovered ();
 			});
@@ -216,7 +223,8 @@ namespace Plank
 			foreach (unowned Gtk.Widget child in flow.get_children ())
 				flow.remove (child);
 			// The windows of another application are of no use any longer
-			thumbnails.clear ();
+			if (thumbnails != null)
+				thumbnails.clear ();
 			if (current_item == null || current_item.App == null)
 				return;
 			var count = 0;
@@ -302,14 +310,15 @@ namespace Plank
 
 		void update_image (Gtk.Image image, uint32 xid)
 		{
-			unowned Wnck.Window? wnck = Wnck.Window.@get (xid);
-			if (wnck == null)
+			// The windows of BAMF are toplevels of the X11 backend, whose ids are XIDs
+			var toplevel = (toplevels != null ? toplevels.lookup_id (xid) : null);
+			if (toplevel == null)
 				return;
-			var pixbuf = thumbnails.lookup (xid);
+			var pixbuf = (thumbnails != null ? thumbnails.lookup (toplevel) : null);
 			if (pixbuf != null) {
 				image.set_from_pixbuf (pixbuf);
 			} else {
-				unowned Gdk.Pixbuf? fallback = wnck.get_icon ();
+				var fallback = toplevel.get_icon ();
 				if (fallback != null)
 					image.set_from_pixbuf (DrawingService.ar_scale (fallback, 64, 64));
 				else
@@ -317,10 +326,11 @@ namespace Plank
 			}
 		}
 
-		void refresh_image (uint32 xid)
+		void refresh_image (Platform.Toplevel toplevel)
 		{
 			if (!visible)
 				return;
+			var xid = (uint32) toplevel.id;
 			foreach (unowned Gtk.Widget row in flow.get_children ()) {
 				var child = (row as Gtk.FlowBoxChild)?.get_child () as Gtk.EventBox;
 				var box = child?.get_child () as Gtk.Box;

@@ -113,6 +113,16 @@ namespace Plank.Platform
 		public abstract WorkspaceManager? workspaces { get; }
 
 		/**
+		 * Creates a cache of pictures of toplevels; each user has its own,
+		 * with the size it shows them at.
+		 *
+		 * @param width the most room a picture gets
+		 * @param height the most room a picture gets
+		 * @return null without {@link Capability.THUMBNAILS}
+		 */
+		public abstract WindowThumbnailer? create_thumbnailer (int width, int height);
+
+		/**
 		 * Whether this backend supports the given capability.
 		 */
 		public bool has (Capability capability)

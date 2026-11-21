@@ -105,6 +105,11 @@ namespace Plank.Platform
 			return toplevel_manager;
 		}
 
+		public WindowThumbnailer? create_thumbnailer (int width, int height)
+		{
+			return new X11WindowThumbnailer (width, height);
+		}
+
 		public EdgeTrigger? create_edge_trigger (Gtk.Window dock)
 		{
 #if HAVE_BARRIERS

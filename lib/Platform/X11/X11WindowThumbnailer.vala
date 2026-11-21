@@ -1,8 +1,8 @@
 //
-// Scaled-down pictures of other applications' windows.
+// Scaled-down pictures of other applications' windows on X11.
 //
 
-namespace Plank
+namespace Plank.Platform
 {
 	/**
 	 * Keeps a small picture of each window which is asked for, and takes a
@@ -12,7 +12,7 @@ namespace Plank
 	 * doing that on a timer costs the same whether anything changed or not.
 	 * The X Damage extension reports the changes instead.
 	 */
-	public class WindowThumbnails : GLib.Object
+	public class X11WindowThumbnailer : GLib.Object, WindowThumbnailer
 	{
 		// A window which keeps painting, like a video, is read this often at most
 		const uint REFRESH_INTERVAL = 250U;
@@ -21,6 +21,7 @@ namespace Plank
 
 		class Entry
 		{
+			public Toplevel toplevel;
 			public Gdk.Pixbuf? pixbuf;
 			// The window changed since the picture was taken
 			public bool stale = true;
@@ -28,12 +29,6 @@ namespace Plank
 			public XDamage.Damage damage;
 #endif
 		}
-
-		/**
-		 * The picture of this window is out of date, and asking for it again
-		 * gives a new one.
-		 */
-		public signal void changed (uint32 xid);
 
 		int width;
 		int height;
@@ -50,7 +45,7 @@ namespace Plank
 		 * @param width the most room a picture gets, which it is fit into
 		 * @param height the most room a picture gets, which it is fit into
 		 */
-		public WindowThumbnails (int width, int height)
+		public X11WindowThumbnailer (int width, int height)
 		{
 			this.width = width;
 			this.height = height;
@@ -66,7 +61,7 @@ namespace Plank
 #endif
 		}
 
-		~WindowThumbnails ()
+		~X11WindowThumbnailer ()
 		{
 			clear ();
 #if HAVE_XDAMAGE
@@ -75,16 +70,13 @@ namespace Plank
 #endif
 		}
 
-		/**
-		 * The current picture of a window.
-		 *
-		 * @return null if the window cannot be read, as when it is gone
-		 */
-		public Gdk.Pixbuf? lookup (uint32 xid)
+		public Gdk.Pixbuf? lookup (Toplevel toplevel)
 		{
+			var xid = (uint32) toplevel.id;
 			Entry? entry = entries[xid];
 			if (entry == null) {
 				entry = new Entry ();
+				entry.toplevel = toplevel;
 				entries[xid] = entry;
 				watch (xid, entry);
 			}
@@ -97,9 +89,6 @@ namespace Plank
 			return entry.pixbuf;
 		}
 
-		/**
-		 * Forgets every window, which also frees their pictures.
-		 */
 		public void clear ()
 		{
 			if (notify_timer_id > 0U) {
@@ -216,9 +205,11 @@ namespace Plank
 			// A handler may forget every window while it is being told
 			var xids = pending.to_array ();
 			pending.clear ();
-			foreach (var xid in xids)
-				if (entries.has_key (xid))
-					changed (xid);
+			foreach (var xid in xids) {
+				Entry? entry = entries[xid];
+				if (entry != null)
+					changed (entry.toplevel);
+			}
 		}
 
 		static unowned X.Display? get_xdisplay ()

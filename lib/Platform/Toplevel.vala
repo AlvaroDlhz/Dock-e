@@ -132,6 +132,11 @@ namespace Plank.Platform
 		 */
 		public abstract Gee.List<Toplevel> list ();
 
+		/**
+		 * The toplevel with this {@link Toplevel.id}, or null.
+		 */
+		public abstract Toplevel? lookup_id (uint64 id);
+
 		public signal void added (Toplevel toplevel);
 		public signal void removed (Toplevel toplevel);
 		/**

@@ -17,7 +17,7 @@ namespace Plank
 		// The workspaces as of the last rebuild
 		Gee.List<Platform.Workspace> shown_workspaces = new Gee.ArrayList<Platform.Workspace> ();
 		// Pictures of the windows, taken again only once a window has changed
-		WindowThumbnails thumbnails;
+		Platform.WindowThumbnailer? thumbnails;
 		ulong thumbnail_changed_id = 0UL;
 
 		public WorkspacePreviewWindow (DockController controller)
@@ -40,9 +40,10 @@ namespace Plank
 			if (backend != null) {
 				workspaces = backend.workspaces;
 				toplevels = backend.toplevels;
+				thumbnails = backend.create_thumbnailer (CARD_WIDTH - 10, PREVIEW_HEIGHT);
 			}
-			thumbnails = new WindowThumbnails (CARD_WIDTH - 10, PREVIEW_HEIGHT);
-			thumbnail_changed_id = thumbnails.changed.connect (() => redraw_previews ());
+			if (thumbnails != null)
+				thumbnail_changed_id = thumbnails.changed.connect (() => redraw_previews ());
 			decorated = false;
 			resizable = false;
 			skip_taskbar_hint = true;
@@ -87,7 +88,8 @@ namespace Plank
 			});
 			hide.connect (() => {
 				// Nothing is watched or kept in memory while there is nothing to show
-				thumbnails.clear ();
+				if (thumbnails != null)
+					thumbnails.clear ();
 				controller.hide_manager.ExternalMenuVisible = false;
 				controller.hide_manager.update_hovered ();
 			});
@@ -311,9 +313,9 @@ namespace Plank
 
 		Gdk.Pixbuf? capture_window (Platform.Toplevel window)
 		{
-			if (window.has_any_state (Platform.ToplevelState.MINIMIZED))
+			if (thumbnails == null || window.has_any_state (Platform.ToplevelState.MINIMIZED))
 				return null;
-			return thumbnails.lookup ((uint32) window.id);
+			return thumbnails.lookup (window);
 		}
 
 		void redraw_previews ()
