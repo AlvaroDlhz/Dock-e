@@ -148,6 +148,7 @@ am__objects_3 = tests-Accessibility.$(OBJEXT) \
 	tests-ApplicationUninstallService.$(OBJEXT) \
 	tests-CalculatorService.$(OBJEXT) \
 	tests-LauncherSearch.$(OBJEXT) tests-CommandRunner.$(OBJEXT) \
+	tests-SessionActions.$(OBJEXT) \
 	tests-StatusNoticeModel.$(OBJEXT) tests-System.$(OBJEXT) \
 	tests-Controller.$(OBJEXT) tests-Drawing.$(OBJEXT) \
 	tests-Items.$(OBJEXT) tests-Preferences.$(OBJEXT) \
@@ -184,6 +185,7 @@ am__depfiles_remade = ./$(DEPDIR)/dock-Dock.Po \
 	./$(DEPDIR)/tests-Controller.Po ./$(DEPDIR)/tests-Drawing.Po \
 	./$(DEPDIR)/tests-Items.Po ./$(DEPDIR)/tests-LauncherSearch.Po \
 	./$(DEPDIR)/tests-Main.Po ./$(DEPDIR)/tests-Preferences.Po \
+	./$(DEPDIR)/tests-SessionActions.Po \
 	./$(DEPDIR)/tests-StatusNoticeModel.Po \
 	./$(DEPDIR)/tests-System.Po ./$(DEPDIR)/tests-TestHelper.Po \
 	./$(DEPDIR)/tests-Widgets.Po gmock/$(DEPDIR)/tests-color.Po \
@@ -383,6 +385,8 @@ VALAC = @VALAC@
 VALADOC = @VALADOC@
 VAPIGEN = @VAPIGEN@
 VERSION = @VERSION@
+XDAMAGE_CFLAGS = @XDAMAGE_CFLAGS@
+XDAMAGE_LIBS = @XDAMAGE_LIBS@
 XGETTEXT = @XGETTEXT@
 XGETTEXT_015 = @XGETTEXT_015@
 XGETTEXT_EXTRA_OPTIONS = @XGETTEXT_EXTRA_OPTIONS@
@@ -492,6 +496,7 @@ tests_VALASOURCES = \
 	CalculatorService.vala \
 	LauncherSearch.vala \
 	CommandRunner.vala \
+	SessionActions.vala \
 	StatusNoticeModel.vala \
 	System.vala \
 	Controller.vala \
@@ -655,6 +660,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-LauncherSearch.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Main.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Preferences.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-SessionActions.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-StatusNoticeModel.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-System.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-TestHelper.Po@am__quote@ # am--include-marker
@@ -775,6 +781,20 @@ tests-CommandRunner.obj: CommandRunner.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='CommandRunner.c' object='tests-CommandRunner.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-CommandRunner.obj `if test -f 'CommandRunner.c'; then $(CYGPATH_W) 'CommandRunner.c'; else $(CYGPATH_W) '$(srcdir)/CommandRunner.c'; fi`
+
+tests-SessionActions.o: SessionActions.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-SessionActions.o -MD -MP -MF $(DEPDIR)/tests-SessionActions.Tpo -c -o tests-SessionActions.o `test -f 'SessionActions.c' || echo '$(srcdir)/'`SessionActions.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-SessionActions.Tpo $(DEPDIR)/tests-SessionActions.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='SessionActions.c' object='tests-SessionActions.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-SessionActions.o `test -f 'SessionActions.c' || echo '$(srcdir)/'`SessionActions.c
+
+tests-SessionActions.obj: SessionActions.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-SessionActions.obj -MD -MP -MF $(DEPDIR)/tests-SessionActions.Tpo -c -o tests-SessionActions.obj `if test -f 'SessionActions.c'; then $(CYGPATH_W) 'SessionActions.c'; else $(CYGPATH_W) '$(srcdir)/SessionActions.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-SessionActions.Tpo $(DEPDIR)/tests-SessionActions.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='SessionActions.c' object='tests-SessionActions.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-SessionActions.obj `if test -f 'SessionActions.c'; then $(CYGPATH_W) 'SessionActions.c'; else $(CYGPATH_W) '$(srcdir)/SessionActions.c'; fi`
 
 tests-StatusNoticeModel.o: StatusNoticeModel.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-StatusNoticeModel.o -MD -MP -MF $(DEPDIR)/tests-StatusNoticeModel.Tpo -c -o tests-StatusNoticeModel.o `test -f 'StatusNoticeModel.c' || echo '$(srcdir)/'`StatusNoticeModel.c
@@ -1104,6 +1124,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/tests-LauncherSearch.Po
 	-rm -f ./$(DEPDIR)/tests-Main.Po
 	-rm -f ./$(DEPDIR)/tests-Preferences.Po
+	-rm -f ./$(DEPDIR)/tests-SessionActions.Po
 	-rm -f ./$(DEPDIR)/tests-StatusNoticeModel.Po
 	-rm -f ./$(DEPDIR)/tests-System.Po
 	-rm -f ./$(DEPDIR)/tests-TestHelper.Po
@@ -1166,6 +1187,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/tests-LauncherSearch.Po
 	-rm -f ./$(DEPDIR)/tests-Main.Po
 	-rm -f ./$(DEPDIR)/tests-Preferences.Po
+	-rm -f ./$(DEPDIR)/tests-SessionActions.Po
 	-rm -f ./$(DEPDIR)/tests-StatusNoticeModel.Po
 	-rm -f ./$(DEPDIR)/tests-System.Po
 	-rm -f ./$(DEPDIR)/tests-TestHelper.Po

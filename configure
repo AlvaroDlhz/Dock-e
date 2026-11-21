@@ -763,6 +763,10 @@ ENABLE_APPORT_TRUE
 PLANK_CORE_LIBS
 PLANK_CORE_CFLAGS
 PLANK_CORE_OPTIONAL_PKGS
+HAVE_XDAMAGE_FALSE
+HAVE_XDAMAGE_TRUE
+XDAMAGE_LIBS
+XDAMAGE_CFLAGS
 HAVE_DBUSMENU_FALSE
 HAVE_DBUSMENU_TRUE
 DBUSMENU_LIBS
@@ -961,6 +965,7 @@ enable_libtool_lock
 enable_schemas_compile
 enable_barriers
 enable_dbusmenu
+enable_xdamage
 enable_debug
 enable_apport
 enable_benchmark
@@ -995,6 +1000,8 @@ GLIB_COMPILE_RESOURCES
 XMLLINT
 DBUSMENU_CFLAGS
 DBUSMENU_LIBS
+XDAMAGE_CFLAGS
+XDAMAGE_LIBS
 PLANK_CORE_CFLAGS
 PLANK_CORE_LIBS'
 
@@ -1645,6 +1652,8 @@ Optional Features:
   --enable-barriers       Enable use of barriers
   --enable-dbusmenu       Enable dynamic quicklist support provided over
                           dbusmenu
+  --enable-xdamage        Follow window changes with the X Damage extension
+                          instead of polling
   --disable-debug         compile without debug code
   --enable-apport         Enable installation of Apport support files
   --enable-benchmark      Enable output of benchmarking data in logs
@@ -1704,6 +1713,10 @@ Some influential environment variables:
               C compiler flags for DBUSMENU, overriding pkg-config
   DBUSMENU_LIBS
               linker flags for DBUSMENU, overriding pkg-config
+  XDAMAGE_CFLAGS
+              C compiler flags for XDAMAGE, overriding pkg-config
+  XDAMAGE_LIBS
+              linker flags for XDAMAGE, overriding pkg-config
   PLANK_CORE_CFLAGS
               C compiler flags for PLANK_CORE, overriding pkg-config
   PLANK_CORE_LIBS
@@ -20807,6 +20820,100 @@ else
 fi
 
 
+# Repaint window previews only when their window changed
+XDAMAGE_PKGS="xdamage"
+# Check whether --enable-xdamage was given.
+if test ${enable_xdamage+y}
+then :
+  enableval=$enable_xdamage; enable_xdamage=$enableval
+else $as_nop
+
+pkg_failed=no
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $XDAMAGE_PKGS" >&5
+printf %s "checking for $XDAMAGE_PKGS... " >&6; }
+
+if test -n "$XDAMAGE_CFLAGS"; then
+    pkg_cv_XDAMAGE_CFLAGS="$XDAMAGE_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"\$XDAMAGE_PKGS\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "$XDAMAGE_PKGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_XDAMAGE_CFLAGS=`$PKG_CONFIG --cflags "$XDAMAGE_PKGS" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$XDAMAGE_LIBS"; then
+    pkg_cv_XDAMAGE_LIBS="$XDAMAGE_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"\$XDAMAGE_PKGS\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "$XDAMAGE_PKGS") 2>&5
+  ac_status=$?
+  printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_XDAMAGE_LIBS=`$PKG_CONFIG --libs "$XDAMAGE_PKGS" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+                XDAMAGE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "$XDAMAGE_PKGS" 2>&1`
+        else
+                XDAMAGE_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "$XDAMAGE_PKGS" 2>&1`
+        fi
+        # Put the nasty error message in config.log where it belongs
+        echo "$XDAMAGE_PKG_ERRORS" >&5
+
+        enable_xdamage=no
+elif test $pkg_failed = untried; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+        enable_xdamage=no
+else
+        XDAMAGE_CFLAGS=$pkg_cv_XDAMAGE_CFLAGS
+        XDAMAGE_LIBS=$pkg_cv_XDAMAGE_LIBS
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+        enable_xdamage=yes
+fi
+fi
+
+if test "x$enable_xdamage" = "xyes" ; then
+    PLANK_CORE_OPTIONAL_PKGS="$PLANK_CORE_OPTIONAL_PKGS $XDAMAGE_PKGS"
+    PLANK_CORE_VALA_PKGS="$PLANK_CORE_VALA_PKGS --pkg xdamage"
+    VALAFLAGS="$VALAFLAGS --define HAVE_XDAMAGE"
+fi
+ if test "x$enable_xdamage" = "xyes"; then
+  HAVE_XDAMAGE_TRUE=
+  HAVE_XDAMAGE_FALSE='#'
+else
+  HAVE_XDAMAGE_TRUE='#'
+  HAVE_XDAMAGE_FALSE=
+fi
+
+
 
 
 
@@ -21754,6 +21861,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_DBUSMENU_TRUE}" && test -z "${HAVE_DBUSMENU_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_DBUSMENU\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_XDAMAGE_TRUE}" && test -z "${HAVE_XDAMAGE_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_XDAMAGE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_APPORT_TRUE}" && test -z "${ENABLE_APPORT_FALSE}"; then

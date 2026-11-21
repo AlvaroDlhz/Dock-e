@@ -163,8 +163,8 @@ am__uninstall_files_from_dir = { \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
 am__installdirs = "$(DESTDIR)$(appdatadir)" \
-	"$(DESTDIR)$(applicationsdir)"
-DATA = $(appdata_DATA) $(applications_DATA)
+	"$(DESTDIR)$(applicationsdir)" "$(DESTDIR)$(autostartdir)"
+DATA = $(appdata_DATA) $(applications_DATA) $(autostart_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 am__recursive_targets = \
@@ -348,6 +348,8 @@ VALAC = @VALAC@
 VALADOC = @VALADOC@
 VAPIGEN = @VAPIGEN@
 VERSION = @VERSION@
+XDAMAGE_CFLAGS = @XDAMAGE_CFLAGS@
+XDAMAGE_LIBS = @XDAMAGE_LIBS@
 XGETTEXT = @XGETTEXT@
 XGETTEXT_015 = @XGETTEXT_015@
 XGETTEXT_EXTRA_OPTIONS = @XGETTEXT_EXTRA_OPTIONS@
@@ -430,22 +432,32 @@ EXTRA_DIST = \
 	plank.appdata.xml.in \
 	net.launchpad.plank.gschema.xml.in \
 	plank.desktop.in \
+	dock-e.desktop.in \
+	dock-e-autostart.desktop.in \
 	plank.gresource.xml \
 	menu-2.svg \
 	poof.svg \
+	style/dock-e.css \
 	ui/preferences.ui \
 	$(NULL)
 
 CLEANFILES = \
 	plank.appdata.xml \
 	plank.desktop \
+	dock-e.desktop \
+	dock-e-autostart.desktop \
 	$(gsettings_SCHEMAS) \
 	gschemas.compiled \
 	net.launchpad.plank.gschema.valid \
 	$(NULL)
 
 applicationsdir = $(datadir)/applications
-applications_DATA = plank.desktop
+applications_DATA = dock-e.desktop
+
+# Not started for everybody: it is there to be copied into ~/.config/autostart,
+# which scripts/install-dock-e does
+autostartdir = $(pkgdatadir)/autostart
+autostart_DATA = dock-e-autostart.desktop
 appdatadir = $(datadir)/metainfo
 appdata_DATA = plank.appdata.xml
 gsettings_SCHEMAS = net.launchpad.plank.gschema.xml
@@ -529,6 +541,27 @@ uninstall-applicationsDATA:
 	@list='$(applications_DATA)'; test -n "$(applicationsdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(applicationsdir)'; $(am__uninstall_files_from_dir)
+install-autostartDATA: $(autostart_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(autostart_DATA)'; test -n "$(autostartdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(autostartdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(autostartdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(autostartdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(autostartdir)" || exit $$?; \
+	done
+
+uninstall-autostartDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(autostart_DATA)'; test -n "$(autostartdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(autostartdir)'; $(am__uninstall_files_from_dir)
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run 'make' without going through this Makefile.
@@ -691,7 +724,7 @@ check: check-recursive
 all-am: Makefile $(DATA) all-local
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(appdatadir)" "$(DESTDIR)$(applicationsdir)"; do \
+	for dir in "$(DESTDIR)$(appdatadir)" "$(DESTDIR)$(applicationsdir)" "$(DESTDIR)$(autostartdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -745,7 +778,8 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-appdataDATA install-applicationsDATA
+install-data-am: install-appdataDATA install-applicationsDATA \
+	install-autostartDATA
 
 install-dvi: install-dvi-recursive
 
@@ -789,7 +823,8 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-appdataDATA uninstall-applicationsDATA
+uninstall-am: uninstall-appdataDATA uninstall-applicationsDATA \
+	uninstall-autostartDATA
 
 .MAKE: $(am__recursive_targets) install-am install-strip
 
@@ -798,18 +833,24 @@ uninstall-am: uninstall-appdataDATA uninstall-applicationsDATA
 	ctags ctags-am distclean distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-appdataDATA \
-	install-applicationsDATA install-data install-data-am \
-	install-dvi install-dvi-am install-exec install-exec-am \
-	install-html install-html-am install-info install-info-am \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs installdirs-am maintainer-clean \
+	install-applicationsDATA install-autostartDATA install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-am uninstall \
-	uninstall-am uninstall-appdataDATA uninstall-applicationsDATA
+	uninstall-am uninstall-appdataDATA uninstall-applicationsDATA \
+	uninstall-autostartDATA
 
 .PRECIOUS: Makefile
 
+
+# The entries name the program by its full path, since a prefix like ~/.local
+# is not always in the PATH of the session
+dock-e.desktop dock-e-autostart.desktop: %.desktop: %.desktop.in Makefile
+	$(AM_V_GEN) sed -e 's|@bindir[@]|$(bindir)|g' $< > $@ || rm $@
 
 %.gschema.xml: %.gschema.xml.in Makefile
 	$(AM_V_GEN) sed -e 's|@GETTEXT_PACKAGE[@]|$(GETTEXT_PACKAGE)|g' \

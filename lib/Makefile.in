@@ -151,11 +151,15 @@ am__objects_2 = libplank_internal_la-InternalConsts.lo \
 	Services/libplank_internal_la-Accessibility.lo \
 	Services/libplank_internal_la-ApplicationUninstallService.lo \
 	Services/libplank_internal_la-CalculatorService.lo \
+	Services/libplank_internal_la-DockProfiles.lo \
+	Services/libplank_internal_la-LauncherCatalog.lo \
+	Services/libplank_internal_la-LauncherCommands.lo \
 	Services/libplank_internal_la-LauncherSearch.lo \
 	Services/libplank_internal_la-CommandRunner.lo \
 	Services/libplank_internal_la-StatusNoticeModel.lo \
 	Services/libplank_internal_la-Matcher.lo \
 	Services/libplank_internal_la-WindowControl.lo \
+	Services/libplank_internal_la-WindowThumbnails.lo \
 	Services/libplank_internal_la-Utils.lo \
 	Widgets/libplank_internal_la-DockletViewModel.lo \
 	$(am__objects_1)
@@ -195,16 +199,17 @@ am__objects_5 = DBusManager.lo DockController.lo DockPreferences.lo \
 	Items/PlaceholderDockItem.lo Items/PlankDockItem.lo \
 	Items/TrayToggleItem.lo Items/TransientDockItem.lo \
 	Items/WorkspaceItem.lo Items/LauncherItem.lo \
-	Services/Environment.lo Services/EnvironmentSettings.lo \
-	Services/Logger.lo Services/Paths.lo Services/Preferences.lo \
-	Services/Settings.lo Services/System.lo \
-	Services/SuperKeyBinding.lo Services/Unity.lo \
-	Services/Worker.lo Widgets/CompositedWindow.lo \
-	Widgets/ContextMenuStyle.lo Widgets/DockWindow.lo \
-	Widgets/WindowPreviewWindow.lo \
+	Services/Environment.lo Services/SessionActions.lo \
+	Services/EnvironmentSettings.lo Services/Logger.lo \
+	Services/Paths.lo Services/Preferences.lo Services/Settings.lo \
+	Services/System.lo Services/SuperKeyBinding.lo \
+	Services/Unity.lo Services/Worker.lo \
+	Widgets/CompositedWindow.lo Widgets/ContextMenuStyle.lo \
+	Services/AccentColor.lo Widgets/DockStyle.lo \
+	Widgets/DockWindow.lo Widgets/WindowPreviewWindow.lo \
 	Widgets/WorkspacePreviewWindow.lo Widgets/HoverWindow.lo \
-	Widgets/LauncherWindow.lo Widgets/PoofWindow.lo \
-	Widgets/PreferencesWindow.lo \
+	Widgets/LauncherWindow.lo Widgets/ListSelectionGlide.lo \
+	Widgets/PoofWindow.lo Widgets/PreferencesWindow.lo \
 	Widgets/TitledSeparatorMenuItem.lo $(am__objects_1)
 nodist_libplank_la_OBJECTS = $(am__objects_3) $(am__objects_4) \
 	$(am__objects_5) $(am__objects_1)
@@ -262,10 +267,12 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Items/$(DEPDIR)/TransientDockItem.Plo \
 	Items/$(DEPDIR)/TrayToggleItem.Plo \
 	Items/$(DEPDIR)/WorkspaceItem.Plo \
+	Services/$(DEPDIR)/AccentColor.Plo \
 	Services/$(DEPDIR)/Environment.Plo \
 	Services/$(DEPDIR)/EnvironmentSettings.Plo \
 	Services/$(DEPDIR)/Logger.Plo Services/$(DEPDIR)/Paths.Plo \
 	Services/$(DEPDIR)/Preferences.Plo \
+	Services/$(DEPDIR)/SessionActions.Plo \
 	Services/$(DEPDIR)/Settings.Plo \
 	Services/$(DEPDIR)/SuperKeyBinding.Plo \
 	Services/$(DEPDIR)/System.Plo Services/$(DEPDIR)/Unity.Plo \
@@ -274,16 +281,22 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Plo \
+	Services/$(DEPDIR)/libplank_internal_la-DockProfiles.Plo \
+	Services/$(DEPDIR)/libplank_internal_la-LauncherCatalog.Plo \
+	Services/$(DEPDIR)/libplank_internal_la-LauncherCommands.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-LauncherSearch.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-Utils.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo \
+	Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Plo \
 	Widgets/$(DEPDIR)/CompositedWindow.Plo \
 	Widgets/$(DEPDIR)/ContextMenuStyle.Plo \
+	Widgets/$(DEPDIR)/DockStyle.Plo \
 	Widgets/$(DEPDIR)/DockWindow.Plo \
 	Widgets/$(DEPDIR)/HoverWindow.Plo \
 	Widgets/$(DEPDIR)/LauncherWindow.Plo \
+	Widgets/$(DEPDIR)/ListSelectionGlide.Plo \
 	Widgets/$(DEPDIR)/PoofWindow.Plo \
 	Widgets/$(DEPDIR)/PreferencesWindow.Plo \
 	Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo \
@@ -650,6 +663,8 @@ VALAC = @VALAC@
 VALADOC = @VALADOC@
 VAPIGEN = @VAPIGEN@
 VERSION = @VERSION@
+XDAMAGE_CFLAGS = @XDAMAGE_CFLAGS@
+XDAMAGE_LIBS = @XDAMAGE_LIBS@
 XGETTEXT = @XGETTEXT@
 XGETTEXT_015 = @XGETTEXT_015@
 XGETTEXT_EXTRA_OPTIONS = @XGETTEXT_EXTRA_OPTIONS@
@@ -819,6 +834,7 @@ libplank_la_VALASOURCES = \
 	Items/WorkspaceItem.vala \
 	Items/LauncherItem.vala \
 	Services/Environment.vala \
+	Services/SessionActions.vala \
 	Services/EnvironmentSettings.vala \
 	Services/Logger.vala \
 	Services/Paths.vala \
@@ -830,11 +846,14 @@ libplank_la_VALASOURCES = \
 	Services/Worker.vala \
 	Widgets/CompositedWindow.vala \
 	Widgets/ContextMenuStyle.vala \
+	Services/AccentColor.vala \
+	Widgets/DockStyle.vala \
 	Widgets/DockWindow.vala \
 	Widgets/WindowPreviewWindow.vala \
 	Widgets/WorkspacePreviewWindow.vala \
 	Widgets/HoverWindow.vala \
 	Widgets/LauncherWindow.vala \
+	Widgets/ListSelectionGlide.vala \
 	Widgets/PoofWindow.vala \
 	Widgets/PreferencesWindow.vala \
 	Widgets/TitledSeparatorMenuItem.vala \
@@ -873,11 +892,15 @@ libplank_internal_la_VALASOURCES = \
 	Services/Accessibility.vala \
 	Services/ApplicationUninstallService.vala \
 	Services/CalculatorService.vala \
+	Services/DockProfiles.vala \
+	Services/LauncherCatalog.vala \
+	Services/LauncherCommands.vala \
 	Services/LauncherSearch.vala \
 	Services/CommandRunner.vala \
 	Services/StatusNoticeModel.vala \
 	Services/Matcher.vala \
 	Services/WindowControl.vala \
+	Services/WindowThumbnails.vala \
 	Services/Utils.vala \
 	Widgets/DockletViewModel.vala \
 	$(NULL)
@@ -1013,6 +1036,12 @@ Services/libplank_internal_la-ApplicationUninstallService.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-CalculatorService.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
+Services/libplank_internal_la-DockProfiles.lo:  \
+	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
+Services/libplank_internal_la-LauncherCatalog.lo:  \
+	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
+Services/libplank_internal_la-LauncherCommands.lo:  \
+	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-LauncherSearch.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-CommandRunner.lo:  \
@@ -1022,6 +1051,8 @@ Services/libplank_internal_la-StatusNoticeModel.lo:  \
 Services/libplank_internal_la-Matcher.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-WindowControl.lo:  \
+	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
+Services/libplank_internal_la-WindowThumbnails.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-Utils.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
@@ -1134,6 +1165,8 @@ Items/LauncherItem.lo: Items/$(am__dirstamp) \
 	Items/$(DEPDIR)/$(am__dirstamp)
 Services/Environment.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
+Services/SessionActions.lo: Services/$(am__dirstamp) \
+	Services/$(DEPDIR)/$(am__dirstamp)
 Services/EnvironmentSettings.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
 Services/Logger.lo: Services/$(am__dirstamp) \
@@ -1156,6 +1189,10 @@ Widgets/CompositedWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
 Widgets/ContextMenuStyle.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
+Services/AccentColor.lo: Services/$(am__dirstamp) \
+	Services/$(DEPDIR)/$(am__dirstamp)
+Widgets/DockStyle.lo: Widgets/$(am__dirstamp) \
+	Widgets/$(DEPDIR)/$(am__dirstamp)
 Widgets/DockWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
 Widgets/WindowPreviewWindow.lo: Widgets/$(am__dirstamp) \
@@ -1165,6 +1202,8 @@ Widgets/WorkspacePreviewWindow.lo: Widgets/$(am__dirstamp) \
 Widgets/HoverWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
 Widgets/LauncherWindow.lo: Widgets/$(am__dirstamp) \
+	Widgets/$(DEPDIR)/$(am__dirstamp)
+Widgets/ListSelectionGlide.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
 Widgets/PoofWindow.lo: Widgets/$(am__dirstamp) \
 	Widgets/$(DEPDIR)/$(am__dirstamp)
@@ -1242,11 +1281,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/TransientDockItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/TrayToggleItem.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Items/$(DEPDIR)/WorkspaceItem.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/AccentColor.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Environment.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/EnvironmentSettings.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Logger.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Paths.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Preferences.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/SessionActions.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Settings.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/SuperKeyBinding.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/System.Plo@am__quote@ # am--include-marker
@@ -1256,16 +1297,22 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-DockProfiles.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-LauncherCatalog.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-LauncherCommands.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-LauncherSearch.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-Utils.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/CompositedWindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/ContextMenuStyle.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/DockStyle.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/DockWindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/HoverWindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/LauncherWindow.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/ListSelectionGlide.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/PoofWindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/PreferencesWindow.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo@am__quote@ # am--include-marker
@@ -1345,6 +1392,27 @@ Services/libplank_internal_la-CalculatorService.lo: Services/CalculatorService.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-CalculatorService.lo `test -f 'Services/CalculatorService.c' || echo '$(srcdir)/'`Services/CalculatorService.c
 
+Services/libplank_internal_la-DockProfiles.lo: Services/DockProfiles.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-DockProfiles.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-DockProfiles.Tpo -c -o Services/libplank_internal_la-DockProfiles.lo `test -f 'Services/DockProfiles.c' || echo '$(srcdir)/'`Services/DockProfiles.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-DockProfiles.Tpo Services/$(DEPDIR)/libplank_internal_la-DockProfiles.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/DockProfiles.c' object='Services/libplank_internal_la-DockProfiles.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-DockProfiles.lo `test -f 'Services/DockProfiles.c' || echo '$(srcdir)/'`Services/DockProfiles.c
+
+Services/libplank_internal_la-LauncherCatalog.lo: Services/LauncherCatalog.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-LauncherCatalog.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-LauncherCatalog.Tpo -c -o Services/libplank_internal_la-LauncherCatalog.lo `test -f 'Services/LauncherCatalog.c' || echo '$(srcdir)/'`Services/LauncherCatalog.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-LauncherCatalog.Tpo Services/$(DEPDIR)/libplank_internal_la-LauncherCatalog.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/LauncherCatalog.c' object='Services/libplank_internal_la-LauncherCatalog.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-LauncherCatalog.lo `test -f 'Services/LauncherCatalog.c' || echo '$(srcdir)/'`Services/LauncherCatalog.c
+
+Services/libplank_internal_la-LauncherCommands.lo: Services/LauncherCommands.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-LauncherCommands.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-LauncherCommands.Tpo -c -o Services/libplank_internal_la-LauncherCommands.lo `test -f 'Services/LauncherCommands.c' || echo '$(srcdir)/'`Services/LauncherCommands.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-LauncherCommands.Tpo Services/$(DEPDIR)/libplank_internal_la-LauncherCommands.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/LauncherCommands.c' object='Services/libplank_internal_la-LauncherCommands.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-LauncherCommands.lo `test -f 'Services/LauncherCommands.c' || echo '$(srcdir)/'`Services/LauncherCommands.c
+
 Services/libplank_internal_la-LauncherSearch.lo: Services/LauncherSearch.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-LauncherSearch.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-LauncherSearch.Tpo -c -o Services/libplank_internal_la-LauncherSearch.lo `test -f 'Services/LauncherSearch.c' || echo '$(srcdir)/'`Services/LauncherSearch.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-LauncherSearch.Tpo Services/$(DEPDIR)/libplank_internal_la-LauncherSearch.Plo
@@ -1379,6 +1447,13 @@ Services/libplank_internal_la-WindowControl.lo: Services/WindowControl.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/WindowControl.c' object='Services/libplank_internal_la-WindowControl.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-WindowControl.lo `test -f 'Services/WindowControl.c' || echo '$(srcdir)/'`Services/WindowControl.c
+
+Services/libplank_internal_la-WindowThumbnails.lo: Services/WindowThumbnails.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-WindowThumbnails.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Tpo -c -o Services/libplank_internal_la-WindowThumbnails.lo `test -f 'Services/WindowThumbnails.c' || echo '$(srcdir)/'`Services/WindowThumbnails.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Tpo Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/WindowThumbnails.c' object='Services/libplank_internal_la-WindowThumbnails.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-WindowThumbnails.lo `test -f 'Services/WindowThumbnails.c' || echo '$(srcdir)/'`Services/WindowThumbnails.c
 
 Services/libplank_internal_la-Utils.lo: Services/Utils.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-Utils.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-Utils.Tpo -c -o Services/libplank_internal_la-Utils.lo `test -f 'Services/Utils.c' || echo '$(srcdir)/'`Services/Utils.c
@@ -1829,11 +1904,13 @@ distclean: distclean-am
 	-rm -f Items/$(DEPDIR)/TransientDockItem.Plo
 	-rm -f Items/$(DEPDIR)/TrayToggleItem.Plo
 	-rm -f Items/$(DEPDIR)/WorkspaceItem.Plo
+	-rm -f Services/$(DEPDIR)/AccentColor.Plo
 	-rm -f Services/$(DEPDIR)/Environment.Plo
 	-rm -f Services/$(DEPDIR)/EnvironmentSettings.Plo
 	-rm -f Services/$(DEPDIR)/Logger.Plo
 	-rm -f Services/$(DEPDIR)/Paths.Plo
 	-rm -f Services/$(DEPDIR)/Preferences.Plo
+	-rm -f Services/$(DEPDIR)/SessionActions.Plo
 	-rm -f Services/$(DEPDIR)/Settings.Plo
 	-rm -f Services/$(DEPDIR)/SuperKeyBinding.Plo
 	-rm -f Services/$(DEPDIR)/System.Plo
@@ -1843,16 +1920,22 @@ distclean: distclean-am
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-DockProfiles.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-LauncherCatalog.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-LauncherCommands.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-LauncherSearch.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Utils.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Plo
 	-rm -f Widgets/$(DEPDIR)/CompositedWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/ContextMenuStyle.Plo
+	-rm -f Widgets/$(DEPDIR)/DockStyle.Plo
 	-rm -f Widgets/$(DEPDIR)/DockWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/HoverWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/LauncherWindow.Plo
+	-rm -f Widgets/$(DEPDIR)/ListSelectionGlide.Plo
 	-rm -f Widgets/$(DEPDIR)/PoofWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/PreferencesWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo
@@ -1951,11 +2034,13 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Items/$(DEPDIR)/TransientDockItem.Plo
 	-rm -f Items/$(DEPDIR)/TrayToggleItem.Plo
 	-rm -f Items/$(DEPDIR)/WorkspaceItem.Plo
+	-rm -f Services/$(DEPDIR)/AccentColor.Plo
 	-rm -f Services/$(DEPDIR)/Environment.Plo
 	-rm -f Services/$(DEPDIR)/EnvironmentSettings.Plo
 	-rm -f Services/$(DEPDIR)/Logger.Plo
 	-rm -f Services/$(DEPDIR)/Paths.Plo
 	-rm -f Services/$(DEPDIR)/Preferences.Plo
+	-rm -f Services/$(DEPDIR)/SessionActions.Plo
 	-rm -f Services/$(DEPDIR)/Settings.Plo
 	-rm -f Services/$(DEPDIR)/SuperKeyBinding.Plo
 	-rm -f Services/$(DEPDIR)/System.Plo
@@ -1965,16 +2050,22 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-CommandRunner.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-DockProfiles.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-LauncherCatalog.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-LauncherCommands.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-LauncherSearch.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Utils.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo
+	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowThumbnails.Plo
 	-rm -f Widgets/$(DEPDIR)/CompositedWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/ContextMenuStyle.Plo
+	-rm -f Widgets/$(DEPDIR)/DockStyle.Plo
 	-rm -f Widgets/$(DEPDIR)/DockWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/HoverWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/LauncherWindow.Plo
+	-rm -f Widgets/$(DEPDIR)/ListSelectionGlide.Plo
 	-rm -f Widgets/$(DEPDIR)/PoofWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/PreferencesWindow.Plo
 	-rm -f Widgets/$(DEPDIR)/TitledSeparatorMenuItem.Plo
