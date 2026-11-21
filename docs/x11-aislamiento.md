@@ -598,6 +598,63 @@ sección 2, con el motivo:
 - **Tests:** `Platform.set_backend_for_tests ()` cambia el backend del proceso
   por uno falso (`tests/PlatformFakes.vala`).
 
+### 3.3 Ajustes hechos al ejecutar las etapas 10–14
+
+- **API pública (etapa 10, D2):**
+  - El soname sube a `libplank.so.2`; el paquete de Debian pasa a ser
+    `libplank2`.
+  - `plank.deps`, `plank.pc` y `libplank-dev` ya no piden `libbamf3`.
+  - `ApplicationDockItem.App` (ahora un `RunningApp`) e
+    `item_for_application ()` quedan `internal`.
+  - El método virtual protegido `app_opened (Bamf.Application)` desaparece. Lo
+    sustituye la señal interna `unmatched_app_opened`, porque la vtable de un
+    método virtual va en la cabecera pública con el tipo del backend.
+  - Desaparecen `PositionManager.get_struts ()` y el enum `Struts`.
+  - Las declaraciones `internal` de libplank van a `plank-private.h`
+    (`--internal-header`), así `plank.h` no incluye las cabeceras de Wnck.
+  - Ningún docklet incluido usaba lo que se quitó; no hubo que cambiarlos.
+  - `libplank.symbols` se regeneró con `make symbols`.
+- **`Matcher` desaparece** en la etapa 10, en vez de quedar como fachada hasta
+  la 14: ya no lo usa nadie. `BamfApp` emite `closed` una sola vez, aunque
+  BAMF avise del cierre por la aplicación y por el matcher en cualquier orden.
+- **El `force_update` de Wnck al abrirse una aplicación** pasa a
+  `ToplevelManager.refresh ()`. Antes sólo lo hacía el proveedor base, porque
+  el proveedor por defecto lo reemplazaba; ahora lo hacen los dos.
+- **Diferencias con ventanas que no son toplevels:** las ventanas de una
+  aplicación que el backend no lista (sobre todo los splash, como el de
+  LibreOffice) ya no cuentan como ventanas suyas. Mientras una aplicación sólo
+  tenga su splash, un clic en su ícono la lanza otra vez en vez de enfocar el
+  splash.
+- **Viewports (etapa 11):** `Toplevel` gana `is_in_view ()`,
+  `shares_view_with ()` e `icon_is_generic`. `X11Toplevel.activate ()` hace lo
+  que hacía `center_and_focus_window`. Única diferencia: el reenfoque diferido
+  del truco para Compiz usa también ese `activate` (antes era un `activate`
+  simple de Wnck), así que, si la ventana tiene un diálogo abierto, enfoca el
+  diálogo. La preparación de Wnck como pager pasa a `Backend.initialize ()`.
+- **Ventanas emergentes (etapa 12):**
+  - `PopupPlacer.place (popup, x, y, anchor)` recibe la posición que ya calcula
+    cada ventana y, cuando lo hay, el rectángulo del ítem. En vez de que el
+    backend calcule la posición a partir del ancla, la conserva tal cual en
+    X11; el ancla queda para un `xdg_positioner`.
+  - `PopupPlacer.setup (popup, kind)` no fija el padre: los `transient_for`
+    siguen en cada ventana, porque son GTK portable.
+  - `AbsolutePopupPlacer` hace con GTK lo mismo que antes cada ventana y es el
+    placer del backend X11.
+  - `DockSurface.place (edge, area, rect)` recibe el rectángulo en
+    coordenadas de pantalla de GDK.
+  - El diálogo de `System` no es una ventana del dock y no se tocó.
+- **Puntero global (etapa 13):** sólo cambian `update_hovered` y el `grab` de
+  `DragManager`. Las otras consultas de puntero global de `DragManager`
+  (posición del «poof», ventana proxy de XDND) y de `WindowPreviewWindow`
+  quedan para el backend Wayland: usan GTK, no X11, pero suponen un puntero
+  global.
+- **Compilación (etapa 14):**
+  - `--without-x11` quita gdk-x11, BAMF, Wnck y Xlib, y con ellos las barreras
+    y XDamage. `Platform/X11/` sólo se compila con `HAVE_X11`.
+  - `Backend.vala` reconoce el display por el nombre de su tipo
+    (`GdkX11Display`, `GdkWaylandDisplay`).
+  - Los tests propios del backend X11 se compilan sólo con `HAVE_X11`.
+
 Al terminar la etapa 14 el dock es idéntico en X11 y la compilación sin X11
 debería fallar sólo por falta de backend. A partir de ahí, el backend Wayland, en
 este orden (cada paso usable por sí solo):
