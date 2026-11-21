@@ -33,11 +33,20 @@ namespace Plank
 		 */
 		public void index ()
 		{
+			index_applications (AppInfo.get_all ());
+		}
+
+		/**
+		 * Takes these applications as the installed ones, leaving out the
+		 * hidden, the missing and the repeated ones. The tests give their own.
+		 */
+		public void index_applications (List<AppInfo> installed)
+		{
 			applications.clear ();
 			search_names.clear ();
 			search_texts.clear ();
 			var seen = new Gee.HashSet<string> ();
-			foreach (unowned AppInfo app in AppInfo.get_all ()) {
+			foreach (unowned AppInfo app in installed) {
 				var id = usage_id (app);
 				if (!app.should_show () || !is_available (app) || id in seen)
 					continue;

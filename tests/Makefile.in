@@ -148,6 +148,7 @@ am__objects_3 = tests-Accessibility.$(OBJEXT) \
 	tests-ApplicationUninstallService.$(OBJEXT) \
 	tests-CalculatorService.$(OBJEXT) \
 	tests-LauncherSearch.$(OBJEXT) tests-CommandRunner.$(OBJEXT) \
+	tests-DockProfiles.$(OBJEXT) tests-LauncherCatalog.$(OBJEXT) \
 	tests-SessionActions.$(OBJEXT) \
 	tests-StatusNoticeModel.$(OBJEXT) tests-System.$(OBJEXT) \
 	tests-Controller.$(OBJEXT) tests-Drawing.$(OBJEXT) \
@@ -182,9 +183,12 @@ am__depfiles_remade = ./$(DEPDIR)/dock-Dock.Po \
 	./$(DEPDIR)/tests-ApplicationUninstallService.Po \
 	./$(DEPDIR)/tests-CalculatorService.Po \
 	./$(DEPDIR)/tests-CommandRunner.Po \
-	./$(DEPDIR)/tests-Controller.Po ./$(DEPDIR)/tests-Drawing.Po \
-	./$(DEPDIR)/tests-Items.Po ./$(DEPDIR)/tests-LauncherSearch.Po \
-	./$(DEPDIR)/tests-Main.Po ./$(DEPDIR)/tests-Preferences.Po \
+	./$(DEPDIR)/tests-Controller.Po \
+	./$(DEPDIR)/tests-DockProfiles.Po ./$(DEPDIR)/tests-Drawing.Po \
+	./$(DEPDIR)/tests-Items.Po \
+	./$(DEPDIR)/tests-LauncherCatalog.Po \
+	./$(DEPDIR)/tests-LauncherSearch.Po ./$(DEPDIR)/tests-Main.Po \
+	./$(DEPDIR)/tests-Preferences.Po \
 	./$(DEPDIR)/tests-SessionActions.Po \
 	./$(DEPDIR)/tests-StatusNoticeModel.Po \
 	./$(DEPDIR)/tests-System.Po ./$(DEPDIR)/tests-TestHelper.Po \
@@ -496,6 +500,8 @@ tests_VALASOURCES = \
 	CalculatorService.vala \
 	LauncherSearch.vala \
 	CommandRunner.vala \
+	DockProfiles.vala \
+	LauncherCatalog.vala \
 	SessionActions.vala \
 	StatusNoticeModel.vala \
 	System.vala \
@@ -655,8 +661,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-CalculatorService.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-CommandRunner.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Controller.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-DockProfiles.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Drawing.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Items.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-LauncherCatalog.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-LauncherSearch.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Main.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tests-Preferences.Po@am__quote@ # am--include-marker
@@ -781,6 +789,34 @@ tests-CommandRunner.obj: CommandRunner.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='CommandRunner.c' object='tests-CommandRunner.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-CommandRunner.obj `if test -f 'CommandRunner.c'; then $(CYGPATH_W) 'CommandRunner.c'; else $(CYGPATH_W) '$(srcdir)/CommandRunner.c'; fi`
+
+tests-DockProfiles.o: DockProfiles.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-DockProfiles.o -MD -MP -MF $(DEPDIR)/tests-DockProfiles.Tpo -c -o tests-DockProfiles.o `test -f 'DockProfiles.c' || echo '$(srcdir)/'`DockProfiles.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-DockProfiles.Tpo $(DEPDIR)/tests-DockProfiles.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='DockProfiles.c' object='tests-DockProfiles.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-DockProfiles.o `test -f 'DockProfiles.c' || echo '$(srcdir)/'`DockProfiles.c
+
+tests-DockProfiles.obj: DockProfiles.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-DockProfiles.obj -MD -MP -MF $(DEPDIR)/tests-DockProfiles.Tpo -c -o tests-DockProfiles.obj `if test -f 'DockProfiles.c'; then $(CYGPATH_W) 'DockProfiles.c'; else $(CYGPATH_W) '$(srcdir)/DockProfiles.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-DockProfiles.Tpo $(DEPDIR)/tests-DockProfiles.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='DockProfiles.c' object='tests-DockProfiles.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-DockProfiles.obj `if test -f 'DockProfiles.c'; then $(CYGPATH_W) 'DockProfiles.c'; else $(CYGPATH_W) '$(srcdir)/DockProfiles.c'; fi`
+
+tests-LauncherCatalog.o: LauncherCatalog.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-LauncherCatalog.o -MD -MP -MF $(DEPDIR)/tests-LauncherCatalog.Tpo -c -o tests-LauncherCatalog.o `test -f 'LauncherCatalog.c' || echo '$(srcdir)/'`LauncherCatalog.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-LauncherCatalog.Tpo $(DEPDIR)/tests-LauncherCatalog.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='LauncherCatalog.c' object='tests-LauncherCatalog.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-LauncherCatalog.o `test -f 'LauncherCatalog.c' || echo '$(srcdir)/'`LauncherCatalog.c
+
+tests-LauncherCatalog.obj: LauncherCatalog.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-LauncherCatalog.obj -MD -MP -MF $(DEPDIR)/tests-LauncherCatalog.Tpo -c -o tests-LauncherCatalog.obj `if test -f 'LauncherCatalog.c'; then $(CYGPATH_W) 'LauncherCatalog.c'; else $(CYGPATH_W) '$(srcdir)/LauncherCatalog.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/tests-LauncherCatalog.Tpo $(DEPDIR)/tests-LauncherCatalog.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='LauncherCatalog.c' object='tests-LauncherCatalog.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -c -o tests-LauncherCatalog.obj `if test -f 'LauncherCatalog.c'; then $(CYGPATH_W) 'LauncherCatalog.c'; else $(CYGPATH_W) '$(srcdir)/LauncherCatalog.c'; fi`
 
 tests-SessionActions.o: SessionActions.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tests_CFLAGS) $(CFLAGS) -MT tests-SessionActions.o -MD -MP -MF $(DEPDIR)/tests-SessionActions.Tpo -c -o tests-SessionActions.o `test -f 'SessionActions.c' || echo '$(srcdir)/'`SessionActions.c
@@ -1119,8 +1155,10 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/tests-CalculatorService.Po
 	-rm -f ./$(DEPDIR)/tests-CommandRunner.Po
 	-rm -f ./$(DEPDIR)/tests-Controller.Po
+	-rm -f ./$(DEPDIR)/tests-DockProfiles.Po
 	-rm -f ./$(DEPDIR)/tests-Drawing.Po
 	-rm -f ./$(DEPDIR)/tests-Items.Po
+	-rm -f ./$(DEPDIR)/tests-LauncherCatalog.Po
 	-rm -f ./$(DEPDIR)/tests-LauncherSearch.Po
 	-rm -f ./$(DEPDIR)/tests-Main.Po
 	-rm -f ./$(DEPDIR)/tests-Preferences.Po
@@ -1182,8 +1220,10 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/tests-CalculatorService.Po
 	-rm -f ./$(DEPDIR)/tests-CommandRunner.Po
 	-rm -f ./$(DEPDIR)/tests-Controller.Po
+	-rm -f ./$(DEPDIR)/tests-DockProfiles.Po
 	-rm -f ./$(DEPDIR)/tests-Drawing.Po
 	-rm -f ./$(DEPDIR)/tests-Items.Po
+	-rm -f ./$(DEPDIR)/tests-LauncherCatalog.Po
 	-rm -f ./$(DEPDIR)/tests-LauncherSearch.Po
 	-rm -f ./$(DEPDIR)/tests-Main.Po
 	-rm -f ./$(DEPDIR)/tests-Preferences.Po

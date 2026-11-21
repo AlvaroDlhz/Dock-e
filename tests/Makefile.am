@@ -39,6 +39,8 @@ tests_VALASOURCES = \
 	CalculatorService.vala \
 	LauncherSearch.vala \
 	CommandRunner.vala \
+	DockProfiles.vala \
+	LauncherCatalog.vala \
 	SessionActions.vala \
 	StatusNoticeModel.vala \
 	System.vala \
