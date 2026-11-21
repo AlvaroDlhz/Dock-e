@@ -153,6 +153,16 @@ namespace Plank.Platform
 	static bool backend_probed = false;
 
 	/**
+	 * Replaces the backend of the display, for tests.  null goes back to
+	 * the backend of the display.
+	 */
+	public void set_backend_for_tests (Backend? replacement)
+	{
+		backend = replacement;
+		backend_probed = (replacement != null);
+	}
+
+	/**
 	 * Returns the backend for the default display, or null if there is no
 	 * backend for it.  The backend is created on the first call.
 	 */

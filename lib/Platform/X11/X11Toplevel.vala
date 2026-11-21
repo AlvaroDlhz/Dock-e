@@ -95,8 +95,6 @@ namespace Plank.Platform
 
 		public override Gdk.Pixbuf? get_icon ()
 		{
-			if (window.get_icon_is_fallback ())
-				return null;
 			return window.get_icon ();
 		}
 

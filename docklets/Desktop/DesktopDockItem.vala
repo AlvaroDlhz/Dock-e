@@ -44,8 +44,7 @@ namespace Docky
 		protected override AnimationType on_clicked (PopupButton button, Gdk.ModifierType mod, uint32 event_time)
 		{
 			if (button == PopupButton.LEFT) {
-				unowned Wnck.Screen screen = Wnck.Screen.get_default ();
-				screen.toggle_showing_desktop (!screen.get_showing_desktop ());
+				toggle_showing_desktop ();
 				return AnimationType.BOUNCE;
 			}
 			

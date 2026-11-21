@@ -61,6 +61,7 @@ namespace Plank.Platform
 			screen.workspace_created.connect (handle_workspaces_changed);
 			screen.workspace_destroyed.connect (handle_workspaces_changed);
 			screen.active_workspace_changed.connect (handle_active_workspace_changed);
+			screen.viewports_changed.connect (handle_viewports_changed);
 		}
 
 		~X11WorkspaceManager ()
@@ -68,10 +69,14 @@ namespace Plank.Platform
 			screen.workspace_created.disconnect (handle_workspaces_changed);
 			screen.workspace_destroyed.disconnect (handle_workspaces_changed);
 			screen.active_workspace_changed.disconnect (handle_active_workspace_changed);
+			screen.viewports_changed.disconnect (handle_viewports_changed);
 		}
 
 		public Gee.List<Workspace> list ()
 		{
+			// Make sure the list of Wnck is up to date
+			screen.force_update ();
+
 			var result = new Gee.ArrayList<Workspace> ();
 			foreach (unowned Wnck.Workspace workspace in screen.get_workspaces ())
 				result.add (lookup (workspace));
@@ -119,6 +124,18 @@ namespace Plank.Platform
 		void handle_active_workspace_changed (Wnck.Screen screen, Wnck.Workspace? previous)
 		{
 			active_changed (lookup (previous));
+		}
+
+		/**
+		 * Moving to another viewport of a Compiz-like workspace is what
+		 * switching workspaces is elsewhere.
+		 */
+		[CCode (instance_pos = -1)]
+		void handle_viewports_changed (Wnck.Screen screen)
+		{
+			var current = active;
+			if (current != null && current.is_viewport)
+				active_changed (current);
 		}
 	}
 }

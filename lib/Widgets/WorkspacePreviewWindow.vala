@@ -1,4 +1,4 @@
-// Native overview for X11 workspaces.
+// Native overview of the workspaces.
 
 namespace Plank
 {
@@ -12,7 +12,10 @@ namespace Plank
 		WindowTransition transition;
 		WorkspaceItem? current_item;
 		Gtk.FlowBox flow;
-		unowned Wnck.Screen? wnck_screen;
+		Platform.WorkspaceManager? workspaces;
+		Platform.ToplevelManager? toplevels;
+		// The workspaces as of the last rebuild
+		Gee.List<Platform.Workspace> shown_workspaces = new Gee.ArrayList<Platform.Workspace> ();
 		// Pictures of the windows, taken again only once a window has changed
 		WindowThumbnails thumbnails;
 		ulong thumbnail_changed_id = 0UL;
@@ -33,7 +36,11 @@ namespace Plank
 					return false;
 				});
 			});
-			wnck_screen = Wnck.Screen.get_default ();
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend != null) {
+				workspaces = backend.workspaces;
+				toplevels = backend.toplevels;
+			}
 			thumbnails = new WindowThumbnails (CARD_WIDTH - 10, PREVIEW_HEIGHT);
 			thumbnail_changed_id = thumbnails.changed.connect (() => redraw_previews ());
 			decorated = false;
@@ -84,13 +91,14 @@ namespace Plank
 				controller.hide_manager.ExternalMenuVisible = false;
 				controller.hide_manager.update_hovered ();
 			});
-			if (wnck_screen != null) {
-				wnck_screen.workspace_created.connect (() => { if (visible) rebuild (); });
-				wnck_screen.workspace_destroyed.connect (() => { if (visible) rebuild (); });
-				wnck_screen.active_workspace_changed.connect (() => { if (visible) rebuild (); });
+			if (workspaces != null) {
+				workspaces.changed.connect (() => { if (visible) rebuild (); });
+				workspaces.active_changed.connect (() => { if (visible) rebuild (); });
+			}
+			if (toplevels != null) {
 				// Which windows there are is not something their contents tell
-				wnck_screen.window_opened.connect (() => redraw_previews ());
-				wnck_screen.window_closed.connect (() => redraw_previews ());
+				toplevels.added.connect (() => redraw_previews ());
+				toplevels.removed.connect (() => redraw_previews ());
 			}
 			apply_theme ();
 		}
@@ -153,12 +161,12 @@ namespace Plank
 		{
 			foreach (unowned Gtk.Widget child in flow.get_children ())
 				flow.remove (child);
-			if (wnck_screen == null)
+			if (workspaces == null)
 				return;
-			wnck_screen.force_update ();
-			var count = wnck_screen.get_workspace_count ();
+			shown_workspaces = workspaces.list ();
+			var count = shown_workspaces.size;
 			for (var number = 0; number < count; number++) {
-				var card = create_card (number);
+				var card = create_card (shown_workspaces[number]);
 				flow.add (card);
 				unowned Gtk.Widget wrapper = card.get_parent ();
 				wrapper.margin = 4;
@@ -170,16 +178,16 @@ namespace Plank
 			Idle.add (() => { if (visible) position_over_item (); return false; });
 		}
 
-		Gtk.Widget create_card (int workspace_number)
+		Gtk.Widget create_card (Platform.Workspace workspace)
 		{
-			unowned Wnck.Workspace workspace = wnck_screen.get_workspace (workspace_number);
+			var workspace_number = workspace.index;
 			var card = new Gtk.EventBox ();
 			card.visible_window = true;
 			card.can_focus = true;
 			card.get_style_context ().add_class ("workspace-card");
-			if (workspace == wnck_screen.get_active_workspace ())
+			if (workspace.is_active)
 				card.get_style_context ().add_class ("active");
-			Accessibility.describe (card, _("Switch to %s").printf (workspace.get_name ()),
+			Accessibility.describe (card, _("Switch to %s").printf (workspace.name),
 				_("Workspace preview"));
 			Accessibility.set_role (card, Atk.Role.PUSH_BUTTON);
 
@@ -195,11 +203,11 @@ namespace Plank
 			box.pack_start (preview, true, true, 0);
 
 			var footer = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 6);
-			var title = new Gtk.Label (workspace.get_name ()) { xalign = 0.0f };
+			var title = new Gtk.Label (workspace.name) { xalign = 0.0f };
 			title.ellipsize = Pango.EllipsizeMode.END;
 			title.get_style_context ().add_class ("workspace-title");
 			footer.pack_start (title, true, true, 0);
-			if (workspace == wnck_screen.get_active_workspace ()) {
+			if (workspace.is_active) {
 				var active = new Gtk.Label (_("Current"));
 				active.get_style_context ().add_class ("workspace-active-label");
 				footer.pack_end (active, false, false, 0);
@@ -226,8 +234,8 @@ namespace Plank
 
 		void activate_workspace (int number, uint32 timestamp)
 		{
-			if (wnck_screen != null && number < wnck_screen.get_workspace_count ())
-				wnck_screen.get_workspace (number).activate (timestamp);
+			if (number < shown_workspaces.size)
+				shown_workspaces[number].activate (timestamp);
 			dismiss ();
 		}
 
@@ -245,22 +253,23 @@ namespace Plank
 			cr.rectangle (0, 0, width, height);
 			cr.fill ();
 			cr.restore ();
-			if (wnck_screen == null || workspace_number >= wnck_screen.get_workspace_count ())
+			if (toplevels == null || workspace_number >= shown_workspaces.size)
 				return;
-			unowned Wnck.Workspace workspace = wnck_screen.get_workspace (workspace_number);
-			var screen_width = int.max (1, wnck_screen.get_width ());
-			var screen_height = int.max (1, wnck_screen.get_height ());
+			var workspace = shown_workspaces[workspace_number];
+			var screen_width = int.max (1, get_screen ().get_width ());
+			var screen_height = int.max (1, get_screen ().get_height ());
 			var scale_x = (double) width / screen_width;
 			var scale_y = (double) height / screen_height;
 
-			foreach (unowned Wnck.Window window in wnck_screen.get_windows_stacked ()) {
-				var type = window.get_window_type ();
-				if (!window.is_visible_on_workspace (workspace) || window.is_skip_pager ()
-					|| type == Wnck.WindowType.DESKTOP || type == Wnck.WindowType.DOCK
-					|| type == Wnck.WindowType.MENU || type == Wnck.WindowType.SPLASHSCREEN)
+			foreach (var window in toplevels.list ()) {
+				if (window.has_any_state (Platform.ToplevelState.MINIMIZED | Platform.ToplevelState.SKIP_PAGER)
+					|| !window.is_on_workspace (workspace))
 					continue;
-				int x, y, window_width, window_height;
-				window.get_geometry (out x, out y, out window_width, out window_height);
+				Gdk.Rectangle geometry;
+				if (!window.get_geometry (out geometry))
+					continue;
+				var x = geometry.x, y = geometry.y;
+				var window_width = geometry.width, window_height = geometry.height;
 				if (window_width < 2 || window_height < 2)
 					continue;
 				var px = double.max (1.0, x * scale_x);
@@ -281,7 +290,7 @@ namespace Plank
 				} else {
 					cr.set_source_rgb (0.22, 0.25, 0.31);
 					cr.paint ();
-					unowned Gdk.Pixbuf? icon = window.get_icon ();
+					var icon = window.get_icon ();
 					if (icon != null) {
 						var icon_size = (int) double.min (32.0, double.min (pw - 4.0, ph - 4.0));
 						if (icon_size > 4) {
@@ -300,11 +309,11 @@ namespace Plank
 			}
 		}
 
-		Gdk.Pixbuf? capture_window (Wnck.Window window)
+		Gdk.Pixbuf? capture_window (Platform.Toplevel window)
 		{
-			if (window.is_minimized ())
+			if (window.has_any_state (Platform.ToplevelState.MINIMIZED))
 				return null;
-			return thumbnails.lookup ((uint32) window.get_xid ());
+			return thumbnails.lookup ((uint32) window.id);
 		}
 
 		void redraw_previews ()

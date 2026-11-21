@@ -35,11 +35,18 @@ namespace Plank.Platform
 
 	public interface WorkspaceManager : Object
 	{
+		/**
+		 * The workspaces in their order; up to date with the display server.
+		 */
 		public abstract Gee.List<Workspace> list ();
 		public abstract Workspace? active { owned get; }
 
 		/** Workspaces were added, removed or renamed */
 		public signal void changed ();
+		/**
+		 * Another workspace became active, or another viewport of the
+		 * active one; previous is the active workspace itself then.
+		 */
 		public signal void active_changed (Workspace? previous);
 
 		public abstract bool showing_desktop { get; }

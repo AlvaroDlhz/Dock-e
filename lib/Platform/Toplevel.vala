@@ -87,9 +87,10 @@ namespace Plank.Platform
 		public abstract bool is_on_workspace (Workspace workspace);
 
 		/**
-		 * The icon the window provides itself.
+		 * The icon of the window; may be a generic icon of the backend if
+		 * the window has none.
 		 *
-		 * @return null if the window has none (see {@link Capability.WINDOW_ICONS})
+		 * @return null without {@link Capability.WINDOW_ICONS}
 		 */
 		public abstract Gdk.Pixbuf? get_icon ();
 

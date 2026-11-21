@@ -215,10 +215,11 @@ am__objects_5 = DBusManager.lo DockController.lo DockPreferences.lo \
 	Services/Environment.lo Services/SessionActions.lo \
 	Services/EnvironmentSettings.lo Services/Logger.lo \
 	Services/Paths.lo Services/Preferences.lo Services/Settings.lo \
-	Services/System.lo Services/Unity.lo Services/Worker.lo \
-	Widgets/CompositedWindow.lo Widgets/ContextMenuStyle.lo \
-	Services/AccentColor.lo Widgets/DockStyle.lo \
-	Widgets/DockWindow.lo Widgets/WindowPreviewWindow.lo \
+	Services/ShowDesktop.lo Services/System.lo Services/Unity.lo \
+	Services/Worker.lo Widgets/CompositedWindow.lo \
+	Widgets/ContextMenuStyle.lo Services/AccentColor.lo \
+	Widgets/DockStyle.lo Widgets/DockWindow.lo \
+	Widgets/WindowPreviewWindow.lo \
 	Widgets/WorkspacePreviewWindow.lo Widgets/HoverWindow.lo \
 	Widgets/LauncherWindow.lo Widgets/ListSelectionGlide.lo \
 	Widgets/PoofWindow.lo Widgets/PreferencesWindow.lo \
@@ -297,8 +298,10 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Services/$(DEPDIR)/Logger.Plo Services/$(DEPDIR)/Paths.Plo \
 	Services/$(DEPDIR)/Preferences.Plo \
 	Services/$(DEPDIR)/SessionActions.Plo \
-	Services/$(DEPDIR)/Settings.Plo Services/$(DEPDIR)/System.Plo \
-	Services/$(DEPDIR)/Unity.Plo Services/$(DEPDIR)/Worker.Plo \
+	Services/$(DEPDIR)/Settings.Plo \
+	Services/$(DEPDIR)/ShowDesktop.Plo \
+	Services/$(DEPDIR)/System.Plo Services/$(DEPDIR)/Unity.Plo \
+	Services/$(DEPDIR)/Worker.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-Accessibility.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-ApplicationUninstallService.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-CalculatorService.Plo \
@@ -863,6 +866,7 @@ libplank_la_VALASOURCES = \
 	Services/Paths.vala \
 	Services/Preferences.vala \
 	Services/Settings.vala \
+	Services/ShowDesktop.vala \
 	Services/System.vala \
 	Services/Unity.vala \
 	Services/Worker.vala \
@@ -1256,6 +1260,8 @@ Services/Preferences.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
 Services/Settings.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
+Services/ShowDesktop.lo: Services/$(am__dirstamp) \
+	Services/$(DEPDIR)/$(am__dirstamp)
 Services/System.lo: Services/$(am__dirstamp) \
 	Services/$(DEPDIR)/$(am__dirstamp)
 Services/Unity.lo: Services/$(am__dirstamp) \
@@ -1382,6 +1388,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Preferences.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/SessionActions.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Settings.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/ShowDesktop.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/System.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Unity.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/Worker.Plo@am__quote@ # am--include-marker
@@ -2114,6 +2121,7 @@ distclean: distclean-am
 	-rm -f Services/$(DEPDIR)/Preferences.Plo
 	-rm -f Services/$(DEPDIR)/SessionActions.Plo
 	-rm -f Services/$(DEPDIR)/Settings.Plo
+	-rm -f Services/$(DEPDIR)/ShowDesktop.Plo
 	-rm -f Services/$(DEPDIR)/System.Plo
 	-rm -f Services/$(DEPDIR)/Unity.Plo
 	-rm -f Services/$(DEPDIR)/Worker.Plo
@@ -2256,6 +2264,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Services/$(DEPDIR)/Preferences.Plo
 	-rm -f Services/$(DEPDIR)/SessionActions.Plo
 	-rm -f Services/$(DEPDIR)/Settings.Plo
+	-rm -f Services/$(DEPDIR)/ShowDesktop.Plo
 	-rm -f Services/$(DEPDIR)/System.Plo
 	-rm -f Services/$(DEPDIR)/Unity.Plo
 	-rm -f Services/$(DEPDIR)/Worker.Plo

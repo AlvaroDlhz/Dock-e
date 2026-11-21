@@ -19,6 +19,7 @@ namespace PlankTests
 		Test.add_func ("/Platform/X11/device-to-logical", platform_x11_device_to_logical);
 		Test.add_func ("/Platform/X11/device-to-logical-intersection", platform_x11_device_to_logical_intersection);
 		Test.add_func ("/Platform/X11/map-state", platform_x11_map_state);
+		Test.add_func ("/Platform/show-desktop", platform_show_desktop);
 		Test.add_func ("/HideManager/WindowOverlap/no-focus", window_overlap_no_focus);
 		Test.add_func ("/HideManager/WindowOverlap/desktop-focused", window_overlap_desktop_focused);
 		Test.add_func ("/HideManager/WindowOverlap/active-maximized", window_overlap_active_maximized);
@@ -310,5 +311,24 @@ namespace PlankTests
 		assert (WindowOverlap.compute (backend.toplevels, null, OVERLAP_DOCK, DOCK_PID).any_window);
 		backend.fake_workspaces.set_active (null);
 		assert (!overlap_of (backend).any_window);
+	}
+
+	void platform_show_desktop ()
+	{
+		var backend = new FakeBackend (Capability.WORKSPACES | Capability.SHOW_DESKTOP);
+		set_backend_for_tests (backend);
+
+		assert (can_show_desktop ());
+		toggle_showing_desktop ();
+		assert (backend.workspaces.showing_desktop);
+		toggle_showing_desktop ();
+		assert (!backend.workspaces.showing_desktop);
+
+		backend.supported = Capability.WORKSPACES;
+		assert (!can_show_desktop ());
+		toggle_showing_desktop ();
+		assert (!backend.workspaces.showing_desktop);
+
+		set_backend_for_tests (null);
 	}
 }

@@ -106,6 +106,7 @@ libplank_la_VALASOURCES = \
 	Services/Paths.vala \
 	Services/Preferences.vala \
 	Services/Settings.vala \
+	Services/ShowDesktop.vala \
 	Services/System.vala \
 	Services/Unity.vala \
 	Services/Worker.vala \
