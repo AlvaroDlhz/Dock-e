@@ -137,6 +137,12 @@ namespace Plank.Platform
 		 */
 		public abstract Toplevel? lookup_id (uint64 id);
 
+		/**
+		 * Makes sure the list matches the display server right now, for
+		 * windows another source announced first.
+		 */
+		public abstract void refresh ();
+
 		public signal void added (Toplevel toplevel);
 		public signal void removed (Toplevel toplevel);
 		/**

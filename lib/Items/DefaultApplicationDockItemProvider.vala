@@ -43,8 +43,12 @@ namespace Plank
 		{
 			Prefs.notify["CurrentWorkspaceOnly"].connect (handle_setting_changed);
 			Prefs.notify["PinnedOnly"].connect (handle_pinned_only_changed);
-			Matcher.get_default ().window_opened.connect (handle_matcher_window_opened);
-			Matcher.get_default ().active_window_changed.connect (handle_matcher_active_window_changed);
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend != null) {
+				backend.apps.window_opened.connect (handle_app_window_opened);
+				backend.apps.active_window_changed.connect (handle_active_app_window_changed);
+			}
+			unmatched_app_opened.connect (handle_unmatched_app_opened);
 			
 			current_workspace_only = Prefs.CurrentWorkspaceOnly;
 			
@@ -56,8 +60,11 @@ namespace Plank
 		{
 			Prefs.notify["CurrentWorkspaceOnly"].disconnect (handle_setting_changed);
 			Prefs.notify["PinnedOnly"].disconnect (handle_pinned_only_changed);
-			Matcher.get_default ().window_opened.disconnect (handle_matcher_window_opened);
-			Matcher.get_default ().active_window_changed.disconnect (handle_matcher_active_window_changed);
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend != null) {
+				backend.apps.window_opened.disconnect (handle_app_window_opened);
+				backend.apps.active_window_changed.disconnect (handle_active_app_window_changed);
+			}
 
 			if (reconcile_transient_items_source != 0) {
 				Source.remove (reconcile_transient_items_source);
@@ -104,17 +111,13 @@ namespace Plank
 					favs.add (item.Launcher);
 			}
 			
-			Matcher.get_default ().set_favorites (favs);
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend != null)
+				backend.apps.set_favorites (favs);
 		}
 		
-		protected override void app_opened (Bamf.Application app)
+		void handle_unmatched_app_opened (Platform.RunningApp app)
 		{
-			unowned ApplicationDockItem? found = item_for_application (app);
-			if (found != null) {
-				found.App = app;
-				return;
-			}
-			
 			if (Prefs.PinnedOnly)
 				return;
 			
@@ -192,12 +195,12 @@ namespace Plank
 				add_transient_items ();
 		}
 		
-		void handle_matcher_window_opened (Bamf.Window window)
+		void handle_app_window_opened (Platform.Toplevel window)
 		{
 			schedule_transient_items_reconciliation ();
 		}
 
-		void handle_matcher_active_window_changed (Bamf.Window? old_window, Bamf.Window? new_window)
+		void handle_active_app_window_changed (Platform.Toplevel? old_window, Platform.Toplevel? new_window)
 		{
 			if (new_window != null)
 				schedule_transient_items_reconciliation ();
@@ -223,15 +226,19 @@ namespace Plank
 		{
 			var transient_items = new Gee.ArrayList<DockElement> ();
 			
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend == null)
+				return;
+			
 			// Match running applications to their available dock-items
-			foreach (var app in Matcher.get_default ().active_launchers ()) {
+			foreach (var app in backend.apps.running_apps ()) {
 				unowned ApplicationDockItem? found = item_for_application (app);
 				if (found != null) {
 					found.App = app;
 					continue;
 				}
 				
-				if (!app.is_user_visible ())
+				if (!app.is_user_visible)
 					continue;
 				
 				transient_items.add (new TransientDockItem.with_application (app));
@@ -276,11 +283,11 @@ namespace Plank
 		
 		protected override void handle_item_deleted (DockItem item)
 		{
-			unowned Bamf.Application? app = null;
+			unowned Platform.RunningApp? app = null;
 			if (item is ApplicationDockItem)
 				app = ((ApplicationDockItem) item).App;
 			
-			if (app == null || !app.is_running () || Prefs.PinnedOnly) {
+			if (app == null || !app.is_running || Prefs.PinnedOnly) {
 				remove (item);
 				return;
 			}

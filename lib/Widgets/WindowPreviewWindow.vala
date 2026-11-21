@@ -20,7 +20,6 @@ namespace Plank
 		uint close_timer = 0U;
 		// Pictures of the windows, taken again only once a window has changed
 		Platform.WindowThumbnailer? thumbnails;
-		Platform.ToplevelManager? toplevels;
 		ulong thumbnail_changed_id = 0UL;
 		ulong previews_enabled_changed_id = 0UL;
 		bool pointer_inside = false;
@@ -32,7 +31,6 @@ namespace Plank
 			transition = new WindowTransition (this);
 			unowned Platform.Backend? backend = Platform.get_backend ();
 			if (backend != null) {
-				toplevels = backend.toplevels;
 				thumbnails = backend.create_thumbnailer (CARD_WIDTH - 10, PREVIEW_HEIGHT);
 			}
 			if (thumbnails != null)
@@ -128,7 +126,7 @@ namespace Plank
 			}
 			var app_item = item as ApplicationDockItem;
 			if (app_item != null && app_item.is_running () && app_item.App != null
-				&& app_item.App.get_windows ().length () > 0) {
+				&& app_item.App.get_windows ().size > 0) {
 				cancel_close ();
 				if (visible && current_item == app_item)
 					return;
@@ -228,9 +226,8 @@ namespace Plank
 			if (current_item == null || current_item.App == null)
 				return;
 			var count = 0;
-			foreach (var view in current_item.App.get_windows ()) {
-				unowned Bamf.Window? window = view as Bamf.Window;
-				if (window == null || window.get_transient () != null)
+			foreach (var window in current_item.App.get_windows ()) {
+				if (window.transient_for != null)
 					continue;
 				flow.add (create_card (window));
 				count++;
@@ -239,11 +236,11 @@ namespace Plank
 			flow.min_children_per_line = count <= 3 ? int.max (1, count) : int.min (3, count);
 		}
 
-		Gtk.Widget create_card (Bamf.Window window)
+		Gtk.Widget create_card (Platform.Toplevel window)
 		{
 			var event_box = new Gtk.EventBox ();
 			event_box.can_focus = true;
-			Accessibility.describe (event_box, _("Activate %s").printf (window.get_name ()),
+			Accessibility.describe (event_box, _("Activate %s").printf (window.title),
 				_("Window preview"));
 			Accessibility.set_role (event_box, Atk.Role.PUSH_BUTTON);
 			event_box.visible_window = true;
@@ -253,12 +250,12 @@ namespace Plank
 			box.margin = 5;
 			var image = new Gtk.Image ();
 			image.set_size_request (CARD_WIDTH - 10, PREVIEW_HEIGHT);
-			image.set_data<uint32> ("preview-xid", window.get_xid ());
-			update_image (image, window.get_xid ());
+			image.set_data<Platform.Toplevel> ("preview-window", window);
+			update_image (image, window);
 			box.pack_start (image, true, true, 0);
 
 			var footer = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 5);
-			var title = new Gtk.Label (window.get_name ()) { xalign = 0.0f };
+			var title = new Gtk.Label (window.title) { xalign = 0.0f };
 			title.ellipsize = Pango.EllipsizeMode.END;
 			title.width_chars = 18;
 			title.max_width_chars = 18;
@@ -268,13 +265,9 @@ namespace Plank
 			var close = new Gtk.Button.from_icon_name ("window-close-symbolic", Gtk.IconSize.MENU);
 			close.relief = Gtk.ReliefStyle.NONE;
 			close.tooltip_text = _("Close window");
-			Accessibility.describe (close, _("Close %s").printf (window.get_name ()));
+			Accessibility.describe (close, _("Close %s").printf (window.title));
 			close.get_style_context ().add_class ("preview-close");
-			close.clicked.connect (() => {
-				unowned Wnck.Window? wnck = Wnck.Window.@get (window.get_xid ());
-				if (wnck != null)
-					wnck.close (Gtk.get_current_event_time ());
-			});
+			close.clicked.connect (() => window.close (Gtk.get_current_event_time ()));
 			footer.pack_end (close, false, false, 0);
 			box.pack_end (footer, false, false, 0);
 			event_box.add (box);
@@ -284,9 +277,7 @@ namespace Plank
 					return true;
 				}
 				if (event.button == 2U) {
-					unowned Wnck.Window? wnck = Wnck.Window.@get (window.get_xid ());
-					if (wnck != null)
-						wnck.close (event.time);
+					window.close (event.time);
 					return true;
 				}
 				return false;
@@ -302,18 +293,14 @@ namespace Plank
 			return event_box;
 		}
 
-		void activate_preview (Bamf.Window window, uint32 event_time)
+		void activate_preview (Platform.Toplevel window, uint32 event_time)
 		{
 			WindowControl.focus_window (window, event_time);
 			dismiss ();
 		}
 
-		void update_image (Gtk.Image image, uint32 xid)
+		void update_image (Gtk.Image image, Platform.Toplevel toplevel)
 		{
-			// The windows of BAMF are toplevels of the X11 backend, whose ids are XIDs
-			var toplevel = (toplevels != null ? toplevels.lookup_id (xid) : null);
-			if (toplevel == null)
-				return;
 			var pixbuf = (thumbnails != null ? thumbnails.lookup (toplevel) : null);
 			if (pixbuf != null) {
 				image.set_from_pixbuf (pixbuf);
@@ -330,7 +317,6 @@ namespace Plank
 		{
 			if (!visible)
 				return;
-			var xid = (uint32) toplevel.id;
 			foreach (unowned Gtk.Widget row in flow.get_children ()) {
 				var child = (row as Gtk.FlowBoxChild)?.get_child () as Gtk.EventBox;
 				var box = child?.get_child () as Gtk.Box;
@@ -338,8 +324,8 @@ namespace Plank
 					continue;
 				foreach (unowned Gtk.Widget widget in box.get_children ()) {
 					var image = widget as Gtk.Image;
-					if (image != null && image.get_data<uint32> ("preview-xid") == xid) {
-						update_image (image, xid);
+					if (image != null && image.get_data<Platform.Toplevel> ("preview-window") == toplevel) {
+						update_image (image, toplevel);
 						return;
 					}
 				}

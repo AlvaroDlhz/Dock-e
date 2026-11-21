@@ -19,23 +19,6 @@
 
 namespace Plank
 {
-	public enum Struts
-	{
-		LEFT,
-		RIGHT,
-		TOP,
-		BOTTOM,
-		LEFT_START,
-		LEFT_END,
-		RIGHT_START,
-		RIGHT_END,
-		TOP_START,
-		TOP_END,
-		BOTTOM_START,
-		BOTTOM_END,
-		N_VALUES
-	}
-	
 	public class WindowControl : GLib.Object
 	{
 		// when working on a group of windows, wait this amount between each action
@@ -79,6 +62,28 @@ namespace Plank
 			warning ("Window-manager changed: %s", screen.get_window_manager_name ());
 		}
 		
+		/**
+		 * The Wnck windows of an application, in the order it lists them.
+		 * Until stage 11 of docs/x11-aislamiento.md the actions below still
+		 * work on Wnck.
+		 */
+		static GLib.List<unowned Wnck.Window> wnck_windows (Platform.RunningApp app)
+		{
+			var result = new GLib.List<unowned Wnck.Window> ();
+			foreach (var toplevel in app.get_windows ()) {
+				unowned Platform.X11Toplevel? x11 = (toplevel as Platform.X11Toplevel);
+				if (x11 != null)
+					result.append (x11.window);
+			}
+			return result;
+		}
+		
+		static unowned Wnck.Window? wnck_window (Platform.Toplevel toplevel)
+		{
+			unowned Platform.X11Toplevel? x11 = (toplevel as Platform.X11Toplevel);
+			return (x11 != null ? x11.window : null);
+		}
+		
 		static void handle_window_closed (Wnck.Window window)
 		{
 			if (delayed_focus_timer_id > 0U && delayed_focus_window == window) {
@@ -88,22 +93,13 @@ namespace Plank
 			}
 		}
 		
-		public static unowned Gdk.Pixbuf? get_app_icon (Bamf.Application app)
+		public static unowned Gdk.Pixbuf? get_app_icon (Platform.RunningApp app)
 		{
 			unowned Gdk.Pixbuf? pbuf = null;
 			
-			Wnck.Screen.get_default ();
-			Array<uint32>? xids = app.get_xids ();
-			
-			warn_if_fail (xids != null);
-			
 			Gdk.error_trap_push ();
 			
-			for (var i = 0; xids != null && i < xids.length && pbuf == null; i++) {
-				unowned Wnck.Window window = Wnck.Window.@get (xids.index (i));
-				if (window == null)
-					continue;
-				
+			foreach (unowned Wnck.Window window in wnck_windows (app)) {
 				pbuf = window.get_icon ();
 				if (window.get_icon_is_fallback ())
 					pbuf = null;
@@ -112,14 +108,14 @@ namespace Plank
 			}
 			
 			if (Gdk.error_trap_pop () != 0)
-				critical ("get_app_icon() for '%s' caused a XError", app.get_name ());
+				critical ("get_app_icon() for '%s' caused a XError", app.name);
 			
 			return pbuf;
 		}
 		
-		public static unowned Gdk.Pixbuf? get_window_icon (Bamf.Window window)
+		public static unowned Gdk.Pixbuf? get_window_icon (Platform.Toplevel window)
 		{
-			unowned Wnck.Window w = Wnck.Window.@get (window.get_xid ());
+			unowned Wnck.Window? w = wnck_window (window);
 			unowned Gdk.Pixbuf? pbuf = null;
 			
 			warn_if_fail (w != null);
@@ -134,61 +130,40 @@ namespace Plank
 				pbuf = null;
 			
 			if (Gdk.error_trap_pop () != 0)
-				critical ("get_window_icon() for '%s' caused a XError", window.get_name ());
+				critical ("get_window_icon() for '%s' caused a XError", window.title);
 			
 			return pbuf;
 		}
 		
-		public static bool has_maximized_window (Bamf.Application app)
+		public static bool has_maximized_window (Platform.RunningApp app)
 		{
-			Wnck.Screen.get_default ();
-			Array<uint32>? xids = app.get_xids ();
-			
-			warn_if_fail (xids != null);
-			
-			for (var i = 0; xids != null && i < xids.length; i++) {
-				unowned Wnck.Window window = Wnck.Window.@get (xids.index (i));
-				if (window != null && window.is_maximized ())
+			foreach (unowned Wnck.Window window in wnck_windows (app))
+				if (window.is_maximized ())
 					return true;
-			}
 			
 			return false;
 		}
 		
-		public static bool has_minimized_window (Bamf.Application app)
+		public static bool has_minimized_window (Platform.RunningApp app)
 		{
-			Wnck.Screen.get_default ();
-			Array<uint32>? xids = app.get_xids ();
-			
-			warn_if_fail (xids != null);
-			
-			for (var i = 0; xids != null && i < xids.length; i++) {
-				unowned Wnck.Window window = Wnck.Window.@get (xids.index (i));
-				if (window != null && window.is_minimized ())
+			foreach (unowned Wnck.Window window in wnck_windows (app))
+				if (window.is_minimized ())
 					return true;
-			}
 			
 			return false;
 		}
 		
-		public static bool has_window_on_workspace (Bamf.Application app, Platform.Workspace platform_workspace)
+		public static bool has_window_on_workspace (Platform.RunningApp app, Platform.Workspace platform_workspace)
 		{
-			// Until applications go through the backend (stage 10 in docs/x11-aislamiento.md)
 			unowned Platform.X11Workspace? x11_workspace = (platform_workspace as Platform.X11Workspace);
 			if (x11_workspace == null)
 				return true;
 			unowned Wnck.Workspace workspace = x11_workspace.workspace;
 			
-			Wnck.Screen.get_default ();
-			Array<uint32>? xids = app.get_xids ();
-			
-			warn_if_fail (xids != null);
-			
 			var is_virtual = workspace.is_virtual ();
 			
-			for (var i = 0; xids != null && i < xids.length; i++) {
-				unowned Wnck.Window window = Wnck.Window.@get (xids.index (i));
-				if (window == null || window.is_skip_tasklist ())
+			foreach (unowned Wnck.Window window in wnck_windows (app)) {
+				if (window.is_skip_tasklist ())
 					continue;
 				
 				if (!is_virtual) {
@@ -203,38 +178,22 @@ namespace Plank
 			return false;
 		}
 		
-		public static void update_icon_regions (Bamf.Application app, Gdk.Rectangle rect)
+		public static void update_icon_regions (Platform.RunningApp app, Gdk.Rectangle rect)
 		{
-			Wnck.Screen.get_default ();
-			Array<uint32>? xids = app.get_xids ();
-			
-			warn_if_fail (xids != null);
-			
-			for (var i = 0; xids != null && i < xids.length; i++) {
-				unowned Wnck.Window window = Wnck.Window.@get (xids.index (i));
-				if (window != null)
-					window.set_icon_geometry (rect.x, rect.y, rect.width, rect.height);
-			}
+			foreach (var window in app.get_windows ())
+				window.set_icon_geometry (rect);
 		}
 		
-		public static void close_all (Bamf.Application app, uint32 event_time)
+		public static void close_all (Platform.RunningApp app, uint32 event_time)
 		{
-			Wnck.Screen.get_default ();
-			Array<uint32>? xids = app.get_xids ();
-			
-			warn_if_fail (xids != null);
-			
-			for (var i = 0; xids != null && i < xids.length; i++) {
-				unowned Wnck.Window window = Wnck.Window.@get (xids.index (i));
-				if (window != null && !window.is_skip_tasklist ())
+			foreach (unowned Wnck.Window window in wnck_windows (app))
+				if (!window.is_skip_tasklist ())
 					window.close (event_time);
-			}
 		}
 		
-		public static void focus_window (Bamf.Window window, uint32 event_time)
+		public static void focus_window (Platform.Toplevel window, uint32 event_time)
 		{
-			Wnck.Screen.get_default ();
-			unowned Wnck.Window w = Wnck.Window.@get (window.get_xid ());
+			unowned Wnck.Window? w = wnck_window (window);
 			
 			warn_if_fail (w != null);
 			
@@ -244,69 +203,46 @@ namespace Plank
 			center_and_focus_window (w, event_time);
 		}
 		
-		static void focus_window_by_xid (uint32 xid, uint32 event_time)
-		{
-			Wnck.Screen.get_default ();
-			unowned Wnck.Window w = Wnck.Window.@get (xid);
-			
-			warn_if_fail (w != null);
-			
-			if (w == null)
-				return;
-			
-			center_and_focus_window (w, event_time);
-		}
-		
-		static int find_active_xid_index (Array<uint32>? xids)
+		static int find_active_index (Gee.List<Platform.Toplevel> windows)
 		{
 			var i = 0;
-			for (; xids != null && i < xids.length; i++) {
-				unowned Wnck.Window? window = Wnck.Window.@get (xids.index (i));
-				if (window != null && window.is_active ())
+			for (; i < windows.size; i++)
+				if (Platform.ToplevelState.ACTIVE in windows[i].state)
 					break;
-			}
 			return i;
 		}
 		
-		public static void focus_previous (Bamf.Application app, uint32 event_time)
+		public static void focus_previous (Platform.RunningApp app, uint32 event_time)
 		{
-			Wnck.Screen.get_default ();
-			Array<uint32>? xids = app.get_xids ();
-			
-			warn_if_fail (xids != null);
-			
-			if (xids == null)
+			var windows = app.get_windows ();
+			if (windows.size == 0)
 				return;
 			
-			var i = find_active_xid_index (xids);
-			i = i < xids.length ? i - 1 : 0;
+			var i = find_active_index (windows);
+			i = i < windows.size ? i - 1 : 0;
 			
 			if (i < 0)
-				i = (int) xids.length - 1;
+				i = windows.size - 1;
 			
-			focus_window_by_xid (xids.index (i), event_time);
+			focus_window (windows[i], event_time);
 		}
 		
-		public static void focus_next (Bamf.Application app, uint32 event_time)
+		public static void focus_next (Platform.RunningApp app, uint32 event_time)
 		{
-			Wnck.Screen.get_default ();
-			Array<uint32>? xids = app.get_xids ();
-			
-			warn_if_fail (xids != null);
-			
-			if (xids == null)
+			var windows = app.get_windows ();
+			if (windows.size == 0)
 				return;
 			
-			var i = find_active_xid_index (xids);
-			i = i < xids.length ? i + 1 : 0;
+			var i = find_active_index (windows);
+			i = i < windows.size ? i + 1 : 0;
 			
-			if (i == xids.length)
+			if (i == windows.size)
 				i = 0;
 			
-			focus_window_by_xid (xids.index (i), event_time);
+			focus_window (windows[i], event_time);
 		}
 		
-		public static void minimize (Bamf.Application app)
+		public static void minimize (Platform.RunningApp app)
 		{
 			foreach (unowned Wnck.Window window in get_ordered_window_stack (app)) {
 				unowned Wnck.Workspace? active_workspace = window.get_screen ().get_active_workspace ();
@@ -317,7 +253,7 @@ namespace Plank
 			}
 		}
 		
-		public static void restore (Bamf.Application app, uint32 event_time)
+		public static void restore (Platform.RunningApp app, uint32 event_time)
 		{
 			var stack = get_ordered_window_stack (app);
 			stack.reverse ();
@@ -330,43 +266,35 @@ namespace Plank
 			}
 		}
 		
-		public static void maximize (Bamf.Application app)
+		public static void maximize (Platform.RunningApp app)
 		{
 			foreach (unowned Wnck.Window window in get_ordered_window_stack (app))
 				if (!window.is_maximized ())
 					window.maximize ();
 		}
 		
-		public static void unmaximize (Bamf.Application app)
+		public static void unmaximize (Platform.RunningApp app)
 		{
 			foreach (unowned Wnck.Window window in get_ordered_window_stack (app))
 				if (window.is_maximized ())
 					window.unmaximize ();
 		}
 		
-		public static GLib.List<unowned Wnck.Window> get_ordered_window_stack (Bamf.Application app)
+		public static GLib.List<unowned Wnck.Window> get_ordered_window_stack (Platform.RunningApp app)
 		{
 			var windows = new GLib.List<unowned Wnck.Window> ();
-			
-			Wnck.Screen.get_default ();
-			Array<uint32>? xids = app.get_xids ();
-			
-			warn_if_fail (xids != null);
-			
-			if (xids == null)
-				return windows;
+			var own = wnck_windows (app);
 			
 			unowned GLib.List<Wnck.Window> stack = Wnck.Screen.get_default ().get_windows_stacked ();
 			
 			foreach (unowned Wnck.Window window in stack)
-				for (var j = 0; j < xids.length; j++)
-					if (xids.index (j) == window.get_xid ())
-						windows.append (window);
+				if (own.find (window) != null)
+					windows.append (window);
 			
 			return windows;
 		}
 		
-		public static void smart_focus (Bamf.Application app, uint32 event_time)
+		public static void smart_focus (Platform.RunningApp app, uint32 event_time)
 		{
 			var windows = get_ordered_window_stack (app);
 			

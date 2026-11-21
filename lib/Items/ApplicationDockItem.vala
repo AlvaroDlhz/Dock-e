@@ -65,21 +65,17 @@ namespace Plank
 		DbusmenuGtk.Client? Quicklist { get; set; default = null; }
 #endif
 		
-		Bamf.Application? app = null;
-		public Bamf.Application? App {
-			internal get {
-				// Nasty hack for libreoffice as workarround
-				// closing libreoffice results in destroying its Bamf.Application object
-				// and creating a new object which renders our reference useless
-				// https://bugs.launchpad.net/bamf/+bug/1026426
-				// https://bugs.launchpad.net/plank/+bug/1029555
-				warn_if_fail (app == null || (app is Bamf.Application));
-				if (app != null && !(app is Bamf.Application))
-					app = null;
-				
+		Platform.RunningApp? app = null;
+		/**
+		 * The running application of this item.  The backend keeps its own
+		 * reference to what the windowing system reports, so it stays valid
+		 * after the application closed.
+		 */
+		internal Platform.RunningApp? App {
+			get {
 				return app;
 			}
-			internal construct set {
+			set {
 				if (app == value)
 					return;
 				
@@ -91,7 +87,7 @@ namespace Plank
 				if (app != null) {
 					app_signals_connect (app);
 					initialize_states ();
-					if (app.is_running () && app.is_user_visible ())
+					if (app.is_running && app.is_user_visible)
 						app_window_added ();
 				} else {
 					reset_application_status ();
@@ -145,35 +141,52 @@ namespace Plank
 #endif
 		}
 		
-		void app_signals_connect (Bamf.Application app)
+		void app_signals_connect (Platform.RunningApp app)
 		{
-			app.active_changed.connect_after (handle_active_changed);
-			app.name_changed.connect_after (handle_name_changed);
-			app.running_changed.connect_after (handle_running_changed);
-			app.urgent_changed.connect_after (handle_urgent_changed);
-			app.user_visible_changed.connect_after (handle_user_visible_changed);
-			app.child_added.connect_after (handle_window_added);
-			app.child_removed.connect_after (handle_window_removed);
+			app.notify.connect_after (handle_app_notify);
+			app.window_added.connect_after (handle_window_added);
+			app.window_removed.connect_after (handle_window_removed);
 			app.closed.connect_after (handle_closed);
 		}
 		
-		void app_signals_disconnect (Bamf.Application app)
+		void app_signals_disconnect (Platform.RunningApp app)
 		{
-			app.active_changed.disconnect (handle_active_changed);
-			app.name_changed.disconnect (handle_name_changed);
-			app.running_changed.disconnect (handle_running_changed);
-			app.urgent_changed.disconnect (handle_urgent_changed);
-			app.user_visible_changed.disconnect (handle_user_visible_changed);
-			app.child_added.disconnect (handle_window_added);
-			app.child_removed.disconnect (handle_window_removed);
+			app.notify.disconnect (handle_app_notify);
+			app.window_added.disconnect (handle_window_added);
+			app.window_removed.disconnect (handle_window_removed);
 			app.closed.disconnect (handle_closed);
+		}
+		
+		void handle_app_notify (Object object, ParamSpec pspec)
+		{
+			unowned Platform.RunningApp app = (Platform.RunningApp) object;
+			
+			switch (pspec.name) {
+			case "is-active":
+				handle_active_changed (app.is_active);
+				break;
+			case "name":
+				handle_name_changed (app.name);
+				break;
+			case "is-running":
+				handle_running_changed (app.is_running);
+				break;
+			case "is-urgent":
+				handle_urgent_changed (app.is_urgent);
+				break;
+			case "is-user-visible":
+				handle_user_visible_changed (app.is_user_visible);
+				break;
+			default:
+				break;
+			}
 		}
 		
 		void initialize_states ()
 			requires (App != null)
 		{
-			handle_active_changed (App.is_active ());
-			handle_urgent_changed (App.is_urgent ());
+			handle_active_changed (App.is_active);
+			handle_urgent_changed (App.is_urgent);
 			
 			update_indicator ();
 		}
@@ -186,17 +199,15 @@ namespace Plank
 			if (App == null)
 				return 0;
 			var count = 0;
-			foreach (unowned Bamf.View view in App.get_windows ()) {
-				unowned Bamf.Window? window = (view as Bamf.Window);
-				if (window != null && window.get_transient () == null)
+			foreach (var window in App.get_windows ())
+				if (window.transient_for == null)
 					count++;
-			}
 			return count;
 		}
 		
 		public bool is_running ()
 		{
-			return (App != null && App.is_running ());
+			return (App != null && App.is_running);
 		}
 		
 		public bool is_window ()
@@ -204,8 +215,7 @@ namespace Plank
 			if (App == null)
 				return false;
 			
-			unowned string? desktop_file = App.get_desktop_file ();
-			return (desktop_file == null || desktop_file == "");
+			return (App.desktop_file == null);
 		}
 		
 		void handle_user_visible_changed (bool user_visible)
@@ -236,7 +246,7 @@ namespace Plank
 			}
 		}
 		
-		void handle_name_changed (string old_name, string new_name)
+		void handle_name_changed (string new_name)
 		{
 			// do nothing if name and icon are coming from the desktop-file
 			if (this is TransientDockItem)
@@ -272,21 +282,15 @@ namespace Plank
 			}
 		}
 		
-		void handle_window_added (Bamf.View? child)
+		void handle_window_added (Platform.Toplevel window)
 		{
-			if (!(child is Bamf.Window))
-				return;
-			
 			update_indicator ();
 			
 			app_window_added ();
 		}
 		
-		void handle_window_removed (Bamf.View? child)
+		void handle_window_removed (Platform.Toplevel window)
 		{
-			if (!(child is Bamf.Window))
-				return;
-			
 			update_indicator ();
 			
 			app_window_removed ();
@@ -305,7 +309,7 @@ namespace Plank
 				return;
 			}
 			
-			var window_count = App.get_windows ().length ();
+			var window_count = App.get_windows ().size;
 			
 			if (window_count <= 1) {
 				if (Indicator != IndicatorState.SINGLE)
@@ -337,13 +341,13 @@ namespace Plank
 		{
 			if (!is_window ())
 				if (button == PopupButton.MIDDLE
-					|| (button == PopupButton.LEFT && (App == null || App.get_windows ().length () == 0
+					|| (button == PopupButton.LEFT && (App == null || App.get_windows ().size == 0
 					|| (mod & Gdk.ModifierType.CONTROL_MASK) == Gdk.ModifierType.CONTROL_MASK))) {
 					launch ();
 					return AnimationType.BOUNCE;
 				}
 			
-			if (button == PopupButton.LEFT && App != null && App.get_windows ().length () > 0) {
+			if (button == PopupButton.LEFT && App != null && App.get_windows ().size > 0) {
 				WindowControl.smart_focus (App, event_time);
 				return AnimationType.DARKEN;
 			}
@@ -356,7 +360,7 @@ namespace Plank
 		 */
 		protected override AnimationType on_scrolled (Gdk.ScrollDirection direction, Gdk.ModifierType mod, uint32 event_time)
 		{
-			if (App == null || App.get_windows ().length () == 0)
+			if (App == null || App.get_windows ().size == 0)
 				return AnimationType.NONE;
 			
 			if (GLib.get_monotonic_time () - LastScrolled < ITEM_SCROLL_DURATION * 1000)
@@ -413,13 +417,13 @@ namespace Plank
 		{
 			var items = new Gee.ArrayList<Gtk.MenuItem> ();
 			
-			GLib.List<unowned Bamf.View>? windows = null;
+			Gee.List<Platform.Toplevel>? windows = null;
 			if (App != null)
 				windows = App.get_windows ();
 			
 			var window_count = 0U;
 			if (windows != null)
-				window_count = windows.length ();
+				window_count = windows.size;
 			
 			unowned DefaultApplicationDockItemProvider? default_provider = (Container as DefaultApplicationDockItemProvider);
 			if (default_provider != null
@@ -470,14 +474,13 @@ namespace Plank
 				if (items.size > 0)
 					items.add (new Gtk.SeparatorMenuItem ());
 				
-				foreach (var view in windows) {
-					unowned Bamf.Window? window = (view as Bamf.Window);
-					if (window == null || window.get_transient () != null)
+				foreach (var window in windows) {
+					if (window.transient_for != null)
 						continue;
 					
 					Gtk.MenuItem window_item;
 					var pbuf = WindowControl.get_window_icon (window);
-					var window_name = window.get_name ();
+					var window_name = window.title;
 					window_name = shorten_window_name (window_name);
 					
 					if (pbuf != null)
@@ -485,7 +488,7 @@ namespace Plank
 					else 
 						window_item = create_literal_menu_item (window_name, Icon);
 					
-					if (window.is_active ())
+					if (Platform.ToplevelState.ACTIVE in window.state)
 						window_item.set_sensitive (false);
 					else
 						window_item.activate.connect (() => WindowControl.focus_window (window, event_time));
@@ -727,7 +730,7 @@ namespace Plank
 		{
 			unity_application_uri = null;
 			
-			unowned string? desktop_file = (App != null ? App.get_desktop_file () : Launcher);
+			unowned string? desktop_file = (App != null ? App.desktop_file : Launcher);
 			if (desktop_file == null || desktop_file == "")
 				return;
 			

@@ -1661,44 +1661,6 @@ namespace Plank
 			}
 		}
 		
-		/**
-		 * Computes the struts for the dock.
-		 *
-		 * Only kept for the ABI of libplank; the dock reserves its space
-		 * through {@link Platform.DockSurface} now.  It goes away with the
-		 * rest of the X11 API (stage 10 in docs/x11-aislamiento.md).
-		 *
-		 * @param struts the array to contain the struts
-		 */
-		[Version (deprecated = true)]
-		public void get_struts (ref ulong[] struts)
-		{
-			window_scale_factor = controller.window.get_window ().get_scale_factor ();
-			switch (Position) {
-			default:
-			case Gtk.PositionType.BOTTOM:
-				struts [Struts.BOTTOM] = (VisibleDockHeight + controller.window.get_screen ().get_height () - monitor_geo.y - monitor_geo.height) * window_scale_factor;
-				struts [Struts.BOTTOM_START] = monitor_geo.x * window_scale_factor;
-				struts [Struts.BOTTOM_END] = (monitor_geo.x + monitor_geo.width) * window_scale_factor - 1;
-				break;
-			case Gtk.PositionType.TOP:
-				struts [Struts.TOP] = (monitor_geo.y + VisibleDockHeight) * window_scale_factor;
-				struts [Struts.TOP_START] = monitor_geo.x * window_scale_factor;
-				struts [Struts.TOP_END] = (monitor_geo.x + monitor_geo.width) * window_scale_factor - 1;
-				break;
-			case Gtk.PositionType.LEFT:
-				struts [Struts.LEFT] = (monitor_geo.x + VisibleDockWidth) * window_scale_factor;
-				struts [Struts.LEFT_START] = monitor_geo.y * window_scale_factor;
-				struts [Struts.LEFT_END] = (monitor_geo.y + monitor_geo.height) * window_scale_factor - 1;
-				break;
-			case Gtk.PositionType.RIGHT:
-				struts [Struts.RIGHT] = (VisibleDockWidth + controller.window.get_screen ().get_width () - monitor_geo.x - monitor_geo.width) * window_scale_factor;
-				struts [Struts.RIGHT_START] = monitor_geo.y * window_scale_factor;
-				struts [Struts.RIGHT_END] = (monitor_geo.y + monitor_geo.height) * window_scale_factor - 1;
-				break;
-			}
-		}
-		
 		public Gdk.Rectangle get_barrier ()
 		{
 			Gdk.Rectangle barrier = {};

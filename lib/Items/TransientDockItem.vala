@@ -31,32 +31,30 @@ namespace Plank
 		
 		uint delayed_update_timer_id = 0U;
 		
-		internal TransientDockItem.with_application (Bamf.Application app)
+		internal TransientDockItem.with_application (Platform.RunningApp app)
 		{
-			GLib.Object (Prefs: new DockItemPreferences (), App: app);
+			GLib.Object (Prefs: new DockItemPreferences ());
+			
+			App = app;
+			
+			unowned string? launcher = App.desktop_file;
+			if (launcher == null) {
+				Text = App.name;
+				update_forced_pixbuf ();
+			} else {
+				Prefs.Launcher = launcher;
+				load_from_launcher ();
+			}
 		}
 		
 		public TransientDockItem.with_launcher (string launcher_uri)
 		{
-			GLib.Object (Prefs: new DockItemPreferences.with_launcher (launcher_uri), App: null);
-		}
-		
-		construct
-		{
-			if (App != null) {
-				unowned string? launcher = App.get_desktop_file ();
-				if (launcher == null || launcher == "") {
-					Text = App.get_name ();
-					update_forced_pixbuf ();
-				} else {
-					Prefs.Launcher = launcher;
-					load_from_launcher ();
-				}
-			} else if (Prefs.Launcher != "") {
+			GLib.Object (Prefs: new DockItemPreferences.with_launcher (launcher_uri));
+			
+			if (Prefs.Launcher != "")
 				load_from_launcher ();
-			} else {
+			else
 				critical ("No source of information for this item available");
-			}
 		}
 		
 		~TransientDockItem ()

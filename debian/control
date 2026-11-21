@@ -34,7 +34,7 @@ Rules-Requires-Root: no
 
 Package: plank
 Architecture: any
-Depends: libplank1 (= ${binary:Version}),
+Depends: libplank2 (= ${binary:Version}),
          ${shlibs:Depends},
          ${misc:Depends}
 Suggests: libplank-doc
@@ -47,7 +47,7 @@ Description: Elegant, simple, clean dock
  however, a library which can be extended to create other dock programs
  with more advanced features.
 
-Package: libplank1
+Package: libplank2
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends},
@@ -69,8 +69,7 @@ Package: libplank-dev
 Suggests: libplank-doc
 Architecture: any
 Section: libdevel
-Depends: libplank1 (= ${binary:Version}),
-         libbamf3-dev (>= 0.2.92),
+Depends: libplank2 (= ${binary:Version}),
          libcairo2-dev (>= 1.10.0),
          libgdk-pixbuf-2.0-dev (>= 2.26.0),
          libgee-0.8-dev,

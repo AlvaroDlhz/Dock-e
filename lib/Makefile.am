@@ -138,13 +138,14 @@ nodist_libplank_la_SOURCES = \
 plank-resources.c: $(top_srcdir)/data/plank.gresource.xml Makefile $(shell $(GLIB_COMPILE_RESOURCES) --generate-dependencies --sourcedir $(top_srcdir)/data $(top_srcdir)/data/plank.gresource.xml)
 	$(AM_V_GEN) XMLLINT=$(XMLLINT) $(GLIB_COMPILE_RESOURCES) --target $@ --sourcedir $(top_srcdir)/data --generate --c-name plank $<
 
-plank.h plank.vapi: libplank_la_vala.stamp
+plank.h plank-private.h plank.vapi: libplank_la_vala.stamp
 $(libplank_la_VALASOURCES:.vala=.c): libplank_la_vala.stamp
 
 libplank_la_vala.stamp build-abi: libplank_internal_la_vala.stamp $(libplank_la_VALASOURCES) $(libplank_la_BUILT_VALASOURCES) Makefile
 	$(AM_V_VALA)$(VALAC) \
 		$(AM_VALAFLAGS) $(libplank_la_VALAFLAGS) \
 		-H plank.h \
+		--internal-header plank-private.h \
 		--library plank \
 		--symbols build-abi \
 		--vapi plank.vapi \
@@ -203,7 +204,6 @@ libplank_internal_la_VALASOURCES = \
 	Services/LauncherSearch.vala \
 	Services/CommandRunner.vala \
 	Services/StatusNoticeModel.vala \
-	Services/Matcher.vala \
 	Services/WindowControl.vala \
 	Services/WindowOverlap.vala \
 	Services/Utils.vala \
@@ -243,6 +243,7 @@ CLEANFILES = \
 	plank.pc \
 	plank.vapi \
 	plank.h \
+	plank-private.h \
 	plank-internal.vapi \
 	plank-internal.h \
 	Version.vala \

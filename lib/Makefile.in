@@ -174,7 +174,6 @@ am__objects_2 = libplank_internal_la-InternalConsts.lo \
 	Services/libplank_internal_la-LauncherSearch.lo \
 	Services/libplank_internal_la-CommandRunner.lo \
 	Services/libplank_internal_la-StatusNoticeModel.lo \
-	Services/libplank_internal_la-Matcher.lo \
 	Services/libplank_internal_la-WindowControl.lo \
 	Services/libplank_internal_la-WindowOverlap.lo \
 	Services/libplank_internal_la-Utils.lo \
@@ -319,7 +318,6 @@ am__depfiles_remade = ./$(DEPDIR)/DBusManager.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-LauncherCatalog.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-LauncherCommands.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-LauncherSearch.Plo \
-	Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-Utils.Plo \
 	Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo \
@@ -949,7 +947,6 @@ libplank_internal_la_VALASOURCES = \
 	Services/LauncherSearch.vala \
 	Services/CommandRunner.vala \
 	Services/StatusNoticeModel.vala \
-	Services/Matcher.vala \
 	Services/WindowControl.vala \
 	Services/WindowOverlap.vala \
 	Services/Utils.vala \
@@ -975,6 +972,7 @@ CLEANFILES = \
 	plank.pc \
 	plank.vapi \
 	plank.h \
+	plank-private.h \
 	plank-internal.vapi \
 	plank-internal.h \
 	Version.vala \
@@ -1153,8 +1151,6 @@ Services/libplank_internal_la-CommandRunner.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-StatusNoticeModel.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
-Services/libplank_internal_la-Matcher.lo: Services/$(am__dirstamp) \
-	Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-WindowControl.lo:  \
 	Services/$(am__dirstamp) Services/$(DEPDIR)/$(am__dirstamp)
 Services/libplank_internal_la-WindowOverlap.lo:  \
@@ -1427,7 +1423,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-LauncherCatalog.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-LauncherCommands.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-LauncherSearch.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-Utils.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo@am__quote@ # am--include-marker
@@ -1678,13 +1673,6 @@ Services/libplank_internal_la-StatusNoticeModel.lo: Services/StatusNoticeModel.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/StatusNoticeModel.c' object='Services/libplank_internal_la-StatusNoticeModel.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-StatusNoticeModel.lo `test -f 'Services/StatusNoticeModel.c' || echo '$(srcdir)/'`Services/StatusNoticeModel.c
-
-Services/libplank_internal_la-Matcher.lo: Services/Matcher.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-Matcher.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-Matcher.Tpo -c -o Services/libplank_internal_la-Matcher.lo `test -f 'Services/Matcher.c' || echo '$(srcdir)/'`Services/Matcher.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-Matcher.Tpo Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Services/Matcher.c' object='Services/libplank_internal_la-Matcher.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Services/libplank_internal_la-Matcher.lo `test -f 'Services/Matcher.c' || echo '$(srcdir)/'`Services/Matcher.c
 
 Services/libplank_internal_la-WindowControl.lo: Services/WindowControl.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-WindowControl.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-WindowControl.Tpo -c -o Services/libplank_internal_la-WindowControl.lo `test -f 'Services/WindowControl.c' || echo '$(srcdir)/'`Services/WindowControl.c
@@ -2192,7 +2180,6 @@ distclean: distclean-am
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-LauncherCatalog.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-LauncherCommands.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-LauncherSearch.Plo
-	-rm -f Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Utils.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo
@@ -2339,7 +2326,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-LauncherCatalog.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-LauncherCommands.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-LauncherSearch.Plo
-	-rm -f Services/$(DEPDIR)/libplank_internal_la-Matcher.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-StatusNoticeModel.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-Utils.Plo
 	-rm -f Services/$(DEPDIR)/libplank_internal_la-WindowControl.Plo
@@ -2406,13 +2392,14 @@ uninstall-am: uninstall-libLTLIBRARIES \
 plank-resources.c: $(top_srcdir)/data/plank.gresource.xml Makefile $(shell $(GLIB_COMPILE_RESOURCES) --generate-dependencies --sourcedir $(top_srcdir)/data $(top_srcdir)/data/plank.gresource.xml)
 	$(AM_V_GEN) XMLLINT=$(XMLLINT) $(GLIB_COMPILE_RESOURCES) --target $@ --sourcedir $(top_srcdir)/data --generate --c-name plank $<
 
-plank.h plank.vapi: libplank_la_vala.stamp
+plank.h plank-private.h plank.vapi: libplank_la_vala.stamp
 $(libplank_la_VALASOURCES:.vala=.c): libplank_la_vala.stamp
 
 libplank_la_vala.stamp build-abi: libplank_internal_la_vala.stamp $(libplank_la_VALASOURCES) $(libplank_la_BUILT_VALASOURCES) Makefile
 	$(AM_V_VALA)$(VALAC) \
 		$(AM_VALAFLAGS) $(libplank_la_VALAFLAGS) \
 		-H plank.h \
+		--internal-header plank-private.h \
 		--library plank \
 		--symbols build-abi \
 		--vapi plank.vapi \

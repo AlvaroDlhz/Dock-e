@@ -49,7 +49,9 @@ namespace Plank
 			// Make sure our launchers-directory exists
 			Paths.ensure_directory_exists (LaunchersDir);
 			
-			Matcher.get_default ().application_opened.connect (app_opened);
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend != null)
+				backend.apps.app_opened.connect (app_opened);
 			
 			try {
 				items_monitor = LaunchersDir.monitor_directory (0);
@@ -63,7 +65,9 @@ namespace Plank
 		{
 			queued_files = null;
 			
-			Matcher.get_default ().application_opened.disconnect (app_opened);
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend != null)
+				backend.apps.app_opened.disconnect (app_opened);
 			
 			if (items_monitor != null) {
 				items_monitor.changed.disconnect (handle_items_dir_changed);
@@ -72,9 +76,9 @@ namespace Plank
 			}
 		}
 		
-		protected unowned ApplicationDockItem? item_for_application (Bamf.Application app)
+		internal unowned ApplicationDockItem? item_for_application (Platform.RunningApp app)
 		{
-			var app_desktop_file = app.get_desktop_file ();
+			string? app_desktop_file = app.desktop_file;
 			if (app_desktop_file != null && app_desktop_file.has_prefix ("/"))
 				try {
 					app_desktop_file = Filename.to_uri (app_desktop_file);
@@ -87,7 +91,7 @@ namespace Plank
 				if (appitem == null)
 					continue;
 				
-				unowned Bamf.Application? item_app = appitem.App;
+				unowned Platform.RunningApp? item_app = appitem.App;
 				if (item_app != null && item_app == app)
 					return appitem;
 				
@@ -165,7 +169,11 @@ namespace Plank
 		public override void prepare ()
 		{
 			// Match running applications to their available dock-items
-			foreach (var app in Matcher.get_default ().active_launchers ()) {
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend == null)
+				return;
+			
+			foreach (var app in backend.apps.running_apps ()) {
 				unowned ApplicationDockItem? found = item_for_application (app);
 				if (found != null)
 					found.App = app;
@@ -193,14 +201,25 @@ namespace Plank
 			return item_list.to_array ();
 		}
 		
-		protected virtual void app_opened (Bamf.Application app)
+		/**
+		 * A running application matched none of the items.  A signal rather
+		 * than a virtual method: the vtable would put the type of the backend
+		 * into the public header.
+		 */
+		internal signal void unmatched_app_opened (Platform.RunningApp app);
+		
+		void app_opened (Platform.RunningApp app)
 		{
-			// Make sure internal window-list of Wnck is most up to date
-			Wnck.Screen.get_default ().force_update ();
+			// Make sure the windows of the application are known as toplevels
+			Platform.get_backend ().toplevels.refresh ();
 			
 			unowned ApplicationDockItem? found = item_for_application (app);
-			if (found != null)
+			if (found != null) {
 				found.App = app;
+				return;
+			}
+			
+			unmatched_app_opened (app);
 		}
 		
 		protected void delay_items_monitor ()

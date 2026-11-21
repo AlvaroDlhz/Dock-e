@@ -266,6 +266,10 @@ namespace PlankTests
 			return toplevels.read_only_view;
 		}
 
+		public void refresh ()
+		{
+		}
+
 		public Toplevel? lookup_id (uint64 id)
 		{
 			foreach (var toplevel in toplevels)

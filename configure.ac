@@ -11,7 +11,7 @@ m4_define([plank_nano_version], [0])
 #  increment current and set revision to 0
 # If interfaces have been added since last release, increment age
 # If interfaces have been removed since last release, set age to 0
-m4_define([plank_lt_current], [1])
+m4_define([plank_lt_current], [2])
 m4_define([plank_lt_revision], [0])
 m4_define([plank_lt_age], [0])
 

@@ -262,6 +262,11 @@ namespace Plank.Platform
 			return toplevels.get (window);
 		}
 
+		public void refresh ()
+		{
+			screen.force_update ();
+		}
+
 		public Toplevel? lookup_id (uint64 id)
 		{
 			unowned Wnck.Window? window = Wnck.Window.@get ((ulong) id);

@@ -28,6 +28,7 @@ namespace Plank.Platform
 		public Bamf.Application app { get; private set; }
 
 		unowned BamfAppTracker tracker;
+		bool closed_emitted = false;
 
 		public override string? desktop_file {
 			get {
@@ -124,28 +125,34 @@ namespace Plank.Platform
 
 		void handle_closed ()
 		{
+			emit_closed ();
+		}
+
+		void emit_closed ()
+		{
+			if (closed_emitted)
+				return;
+			closed_emitted = true;
 			closed ();
+		}
+
+		/**
+		 * BAMF reports the end of an application twice, on the matcher and
+		 * on the application, in either order; it ends here once.
+		 */
+		internal void finish ()
+		{
+			emit_closed ();
+			detach ();
 		}
 	}
 
 	/**
 	 * Applications as BAMF matches them, with the windows as toplevels of
 	 * the X11 backend (their ids are XIDs).
-	 *
-	 * Until the dock items work with {@link RunningApp} (stage 10 in
-	 * docs/x11-aislamiento.md) it also reports the BAMF objects themselves,
-	 * for {@link Plank.Matcher}.
 	 */
 	public class BamfAppTracker : Object, AppTracker
 	{
-		public signal void bamf_active_window_changed (Bamf.Window? old_win, Bamf.Window? new_win);
-		public signal void bamf_window_opened (Bamf.Window w);
-		public signal void bamf_window_closed (Bamf.Window w);
-
-		public signal void bamf_active_application_changed (Bamf.Application? old_app, Bamf.Application? new_app);
-		public signal void bamf_application_opened (Bamf.Application app);
-		public signal void bamf_application_closed (Bamf.Application app);
-
 		unowned X11Backend? backend;
 		Gee.HashSet<Bamf.View> pending_views;
 		Bamf.Matcher? bamf_matcher;
@@ -231,13 +238,11 @@ namespace Plank.Platform
 
 		void handle_active_application_changed (Bamf.Application? arg1, Bamf.Application? arg2)
 		{
-			bamf_active_application_changed (arg1, arg2);
 			active_app_changed (wrap (arg1), wrap (arg2));
 		}
 
 		void handle_active_window_changed (Bamf.Window? arg1, Bamf.Window? arg2)
 		{
-			bamf_active_window_changed (arg1, arg2);
 			active_window_changed (arg1 != null ? lookup_toplevel (arg1.get_xid ()) : null,
 				arg2 != null ? lookup_toplevel (arg2.get_xid ()) : null);
 		}
@@ -275,11 +280,9 @@ namespace Plank.Platform
 
 			if (arg1 is Bamf.Window) {
 				unowned Bamf.Window window = (Bamf.Window) arg1;
-				bamf_window_opened (window);
 				when_toplevel (window.get_xid (), (toplevel) => window_opened (toplevel));
 			} else if (arg1 is Bamf.Application) {
 				unowned Bamf.Application app = (Bamf.Application) arg1;
-				bamf_application_opened (app);
 				app_opened (wrap (app));
 			}
 		}
@@ -294,19 +297,13 @@ namespace Plank.Platform
 			if (arg1 is Bamf.Window) {
 				unowned Bamf.Window window = (Bamf.Window) arg1;
 				forget_toplevel (window.get_xid ());
-				bamf_window_closed (window);
 			} else if (arg1 is Bamf.Application) {
 				unowned Bamf.Application app = (Bamf.Application) arg1;
-				bamf_application_closed (app);
 				BamfApp wrapper;
-				if (apps.unset (app, out wrapper)) {
-					app_closed (wrapper);
-					wrapper.detach ();
-				} else {
+				if (!apps.unset (app, out wrapper))
 					wrapper = new BamfApp (this, app);
-					app_closed (wrapper);
-					wrapper.detach ();
-				}
+				app_closed (wrapper);
+				wrapper.finish ();
 			}
 		}
 
@@ -314,10 +311,7 @@ namespace Plank.Platform
 		// Queries
 		//
 
-		/**
-		 * The running applications as BAMF objects, for {@link Plank.Matcher}.
-		 */
-		public Gee.ArrayList<Bamf.Application> bamf_running_applications ()
+		Gee.ArrayList<Bamf.Application> bamf_running_applications ()
 		{
 			var apps = bamf_matcher.get_running_applications ();
 			var list = new Gee.ArrayList<Bamf.Application> ();
@@ -332,11 +326,7 @@ namespace Plank.Platform
 			return list;
 		}
 
-		/**
-		 * The application of a .desktop file as a BAMF object, for
-		 * {@link Plank.Matcher}.
-		 */
-		public Bamf.Application? bamf_app_for_uri (string uri)
+		Bamf.Application? bamf_app_for_uri (string uri)
 		{
 			string launcher;
 			try {
