@@ -17,8 +17,6 @@ namespace Plank
 		const int CASCADE_ROWS = 14;
 		const int CASCADE_STAGGER = 9;
 		const int CASCADE_FADE_TIME = 110;
-		// The time (in seconds) the selection takes to cover most of its way to another row
-		const double SELECTION_GLIDE_TIME = 0.030;
 		// Installing a package touches several desktop files in a row
 		const uint REINDEX_DELAY = 750;
 
@@ -33,7 +31,13 @@ namespace Plank
 		Gtk.Revealer notice_revealer;
 		Gtk.Label notice_label;
 		ulong notice_changed_id = 0UL;
-		Gee.ArrayList<AppInfo> applications;
+		// Which applications there are, and how they are ordered and found
+		LauncherCatalog catalog;
+		// The commands of the user and the saved profiles, offered after a slash
+		LauncherCommands custom_commands;
+		DockProfiles profiles;
+		// Those of them the list shows right now, by what tells them apart
+		Gee.HashMap<string, LauncherCommand> listed_commands;
 		Gee.ArrayList<AppInfo> visible_results;
 		Gee.ArrayList<string> visible_commands;
 		// What can be done with the typed text when nothing matches it
@@ -45,36 +49,27 @@ namespace Plank
 		int frequent_count = 0;
 		Gee.HashMap<AppInfo, Gtk.ListBoxRow> frequent_rows;
 		LauncherUsage usage;
-		// What is compared with the typed text, per application
-		Gee.HashMap<AppInfo, string> search_names;
-		Gee.HashMap<AppInfo, string> search_texts;
 		// Rows are expensive to build, so each application keeps its own
 		Gee.HashMap<AppInfo, Gtk.ListBoxRow> application_rows;
+		// The rows the list is about to show, in their order
+		Gee.ArrayList<Gtk.Widget> staged_rows;
 		AppInfoMonitor application_monitor;
 		uint reindex_timer_id = 0U;
 		uint prepare_catalog_id = 0U;
 		// Whether the list currently shows the complete, unfiltered catalog
 		bool catalog_ready = false;
-		string applied_css = "";
 		bool showing_commands = false;
 		bool showing_calculation = false;
 		string calculation_result = "";
 		LauncherItem? anchor_item;
-		Gtk.CssProvider? theme_provider;
 		WindowTransition transition;
 		// The point the window grows out of, which is as near to its button as it gets
 		double growth_x = 0.0;
 		double growth_y = 0.0;
 		uint cascade_tick_id = 0U;
 		int64 cascade_start = 0LL;
-		// The selection highlight is painted here, so it can glide between rows
-		Gdk.RGBA selection_color = { 1.0, 1.0, 1.0, 0.16 };
-		double selection_y = 0.0;
-		double selection_height = 0.0;
-		bool selection_placed = false;
-		bool selection_snap = true;
-		uint selection_tick_id = 0U;
-		int64 selection_time = 0LL;
+		// Paints the selection highlight, so it can glide between rows
+		ListSelectionGlide selection_glide;
 		int panel_x = 0;
 		int panel_y = 0;
 		bool context_menu_open = false;
@@ -101,15 +96,19 @@ namespace Plank
 				// Leave the catalog ready so the next opening has nothing to build
 				schedule_prepare_catalog ();
 			});
-			applications = new Gee.ArrayList<AppInfo> ();
 			visible_results = new Gee.ArrayList<AppInfo> ();
 			visible_commands = new Gee.ArrayList<string> ();
 			visible_actions = new Gee.ArrayList<string> ();
 			frequent_rows = new Gee.HashMap<AppInfo, Gtk.ListBoxRow> ();
-			search_names = new Gee.HashMap<AppInfo, string> ();
-			search_texts = new Gee.HashMap<AppInfo, string> ();
 			usage = new LauncherUsage (controller.config_folder.get_child ("launcher-usage.ini"));
+			catalog = new LauncherCatalog (usage);
+			custom_commands = new LauncherCommands (
+				controller.config_folder.get_child (LauncherCommands.FILE_NAME));
+			profiles = new DockProfiles (controller.prefs.settings,
+				controller.config_folder.get_child (DockProfiles.FOLDER_NAME));
+			listed_commands = new Gee.HashMap<string, LauncherCommand> ();
 			application_rows = new Gee.HashMap<AppInfo, Gtk.ListBoxRow> ();
+			staged_rows = new Gee.ArrayList<Gtk.Widget> ();
 			uninstall_service = new ApplicationUninstallService ();
 			uninstall_command_cache = new Gee.HashMap<string, string> ();
 			uninstall_detection_pending = new Gee.HashSet<string> ();
@@ -205,14 +204,10 @@ namespace Plank
 			Accessibility.describe (result_list, _("Application results"));
 			result_list.selection_mode = Gtk.SelectionMode.SINGLE;
 			result_list.activate_on_single_click = true;
-			result_list.draw.connect ((cr) => {
-				draw_selection (cr);
-				return false;
-			});
+			selection_glide = new ListSelectionGlide (result_list);
 			result_list.row_selected.connect ((row) => {
 				if (row == null)
 					return;
-				glide_selection ();
 				Idle.add (() => {
 					if (row.get_parent () == result_list)
 						scroll_row_into_view (row);
@@ -230,8 +225,8 @@ namespace Plank
 					row.set_header (index == 0 ? create_alphabet_header (_("Frequent")) : null);
 					return;
 				}
-				var initial = alphabet_initial (visible_results[index]);
-				if (index > frequent_count && alphabet_initial (visible_results[index - 1]) == initial) {
+				var initial = LauncherCatalog.alphabet_initial (visible_results[index]);
+				if (index > frequent_count && LauncherCatalog.alphabet_initial (visible_results[index - 1]) == initial) {
 					row.set_header (null);
 					return;
 				}
@@ -287,8 +282,6 @@ namespace Plank
 			if (prepare_catalog_id > 0U)
 				Source.remove (prepare_catalog_id);
 			application_monitor.changed.disconnect (schedule_reindex);
-			if (theme_provider != null)
-				Gtk.StyleContext.remove_provider_for_screen (get_screen (), theme_provider);
 		}
 
 		Gtk.Widget create_user_avatar ()
@@ -352,17 +345,8 @@ namespace Plank
 
 		void open_user_settings ()
 		{
-			string[] argv;
-			var gnome_control_center = Environment.find_program_in_path ("gnome-control-center");
-			var users_admin = Environment.find_program_in_path ("users-admin");
-			var system_settings = Environment.find_program_in_path ("systemsettings");
-			if (gnome_control_center != null)
-				argv = { gnome_control_center, "user-accounts" };
-			else if (users_admin != null)
-				argv = { users_admin };
-			else if (system_settings != null)
-				argv = { system_settings, "kcm_users" };
-			else {
+			var argv = SessionActions.command_for_session ("user-settings");
+			if (argv == null) {
 				warning ("Unable to open user settings: no supported user settings application was found");
 				show_launcher_error (_("User settings are not available on this system."));
 				return;
@@ -391,19 +375,6 @@ namespace Plank
 			case "restart": return _("Restart");
 			case "poweroff": return _("Power off");
 			default: return action;
-			}
-		}
-
-		string power_action_command (string action)
-		{
-			switch (action) {
-			case "preferences": return "";
-			case "lock": return "xflock4";
-			case "suspend": return "xfce4-session-logout --suspend";
-			case "logout": return "xfce4-session-logout --logout";
-			case "restart": return "xfce4-session-logout --reboot";
-			case "poweroff": return "xfce4-session-logout --halt";
-			default: return "";
 			}
 		}
 
@@ -463,10 +434,124 @@ namespace Plank
 			return row;
 		}
 
-		void run_session_action (string command)
+		const string PROFILE_PREFIX = "profile:";
+		const string PROFILE_SAVE_PREFIX = "profile-save:";
+		// What is typed after the slash to switch to a profile, and to save one
+		const string[] PROFILE_WORDS = { "perfil", "profile" };
+		const string[] PROFILE_SAVE_WORDS = { "guardar-perfil", "save-profile" };
+
+		/**
+		 * The commands which are not built in: those the user wrote down, and
+		 * one for each saved profile.
+		 */
+		Gee.ArrayList<LauncherCommand> own_commands ()
+		{
+			var result = new Gee.ArrayList<LauncherCommand> ();
+			result.add_all (custom_commands.commands);
+			foreach (unowned string name in profiles.list ()) {
+				string[] words = {};
+				foreach (unowned string word in PROFILE_WORDS)
+					words += "%s %s".printf (word, LauncherSearch.normalize (name));
+				result.add (new LauncherCommand (PROFILE_PREFIX + name,
+					_("Switch to the profile “%s”").printf (name),
+					"preferences-desktop-theme-symbolic", words, name));
+			}
+			return result;
+		}
+
+		/**
+		 * The command which saves the preferences as a profile, if that is
+		 * what is being typed.
+		 *
+		 * @param typed_command what follows the slash, as it was typed
+		 */
+		LauncherCommand? profile_save_command (string typed_command)
+		{
+			foreach (unowned string word in PROFILE_SAVE_WORDS) {
+				if (!typed_command.down ().has_prefix (word))
+					continue;
+				var name = typed_command.substring (word.length).strip ();
+				string[] words = {};
+				foreach (unowned string save_word in PROFILE_SAVE_WORDS)
+					words += "%s %s".printf (save_word, name != "" ? name : _("name"));
+				return new LauncherCommand (PROFILE_SAVE_PREFIX + name,
+					name != "" ? _("Save these preferences as the profile “%s”").printf (name)
+						: _("Save these preferences as a profile"),
+					"document-save-symbolic", words, name);
+			}
+			return null;
+		}
+
+		void list_command (LauncherCommand command)
+		{
+			if (listed_commands.has_key (command.id))
+				return;
+			listed_commands[command.id] = command;
+			visible_commands.add (command.id);
+			staged_rows.add (create_command_row (command));
+		}
+
+		Gtk.ListBoxRow create_command_row (LauncherCommand command)
+		{
+			var row = new Gtk.ListBoxRow ();
+			row.get_style_context ().add_class ("launcher-result");
+			var box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 11);
+			box.margin_left = box.margin_right = 12;
+			box.margin_top = box.margin_bottom = 9;
+			var icon = new Gtk.Image.from_icon_name (command.icon, Gtk.IconSize.DIALOG);
+			icon.pixel_size = 30;
+			box.pack_start (icon, false, false, 0);
+
+			var labels = new Gtk.Box (Gtk.Orientation.VERTICAL, 2);
+			var name = new Gtk.Label (command.name) { xalign = 0.0f };
+			name.ellipsize = Pango.EllipsizeMode.END;
+			labels.pack_start (name, false, false, 0);
+			var hint = new Gtk.Label (command.hint ()) { xalign = 0.0f };
+			hint.ellipsize = Pango.EllipsizeMode.END;
+			hint.get_style_context ().add_class (Gtk.STYLE_CLASS_DIM_LABEL);
+			labels.pack_start (hint, false, false, 0);
+			box.pack_start (labels, true, true, 0);
+			var enter_hint = new Gtk.Label ("↵");
+			enter_hint.get_style_context ().add_class ("launcher-enter");
+			box.pack_end (enter_hint, false, false, 0);
+			row.add (box);
+			return row;
+		}
+
+		void run_command (LauncherCommand command)
 		{
 			try {
-				Process.spawn_command_line_async (command);
+				if (command.id.has_prefix (PROFILE_SAVE_PREFIX)) {
+					if (!DockProfiles.is_valid_name (command.argument)) {
+						show_launcher_error (_("Type a name after the command, using letters, digits, spaces or dashes."));
+						return;
+					}
+					profiles.save (command.argument);
+				} else if (command.id.has_prefix (PROFILE_PREFIX)) {
+					profiles.apply (command.argument);
+				} else {
+					Process.spawn_command_line_async (command.argument);
+				}
+				notice_model.dismiss ();
+				hide_animated ();
+			} catch (Error e) {
+				warning ("Unable to run the command '%s': %s", command.id, e.message);
+				show_launcher_error (_("“%s” could not be done: %s").printf (command.name, e.message));
+			}
+		}
+
+		void run_session_action (string action)
+		{
+			var argv = SessionActions.command_for_session (action);
+			if (argv == null) {
+				warning ("Unable to run session action '%s': nothing on this system can do it", action);
+				show_launcher_error (_("This system action is not available on this desktop."));
+				return;
+			}
+
+			try {
+				Pid pid;
+				Process.spawn_async (null, argv, null, SpawnFlags.SEARCH_PATH, null, out pid);
 				notice_model.dismiss ();
 			} catch (SpawnError e) {
 				warning ("Unable to run session action: %s", e.message);
@@ -534,49 +619,11 @@ namespace Plank
 
 		void index_applications ()
 		{
-			applications.clear ();
+			catalog.index ();
+			// The rows belong to applications which may be gone now
 			application_rows.clear ();
 			frequent_rows.clear ();
-			search_names.clear ();
-			search_texts.clear ();
 			catalog_ready = false;
-			var seen = new Gee.HashSet<string> ();
-			foreach (unowned AppInfo app in AppInfo.get_all ()) {
-				var id = app.get_id () ?? app.get_name ();
-				if (!app.should_show () || !application_is_available (app) || id in seen)
-					continue;
-				seen.add (id);
-				applications.add (app);
-				var name = LauncherSearch.normalize (app.get_display_name ());
-				search_names[app] = name;
-				// The initials find "Visual Studio Code" when "vsc" is typed
-				search_texts[app] = LauncherSearch.normalize ("%s %s %s".printf (app.get_name (),
-					app.get_description () ?? "", app.get_executable () ?? ""));
-			}
-			applications.sort ((a, b) => {
-				var initial_order = alphabet_initial (a).collate (alphabet_initial (b));
-				if (initial_order != 0)
-					return initial_order;
-				return a.get_display_name ().collate (b.get_display_name ());
-			});
-		}
-
-		bool application_is_available (AppInfo app)
-		{
-			var executable = app.get_executable ();
-			if (executable == null || executable.strip () == "")
-				return false;
-			try {
-				string[] arguments;
-				Shell.parse_argv (executable, out arguments);
-				if (arguments.length == 0)
-					return false;
-				if (Path.is_absolute (arguments[0]))
-					return FileUtils.test (arguments[0], FileTest.EXISTS | FileTest.IS_EXECUTABLE);
-				return Environment.find_program_in_path (arguments[0]) != null;
-			} catch (ShellError e) {
-				return false;
-			}
 		}
 
 		public void toggle (LauncherItem item)
@@ -653,15 +700,17 @@ namespace Plank
 		{
 			stop_cascade ();
 			// The rows are replaced, so there is nothing to glide from
-			selection_snap = true;
+			selection_glide.snap ();
 			// Rows are kept and reused. One taken out while selected would still
 			// claim to be selected when it returns, and the list would then
 			// refuse to select it again, leaving nothing selected at all.
 			result_list.unselect_all ();
-			foreach (unowned Gtk.Widget child in result_list.get_children ())
-				result_list.remove (child);
+			// What the list is to show is collected first and compared with
+			// what it shows already, see finish_refresh_results ()
+			staged_rows.clear ();
 			visible_results.clear ();
 			visible_commands.clear ();
+			listed_commands.clear ();
 			visible_actions.clear ();
 			frequent_count = 0;
 			showing_calculation = false;
@@ -679,11 +728,22 @@ namespace Plank
 					if (command_query == ""
 						|| LauncherSearch.score (power_action_search_text (action), command_query) >= 0) {
 						visible_commands.add (action);
-						result_list.add (create_power_command_row (action));
+						staged_rows.add (create_power_command_row (action));
 					}
 				}
+				// What is typed keeps its case, a profile is named as it is written
+				var save_command = profile_save_command (typed.substring (1).strip ());
+				if (save_command != null)
+					list_command (save_command);
+				foreach (var command in own_commands ()) {
+					if (command_query == ""
+						|| LauncherSearch.score (command.search_text (), command_query) >= 0)
+						list_command (command);
+				}
+				if (save_command == null && command_query == "")
+					list_command (profile_save_command (PROFILE_SAVE_WORDS[0]));
 				if (visible_commands.size == 0)
-					result_list.add (create_empty_row (_("No matching commands")));
+					staged_rows.add (create_empty_row (_("No matching commands")));
 				finish_refresh_results ();
 				return;
 			}
@@ -692,66 +752,38 @@ namespace Plank
 			if (CalculatorService.evaluate (typed.down (), out result)) {
 				showing_calculation = true;
 				calculation_result = result == 0.0 ? "0" : result.to_string ();
-				result_list.add (create_calculation_row (typed, calculation_result));
+				staged_rows.add (create_calculation_row (typed, calculation_result));
 				finish_refresh_results ();
 				return;
 			}
 
 			if (query == "") {
-				// The applications opened most lead the catalog
-				var frequent = new Gee.ArrayList<AppInfo> ();
-				var usage_scores = new Gee.HashMap<AppInfo, double?> ();
-				foreach (var app in applications) {
-					var usage_score = usage.score (usage_id (app));
-					if (usage_score <= 0.0)
-						continue;
-					usage_scores[app] = usage_score;
-					frequent.add (app);
-				}
-				frequent.sort ((a, b) => {
-					if (usage_scores[a] != usage_scores[b])
-						return usage_scores[a] > usage_scores[b] ? -1 : 1;
-					return a.get_display_name ().collate (b.get_display_name ());
-				});
-				// The list asks for the header of a row as soon as it is added,
-				// so how many of them are frequent has to be known before that
-				frequent_count = int.min (FREQUENT_ROWS, frequent.size);
-				for (var i = 0; i < frequent_count; i++) {
-					var app = frequent[i];
+				// The applications opened most lead the catalog. The list asks
+				// for the header of a row as soon as it is added, so how many
+				// of them are frequent has to be known before that
+				var frequent = catalog.frequent (FREQUENT_ROWS);
+				frequent_count = frequent.size;
+				foreach (var app in frequent) {
 					Gtk.ListBoxRow? row = frequent_rows[app];
 					if (row == null) {
 						row = create_result_row (app);
 						frequent_rows[app] = row;
 					}
 					visible_results.add (app);
-					result_list.add (row);
+					staged_rows.add (row);
 				}
 
-				foreach (var app in applications) {
+				foreach (var app in catalog.applications) {
 					visible_results.add (app);
-					result_list.add (get_application_row (app, query));
+					staged_rows.add (get_application_row (app, query));
 				}
 				finish_refresh_results ();
 				return;
 			}
 
-			var matches = new Gee.ArrayList<AppInfo> ();
-			var scores = new Gee.HashMap<AppInfo, int> ();
-			foreach (var app in applications) {
-				var match = match_score (app, query);
-				if (match < 0)
-					continue;
-				scores[app] = match;
-				matches.add (app);
-			}
-			matches.sort ((a, b) => {
-				if (scores[a] != scores[b])
-					return scores[a] > scores[b] ? -1 : 1;
-				return a.get_display_name ().collate (b.get_display_name ());
-			});
-			foreach (var app in matches) {
+			foreach (var app in catalog.search (query)) {
 				visible_results.add (app);
-				result_list.add (get_application_row (app, query));
+				staged_rows.add (get_application_row (app, query));
 			}
 
 			// Session commands are found by their name too, without the slash
@@ -759,21 +791,25 @@ namespace Plank
 				foreach (unowned string action in POWER_ACTIONS) {
 					if (LauncherSearch.matches_clearly (power_action_search_text (action), query)) {
 						visible_commands.add (action);
-						result_list.add (create_power_command_row (action));
+						staged_rows.add (create_power_command_row (action));
 					}
 				}
+				foreach (var command in own_commands ())
+					if (LauncherSearch.matches_clearly (command.search_text (), query))
+						list_command (command);
 			}
 
 			// Nothing to open, so offer what else can be done with the text
 			if (visible_results.size == 0 && visible_commands.size == 0) {
-				var program = typed.split (" ")[0];
+				var words = typed.split (" ");
+				var program = words.length > 0 ? words[0] : "";
 				if (program != "" && Environment.find_program_in_path (program) != null) {
 					visible_actions.add ("run");
-					result_list.add (create_action_row ("utilities-terminal-symbolic",
+					staged_rows.add (create_action_row ("utilities-terminal-symbolic",
 						_("Run “%s”").printf (typed), _("Command")));
 				}
 				visible_actions.add ("web");
-				result_list.add (create_action_row ("system-search-symbolic",
+				staged_rows.add (create_action_row ("system-search-symbolic",
 					_("Search the web for “%s”").printf (typed), "DuckDuckGo"));
 			}
 
@@ -795,30 +831,6 @@ namespace Plank
 			if (title != null)
 				title.set_markup (LauncherSearch.highlight (app.get_display_name (), query));
 			return row;
-		}
-
-		/**
-		 * Rates how well an application matches the typed text, preferring
-		 * its name over its description and the ones opened more often.
-		 *
-		 * @return a higher number for a better match, negative for none at all
-		 */
-		int match_score (AppInfo app, string query)
-		{
-			var habit = (int) (double.min (10.0, usage.score (usage_id (app))) * 30.0);
-			var name = LauncherSearch.score (search_names[app], query);
-			if (name >= 0)
-				return 1000 + name + habit;
-			// Descriptions are long, a loose match in them means little
-			var text = LauncherSearch.score (search_texts[app], query);
-			if (text >= 800)
-				return text / 2 + habit;
-			return -1;
-		}
-
-		string usage_id (AppInfo app)
-		{
-			return app.get_id () ?? app.get_name ();
 		}
 
 		string power_action_search_text (string action)
@@ -912,6 +924,23 @@ namespace Plank
 
 		void finish_refresh_results ()
 		{
+			// Typing one more letter often leaves the best matches where they
+			// were. Taking a row out and putting it back makes the list work
+			// out its styles and sizes again, so the rows which lead both the
+			// old and the new list simply stay.
+			var current = result_list.get_children ();
+			var kept = 0;
+			unowned List<weak Gtk.Widget>? link = current;
+			while (link != null && kept < staged_rows.size && link.data == staged_rows[kept]) {
+				kept++;
+				link = link.next;
+			}
+			for (; link != null; link = link.next)
+				result_list.remove (link.data);
+			for (var i = kept; i < staged_rows.size; i++)
+				result_list.add (staged_rows[i]);
+			staged_rows.clear ();
+
 			// Headers depend on the whole list, which is only complete now
 			result_list.invalidate_headers ();
 			result_list.show_all ();
@@ -1412,18 +1441,6 @@ namespace Plank
 			return header;
 		}
 
-		string alphabet_initial (AppInfo app)
-		{
-			var name = app.get_display_name ().strip ();
-			if (name == "")
-				return "#";
-			var decomposed = name.normalize (-1, GLib.NormalizeMode.NFD);
-			var initial = decomposed.get_char ();
-			if (!initial.isalpha ())
-				return "#";
-			return initial.to_string ().up ();
-		}
-
 		bool handle_key_press (Gdk.EventKey event)
 		{
 			Accessibility.set_keyboard_navigation (this, true);
@@ -1583,11 +1600,14 @@ namespace Plank
 				index -= visible_results.size;
 				if (index < visible_commands.size) {
 					var action = visible_commands[index];
-					if (action == "preferences") {
+					var command = listed_commands[action];
+					if (command != null) {
+						run_command (command);
+					} else if (action == "preferences") {
 						Application.get_default ().activate_action ("preferences", null);
 						hide_animated ();
 					} else {
-						run_session_action (power_action_command (action));
+						run_session_action (action);
 					}
 				} else if (index - visible_commands.size < visible_actions.size) {
 					run_action (visible_actions[index - visible_commands.size]);
@@ -1597,7 +1617,7 @@ namespace Plank
 			try {
 				var app = visible_results[index];
 				app.launch (null, null);
-				usage.record (usage_id (app));
+				usage.record (LauncherCatalog.usage_id (app));
 				// The most used applications may have changed their order
 				catalog_ready = false;
 				notice_model.dismiss ();
@@ -1636,122 +1656,13 @@ namespace Plank
 
 		void apply_theme ()
 		{
-			var color = controller.renderer.theme.FillStartColor;
-			var red = (int) Math.round (color.red * 255.0);
-			var green = (int) Math.round (color.green * 255.0);
-			var blue = (int) Math.round (color.blue * 255.0);
-			var background_opacity = (controller.prefs.CustomBackgroundEnabled
-				? 1.0 : color.alpha).clamp (0.0, 1.0);
-			var opacity_milli = (int) Math.round (background_opacity * 1000.0);
-			var opacity_css = "%d.%03d".printf (opacity_milli / 1000, opacity_milli % 1000);
-			var luminance = relative_luminance (color.red, color.green, color.blue);
-			var foreground = luminance > 0.179 ? "24,27,32" : "255,255,255";
-			if (luminance > 0.179)
-				selection_color = { 24 / 255.0, 27 / 255.0, 32 / 255.0, 0.16 };
+			DockStyle.update (controller);
+			// The highlight of the selected row is painted, not styled
+			if (ContextMenuStyle.is_light (controller.renderer.theme.FillStartColor))
+				selection_glide.color = { 24 / 255.0, 27 / 255.0, 32 / 255.0, 0.16 };
 			else
-				selection_color = { 1.0, 1.0, 1.0, 0.16 };
-			var muted_foreground = luminance > 0.179 ? "48,52,58" : "255,255,255";
-			var command_status_color = luminance > 0.179 ? "#286400" : "#a8ef70";
-			var destructive_color = luminance > 0.179 ? "#a61b1b" : "#ff8b82";
-			// Keep floating menus on the bar's RGB color.  Avoid formatting a
-			// floating-point alpha here: printf follows the current locale and can
-			// emit a decimal comma, which makes the entire GTK CSS invalid.
-			var css = ".plank-native-launcher { background-color: transparent; }";
-			css += ".plank-native-launcher .launcher-panel { background-color: rgba(%d,%d,%d,%s); color: rgb(%s); border: 1px solid rgba(%s,0.18); border-radius: 12px; padding: 5px; box-shadow: none; }"
-				.printf (red, green, blue, opacity_css, foreground, foreground);
-			css += ".plank-native-launcher .launcher-navbar { min-height: 46px; margin: 10px 9px 0 9px; }";
-			css += ".plank-native-launcher .launcher-user-identity { color: rgb(%s); }".printf (foreground);
-			css += ".plank-native-launcher .launcher-user-avatar-button, .plank-native-launcher .launcher-user-avatar-button:hover, .plank-native-launcher .launcher-user-avatar-button:active { background: transparent; background-image: none; border: none; box-shadow: none; padding: 0; }";
-			css += ".plank-native-launcher.keyboard-navigation .launcher-user-avatar-button:focus { box-shadow: 0 0 0 2px #73d216; }";
-			css += ".plank-native-launcher .launcher-user-avatar { margin: 1px 0; }";
-			css += ".plank-native-launcher .launcher-user-avatar-fallback { color: rgba(%s,0.82); background-color: rgba(%s,0.08); border: 1px solid rgba(%s,0.16); border-radius: 6px; padding: 6px; }"
-				.printf (foreground, foreground, foreground);
-			css += ".plank-native-launcher .launcher-notice { color: white; background-color: rgba(150,25,25,0.94); border: 1px solid rgba(255,160,150,0.55); border-radius: 8px; padding: 7px 9px; margin: 2px 7px 5px 7px; }";
-			css += ".plank-native-launcher .launcher-notice-dismiss { color: white; background: transparent; background-image: none; border: none; box-shadow: none; padding: 2px; }";
-			css += ".plank-native-launcher .launcher-notice-dismiss:hover { background-color: rgba(255,255,255,0.12); border-radius: 5px; }";
-			css += ".plank-native-launcher.keyboard-navigation button:focus { color: rgb(%s); box-shadow: 0 0 0 2px rgba(115,210,22,0.95); }".printf (foreground);
-			css += ".plank-native-launcher.keyboard-navigation row:focus { box-shadow: inset 0 0 0 2px rgba(115,210,22,0.85); }";
-			css += ".plank-native-launcher .launcher-results-scroll { background: transparent; border: none; box-shadow: none; outline-style: none; outline-width: 0; margin-top: 6px; }";
-			css += ".plank-native-launcher .launcher-results-scroll viewport { background: transparent; background-image: none; border: none; box-shadow: none; }";
-			css += ".plank-native-launcher .launcher-results-scroll undershoot.top, .plank-native-launcher .launcher-results-scroll undershoot.bottom, .plank-native-launcher .launcher-results-scroll undershoot.left, .plank-native-launcher .launcher-results-scroll undershoot.right { background-image: none; background-color: transparent; border: none; box-shadow: none; }";
-			css += ".plank-native-launcher .launcher-results-scroll list, .plank-native-launcher .launcher-results-scroll row { outline-style: none; outline-width: 0; }";
-			css += ".plank-native-launcher scrollbar { background: transparent; border: none; }";
-			css += ".plank-native-launcher scrollbar slider { min-width: 4px; min-height: 28px; background-color: rgba(%s,0.28); border-radius: 4px; }".printf (foreground);
-			css += ".plank-native-launcher .launcher-alpha-header { margin: 12px 12px 5px 12px; }";
-			css += ".plank-native-launcher .launcher-alpha-letter { padding: 0 6px; }";
-			css += ".plank-native-launcher .launcher-alpha-letter { color: rgb(%s); background-color: rgba(%s,0.10); border-radius: 6px; min-width: 22px; min-height: 22px; font-size: 11px; font-weight: bold; }"
-				.printf (foreground, foreground);
-			css += ".plank-native-launcher .launcher-panel list, .plank-native-launcher .launcher-panel row, .plank-native-launcher .launcher-search { background-color: transparent; background-image: none; border: none; color: rgb(%s); }"
-				.printf (foreground);
-			css += ".plank-native-launcher .launcher-search { padding: 6px 12px; margin: 0 10px; border: 1px solid rgba(%s,0.22); border-radius: 10px; }".printf (foreground);
-			css += ".plank-native-launcher entry, .plank-native-launcher entry:focus { color: rgb(%s); caret-color: rgb(%s); background: transparent; background-image: none; border: none; border-radius: 0; box-shadow: none; outline: none; font-size: 14px; }"
-				.printf (foreground, foreground);
-			css += ".plank-native-launcher entry placeholder { color: rgba(%s,0.72); opacity: 1; }".printf (muted_foreground);
-			css += ".plank-native-launcher .launcher-search.launcher-search-focused { border-color: #73d216; box-shadow: 0 0 0 1px rgba(115,210,22,0.28); }";
-			css += ".plank-native-launcher row { color: rgb(%s); border-radius: 8px; margin: 1px 5px; transition: background-color 120ms ease; }".printf (foreground);
-			css += ".plank-native-launcher row:hover { background-color: rgba(%s,0.08); }".printf (foreground);
-			// The highlight of the selected row is painted by draw_selection ()
-			css += ".plank-native-launcher row:selected, .plank-native-launcher row:selected:hover { color: rgb(%s); background-color: transparent; }"
-				.printf (foreground);
-			css += ".plank-native-launcher .dim-label { color: rgba(%s,0.78); }".printf (muted_foreground);
-			css += ".plank-native-launcher .launcher-result-title { font-weight: 600; }";
-			css += ".plank-native-launcher .launcher-calculation-result { font-size: 18px; font-weight: bold; }";
-			css += ".plank-native-launcher .launcher-calculation-status { color: rgba(%s,0.78); font-size: 11px; }".printf (muted_foreground);
-			css += ".plank-native-launcher .launcher-more-button { color: rgba(%s,0.78); background: transparent; background-image: none; border: none; border-radius: 7px; box-shadow: none; padding: 4px; opacity: 0; transition: opacity 120ms ease, background-color 120ms ease; }".printf (foreground);
-			css += ".plank-native-launcher row:hover .launcher-more-button, .plank-native-launcher row:selected .launcher-more-button, .plank-native-launcher row:focus .launcher-more-button { opacity: 1; }";
-			css += ".plank-native-launcher .launcher-more-button:hover, .plank-native-launcher .launcher-more-button:focus { color: rgb(%s); background-color: rgba(%s,0.12); }"
-				.printf (foreground, foreground);
-			css += ".plank-native-launcher .launcher-command-status { color: %s; font-size: 11px; font-weight: bold; margin-left: 2px; }".printf (command_status_color);
-			css += ".plank-native-launcher .launcher-enter { color: rgba(%s,0.62); font-size: 16px; }".printf (muted_foreground);
-			css += ".plank-native-launcher row:selected .launcher-enter { color: rgba(%s,0.90); }".printf (foreground);
-			css += ".plank-native-launcher .launcher-empty { color: rgba(%s,0.78); }".printf (muted_foreground);
-			// The same measures as the menus of the dock, see ContextMenuStyle
-			css += ".launcher-app-context { background-color: rgba(%d,%d,%d,%s); color: rgb(%s); border: 1px solid rgba(%s,0.16); border-radius: %dpx; padding: %dpx; }"
-				.printf (red, green, blue, opacity_css, foreground, foreground,
-					ContextMenuStyle.RADIUS, ContextMenuStyle.PADDING);
-			css += ".launcher-app-context .app-context-header { color: rgb(%s); padding: 7px 8px 8px 8px; min-width: 260px; border-radius: %dpx; background-color: rgba(%s,0.06); }"
-				.printf (foreground, ContextMenuStyle.ROW_RADIUS, foreground);
-			css += ".launcher-app-context .app-context-title { font-weight: bold; font-size: 14px; }";
-			css += ".launcher-app-context .dim-label { color: rgba(%s,0.60); font-size: 11px; }".printf (foreground);
-			css += ".launcher-app-context separator { min-height: 1px; margin: 3px 9px; background-color: rgba(%s,0.10); }".printf (foreground);
-			css += ".launcher-app-context .app-context-action { color: rgba(%s,0.92); background: transparent; background-image: none; border: none; border-radius: %dpx; box-shadow: none; padding: 7px 10px; transition: background-color 120ms ease; }"
-				.printf (foreground, ContextMenuStyle.ROW_RADIUS);
-			css += ".launcher-app-context .app-context-action image { color: rgba(%s,0.80); }".printf (foreground);
-			css += ".launcher-app-context .app-context-action:hover { color: rgb(%s); background-color: rgba(%s,0.11); }".printf (foreground, foreground);
-			css += ".launcher-app-context .app-context-action:disabled { color: rgba(%s,0.40); }".printf (foreground);
-			css += ".launcher-app-context .app-context-caption { color: rgba(%s,0.60); font-size: 11px; margin: 4px 10px 2px 10px; }".printf (foreground);
-			css += ".launcher-app-context .app-context-chips { margin: 0 6px 4px 6px; }";
-			css += ".launcher-app-context .app-context-chip { color: rgba(%s,0.92); background-color: rgba(%s,0.07); background-image: none; border: none; border-radius: %dpx; box-shadow: none; padding: 5px 4px; font-size: 12px; min-height: 0; min-width: 0; transition: background-color 120ms ease; }"
-				.printf (foreground, foreground, ContextMenuStyle.ROW_RADIUS);
-			css += ".launcher-app-context .app-context-chip:hover { color: rgb(%s); background-color: rgba(%s,0.16); }".printf (foreground, foreground);
-			css += ".launcher-app-context .app-context-chip:disabled { color: rgba(%s,0.35); background-color: rgba(%s,0.04); }".printf (foreground, foreground);
-			css += ".launcher-app-context.keyboard-navigation .app-context-action:focus, .launcher-app-context.keyboard-navigation .app-context-chip:focus { box-shadow: inset 0 0 0 2px #73d216; }";
-			css += ".launcher-app-context .destructive-action, .launcher-app-context .destructive-action image { color: %s; }".printf (destructive_color);
-			css += ".launcher-app-context .destructive-action:hover, .launcher-app-context .destructive-action:hover image { color: white; }";
-			css += ".launcher-app-context .destructive-action:hover { background-color: rgba(220,65,65,0.55); }";
-			// Swapping the provider restyles every widget, only do it for real changes
-			if (css == applied_css)
-				return;
-			applied_css = css;
-			if (theme_provider != null)
-				Gtk.StyleContext.remove_provider_for_screen (get_screen (), theme_provider);
-			theme_provider = new Gtk.CssProvider ();
-			try { theme_provider.load_from_data (css); } catch (Error e) { warning ("Launcher CSS: %s", e.message); }
-			Gtk.StyleContext.add_provider_for_screen (get_screen (), theme_provider,
-				Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-		}
-
-		static double relative_luminance (double red, double green, double blue)
-		{
-			return 0.2126 * linearize_color_channel (red)
-				+ 0.7152 * linearize_color_channel (green)
-				+ 0.0722 * linearize_color_channel (blue);
-		}
-
-		static double linearize_color_channel (double channel)
-		{
-			return channel <= 0.04045 ? channel / 12.92
-				: Math.pow ((channel + 0.055) / 1.055, 2.4);
+				selection_glide.color = { 1.0, 1.0, 1.0, 0.16 };
+			selection_glide.animate = Motion.movement_enabled (controller.prefs);
 		}
 
 		void hide_animated ()
@@ -1838,87 +1749,6 @@ namespace Plank
 			unowned Gtk.Widget? header = row.get_header ();
 			if (header != null)
 				header.opacity = opacity;
-		}
-
-		/**
-		 * Where the selected row is inside the list.
-		 */
-		bool get_selection_target (out Gdk.Rectangle target)
-		{
-			target = {};
-			var row = result_list.get_selected_row ();
-			if (row == null || !row.get_mapped ())
-				return false;
-			Gtk.Allocation row_allocation, list_allocation;
-			row.get_allocation (out row_allocation);
-			result_list.get_allocation (out list_allocation);
-			// Leaves out the margin rows have around them
-			target = { row_allocation.x - list_allocation.x + 5,
-				row_allocation.y - list_allocation.y + 1,
-				row_allocation.width - 10, row_allocation.height - 2 };
-			return target.width > 0 && target.height > 0;
-		}
-
-		void glide_selection ()
-		{
-			if (selection_tick_id > 0U || selection_snap || !selection_placed
-				|| !visible || !Motion.movement_enabled (controller.prefs))
-				return;
-
-			selection_time = 0LL;
-			selection_tick_id = result_list.add_tick_callback ((widget, frame_clock) => {
-				var now = frame_clock.get_frame_time ();
-				var dt = (selection_time == 0LL ? 0.016
-					: double.min (0.032, (now - selection_time) / 1000000.0));
-				selection_time = now;
-
-				Gdk.Rectangle target;
-				if (get_selection_target (out target)) {
-					var step = 1.0 - Math.exp (-dt / SELECTION_GLIDE_TIME);
-					selection_y += (target.y - selection_y) * step;
-					selection_height += (target.height - selection_height) * step;
-					result_list.queue_draw ();
-					if (!selection_snap && (Math.fabs (target.y - selection_y) >= 0.5
-						|| Math.fabs (target.height - selection_height) >= 0.5))
-						return Source.CONTINUE;
-				}
-
-				// From here on draw_selection () keeps the highlight on its row
-				selection_tick_id = 0U;
-				result_list.queue_draw ();
-				return Source.REMOVE;
-			});
-		}
-
-		void draw_selection (Cairo.Context cr)
-		{
-			Gdk.Rectangle target;
-			if (!get_selection_target (out target)) {
-				selection_placed = false;
-				return;
-			}
-
-			if (selection_tick_id == 0U || selection_snap || !selection_placed) {
-				selection_y = target.y;
-				selection_height = target.height;
-				selection_placed = true;
-				selection_snap = false;
-			}
-
-			var radius = double.min (8.0, selection_height / 2.0);
-			var x = (double) target.x;
-			var right = x + target.width;
-			var bottom = selection_y + selection_height;
-			cr.save ();
-			cr.new_sub_path ();
-			cr.arc (right - radius, selection_y + radius, radius, -Math.PI_2, 0.0);
-			cr.arc (right - radius, bottom - radius, radius, 0.0, Math.PI_2);
-			cr.arc (x + radius, bottom - radius, radius, Math.PI_2, Math.PI);
-			cr.arc (x + radius, selection_y + radius, radius, Math.PI, 3.0 * Math.PI_2);
-			cr.close_path ();
-			Gdk.cairo_set_source_rgba (cr, selection_color);
-			cr.fill ();
-			cr.restore ();
 		}
 	}
 }

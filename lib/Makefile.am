@@ -119,6 +119,7 @@ libplank_la_VALASOURCES = \
 	Widgets/WorkspacePreviewWindow.vala \
 	Widgets/HoverWindow.vala \
 	Widgets/LauncherWindow.vala \
+	Widgets/ListSelectionGlide.vala \
 	Widgets/PoofWindow.vala \
 	Widgets/PreferencesWindow.vala \
 	Widgets/TitledSeparatorMenuItem.vala \
@@ -179,16 +180,19 @@ libplank_internal_la_VALASOURCES = \
 	Services/Accessibility.vala \
 	Services/ApplicationUninstallService.vala \
 	Services/CalculatorService.vala \
+	Services/DockProfiles.vala \
+	Services/LauncherCatalog.vala \
+	Services/LauncherCommands.vala \
 	Services/LauncherSearch.vala \
 	Services/CommandRunner.vala \
 	Services/StatusNoticeModel.vala \
 	Services/Matcher.vala \
 	Services/WindowControl.vala \
+	Services/WindowThumbnails.vala \
 	Services/Utils.vala \
 	Widgets/DockletViewModel.vala \
 	$(NULL)
 
-	Services/WindowThumbnails.vala \
 libplank_internal_la_SOURCES = \
 	gtk-compat.c \
 	gtk-compat.h \

@@ -37,8 +37,6 @@ namespace Plank
 		uint interfaces_added_subscription_id = 0U;
 		uint interfaces_removed_subscription_id = 0U;
 		uint xapp_refresh_idle_id = 0U;
-		uint reconciliation_timeout_id = 0U;
-		uint reconciliation_tick = 0U;
 		public bool Expanded { get; private set; default = false; }
 
 		public TrayToggleItem ()
@@ -50,7 +48,6 @@ namespace Plank
 			load_state_icons ();
 			connect_xapp_monitor ();
 			try_own_watcher ();
-			reconciliation_timeout_id = Timeout.add_seconds (2, reconcile_items);
 		}
 
 		~TrayToggleItem ()
@@ -63,8 +60,6 @@ namespace Plank
 			unregister_local_watcher ();
 			if (xapp_refresh_idle_id > 0U)
 				Source.remove (xapp_refresh_idle_id);
-			if (reconciliation_timeout_id > 0U)
-				Source.remove (reconciliation_timeout_id);
 			if (session_connection != null) {
 				if (name_owner_subscription_id > 0U)
 					session_connection.signal_unsubscribe (name_owner_subscription_id);
@@ -75,15 +70,17 @@ namespace Plank
 			}
 		}
 
-		bool reconcile_items ()
+		/**
+		 * Compares the known items with what is registered right now.
+		 *
+		 * Registrations, removals and bus ownership all arrive as signals, so
+		 * nothing is polled while idle. This only covers an implementation
+		 * which misses one of them, when the list is about to be looked at.
+		 */
+		void reconcile_items ()
 		{
 			refresh ();
-			// XApp emits reliable object-manager signals in the common case. This
-			// slower fallback covers implementations that only change bus ownership.
-			reconciliation_tick++;
-			if (reconciliation_tick % 3U == 0U)
-				schedule_xapp_refresh ();
-			return true;
+			schedule_xapp_refresh ();
 		}
 
 		void connect_xapp_monitor ()
@@ -379,6 +376,8 @@ namespace Plank
 			if (Expanded == expanded)
 				return;
 			Expanded = expanded;
+			if (expanded)
+				reconcile_items ();
 			reset_icon_buffer ();
 			expansion_changed (Expanded);
 		}
@@ -576,6 +575,10 @@ namespace Plank
 		bool is_xapp = false;
 		public string Identifier { get; private set; }
 		public string Status { get; private set; default = "Active"; }
+		/**
+		 * What the application says about itself at the moment, if anything.
+		 */
+		public string Detail { get; private set; default = ""; }
 		public bool Visible { get; private set; default = true; }
 
 		public TrayStatusItem (string identifier) throws Error
@@ -647,6 +650,7 @@ namespace Plank
 			Icon = icon == null || icon.get_string () == ""
 				? "application-x-executable-symbolic" : icon.get_string ();
 			Indicator = Status == "NeedsAttention" ? IndicatorState.SINGLE : IndicatorState.NONE;
+			Detail = status_notifier_detail ();
 			reset_icon_buffer ();
 			changed ();
 		}
@@ -662,6 +666,7 @@ namespace Plank
 			Text = display_name (name != "" ? name : tooltip);
 			Icon = icon != "" ? icon : "application-x-executable-symbolic";
 			Indicator = IndicatorState.NONE;
+			Detail = distinct_detail (tooltip);
 			reset_icon_buffer ();
 			changed ();
 		}
@@ -681,6 +686,41 @@ namespace Plank
 			var description = tooltip.get_child_value (3);
 			var title_text = title.get_string ().strip ();
 			return title_text != "" ? title_text : description.get_string ().strip ();
+		}
+
+		/**
+		 * The part of the tooltip which says more than the name does.
+		 */
+		string status_notifier_detail ()
+		{
+			var tooltip = proxy.get_cached_property ("ToolTip");
+			if (tooltip == null || tooltip.n_children () < 4)
+				return "";
+			var description = distinct_detail (tooltip.get_child_value (3).get_string ());
+			if (description != "")
+				return description;
+			return distinct_detail (tooltip.get_child_value (2).get_string ());
+		}
+
+		/**
+		 * A text as one plain line, or nothing if it only repeats the name.
+		 */
+		string distinct_detail (string text)
+		{
+			var plain = text;
+			try {
+				// Tooltips may carry markup
+				plain = new Regex ("<[^>]*>").replace (text, -1, 0, "");
+			} catch (RegexError e) {
+				plain = text;
+			}
+			// Keep the lines in a variable: taking one out of a temporary
+			// list leaves a text which is already freed
+			var lines = plain.strip ().split ("\n");
+			plain = lines.length > 0 ? lines[0].strip () : "";
+			if (plain == "" || plain.casefold () == Text.casefold ())
+				return "";
+			return plain;
 		}
 
 		static string display_name (string candidate)
@@ -781,7 +821,9 @@ namespace Plank
 	public class BackgroundAppsWindow : Gtk.Window
 	{
 		const int PANEL_WIDTH = 320;
-		const int PANEL_HEIGHT = 360;
+		// The list grows with its rows up to this height, then it scrolls
+		const int MAX_LIST_HEIGHT = 376;
+		const int PANEL_MARGIN = 10;
 		const int PANEL_GAP = 10;
 
 		unowned DockController controller;
@@ -804,8 +846,15 @@ namespace Plank
 		ulong context_root_id = 0UL;
 		uint context_popup_timeout_id = 0U;
 #endif
-		Gtk.CssProvider? css_provider;
 		ulong tray_changed_id = 0UL;
+		// Rows are kept while their application is listed, so a change
+		// neither loses the selection nor makes the list flicker
+		Gee.HashMap<TrayStatusItem, BackgroundAppRow> rows;
+		ListSelectionGlide selection_glide;
+		WindowTransition transition;
+		// The point the panel grows out of, which is as near to its button as it gets
+		double growth_x = 0.0;
+		double growth_y = 0.0;
 
 		public BackgroundAppsWindow (DockController controller)
 		{
@@ -813,14 +862,16 @@ namespace Plank
 			this.controller = controller;
 			applications = new Gee.ArrayList<TrayStatusItem> ();
 			visible_apps = new Gee.ArrayList<TrayStatusItem> ();
+			rows = new Gee.HashMap<TrayStatusItem, BackgroundAppRow> ();
+			transition = new WindowTransition (this);
 			decorated = false;
 			resizable = false;
 			skip_taskbar_hint = true;
 			skip_pager_hint = true;
 			set_keep_above (true);
 			type_hint = Gdk.WindowTypeHint.DIALOG;
-			set_default_size (PANEL_WIDTH, PANEL_HEIGHT);
-			set_size_request (PANEL_WIDTH, PANEL_HEIGHT);
+			// Not being resizable, the window is as high as its content asks for
+			set_size_request (PANEL_WIDTH, -1);
 			app_paintable = true;
 			var visual = get_screen ().get_rgba_visual ();
 			if (visual != null)
@@ -828,8 +879,8 @@ namespace Plank
 			get_style_context ().add_class ("plank-background-apps");
 			Accessibility.describe (this, _("Background applications"));
 
-			var card = new Gtk.Box (Gtk.Orientation.VERTICAL, 6);
-			card.margin = 10;
+			var card = new Gtk.Box (Gtk.Orientation.VERTICAL, 4);
+			card.margin = PANEL_MARGIN;
 			card.get_style_context ().add_class ("background-apps-card");
 			var header = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 8);
 			header.get_style_context ().add_class ("background-apps-title");
@@ -841,7 +892,6 @@ namespace Plank
 			Accessibility.describe (count_label, _("Background application count"));
 			header.pack_end (count_label, false, false, 0);
 			card.pack_start (header, false, false, 0);
-			card.pack_start (new Gtk.Separator (Gtk.Orientation.HORIZONTAL), false, false, 0);
 
 			search_entry = new Gtk.SearchEntry ();
 			search_entry.placeholder_text = _("Search background applications");
@@ -856,10 +906,14 @@ namespace Plank
 			Accessibility.describe (app_list, _("Background application list"));
 			app_list.row_activated.connect ((row) => activate_row (row));
 			app_list.button_press_event.connect (handle_list_button);
+			selection_glide = new ListSelectionGlide (app_list);
+			selection_glide.inset_x = 2;
 			var scroll = new Gtk.ScrolledWindow (null, null);
 			scroll.hscrollbar_policy = Gtk.PolicyType.NEVER;
 			scroll.vscrollbar_policy = Gtk.PolicyType.AUTOMATIC;
 			scroll.overlay_scrolling = true;
+			scroll.propagate_natural_height = true;
+			scroll.max_content_height = MAX_LIST_HEIGHT;
 			scroll.get_style_context ().add_class ("background-apps-scroll");
 			scroll.add (app_list);
 			card.pack_start (scroll, true, true, 0);
@@ -933,8 +987,6 @@ namespace Plank
 #if HAVE_DBUSMENU
 			disconnect_context_menu_loader ();
 #endif
-			if (css_provider != null)
-				Gtk.StyleContext.remove_provider_for_screen (get_screen (), css_provider);
 		}
 
 		public void toggle (TrayToggleItem item)
@@ -953,12 +1005,14 @@ namespace Plank
 			controller.workspace_previews.dismiss ();
 			rebuild ();
 			apply_theme ();
-			opacity = 0.0;
+			selection_glide.snap ();
+			transition.jump_to (0.0);
 			show_all ();
 			present ();
 			Idle.add (() => {
 				position_over_item ();
-				opacity = 1.0;
+				transition.animate_to (1.0,
+					Motion.duration (controller.prefs, Motion.POPUP_OPEN_TIME), false, true);
 				app_list.child_focus (Gtk.DirectionType.TAB_FORWARD);
 				return false;
 			});
@@ -969,7 +1023,21 @@ namespace Plank
 			if (current_item != null)
 				current_item.set_expanded (false);
 			if (visible)
-				hide ();
+				transition.animate_to (0.0,
+					Motion.duration (controller.prefs, Motion.POPUP_CLOSE_TIME), true);
+		}
+
+		public override bool draw (Cairo.Context cr)
+		{
+			// The window itself stays put. Its content grows out of its button
+			// on the dock while appearing and shrinks back into it while leaving.
+			if (transition.progress != 1.0 && Motion.movement_enabled (controller.prefs)) {
+				var scale = Motion.POPUP_SCALE + (1.0 - Motion.POPUP_SCALE) * transition.progress;
+				cr.translate (growth_x, growth_y);
+				cr.scale (scale, scale);
+				cr.translate (-growth_x, -growth_y);
+			}
+			return base.draw (cr);
 		}
 
 		void disconnect_item ()
@@ -981,82 +1049,108 @@ namespace Plank
 
 		void rebuild ()
 		{
-			foreach (unowned Gtk.Widget child in app_list.get_children ())
-				app_list.remove (child);
-			visible_apps.clear ();
 			applications.clear ();
 			if (current_item != null)
 				applications.add_all (current_item.applications ());
 			count_label.label = "%d".printf (applications.size);
+			count_label.visible = applications.size > 0;
 			search_entry.visible = applications.size > 8;
 			if (applications.size <= 8 && search_entry.text != "")
 				search_entry.text = "";
 
 			var query = search_entry.text.strip ().down ();
+			var shown = new Gee.ArrayList<TrayStatusItem> ();
 			foreach (var app in applications) {
 				if (query == "" || app.Text.down ().contains (query))
-					visible_apps.add (app);
+					shown.add (app);
 			}
+
+			// The same applications in the same order only need their rows brought up to date
+			var same = shown.size > 0 && shown.size == visible_apps.size;
+			for (var i = 0; same && i < shown.size; i++)
+				same = shown[i] == visible_apps[i] && rows.has_key (shown[i]);
+			if (same) {
+				foreach (var app in shown)
+					rows[app].update ();
+				return;
+			}
+
+			TrayStatusItem? selected_app = null;
+			var selected_row = app_list.get_selected_row ();
+			if (selected_row != null && selected_row.get_index () >= 0
+				&& selected_row.get_index () < visible_apps.size)
+				selected_app = visible_apps[selected_row.get_index ()];
+
+			selection_glide.snap ();
+			// A row taken out while selected would still claim to be selected
+			// when it returns, and the list would refuse to select it again
+			app_list.unselect_all ();
+			foreach (unowned Gtk.Widget child in app_list.get_children ())
+				app_list.remove (child);
+			visible_apps.clear ();
+			visible_apps.add_all (shown);
+
+			// Forget the rows of applications which are gone
+			var listed = new Gee.HashSet<TrayStatusItem> ();
+			listed.add_all (applications);
+			var rows_it = rows.map_iterator ();
+			while (rows_it.next ())
+				if (!listed.contains (rows_it.get_key ()))
+					rows_it.unset ();
 
 			if (applications.size == 0) {
-				app_list.add (create_empty_state ("application-x-executable-symbolic",
-					_("No background applications")));
+				app_list.add (create_empty_state (_("No background applications")));
 			} else if (visible_apps.size == 0) {
-				app_list.add (create_empty_state ("system-search-symbolic",
-					_("No matching applications")));
+				app_list.add (create_empty_state (_("No matching applications")));
 			} else {
-				foreach (var app in visible_apps)
-					app_list.add (create_row (app));
+				foreach (var app in visible_apps) {
+					BackgroundAppRow? row = rows[app];
+					if (row == null) {
+						row = create_row (app);
+						rows[app] = row;
+					}
+					row.update ();
+					app_list.add (row);
+				}
 			}
 			app_list.show_all ();
+
+			if (selected_app != null && visible_apps.contains (selected_app))
+				app_list.select_row (rows[selected_app]);
+
+			// The panel may have changed its height, so it has to be placed again
+			if (visible)
+				Idle.add (() => { position_over_item (); return false; });
 		}
 
-		Gtk.Widget create_empty_state (string icon_name, string message)
+		Gtk.Widget create_empty_state (string message)
 		{
-			var empty = new Gtk.Box (Gtk.Orientation.VERTICAL, 8);
-			empty.margin = 24;
-			empty.get_style_context ().add_class ("background-apps-empty");
-			var icon = new Gtk.Image.from_icon_name (icon_name, Gtk.IconSize.DIALOG);
-			icon.pixel_size = 28;
-			empty.pack_start (icon, false, false, 0);
-			var label = new Gtk.Label (message);
+			var row = new Gtk.ListBoxRow () { selectable = false, activatable = false };
+			row.get_style_context ().add_class ("background-apps-empty");
+			var label = new Gtk.Label (message) { xalign = 0.0f };
+			label.margin = 9;
 			label.get_style_context ().add_class ("background-apps-empty-label");
-			empty.pack_start (label, false, false, 0);
-			Accessibility.describe (empty, message);
-			return empty;
+			row.add (label);
+			Accessibility.describe (row, message);
+			return row;
 		}
 
-		Gtk.Widget create_row (TrayStatusItem app)
+		BackgroundAppRow create_row (TrayStatusItem app)
 		{
-			var row = new Gtk.ListBoxRow ();
-			row.get_style_context ().add_class ("background-app-row");
-			Accessibility.describe (row, app.Text, app.Status == "NeedsAttention"
-				? status_label (app.Status)
-				: _("Press Enter to show this application; press Shift+F10 for actions"));
-			var box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
-			box.margin = 7;
-			Gtk.Image image;
-			if (Path.is_absolute (app.Icon))
-				image = new Gtk.Image.from_file (app.Icon);
-			else
-				image = new Gtk.Image.from_icon_name (app.Icon, Gtk.IconSize.DIALOG);
-			image.pixel_size = 28;
-			box.pack_start (image, false, false, 0);
-			var labels = new Gtk.Box (Gtk.Orientation.VERTICAL, 2);
-			var title = new Gtk.Label (app.Text) { xalign = 0.0f, ellipsize = Pango.EllipsizeMode.END };
-			title.get_style_context ().add_class ("background-app-name");
-			labels.pack_start (title, false, false, 0);
-			if (app.Status == "NeedsAttention") {
-				var status = new Gtk.Label (status_label (app.Status)) { xalign = 0.0f };
-				status.get_style_context ().add_class ("background-app-attention");
-				labels.pack_start (status, false, false, 0);
-			}
-			box.pack_start (labels, true, true, 0);
-			if (app.Status == "NeedsAttention") {
-				var marker = new Gtk.Image.from_icon_name ("dialog-warning-symbolic", Gtk.IconSize.MENU);
-				box.pack_end (marker, false, false, 0);
-			}
-			row.add (box);
+			var row = new BackgroundAppRow (app);
+			row.menu_requested.connect ((button) => {
+				int root_x = 0, root_y = 0;
+				var window = button.get_window ();
+				if (window == null)
+					return;
+				window.get_origin (out root_x, out root_y);
+				Gtk.Allocation allocation;
+				button.get_allocation (out allocation);
+				app_list.select_row (row);
+				show_context_menu_at (app, root_x + allocation.x + allocation.width / 2,
+					root_y + allocation.y + allocation.height / 2,
+					0U, Gtk.get_current_event_time ());
+			});
 			return row;
 		}
 
@@ -1300,13 +1394,6 @@ namespace Plank
 			dismiss ();
 		}
 
-		string status_label (string status)
-		{
-			if (status == "NeedsAttention") return _("Needs attention");
-			if (status == "Active") return _("Active");
-			return _("In the background");
-		}
-
 		void position_over_item ()
 		{
 			if (current_item == null)
@@ -1315,44 +1402,128 @@ namespace Plank
 			var screen = get_screen ();
 			var monitor = screen.get_monitor_at_point (item.x, item.y);
 			var workarea = screen.get_monitor_workarea (monitor);
+			// The height follows the list, so it is asked for rather than known
+			int minimum_height, height;
+			get_preferred_height (out minimum_height, out height);
 			int x, y;
-			controller.position_manager.get_popup_position (item, PANEL_WIDTH, PANEL_HEIGHT,
+			controller.position_manager.get_popup_position (item, PANEL_WIDTH, height,
 				PANEL_GAP, workarea, out x, out y);
 			move (x, y);
+
+			growth_x = ((double) (item.x + item.width / 2 - x)).clamp (PANEL_MARGIN,
+				PANEL_WIDTH - PANEL_MARGIN);
+			growth_y = ((double) (item.y + item.height / 2 - y)).clamp (PANEL_MARGIN,
+				double.max (PANEL_MARGIN, height - PANEL_MARGIN));
 		}
 
 		void apply_theme ()
 		{
-			var color = controller.renderer.theme.FillStartColor;
-			var css = ".plank-background-apps { background: transparent; }";
-			css += ".plank-background-apps .background-apps-card { background-color: rgb(%d,%d,%d); border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; padding: 7px; }"
-				.printf ((int)(color.red*255), (int)(color.green*255), (int)(color.blue*255));
-			css += ".plank-background-apps .background-apps-title { color: white; padding: 5px 7px; }";
-			css += ".plank-background-apps .background-apps-title-label { font-weight: bold; font-size: 15px; }";
-			css += ".plank-background-apps .background-apps-count { color: white; background-color: rgba(115,210,22,0.82); border-radius: 9px; padding: 2px 7px; font-weight: bold; }";
-			css += ".plank-background-apps entry.search { color: white; background-color: rgba(255,255,255,0.08); background-image: none; border: 1px solid rgba(255,255,255,0.12); border-radius: 9px; padding: 5px 8px; }";
-			css += ".plank-background-apps entry.search:focus { border-color: #73d216; }";
-			css += ".plank-background-apps list, .plank-background-apps row, .plank-background-apps .background-apps-scroll { background: transparent; border: none; box-shadow: none; }";
-			css += ".plank-background-apps row { color: white; border-radius: 9px; margin: 2px 1px; }";
-			css += ".plank-background-apps row:hover, .plank-background-apps row:selected { background-color: rgba(255,255,255,0.10); }";
-			css += ".plank-background-apps.keyboard-navigation row:focus { box-shadow: inset 0 0 0 2px rgba(115,210,22,0.95); }";
-			css += ".plank-background-apps .background-app-name { color: white; font-weight: bold; }";
-			css += ".plank-background-apps .background-apps-empty { color: rgba(255,255,255,0.58); }";
-			css += ".plank-background-apps .background-apps-empty-label { color: rgba(255,255,255,0.72); }";
-			css += ".plank-background-apps .background-app-attention { color: rgb(255,190,80); }";
-			css += ".plank-background-apps separator { background-color: rgba(255,255,255,0.10); }";
-			css += ".plank-background-apps scrollbar { background: transparent; border: none; }";
-			css += ".plank-background-apps scrollbar slider { min-width: 4px; min-height: 28px; background-color: rgba(255,255,255,0.18); border-radius: 4px; }";
-			if (css_provider != null)
-				Gtk.StyleContext.remove_provider_for_screen (get_screen (), css_provider);
-			css_provider = new Gtk.CssProvider ();
-			try {
-				css_provider.load_from_data (css);
-			} catch (Error e) {
-				warning ("Background applications CSS: %s", e.message);
+			DockStyle.update (controller);
+			// The highlight of the selected row is painted, not styled
+			if (ContextMenuStyle.is_light (controller.renderer.theme.FillStartColor))
+				selection_glide.color = { 24 / 255.0, 27 / 255.0, 32 / 255.0, 0.14 };
+			else
+				selection_glide.color = { 1.0, 1.0, 1.0, 0.14 };
+			selection_glide.animate = Motion.movement_enabled (controller.prefs);
+		}
+	}
+
+	/**
+	 * The row of one application in the background applications panel.
+	 */
+	class BackgroundAppRow : Gtk.ListBoxRow
+	{
+		/**
+		 * Emitted when the menu of the application is asked for.
+		 *
+		 * @param button the button which was used to ask for it
+		 */
+		public signal void menu_requested (Gtk.Widget button);
+
+		public unowned TrayStatusItem app { get; construct; }
+
+		Gtk.Image image;
+		Gtk.Label title;
+		Gtk.Label detail;
+		Gtk.Box dot;
+		string shown_icon = "";
+
+		public BackgroundAppRow (TrayStatusItem app)
+		{
+			Object (app : app);
+		}
+
+		construct
+		{
+			get_style_context ().add_class ("background-app-row");
+			var box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 10);
+			box.margin_left = 8;
+			box.margin_right = 6;
+			box.margin_top = box.margin_bottom = 7;
+
+			image = new Gtk.Image ();
+			image.pixel_size = 28;
+			box.pack_start (image, false, false, 0);
+
+			var labels = new Gtk.Box (Gtk.Orientation.VERTICAL, 1);
+			labels.valign = Gtk.Align.CENTER;
+			title = new Gtk.Label ("") { xalign = 0.0f, ellipsize = Pango.EllipsizeMode.END };
+			title.get_style_context ().add_class ("background-app-name");
+			labels.pack_start (title, false, false, 0);
+			detail = new Gtk.Label ("") { xalign = 0.0f, ellipsize = Pango.EllipsizeMode.END };
+			detail.get_style_context ().add_class ("background-app-detail");
+			detail.no_show_all = true;
+			labels.pack_start (detail, false, false, 0);
+			box.pack_start (labels, true, true, 0);
+
+			var more = new Gtk.Button.from_icon_name ("view-more-symbolic", Gtk.IconSize.BUTTON);
+			more.relief = Gtk.ReliefStyle.NONE;
+			more.valign = Gtk.Align.CENTER;
+			more.tooltip_text = _("More options");
+			more.get_style_context ().add_class ("background-app-more");
+			more.clicked.connect (() => menu_requested (more));
+			box.pack_end (more, false, false, 0);
+
+			// Marks an application which wants to be looked at
+			dot = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+			dot.valign = Gtk.Align.CENTER;
+			dot.get_style_context ().add_class ("background-app-dot");
+			dot.no_show_all = true;
+			box.pack_end (dot, false, false, 0);
+
+			add (box);
+		}
+
+		/**
+		 * Shows the application as it currently is.
+		 */
+		public void update ()
+		{
+			if (app.Icon != shown_icon) {
+				shown_icon = app.Icon;
+				if (Path.is_absolute (app.Icon))
+					image.set_from_file (app.Icon);
+				else
+					image.set_from_icon_name (app.Icon, Gtk.IconSize.DIALOG);
+				image.pixel_size = 28;
 			}
-			Gtk.StyleContext.add_provider_for_screen (get_screen (), css_provider,
-				Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+			var attention = (app.Status == "NeedsAttention");
+			var text = app.Detail;
+			if (text == "" && attention)
+				text = _("Needs attention");
+			title.label = app.Text;
+			detail.label = text;
+			detail.visible = (text != "");
+			dot.visible = attention;
+			if (attention)
+				get_style_context ().add_class ("attention");
+			else
+				get_style_context ().remove_class ("attention");
+
+			Accessibility.describe (this, app.Text, text != "" ? text
+				: _("Press Enter to show this application; press Shift+F10 for actions"));
+			Accessibility.describe ((Gtk.Widget) dot, _("Needs attention"));
 		}
 	}
 
