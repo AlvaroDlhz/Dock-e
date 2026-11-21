@@ -93,6 +93,49 @@ namespace Plank.Platform
 			return (x11_workspace != null && window.is_on_workspace (x11_workspace.workspace));
 		}
 
+		public override bool is_in_view (Workspace workspace)
+		{
+			unowned X11Workspace? x11_workspace = (workspace as X11Workspace);
+			return (x11_workspace != null && window.is_in_viewport (x11_workspace.workspace));
+		}
+
+		public override bool shares_view_with (Toplevel other)
+		{
+			unowned X11Toplevel? second = (other as X11Toplevel);
+			if (second == null)
+				return false;
+
+			unowned Wnck.Workspace? wksp = window.get_workspace ();
+			if (wksp == null)
+				wksp = second.window.get_workspace ();
+
+			if (wksp == null)
+				return false;
+
+			Gdk.Rectangle firstGeo = {};
+			Gdk.Rectangle secondGeo = {};
+
+			window.get_geometry (out firstGeo.x, out firstGeo.y, out firstGeo.width, out firstGeo.height);
+			second.window.get_geometry (out secondGeo.x, out secondGeo.y, out secondGeo.width, out secondGeo.height);
+
+			firstGeo.x += wksp.get_viewport_x ();
+			firstGeo.y += wksp.get_viewport_y ();
+
+			secondGeo.x += wksp.get_viewport_x ();
+			secondGeo.y += wksp.get_viewport_y ();
+
+			var viewportWidth = window.get_screen ().get_width ();
+			var viewportHeight = window.get_screen ().get_height ();
+
+			var firstViewportX = ((firstGeo.x + firstGeo.width / 2) / viewportWidth) * viewportWidth;
+			var firstViewportY = ((firstGeo.y + firstGeo.height / 2) / viewportHeight) * viewportHeight;
+
+			Gdk.Rectangle viewpRect = { firstViewportX, firstViewportY, viewportWidth, viewportHeight };
+			return viewpRect.intersect (secondGeo, null);
+		}
+
+		public override bool icon_is_generic { get { return window.get_icon_is_fallback (); } }
+
 		public override Gdk.Pixbuf? get_icon ()
 		{
 			return window.get_icon ();
@@ -100,7 +143,15 @@ namespace Plank.Platform
 
 		public override void activate (uint32 timestamp)
 		{
-			window.activate (timestamp);
+			unowned Wnck.Workspace? workspace = window.get_workspace ();
+
+			if (workspace != null && workspace != window.get_screen ().get_active_workspace ())
+				workspace.activate (timestamp);
+
+			if (window.is_minimized ())
+				window.unminimize (timestamp);
+
+			window.activate_transient (timestamp);
 		}
 
 		public override void close (uint32 timestamp)

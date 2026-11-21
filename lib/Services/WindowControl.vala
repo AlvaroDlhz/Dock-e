@@ -19,6 +19,10 @@
 
 namespace Plank
 {
+	/**
+	 * What the dock does with the windows of an application.  Works on any
+	 * backend; Compiz-like viewports are a detail of the X11 backend.
+	 */
 	public class WindowControl : GLib.Object
 	{
 		// when working on a group of windows, wait this amount between each action
@@ -27,64 +31,36 @@ namespace Plank
 		public const uint VIEWPORT_CHANGE_DELAY = 200U;
 		
 		static uint delayed_focus_timer_id = 0U;
-		static Wnck.Window? delayed_focus_window = null;
+		static Platform.Toplevel? delayed_focus_window = null;
+		static bool watching_toplevels = false;
 		
 		WindowControl ()
 		{
 		}
 		
-		public static void initialize ()
+		static unowned Platform.ToplevelManager? get_toplevels ()
 		{
-			unowned Wnck.Screen screen = Wnck.Screen.get_default ();
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend == null)
+				return null;
 			
-			Wnck.set_client_type (Wnck.ClientType.PAGER);
-			
-			// Make sure internal window-list of Wnck is most up to date
-			Gdk.error_trap_push ();
-			screen.force_update ();
-			if (Gdk.error_trap_pop () != 0)
-				critical ("Wnck.Screen.force_update() caused a XError");
-			
-			screen.window_manager_changed.connect_after (window_manager_changed);
-			screen.window_closed.connect_after (handle_window_closed);
-			
-			message ("Window-manager: %s", screen.get_window_manager_name ());
-		}
-		
-		static void window_manager_changed (Wnck.Screen screen)
-		{
-			// Make sure internal window-list of Wnck is most up to date
-			Gdk.error_trap_push ();
-			screen.force_update ();
-			if (Gdk.error_trap_pop () != 0)
-				critical ("Wnck.Screen.force_update() caused a XError");
-			
-			warning ("Window-manager changed: %s", screen.get_window_manager_name ());
-		}
-		
-		/**
-		 * The Wnck windows of an application, in the order it lists them.
-		 * Until stage 11 of docs/x11-aislamiento.md the actions below still
-		 * work on Wnck.
-		 */
-		static GLib.List<unowned Wnck.Window> wnck_windows (Platform.RunningApp app)
-		{
-			var result = new GLib.List<unowned Wnck.Window> ();
-			foreach (var toplevel in app.get_windows ()) {
-				unowned Platform.X11Toplevel? x11 = (toplevel as Platform.X11Toplevel);
-				if (x11 != null)
-					result.append (x11.window);
+			if (!watching_toplevels) {
+				watching_toplevels = true;
+				backend.toplevels.removed.connect (handle_window_closed);
 			}
-			return result;
+			
+			return backend.toplevels;
 		}
 		
-		static unowned Wnck.Window? wnck_window (Platform.Toplevel toplevel)
+		static Platform.Workspace? get_active_workspace ()
 		{
-			unowned Platform.X11Toplevel? x11 = (toplevel as Platform.X11Toplevel);
-			return (x11 != null ? x11.window : null);
+			unowned Platform.Backend? backend = Platform.get_backend ();
+			if (backend == null || backend.workspaces == null)
+				return null;
+			return backend.workspaces.active;
 		}
 		
-		static void handle_window_closed (Wnck.Window window)
+		static void handle_window_closed (Platform.Toplevel window)
 		{
 			if (delayed_focus_timer_id > 0U && delayed_focus_window == window) {
 				GLib.Source.remove (delayed_focus_timer_id);
@@ -93,52 +69,38 @@ namespace Plank
 			}
 		}
 		
-		public static unowned Gdk.Pixbuf? get_app_icon (Platform.RunningApp app)
+		static bool in_view (Platform.Toplevel window, Platform.Workspace? workspace)
 		{
-			unowned Gdk.Pixbuf? pbuf = null;
-			
-			Gdk.error_trap_push ();
-			
-			foreach (unowned Wnck.Window window in wnck_windows (app)) {
-				pbuf = window.get_icon ();
-				if (window.get_icon_is_fallback ())
-					pbuf = null;
-				
-				break;
-			}
-			
-			if (Gdk.error_trap_pop () != 0)
-				critical ("get_app_icon() for '%s' caused a XError", app.name);
-			
-			return pbuf;
+			return (workspace != null && window.is_in_view (workspace));
 		}
 		
-		public static unowned Gdk.Pixbuf? get_window_icon (Platform.Toplevel window)
+		static bool is_minimized (Platform.Toplevel window)
 		{
-			unowned Wnck.Window? w = wnck_window (window);
-			unowned Gdk.Pixbuf? pbuf = null;
+			return window.has_any_state (Platform.ToplevelState.MINIMIZED);
+		}
+		
+		static bool is_skip_tasklist (Platform.Toplevel window)
+		{
+			return window.has_any_state (Platform.ToplevelState.SKIP_TASKBAR);
+		}
+		
+		public static Gdk.Pixbuf? get_app_icon (Platform.RunningApp app)
+		{
+			foreach (var window in app.get_windows ())
+				return (window.icon_is_generic ? null : window.get_icon ());
 			
-			warn_if_fail (w != null);
-			
-			if (w == null)
-				return null;
-			
-			Gdk.error_trap_push ();
-			
-			pbuf = w.get_icon ();
-			if (w.get_icon_is_fallback ())
-				pbuf = null;
-			
-			if (Gdk.error_trap_pop () != 0)
-				critical ("get_window_icon() for '%s' caused a XError", window.title);
-			
-			return pbuf;
+			return null;
+		}
+		
+		public static Gdk.Pixbuf? get_window_icon (Platform.Toplevel window)
+		{
+			return (window.icon_is_generic ? null : window.get_icon ());
 		}
 		
 		public static bool has_maximized_window (Platform.RunningApp app)
 		{
-			foreach (unowned Wnck.Window window in wnck_windows (app))
-				if (window.is_maximized ())
+			foreach (var window in app.get_windows ())
+				if (Platform.ToplevelState.MAXIMIZED in window.state)
 					return true;
 			
 			return false;
@@ -146,31 +108,26 @@ namespace Plank
 		
 		public static bool has_minimized_window (Platform.RunningApp app)
 		{
-			foreach (unowned Wnck.Window window in wnck_windows (app))
-				if (window.is_minimized ())
+			foreach (var window in app.get_windows ())
+				if (is_minimized (window))
 					return true;
 			
 			return false;
 		}
 		
-		public static bool has_window_on_workspace (Platform.RunningApp app, Platform.Workspace platform_workspace)
+		public static bool has_window_on_workspace (Platform.RunningApp app, Platform.Workspace workspace)
 		{
-			unowned Platform.X11Workspace? x11_workspace = (platform_workspace as Platform.X11Workspace);
-			if (x11_workspace == null)
-				return true;
-			unowned Wnck.Workspace workspace = x11_workspace.workspace;
+			var is_virtual = workspace.is_viewport;
 			
-			var is_virtual = workspace.is_virtual ();
-			
-			foreach (unowned Wnck.Window window in wnck_windows (app)) {
-				if (window.is_skip_tasklist ())
+			foreach (var window in app.get_windows ()) {
+				if (is_skip_tasklist (window))
 					continue;
 				
 				if (!is_virtual) {
 					if (window.is_on_workspace (workspace))
 						return true;
 				} else {
-					if (window.is_in_viewport (workspace))
+					if (window.is_in_view (workspace))
 						return true;
 				}
 			}
@@ -186,21 +143,14 @@ namespace Plank
 		
 		public static void close_all (Platform.RunningApp app, uint32 event_time)
 		{
-			foreach (unowned Wnck.Window window in wnck_windows (app))
-				if (!window.is_skip_tasklist ())
+			foreach (var window in app.get_windows ())
+				if (!is_skip_tasklist (window))
 					window.close (event_time);
 		}
 		
 		public static void focus_window (Platform.Toplevel window, uint32 event_time)
 		{
-			unowned Wnck.Window? w = wnck_window (window);
-			
-			warn_if_fail (w != null);
-			
-			if (w == null)
-				return;
-			
-			center_and_focus_window (w, event_time);
+			window.activate (event_time);
 		}
 		
 		static int find_active_index (Gee.List<Platform.Toplevel> windows)
@@ -244,10 +194,10 @@ namespace Plank
 		
 		public static void minimize (Platform.RunningApp app)
 		{
-			foreach (unowned Wnck.Window window in get_ordered_window_stack (app)) {
-				unowned Wnck.Workspace? active_workspace = window.get_screen ().get_active_workspace ();
-				if (!window.is_minimized () && active_workspace != null && window.is_in_viewport (active_workspace)) {
-					window.minimize ();
+			var active_workspace = get_active_workspace ();
+			foreach (var window in get_ordered_window_stack (app)) {
+				if (!is_minimized (window) && in_view (window, active_workspace)) {
+					window.set_minimized (true, 0U);
 					Thread.usleep (WINDOW_GROUP_DELAY);
 				}
 			}
@@ -255,12 +205,12 @@ namespace Plank
 		
 		public static void restore (Platform.RunningApp app, uint32 event_time)
 		{
+			var active_workspace = get_active_workspace ();
 			var stack = get_ordered_window_stack (app);
-			stack.reverse ();
-			foreach (unowned Wnck.Window window in stack) {
-				unowned Wnck.Workspace? active_workspace = window.get_screen ().get_active_workspace ();
-				if (window.is_minimized () && active_workspace != null && window.is_in_viewport (active_workspace)) {
-					window.unminimize (event_time);
+			for (var i = stack.size - 1; i >= 0; i--) {
+				var window = stack[i];
+				if (is_minimized (window) && in_view (window, active_workspace)) {
+					window.set_minimized (false, event_time);
 					Thread.usleep (WINDOW_GROUP_DELAY);
 				}
 			}
@@ -268,28 +218,33 @@ namespace Plank
 		
 		public static void maximize (Platform.RunningApp app)
 		{
-			foreach (unowned Wnck.Window window in get_ordered_window_stack (app))
-				if (!window.is_maximized ())
-					window.maximize ();
+			foreach (var window in get_ordered_window_stack (app))
+				if (!(Platform.ToplevelState.MAXIMIZED in window.state))
+					window.set_maximized (true);
 		}
 		
 		public static void unmaximize (Platform.RunningApp app)
 		{
-			foreach (unowned Wnck.Window window in get_ordered_window_stack (app))
-				if (window.is_maximized ())
-					window.unmaximize ();
+			foreach (var window in get_ordered_window_stack (app))
+				if (Platform.ToplevelState.MAXIMIZED in window.state)
+					window.set_maximized (false);
 		}
 		
-		public static GLib.List<unowned Wnck.Window> get_ordered_window_stack (Platform.RunningApp app)
+		/**
+		 * The windows of an application from the bottom of the stack to the
+		 * top, or in order of appearance without {@link Platform.Capability.STACKING_ORDER}.
+		 */
+		public static Gee.List<Platform.Toplevel> get_ordered_window_stack (Platform.RunningApp app)
 		{
-			var windows = new GLib.List<unowned Wnck.Window> ();
-			var own = wnck_windows (app);
+			var windows = new Gee.ArrayList<Platform.Toplevel> ();
+			unowned Platform.ToplevelManager? toplevels = get_toplevels ();
+			if (toplevels == null)
+				return windows;
 			
-			unowned GLib.List<Wnck.Window> stack = Wnck.Screen.get_default ().get_windows_stacked ();
-			
-			foreach (unowned Wnck.Window window in stack)
-				if (own.find (window) != null)
-					windows.append (window);
+			var own = app.get_windows ();
+			foreach (var window in toplevels.list ())
+				if (own.contains (window))
+					windows.add (window);
 			
 			return windows;
 		}
@@ -297,25 +252,25 @@ namespace Plank
 		public static void smart_focus (Platform.RunningApp app, uint32 event_time)
 		{
 			var windows = get_ordered_window_stack (app);
+			var active_workspace = get_active_workspace ();
 			
 			var not_in_viewport = true;
 			var urgent = false;
 			
-			foreach (unowned Wnck.Window window in windows) {
-				unowned Wnck.Workspace? active_workspace = window.get_screen ().get_active_workspace ();
-				if (!window.is_skip_tasklist () && active_workspace != null && window.is_in_viewport (active_workspace))
+			foreach (var window in windows) {
+				if (!is_skip_tasklist (window) && in_view (window, active_workspace))
 					not_in_viewport = false;
-				if (window.needs_attention ())
+				if (window.has_any_state (Platform.ToplevelState.URGENT))
 					urgent = true;
 			}
 			
 			// Focus off-viewport window if it needs attention
 			if (not_in_viewport || urgent) {
-				foreach (unowned Wnck.Window window in windows) {
-					if (urgent && !window.needs_attention ())
+				foreach (var window in windows) {
+					if (urgent && !window.has_any_state (Platform.ToplevelState.URGENT))
 						continue;
 					
-					if (!window.is_skip_tasklist ()) {
+					if (!is_skip_tasklist (window)) {
 						intelligent_focus_off_viewport_window (window, windows, event_time);
 						return;
 					}
@@ -323,12 +278,11 @@ namespace Plank
 			}
 			
 			// Unminimize minimized windows if there is one or more
-			foreach (unowned Wnck.Window window in windows) {
-				unowned Wnck.Workspace? active_workspace = window.get_screen ().get_active_workspace ();
-				if (window.is_minimized () && active_workspace != null && window.is_in_viewport (active_workspace)) {
-					foreach (unowned Wnck.Window w in windows)
-						if (w.is_minimized () && w.is_in_viewport (active_workspace)) {
-							w.unminimize (event_time);
+			foreach (var window in windows) {
+				if (is_minimized (window) && in_view (window, active_workspace)) {
+					foreach (var w in windows)
+						if (is_minimized (w) && in_view (w, active_workspace)) {
+							w.set_minimized (false, event_time);
 							Thread.usleep (WINDOW_GROUP_DELAY);
 						}
 					return;
@@ -336,13 +290,13 @@ namespace Plank
 			}
 			
 			// Minimize all windows if this application owns the active window
-			foreach (unowned Wnck.Window window in windows) {
-				unowned Wnck.Workspace? active_workspace = window.get_screen ().get_active_workspace ();
-				if ((window.is_active () && active_workspace != null && window.is_in_viewport (active_workspace))
-					|| window == window.get_screen ().get_active_window ()) {
-					foreach (unowned Wnck.Window w in windows)
-						if (!w.is_minimized () && w.is_in_viewport (active_workspace)) {
-							w.minimize ();
+			unowned Platform.ToplevelManager? toplevels = get_toplevels ();
+			foreach (var window in windows) {
+				if ((Platform.ToplevelState.ACTIVE in window.state && in_view (window, active_workspace))
+					|| (toplevels != null && window == toplevels.active)) {
+					foreach (var w in windows)
+						if (!is_minimized (w) && in_view (w, active_workspace)) {
+							w.set_minimized (true, event_time);
 							Thread.usleep (WINDOW_GROUP_DELAY);
 						}
 					return;
@@ -350,12 +304,11 @@ namespace Plank
 			}
 
 			// Get all windows on the current workspace in the foreground
-			foreach (unowned Wnck.Window window in windows) {
-				unowned Wnck.Workspace? active_workspace = window.get_screen ().get_active_workspace ();
-				if (active_workspace != null && window.is_in_viewport (active_workspace)) {
-					foreach (unowned Wnck.Window w in windows)
-						if (w.is_in_viewport (active_workspace)) {
-							center_and_focus_window (w, event_time);
+			foreach (var window in windows) {
+				if (in_view (window, active_workspace)) {
+					foreach (var w in windows)
+						if (in_view (w, active_workspace)) {
+							w.activate (event_time);
 							Thread.usleep (WINDOW_GROUP_DELAY);
 						}
 					return;
@@ -363,95 +316,40 @@ namespace Plank
 			}
 			
 			// Focus most-top window and all others on its workspace
-			intelligent_focus_off_viewport_window (windows.nth_data (0), windows, event_time);
+			if (windows.size > 0)
+				intelligent_focus_off_viewport_window (windows[0], windows, event_time);
 		}
 		
-		static void intelligent_focus_off_viewport_window (Wnck.Window targetWindow,
-			GLib.List<unowned Wnck.Window> additional_windows, uint32 event_time)
+		static void intelligent_focus_off_viewport_window (Platform.Toplevel target_window,
+			Gee.List<Platform.Toplevel> additional_windows, uint32 event_time)
 		{
-			additional_windows.reverse ();
-			
-			foreach (unowned Wnck.Window window in additional_windows) {
-				if (window == targetWindow)
+			for (var i = additional_windows.size - 1; i >= 0; i--) {
+				var window = additional_windows[i];
+				if (window == target_window)
 					continue;
-				if (!window.is_minimized () && windows_share_viewport (targetWindow, window)) {
-					center_and_focus_window (window, event_time);
+				if (!is_minimized (window) && target_window.shares_view_with (window)) {
+					window.activate (event_time);
 					Thread.usleep (WINDOW_GROUP_DELAY);
 				}
 			}
 			
-			center_and_focus_window (targetWindow, event_time);
+			target_window.activate (event_time);
 			
-			if (additional_windows.length () <= 1)
+			if (additional_windows.size <= 1)
 				return;
 			
 			// we do this to make sure our active window is also at the front... Its a tricky thing to do.
 			// sometimes compiz plays badly.  This hacks around it
+			get_toplevels ();
 			if (delayed_focus_timer_id > 0U)
 				GLib.Source.remove (delayed_focus_timer_id);
-			delayed_focus_window = targetWindow;
+			delayed_focus_window = target_window;
 			delayed_focus_timer_id = Gdk.threads_add_timeout (VIEWPORT_CHANGE_DELAY, () => {
 				delayed_focus_timer_id = 0U;
 				delayed_focus_window.activate (event_time);
 				delayed_focus_window = null;
 				return false;
 			});
-		}
-		
-		static bool windows_share_viewport (Wnck.Window? first, Wnck.Window? second)
-		{
-			if (first == null || second == null)
-				return false;
-			
-			unowned Wnck.Workspace wksp = first.get_workspace ();
-			if (wksp == null)
-				wksp = second.get_workspace ();
-			
-			if (wksp == null)
-				return false;
-			
-			Gdk.Rectangle firstGeo = {};
-			Gdk.Rectangle secondGeo = {};
-			
-			first.get_geometry (out firstGeo.x, out firstGeo.y, out firstGeo.width, out firstGeo.height);
-			second.get_geometry (out secondGeo.x, out secondGeo.y, out secondGeo.width, out secondGeo.height);
-			
-			firstGeo.x += wksp.get_viewport_x ();
-			firstGeo.y += wksp.get_viewport_y ();
-			
-			secondGeo.x += wksp.get_viewport_x ();
-			secondGeo.y += wksp.get_viewport_y ();
-			
-			var viewportWidth = first.get_screen ().get_width ();
-			var viewportHeight = first.get_screen ().get_height ();
-			
-			var firstViewportX = ((firstGeo.x + firstGeo.width / 2) / viewportWidth) * viewportWidth;
-			var firstViewportY = ((firstGeo.y + firstGeo.height / 2) / viewportHeight) * viewportHeight;
-			
-			Gdk.Rectangle viewpRect = { firstViewportX, firstViewportY, viewportWidth, viewportHeight };
-			return viewpRect.intersect (secondGeo, null);
-		}
-		
-		static void center_and_focus_window (Wnck.Window w, uint32 event_time)
-		{
-			unowned Wnck.Workspace? workspace = w.get_workspace ();
-			
-			if (workspace != null && workspace != w.get_screen ().get_active_workspace ())
-				workspace.activate (event_time);
-			
-			if (w.is_minimized ())
-				w.unminimize (event_time);
-			
-			w.activate_transient (event_time);
-		}
-		
-		public static Gdk.Rectangle get_easy_geometry (Wnck.Window w)
-		{
-			Gdk.Rectangle geo = {};
-			
-			w.get_geometry (out geo.x, out geo.y, out geo.width, out geo.height);
-			
-			return geo;
 		}
 	}
 }

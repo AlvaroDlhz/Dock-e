@@ -31,6 +31,10 @@ namespace PlankTests
 		{
 		}
 
+		public void initialize ()
+		{
+		}
+
 		public SuperKeyTrigger? create_super_key_trigger ()
 		{
 			return null;
@@ -205,6 +209,18 @@ namespace PlankTests
 		{
 			return on_workspaces.contains (workspace);
 		}
+
+		public override bool is_in_view (Workspace workspace)
+		{
+			return on_workspaces.contains (workspace);
+		}
+
+		public override bool shares_view_with (Toplevel other)
+		{
+			return true;
+		}
+
+		public override bool icon_is_generic { get { return false; } }
 
 		public override Gdk.Pixbuf? get_icon ()
 		{

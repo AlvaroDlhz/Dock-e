@@ -87,6 +87,25 @@ namespace Plank.Platform
 		public abstract bool is_on_workspace (Workspace workspace);
 
 		/**
+		 * Whether the window is on the workspace and inside the part of it
+		 * that is shown: the current viewport of a Compiz-like workspace.
+		 * The same as {@link is_on_workspace} elsewhere.
+		 */
+		public abstract bool is_in_view (Workspace workspace);
+
+		/**
+		 * Whether both windows would be shown together: on the same viewport
+		 * of a Compiz-like workspace, or both on the screen elsewhere.
+		 */
+		public abstract bool shares_view_with (Toplevel other);
+
+		/**
+		 * Whether {@link get_icon} is a generic icon of the backend rather
+		 * than one the window provides.
+		 */
+		public abstract bool icon_is_generic { get; }
+
+		/**
 		 * The icon of the window; may be a generic icon of the backend if
 		 * the window has none.
 		 *
@@ -101,6 +120,11 @@ namespace Plank.Platform
 		public signal void geometry_changed ();
 		public signal void title_changed ();
 
+		/**
+		 * Brings the window to the front: switches to its workspace,
+		 * restores it if it is minimized, and focuses it, or the dialog it
+		 * has open.
+		 */
 		public abstract void activate (uint32 timestamp);
 		public abstract void close (uint32 timestamp);
 		public abstract void set_minimized (bool minimized, uint32 timestamp);

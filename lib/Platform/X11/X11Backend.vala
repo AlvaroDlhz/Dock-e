@@ -67,6 +67,34 @@ namespace Plank.Platform
 #endif
 		}
 
+		public void initialize ()
+		{
+			unowned Wnck.Screen screen = Wnck.Screen.get_default ();
+
+			Wnck.set_client_type (Wnck.ClientType.PAGER);
+
+			// Make sure internal window-list of Wnck is most up to date
+			Gdk.error_trap_push ();
+			screen.force_update ();
+			if (Gdk.error_trap_pop () != 0)
+				critical ("Wnck.Screen.force_update() caused a XError");
+
+			screen.window_manager_changed.connect_after (window_manager_changed);
+
+			message ("Window-manager: %s", screen.get_window_manager_name ());
+		}
+
+		static void window_manager_changed (Wnck.Screen screen)
+		{
+			// Make sure internal window-list of Wnck is most up to date
+			Gdk.error_trap_push ();
+			screen.force_update ();
+			if (Gdk.error_trap_pop () != 0)
+				critical ("Wnck.Screen.force_update() caused a XError");
+
+			warning ("Window-manager changed: %s", screen.get_window_manager_name ());
+		}
+
 		public SuperKeyTrigger? create_super_key_trigger ()
 		{
 			return new X11SuperKeyTrigger (display);

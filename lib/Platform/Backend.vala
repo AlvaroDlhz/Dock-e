@@ -80,6 +80,11 @@ namespace Plank.Platform
 		public abstract void log_details ();
 
 		/**
+		 * Prepares the backend once at startup, before any dock exists.
+		 */
+		public abstract void initialize ();
+
+		/**
 		 * Claims the global Super key for one dock.  Every dock asks for its
 		 * own trigger; only the first one gets the key on X11.
 		 *
