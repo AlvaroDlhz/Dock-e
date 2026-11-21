@@ -93,6 +93,26 @@ namespace Plank
 		};
 
 		/**
+		 * What locks, suspends or ends the session, as opposed to the other
+		 * commands of the launcher.
+		 */
+		const string[] SESSION_ACTIONS = { "lock", "suspend", "logout", "restart", "poweroff" };
+
+		/**
+		 * Whether the launcher lists an action.
+		 *
+		 * The session actions can be turned off, for a desktop whose panel
+		 * already offers them. Everything else is always listed.
+		 *
+		 * @param action the action the launcher would list
+		 * @param show_session_actions what the show-session-actions preference says
+		 */
+		public static bool is_listed (string action, bool show_session_actions)
+		{
+			return show_session_actions || !(action in SESSION_ACTIONS);
+		}
+
+		/**
 		 * The command for an action on the given desktop.
 		 *
 		 * @param action one of lock, suspend, logout, restart, poweroff or user-settings

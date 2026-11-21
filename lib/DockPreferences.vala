@@ -93,6 +93,9 @@ namespace Plank
 		[Description(nick = "show-dock-item", blurb = "Whether to show the item for the dock itself.")]
 		public bool ShowDockItem { get; set; }
 		
+		[Description(nick = "show-session-actions", blurb = "Whether the launcher offers to lock, suspend, log out, restart and power off.")]
+		public bool ShowSessionActions { get; set; }
+		
 		[Description(nick = "zoom-enabled", blurb = "Whether the dock will zoom when hovered.")]
 		public bool ZoomEnabled { get; set; }
 		
