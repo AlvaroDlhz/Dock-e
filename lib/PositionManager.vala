@@ -1635,10 +1635,44 @@ namespace Plank
 		}
 		
 		/**
+		 * The part of the screen the dock is placed in, in GDK screen
+		 * coordinates: the work area of its monitor, or the whole monitor
+		 * under GNOME.
+		 */
+		internal Gdk.Rectangle get_monitor_area ()
+		{
+			return monitor_geo;
+		}
+		
+		/**
+		 * The logical pixels the dock reserves along its edge when it does
+		 * not hide.
+		 */
+		internal int get_reserved_thickness ()
+		{
+			window_scale_factor = controller.window.get_window ().get_scale_factor ();
+			
+			switch (Position) {
+			default:
+			case Gtk.PositionType.BOTTOM:
+			case Gtk.PositionType.TOP:
+				return VisibleDockHeight;
+			case Gtk.PositionType.LEFT:
+			case Gtk.PositionType.RIGHT:
+				return VisibleDockWidth;
+			}
+		}
+		
+		/**
 		 * Computes the struts for the dock.
+		 *
+		 * Only kept for the ABI of libplank; the dock reserves its space
+		 * through {@link Platform.DockSurface} now.  It goes away with the
+		 * rest of the X11 API (stage 10 in docs/x11-aislamiento.md).
 		 *
 		 * @param struts the array to contain the struts
 		 */
+		[Version (deprecated = true)]
 		public void get_struts (ref ulong[] struts)
 		{
 			window_scale_factor = controller.window.get_window ().get_scale_factor ();

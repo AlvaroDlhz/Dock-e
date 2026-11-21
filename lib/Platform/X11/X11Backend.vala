@@ -71,5 +71,10 @@ namespace Plank.Platform
 		{
 			return new X11SuperKeyTrigger (display);
 		}
+
+		public DockSurface create_dock_surface (Gtk.Window dock)
+		{
+			return new X11DockSurface (dock);
+		}
 	}
 }

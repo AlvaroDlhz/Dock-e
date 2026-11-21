@@ -88,6 +88,12 @@ namespace Plank.Platform
 		public abstract SuperKeyTrigger? create_super_key_trigger ();
 
 		/**
+		 * Wraps the window of a dock.  The surface does not keep the window
+		 * alive.
+		 */
+		public abstract DockSurface create_dock_surface (Gtk.Window dock);
+
+		/**
 		 * Whether this backend supports the given capability.
 		 */
 		public bool has (Capability capability)
