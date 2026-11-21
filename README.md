@@ -35,8 +35,9 @@ project. It includes:
   command, and uninstall packages installed through dpkg, rpm, Flatpak, or Snap.
 - Full mouse and keyboard navigation.
 
-Session commands currently rely on `xflock4` and `xfce4-session-logout`, so
-they require an XFCE session.
+Session commands use the session manager of the running desktop (XFCE,
+Cinnamon, MATE, KDE Plasma, LXQt, LXDE, GNOME and its derivatives) and fall
+back to logind (`systemctl`, `loginctl`) anywhere else.
 
 ## Background Applications
 

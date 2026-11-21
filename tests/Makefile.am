@@ -39,6 +39,7 @@ tests_VALASOURCES = \
 	CalculatorService.vala \
 	LauncherSearch.vala \
 	CommandRunner.vala \
+	SessionActions.vala \
 	StatusNoticeModel.vala \
 	System.vala \
 	Controller.vala \

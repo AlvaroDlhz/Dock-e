@@ -100,6 +100,7 @@ libplank_la_VALASOURCES = \
 	Items/WorkspaceItem.vala \
 	Items/LauncherItem.vala \
 	Services/Environment.vala \
+	Services/SessionActions.vala \
 	Services/EnvironmentSettings.vala \
 	Services/Logger.vala \
 	Services/Paths.vala \
