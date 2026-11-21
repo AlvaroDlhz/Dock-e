@@ -18,16 +18,19 @@ namespace Plank
 		Gtk.FlowBox flow;
 		uint open_timer = 0U;
 		uint close_timer = 0U;
-		uint refresh_timer = 0U;
+		// Pictures of the windows, taken again only once a window has changed
+		WindowThumbnails thumbnails;
+		ulong thumbnail_changed_id = 0UL;
 		ulong previews_enabled_changed_id = 0UL;
 		bool pointer_inside = false;
-		Gtk.CssProvider css_provider;
 
 		public WindowPreviewWindow (DockController controller)
 		{
 			Object (type: Gtk.WindowType.TOPLEVEL);
 			this.controller = controller;
 			transition = new WindowTransition (this);
+			thumbnails = new WindowThumbnails (CARD_WIDTH - 10, PREVIEW_HEIGHT);
+			thumbnail_changed_id = thumbnails.changed.connect (refresh_image);
 			decorated = false;
 			resizable = false;
 			skip_taskbar_hint = true;
@@ -92,6 +95,8 @@ namespace Plank
 				controller.hide_manager.update_hovered ();
 			});
 			hide.connect (() => {
+				// Nothing is watched or kept in memory while there is nothing to show
+				thumbnails.clear ();
 				controller.hide_manager.ExternalMenuVisible = false;
 				controller.hide_manager.update_hovered ();
 			});
@@ -102,10 +107,10 @@ namespace Plank
 		{
 			cancel_open ();
 			cancel_close ();
-			stop_refresh ();
+			if (thumbnail_changed_id > 0UL)
+				SignalHandler.disconnect (thumbnails, thumbnail_changed_id);
 			if (previews_enabled_changed_id > 0UL)
 				SignalHandler.disconnect (controller.prefs, previews_enabled_changed_id);
-			Gtk.StyleContext.remove_provider_for_screen (get_screen (), css_provider);
 		}
 
 		public void handle_dock_hover (DockItem? item)
@@ -192,6 +197,7 @@ namespace Plank
 			}
 			Accessibility.set_keyboard_navigation (this, false);
 			current_item = item;
+			apply_theme ();
 			rebuild ();
 			if (flow.get_children ().length () == 0) {
 				dismiss ();
@@ -203,13 +209,14 @@ namespace Plank
 			show_all ();
 			position_over_item ();
 			transition.animate_to (1.0, Motion.duration (controller.prefs, Motion.POPUP_OPEN_TIME), false, true);
-			start_refresh ();
 		}
 
 		void rebuild ()
 		{
 			foreach (unowned Gtk.Widget child in flow.get_children ())
 				flow.remove (child);
+			// The windows of another application are of no use any longer
+			thumbnails.clear ();
 			if (current_item == null || current_item.App == null)
 				return;
 			var count = 0;
@@ -298,20 +305,9 @@ namespace Plank
 			unowned Wnck.Window? wnck = Wnck.Window.@get (xid);
 			if (wnck == null)
 				return;
-			Gdk.error_trap_push ();
-			var foreign = new Gdk.X11.Window.foreign_for_display (
-				(Gdk.X11.Display) get_display (), (X.Window) xid);
-			Gdk.Pixbuf? pixbuf = null;
-			if (foreign != null) {
-				int x, y, width, height;
-				wnck.get_geometry (out x, out y, out width, out height);
-				if (width > 1 && height > 1)
-					pixbuf = Gdk.pixbuf_get_from_window (foreign, 0, 0, width, height);
-			}
-			Gdk.error_trap_pop_ignored ();
+			var pixbuf = thumbnails.lookup (xid);
 			if (pixbuf != null) {
-				var scaled = DrawingService.ar_scale (pixbuf, CARD_WIDTH - 10, PREVIEW_HEIGHT);
-				image.set_from_pixbuf (scaled);
+				image.set_from_pixbuf (pixbuf);
 			} else {
 				unowned Gdk.Pixbuf? fallback = wnck.get_icon ();
 				if (fallback != null)
@@ -321,8 +317,10 @@ namespace Plank
 			}
 		}
 
-		void refresh_images ()
+		void refresh_image (uint32 xid)
 		{
+			if (!visible)
+				return;
 			foreach (unowned Gtk.Widget row in flow.get_children ()) {
 				var child = (row as Gtk.FlowBoxChild)?.get_child () as Gtk.EventBox;
 				var box = child?.get_child () as Gtk.Box;
@@ -330,27 +328,12 @@ namespace Plank
 					continue;
 				foreach (unowned Gtk.Widget widget in box.get_children ()) {
 					var image = widget as Gtk.Image;
-					if (image != null) {
-						update_image (image, image.get_data<uint32> ("preview-xid"));
-						break;
+					if (image != null && image.get_data<uint32> ("preview-xid") == xid) {
+						update_image (image, xid);
+						return;
 					}
 				}
 			}
-		}
-
-		void start_refresh ()
-		{
-			stop_refresh ();
-			refresh_timer = Timeout.add (500, () => {
-				if (!visible) { refresh_timer = 0U; return false; }
-				refresh_images ();
-				return true;
-			});
-		}
-
-		void stop_refresh ()
-		{
-			if (refresh_timer > 0U) { Source.remove (refresh_timer); refresh_timer = 0U; }
 		}
 
 		void schedule_close ()
@@ -384,7 +367,6 @@ namespace Plank
 		public void dismiss ()
 		{
 			cancel_open ();
-			stop_refresh ();
 			current_item = null;
 			if (visible)
 				transition.animate_to (0.0,
@@ -409,34 +391,7 @@ namespace Plank
 
 		void apply_theme ()
 		{
-			var color = controller.renderer.theme.FillStartColor;
-			var red = (int) (color.red * 255);
-			var green = (int) (color.green * 255);
-			var blue = (int) (color.blue * 255);
-			var card_red = int.min (255, red + 12);
-			var card_green = int.min (255, green + 12);
-			var card_blue = int.min (255, blue + 12);
-			var hover_red = int.min (255, red + 24);
-			var hover_green = int.min (255, green + 24);
-			var hover_blue = int.min (255, blue + 24);
-			var css = ".plank-window-previews { background: rgb(%d,%d,%d); border-radius: 14px; }"
-				.printf (red, green, blue);
-			css += ".plank-window-previews .preview-card { background: rgb(%d,%d,%d); border-radius: 10px; }"
-				.printf (card_red, card_green, card_blue);
-			css += ".plank-window-previews .preview-card:hover { background: rgb(%d,%d,%d); }"
-				.printf (hover_red, hover_green, hover_blue);
-			css += ".plank-window-previews.keyboard-navigation .preview-card:focus { box-shadow: inset 0 0 0 2px rgba(115,210,22,0.85); }";
-			css += ".plank-window-previews .preview-title { color: white; font-weight: 500; }";
-			css += ".plank-window-previews .preview-close { color: white; border-radius: 8px; padding: 3px; background: transparent; }";
-			css += ".plank-window-previews .preview-close:hover { background: rgb(210,65,65); }";
-			css_provider = new Gtk.CssProvider ();
-			try {
-				css_provider.load_from_data (css);
-				Gtk.StyleContext.add_provider_for_screen (get_screen (), css_provider,
-					Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-			} catch (Error e) {
-				warning ("Unable to style previews: %s", e.message);
-			}
+			DockStyle.update (controller);
 		}
 	}
 }

@@ -3,6 +3,7 @@ VAPIS = \
 	config.vapi \
 	libbamf3.deps \
 	libbamf3.vapi \
+	xdamage.vapi \
 	xfixes.vapi \
 	xi.deps \
 	xi.vapi \

@@ -228,6 +228,20 @@ if test "x$enable_dbusmenu" = "xyes" ; then
 fi
 AM_CONDITIONAL([HAVE_DBUSMENU], [test "x$enable_dbusmenu" = "xyes"])
 
+# Repaint window previews only when their window changed
+XDAMAGE_PKGS="xdamage"
+AC_ARG_ENABLE([xdamage],
+              AS_HELP_STRING([--enable-xdamage],
+                             [Follow window changes with the X Damage extension instead of polling]),
+              [enable_xdamage=$enableval],
+              [PKG_CHECK_MODULES(XDAMAGE, $XDAMAGE_PKGS, [enable_xdamage=yes], [enable_xdamage=no])])
+if test "x$enable_xdamage" = "xyes" ; then
+    PLANK_CORE_OPTIONAL_PKGS="$PLANK_CORE_OPTIONAL_PKGS $XDAMAGE_PKGS"
+    PLANK_CORE_VALA_PKGS="$PLANK_CORE_VALA_PKGS --pkg xdamage"
+    VALAFLAGS="$VALAFLAGS --define HAVE_XDAMAGE"
+fi
+AM_CONDITIONAL([HAVE_XDAMAGE], [test "x$enable_xdamage" = "xyes"])
+
 
 
 AC_SUBST(PLANK_CORE_OPTIONAL_PKGS)

@@ -188,6 +188,7 @@ libplank_internal_la_VALASOURCES = \
 	Widgets/DockletViewModel.vala \
 	$(NULL)
 
+	Services/WindowThumbnails.vala \
 libplank_internal_la_SOURCES = \
 	gtk-compat.c \
 	gtk-compat.h \

@@ -28,6 +28,56 @@ namespace PlankTests
 		Test.add_func ("/Widgets/HoverWindow/basics", hover_window_basics);
 		Test.add_func ("/Widgets/PopupPosition/all-edges", popup_position_all_edges);
 		Test.add_func ("/Widgets/PopupPosition/centered", popup_position_centered);
+		Test.add_func ("/Services/WindowThumbnails/follows-changes", window_thumbnails_follow_changes);
+	}
+
+	void window_thumbnails_follow_changes ()
+	{
+		var shade = 0.2;
+		var window = new Gtk.Window (Gtk.WindowType.POPUP);
+		var area = new Gtk.DrawingArea ();
+		area.draw.connect ((cr) => {
+			cr.set_source_rgb (shade, shade, shade);
+			cr.paint ();
+			return true;
+		});
+		window.add (area);
+		window.move (60, 60);
+		window.set_size_request (200, 100);
+		window.show_all ();
+
+		wait (X_WAIT_MS);
+
+		var xid = (uint32) ((Gdk.X11.Window) window.get_window ()).get_xid ();
+		var thumbnails = new WindowThumbnails (100, 100);
+		var first = thumbnails.lookup (xid);
+		assert (first != null);
+		// Fit into the room it was given, keeping its proportions
+		assert (first.width == 100);
+		assert (first.height == 50);
+		// Nothing was painted in between, so the window is not read again
+		assert (thumbnails.lookup (xid) == first);
+
+		var announced = 0;
+		thumbnails.changed.connect ((changed_xid) => {
+			if (changed_xid == xid)
+				announced++;
+		});
+		shade = 0.8;
+		area.queue_draw ();
+
+		wait (1500);
+
+		assert (announced >= 1);
+		var second = thumbnails.lookup (xid);
+		assert (second != null);
+		assert (second != first);
+		// The picture shows what the window paints now
+		unowned uint8[] pixels = second.get_pixels ();
+		assert (pixels[0] > 150);
+
+		thumbnails.clear ();
+		window.destroy ();
 	}
 	
 	void composited_window_basics ()

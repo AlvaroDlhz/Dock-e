@@ -13,8 +13,9 @@ namespace Plank
 		WorkspaceItem? current_item;
 		Gtk.FlowBox flow;
 		unowned Wnck.Screen? wnck_screen;
-		Gtk.CssProvider? css_provider;
-		uint refresh_timer = 0U;
+		// Pictures of the windows, taken again only once a window has changed
+		WindowThumbnails thumbnails;
+		ulong thumbnail_changed_id = 0UL;
 
 		public WorkspacePreviewWindow (DockController controller)
 		{
@@ -33,6 +34,8 @@ namespace Plank
 				});
 			});
 			wnck_screen = Wnck.Screen.get_default ();
+			thumbnails = new WindowThumbnails (CARD_WIDTH - 10, PREVIEW_HEIGHT);
+			thumbnail_changed_id = thumbnails.changed.connect (() => redraw_previews ());
 			decorated = false;
 			resizable = false;
 			skip_taskbar_hint = true;
@@ -76,6 +79,8 @@ namespace Plank
 				controller.hide_manager.update_hovered ();
 			});
 			hide.connect (() => {
+				// Nothing is watched or kept in memory while there is nothing to show
+				thumbnails.clear ();
 				controller.hide_manager.ExternalMenuVisible = false;
 				controller.hide_manager.update_hovered ();
 			});
@@ -83,15 +88,17 @@ namespace Plank
 				wnck_screen.workspace_created.connect (() => { if (visible) rebuild (); });
 				wnck_screen.workspace_destroyed.connect (() => { if (visible) rebuild (); });
 				wnck_screen.active_workspace_changed.connect (() => { if (visible) rebuild (); });
+				// Which windows there are is not something their contents tell
+				wnck_screen.window_opened.connect (() => redraw_previews ());
+				wnck_screen.window_closed.connect (() => redraw_previews ());
 			}
 			apply_theme ();
 		}
 
 		~WorkspacePreviewWindow ()
 		{
-			stop_refresh ();
-			if (css_provider != null)
-				Gtk.StyleContext.remove_provider_for_screen (get_screen (), css_provider);
+			if (thumbnail_changed_id > 0UL)
+				SignalHandler.disconnect (thumbnails, thumbnail_changed_id);
 		}
 
 		public override bool draw (Cairo.Context cr)
@@ -132,12 +139,10 @@ namespace Plank
 				flow.child_focus (Gtk.DirectionType.TAB_FORWARD);
 				return false;
 			});
-			start_refresh ();
 		}
 
 		public void dismiss ()
 		{
-			stop_refresh ();
 			current_item = null;
 			if (visible)
 				transition.animate_to (0.0,
@@ -299,37 +304,16 @@ namespace Plank
 		{
 			if (window.is_minimized ())
 				return null;
-			Gdk.Pixbuf? pixbuf = null;
-			Gdk.error_trap_push ();
-			var foreign = new Gdk.X11.Window.foreign_for_display (
-				(Gdk.X11.Display) get_display (), (X.Window) window.get_xid ());
-			if (foreign != null) {
-				int x, y, width, height;
-				window.get_geometry (out x, out y, out width, out height);
-				if (width > 1 && height > 1)
-					pixbuf = Gdk.pixbuf_get_from_window (foreign, 0, 0, width, height);
-			}
-			Gdk.error_trap_pop_ignored ();
-			return pixbuf;
+			return thumbnails.lookup ((uint32) window.get_xid ());
 		}
 
-		void start_refresh ()
+		void redraw_previews ()
 		{
-			stop_refresh ();
-			refresh_timer = Timeout.add (750, () => {
-				if (!visible) { refresh_timer = 0U; return false; }
-				foreach (unowned Gtk.Widget child in flow.get_children ())
-					child.queue_draw ();
-				return true;
-			});
-		}
-
-		void stop_refresh ()
-		{
-			if (refresh_timer > 0U) {
-				Source.remove (refresh_timer);
-				refresh_timer = 0U;
-			}
+			if (!visible)
+				return;
+			// Drawing is cheap, the pictures of unchanged windows are reused
+			foreach (unowned Gtk.Widget child in flow.get_children ())
+				child.queue_draw ();
 		}
 
 		void position_over_item ()
@@ -349,30 +333,7 @@ namespace Plank
 
 		void apply_theme ()
 		{
-			if (css_provider != null)
-				Gtk.StyleContext.remove_provider_for_screen (get_screen (), css_provider);
-			var color = get_bar_color ();
-			var red = (int) (color.red * 255);
-			var green = (int) (color.green * 255);
-			var blue = (int) (color.blue * 255);
-			var alpha = get_bar_opacity (color);
-			var css = ".plank-workspace-previews { background: rgba(%d,%d,%d,%.3f); border-radius: 14px; }"
-				.printf (red, green, blue, alpha);
-			css += ".plank-workspace-previews .workspace-flow, .plank-workspace-previews .workspace-flow-child { background: transparent; }";
-			css += ".plank-workspace-previews .workspace-card { background: transparent; border: 1px solid rgba(255,255,255,0.16); border-radius: 10px; padding: 1px; }";
-			css += ".plank-workspace-previews .workspace-card:hover { background: rgba(255,255,255,0.17); }";
-			css += ".plank-workspace-previews .workspace-card.active { box-shadow: inset 0 0 0 2px rgba(115,210,22,0.9); }";
-			css += ".plank-workspace-previews.keyboard-navigation .workspace-card:focus { box-shadow: inset 0 0 0 2px white; }";
-			css += ".plank-workspace-previews .workspace-title { color: white; font-weight: 600; }";
-			css += ".plank-workspace-previews .workspace-active-label { color: rgb(145,220,85); font-size: 0.85em; }";
-			css_provider = new Gtk.CssProvider ();
-			try {
-				css_provider.load_from_data (css);
-				Gtk.StyleContext.add_provider_for_screen (get_screen (), css_provider,
-					Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-			} catch (Error e) {
-				warning ("Unable to style workspace previews: %s", e.message);
-			}
+			DockStyle.update (controller);
 		}
 
 		Gdk.RGBA get_bar_color ()
