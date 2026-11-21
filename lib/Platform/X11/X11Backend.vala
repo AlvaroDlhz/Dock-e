@@ -58,5 +58,13 @@ namespace Plank.Platform
 			supported |= Capability.EDGE_PRESSURE;
 #endif
 		}
+
+		public void log_details ()
+		{
+			message ("Wnck version: %d.%d.%d", Wnck.Version.MAJOR_VERSION, Wnck.Version.MINOR_VERSION, Wnck.Version.MICRO_VERSION);
+#if HAVE_BARRIERS
+			message ("+ XInput Barriers support enabled");
+#endif
+		}
 	}
 }

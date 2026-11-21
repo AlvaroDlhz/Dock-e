@@ -211,8 +211,9 @@ namespace Plank
 		
 		warning ("XDG_SESSION_TYPE not set in this environment!");
 		
-		if (Gdk.Screen.get_default () is Gdk.X11.Screen)
-			return XdgSessionType.X11;
+		Platform.BackendKind kind;
+		if (Platform.detect_backend (out kind))
+			return (kind == Platform.BackendKind.WAYLAND ? XdgSessionType.WAYLAND : XdgSessionType.X11);
 		
 		error ("XdgSessionType could not be determined!");
 	}

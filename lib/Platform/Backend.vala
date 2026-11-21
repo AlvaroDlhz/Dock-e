@@ -74,12 +74,46 @@ namespace Plank.Platform
 		public abstract Capability capabilities { get; }
 
 		/**
+		 * Logs the versions and optional features of the libraries behind
+		 * this backend, next to the rest of the startup information.
+		 */
+		public abstract void log_details ();
+
+		/**
 		 * Whether this backend supports the given capability.
 		 */
 		public bool has (Capability capability)
 		{
 			return (capability in capabilities);
 		}
+	}
+
+	/**
+	 * Finds out which kind of display server the default display talks to,
+	 * judging by the type of the {@link Gdk.Display} and not by environment
+	 * variables.
+	 *
+	 * @param kind the kind of display server
+	 * @return false if there is no display or it is of an unknown kind
+	 */
+	public bool detect_backend (out BackendKind kind)
+	{
+		kind = BackendKind.X11;
+
+		unowned Gdk.Display? display = Gdk.Display.get_default ();
+		if (display == null)
+			return false;
+
+		if (display is Gdk.X11.Display)
+			return true;
+
+		// Checked by name to avoid depending on gdk-wayland
+		if (display.get_type ().name () == "GdkWaylandDisplay") {
+			kind = BackendKind.WAYLAND;
+			return true;
+		}
+
+		return false;
 	}
 
 	static Backend? backend = null;
@@ -89,16 +123,25 @@ namespace Plank.Platform
 	 * Returns the backend for the default display, or null if there is no
 	 * backend for it.  The backend is created on the first call.
 	 */
-	public Backend? get_backend ()
+	public unowned Backend? get_backend ()
 	{
 		if (backend_probed)
 			return backend;
 
 		backend_probed = true;
 
-		unowned Gdk.Display? display = Gdk.Display.get_default ();
-		if (display is Gdk.X11.Display)
-			backend = new X11Backend ((Gdk.X11.Display) display);
+		BackendKind kind;
+		if (!detect_backend (out kind))
+			return null;
+
+		switch (kind) {
+		case BackendKind.X11:
+			backend = new X11Backend ((Gdk.X11.Display) Gdk.Display.get_default ());
+			break;
+		default:
+			// There is no Wayland backend yet
+			break;
+		}
 
 		return backend;
 	}
