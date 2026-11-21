@@ -63,10 +63,16 @@ namespace Docky
 				warning ("Could not start file monitor for trash.");
 			}
 			
-			//FIXME Add support for more environments besides GNOME
-			var nautilus_settings = create_settings ("org.gnome.nautilus.preferences", "/org/gnome/nautilus/preferences/");
-			if (nautilus_settings != null && ("confirm-trash" in nautilus_settings.list_keys ()))
-				confirm_trash_delete = nautilus_settings.get_boolean ("confirm-trash");
+			// The file manager of the desktop says whether emptying asks first
+			const string[] FILE_MANAGERS = { "org.gnome.nautilus", "org.nemo", "org.mate.caja" };
+			foreach (unowned string file_manager in FILE_MANAGERS) {
+				// Asking for a schema which is not installed would abort the dock
+				var schema = SettingsSchemaSource.get_default ().lookup (file_manager + ".preferences", true);
+				if (schema != null && schema.has_key ("confirm-trash")) {
+					confirm_trash_delete = new GLib.Settings.full (schema, null, null).get_boolean ("confirm-trash");
+					break;
+				}
+			}
 		}
 		
 		~TrashDockItem ()
