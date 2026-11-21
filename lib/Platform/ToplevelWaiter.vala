@@ -23,7 +23,8 @@ namespace Plank.Platform
 
 	/**
 	 * Runs actions on a toplevel as soon as the toplevel manager knows it.
-	 * Another source may announce a window first, as BAMF does before Wnck.
+	 * Another source may announce a window first, as an application matcher
+	 * running in another process can.
 	 */
 	public class ToplevelWaiter : Object
 	{

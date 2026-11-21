@@ -16,9 +16,11 @@ namespace PlankTests
 		Test.add_func ("/Platform/Toplevel/manager-signals", platform_toplevel_manager_signals);
 		Test.add_func ("/Platform/Toplevel/geometry", platform_toplevel_geometry);
 		Test.add_func ("/Platform/Workspace/manager", platform_workspace_manager);
+#if HAVE_X11
 		Test.add_func ("/Platform/X11/device-to-logical", platform_x11_device_to_logical);
 		Test.add_func ("/Platform/X11/device-to-logical-intersection", platform_x11_device_to_logical_intersection);
 		Test.add_func ("/Platform/X11/map-state", platform_x11_map_state);
+#endif
 		Test.add_func ("/Platform/show-desktop", platform_show_desktop);
 		Test.add_func ("/Platform/ToplevelWaiter/known", platform_toplevel_waiter_known);
 		Test.add_func ("/Platform/ToplevelWaiter/later", platform_toplevel_waiter_later);
@@ -148,6 +150,7 @@ namespace PlankTests
 		assert (!toplevel.is_on_workspace (first));
 	}
 
+#if HAVE_X11
 	void platform_x11_device_to_logical ()
 	{
 		var same = X11Toplevel.device_to_logical (-7, 3, 11, 5, 1);
@@ -193,6 +196,7 @@ namespace PlankTests
 			| ToplevelState.URGENT | ToplevelState.SKIP_TASKBAR));
 		assert (X11Toplevel.map_state (0) == 0);
 	}
+#endif
 
 	const int DOCK_PID = 4242;
 	const Gdk.Rectangle OVERLAP_DOCK = { 400, 730, 480, 70 };

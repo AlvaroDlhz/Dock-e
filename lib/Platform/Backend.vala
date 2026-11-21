@@ -162,11 +162,12 @@ namespace Plank.Platform
 		if (display == null)
 			return false;
 
-		if (display is Gdk.X11.Display)
+		// Checked by name: neither gdk-x11 nor gdk-wayland is needed for it
+		unowned string type_name = display.get_type ().name ();
+		if (type_name == "GdkX11Display")
 			return true;
 
-		// Checked by name to avoid depending on gdk-wayland
-		if (display.get_type ().name () == "GdkWaylandDisplay") {
+		if (type_name == "GdkWaylandDisplay") {
 			kind = BackendKind.WAYLAND;
 			return true;
 		}
@@ -203,11 +204,13 @@ namespace Plank.Platform
 			return null;
 
 		switch (kind) {
+#if HAVE_X11
 		case BackendKind.X11:
-			backend = new X11Backend ((Gdk.X11.Display) Gdk.Display.get_default ());
+			backend = X11Backend.for_default_display ();
 			break;
+#endif
 		default:
-			// There is no Wayland backend yet
+			// There is no Wayland backend yet, or this build has no X11 one
 			break;
 		}
 

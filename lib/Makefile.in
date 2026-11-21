@@ -90,6 +90,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@HAVE_X11_TRUE@am__append_1 = $(libplank_internal_x11_VALASOURCES)
 subdir = lib
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gcov.m4 \
@@ -146,7 +147,17 @@ am__objects_1 =
 am_libplank_internal_la_OBJECTS = libplank_internal_la-gtk-compat.lo \
 	$(am__objects_1)
 am__dirstamp = $(am__leading_dot)dirstamp
-am__objects_2 = libplank_internal_la-InternalConsts.lo \
+am__objects_2 = Platform/X11/libplank_internal_la-BamfAppTracker.lo \
+	Platform/X11/libplank_internal_la-X11Backend.lo \
+	Platform/X11/libplank_internal_la-X11DockSurface.lo \
+	Platform/X11/libplank_internal_la-X11EdgeTrigger.lo \
+	Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo \
+	Platform/X11/libplank_internal_la-X11Toplevel.lo \
+	Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo \
+	Platform/X11/libplank_internal_la-X11Workspace.lo \
+	$(am__objects_1)
+@HAVE_X11_TRUE@am__objects_3 = $(am__objects_2)
+am__objects_4 = libplank_internal_la-InternalConsts.lo \
 	libplank_internal_la-InternalQuarks.lo \
 	Platform/libplank_internal_la-Backend.lo \
 	Platform/libplank_internal_la-DockSurface.lo \
@@ -158,14 +169,6 @@ am__objects_2 = libplank_internal_la-InternalConsts.lo \
 	Platform/libplank_internal_la-ToplevelWaiter.lo \
 	Platform/libplank_internal_la-WindowThumbnailer.lo \
 	Platform/libplank_internal_la-Workspace.lo \
-	Platform/X11/libplank_internal_la-BamfAppTracker.lo \
-	Platform/X11/libplank_internal_la-X11Backend.lo \
-	Platform/X11/libplank_internal_la-X11DockSurface.lo \
-	Platform/X11/libplank_internal_la-X11EdgeTrigger.lo \
-	Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo \
-	Platform/X11/libplank_internal_la-X11Toplevel.lo \
-	Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo \
-	Platform/X11/libplank_internal_la-X11Workspace.lo \
 	Services/libplank_internal_la-Accessibility.lo \
 	Services/libplank_internal_la-ApplicationUninstallService.lo \
 	Services/libplank_internal_la-CalculatorService.lo \
@@ -179,8 +182,8 @@ am__objects_2 = libplank_internal_la-InternalConsts.lo \
 	Services/libplank_internal_la-WindowOverlap.lo \
 	Services/libplank_internal_la-Utils.lo \
 	Widgets/libplank_internal_la-DockletViewModel.lo \
-	$(am__objects_1)
-nodist_libplank_internal_la_OBJECTS = $(am__objects_2) \
+	$(am__objects_1) $(am__objects_3)
+nodist_libplank_internal_la_OBJECTS = $(am__objects_4) \
 	$(am__objects_1)
 libplank_internal_la_OBJECTS = $(am_libplank_internal_la_OBJECTS) \
 	$(nodist_libplank_internal_la_OBJECTS)
@@ -195,9 +198,9 @@ libplank_internal_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 libplank_la_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(builddir)/libplank-internal.la \
 	$(am__DEPENDENCIES_1)
-am__objects_3 = plank-resources.lo $(am__objects_1)
-am__objects_4 = Version.lo $(am__objects_1)
-am__objects_5 = DBusManager.lo DockController.lo DockPreferences.lo \
+am__objects_5 = plank-resources.lo $(am__objects_1)
+am__objects_6 = Version.lo $(am__objects_1)
+am__objects_7 = DBusManager.lo DockController.lo DockPreferences.lo \
 	DockRenderer.lo DragManager.lo HideManager.lo \
 	PositionManager.lo DBus/Client.lo DBus/Interfaces.lo \
 	Docklets/Docklet.lo Docklets/DockletItem.lo \
@@ -228,8 +231,8 @@ am__objects_5 = DBusManager.lo DockController.lo DockPreferences.lo \
 	Widgets/LauncherWindow.lo Widgets/ListSelectionGlide.lo \
 	Widgets/PoofWindow.lo Widgets/PreferencesWindow.lo \
 	Widgets/TitledSeparatorMenuItem.lo $(am__objects_1)
-nodist_libplank_la_OBJECTS = $(am__objects_3) $(am__objects_4) \
-	$(am__objects_5) $(am__objects_1)
+nodist_libplank_la_OBJECTS = $(am__objects_5) $(am__objects_6) \
+	$(am__objects_7) $(am__objects_1)
 libplank_la_OBJECTS = $(nodist_libplank_la_OBJECTS)
 libplank_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -920,19 +923,23 @@ libplank_internal_la_LIBADD = \
 	$(PLANK_CORE_LIBS) \
 	$(NULL)
 
-libplank_internal_la_VALASOURCES = \
-	InternalConsts.vala \
-	InternalQuarks.vala \
-	Platform/Backend.vala \
-	Platform/DockSurface.vala \
-	Platform/EdgeTrigger.vala \
-	Platform/PopupPlacer.vala \
-	Platform/SuperKeyTrigger.vala \
-	Platform/RunningApp.vala \
-	Platform/Toplevel.vala \
-	Platform/ToplevelWaiter.vala \
-	Platform/WindowThumbnailer.vala \
-	Platform/Workspace.vala \
+libplank_internal_la_VALASOURCES = InternalConsts.vala \
+	InternalQuarks.vala Platform/Backend.vala \
+	Platform/DockSurface.vala Platform/EdgeTrigger.vala \
+	Platform/PopupPlacer.vala Platform/SuperKeyTrigger.vala \
+	Platform/RunningApp.vala Platform/Toplevel.vala \
+	Platform/ToplevelWaiter.vala Platform/WindowThumbnailer.vala \
+	Platform/Workspace.vala Services/Accessibility.vala \
+	Services/ApplicationUninstallService.vala \
+	Services/CalculatorService.vala Services/DockProfiles.vala \
+	Services/LauncherCatalog.vala Services/LauncherCommands.vala \
+	Services/LauncherSearch.vala Services/CommandRunner.vala \
+	Services/StatusNoticeModel.vala Services/WindowControl.vala \
+	Services/WindowOverlap.vala Services/Utils.vala \
+	Widgets/DockletViewModel.vala $(NULL) $(am__append_1)
+
+# The X11 backend, see docs/x11-aislamiento.md
+libplank_internal_x11_VALASOURCES = \
 	Platform/X11/BamfAppTracker.vala \
 	Platform/X11/X11Backend.vala \
 	Platform/X11/X11DockSurface.vala \
@@ -941,19 +948,6 @@ libplank_internal_la_VALASOURCES = \
 	Platform/X11/X11Toplevel.vala \
 	Platform/X11/X11WindowThumbnailer.vala \
 	Platform/X11/X11Workspace.vala \
-	Services/Accessibility.vala \
-	Services/ApplicationUninstallService.vala \
-	Services/CalculatorService.vala \
-	Services/DockProfiles.vala \
-	Services/LauncherCatalog.vala \
-	Services/LauncherCommands.vala \
-	Services/LauncherSearch.vala \
-	Services/CommandRunner.vala \
-	Services/StatusNoticeModel.vala \
-	Services/WindowControl.vala \
-	Services/WindowOverlap.vala \
-	Services/Utils.vala \
-	Widgets/DockletViewModel.vala \
 	$(NULL)
 
 libplank_internal_la_SOURCES = \
@@ -984,6 +978,7 @@ CLEANFILES = \
 EXTRA_DIST = \
 	$(libplank_la_VALASOURCES) \
 	$(libplank_internal_la_VALASOURCES) \
+	$(libplank_internal_x11_VALASOURCES) \
 	abicheck.sh \
 	libplank.symbols \
 	plank.deps \
@@ -1102,36 +1097,6 @@ Platform/libplank_internal_la-WindowThumbnailer.lo:  \
 	Platform/$(am__dirstamp) Platform/$(DEPDIR)/$(am__dirstamp)
 Platform/libplank_internal_la-Workspace.lo: Platform/$(am__dirstamp) \
 	Platform/$(DEPDIR)/$(am__dirstamp)
-Platform/X11/$(am__dirstamp):
-	@$(MKDIR_P) Platform/X11
-	@: > Platform/X11/$(am__dirstamp)
-Platform/X11/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) Platform/X11/$(DEPDIR)
-	@: > Platform/X11/$(DEPDIR)/$(am__dirstamp)
-Platform/X11/libplank_internal_la-BamfAppTracker.lo:  \
-	Platform/X11/$(am__dirstamp) \
-	Platform/X11/$(DEPDIR)/$(am__dirstamp)
-Platform/X11/libplank_internal_la-X11Backend.lo:  \
-	Platform/X11/$(am__dirstamp) \
-	Platform/X11/$(DEPDIR)/$(am__dirstamp)
-Platform/X11/libplank_internal_la-X11DockSurface.lo:  \
-	Platform/X11/$(am__dirstamp) \
-	Platform/X11/$(DEPDIR)/$(am__dirstamp)
-Platform/X11/libplank_internal_la-X11EdgeTrigger.lo:  \
-	Platform/X11/$(am__dirstamp) \
-	Platform/X11/$(DEPDIR)/$(am__dirstamp)
-Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo:  \
-	Platform/X11/$(am__dirstamp) \
-	Platform/X11/$(DEPDIR)/$(am__dirstamp)
-Platform/X11/libplank_internal_la-X11Toplevel.lo:  \
-	Platform/X11/$(am__dirstamp) \
-	Platform/X11/$(DEPDIR)/$(am__dirstamp)
-Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo:  \
-	Platform/X11/$(am__dirstamp) \
-	Platform/X11/$(DEPDIR)/$(am__dirstamp)
-Platform/X11/libplank_internal_la-X11Workspace.lo:  \
-	Platform/X11/$(am__dirstamp) \
-	Platform/X11/$(DEPDIR)/$(am__dirstamp)
 Services/$(am__dirstamp):
 	@$(MKDIR_P) Services
 	@: > Services/$(am__dirstamp)
@@ -1170,6 +1135,36 @@ Widgets/$(DEPDIR)/$(am__dirstamp):
 	@: > Widgets/$(DEPDIR)/$(am__dirstamp)
 Widgets/libplank_internal_la-DockletViewModel.lo:  \
 	Widgets/$(am__dirstamp) Widgets/$(DEPDIR)/$(am__dirstamp)
+Platform/X11/$(am__dirstamp):
+	@$(MKDIR_P) Platform/X11
+	@: > Platform/X11/$(am__dirstamp)
+Platform/X11/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) Platform/X11/$(DEPDIR)
+	@: > Platform/X11/$(DEPDIR)/$(am__dirstamp)
+Platform/X11/libplank_internal_la-BamfAppTracker.lo:  \
+	Platform/X11/$(am__dirstamp) \
+	Platform/X11/$(DEPDIR)/$(am__dirstamp)
+Platform/X11/libplank_internal_la-X11Backend.lo:  \
+	Platform/X11/$(am__dirstamp) \
+	Platform/X11/$(DEPDIR)/$(am__dirstamp)
+Platform/X11/libplank_internal_la-X11DockSurface.lo:  \
+	Platform/X11/$(am__dirstamp) \
+	Platform/X11/$(DEPDIR)/$(am__dirstamp)
+Platform/X11/libplank_internal_la-X11EdgeTrigger.lo:  \
+	Platform/X11/$(am__dirstamp) \
+	Platform/X11/$(DEPDIR)/$(am__dirstamp)
+Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo:  \
+	Platform/X11/$(am__dirstamp) \
+	Platform/X11/$(DEPDIR)/$(am__dirstamp)
+Platform/X11/libplank_internal_la-X11Toplevel.lo:  \
+	Platform/X11/$(am__dirstamp) \
+	Platform/X11/$(DEPDIR)/$(am__dirstamp)
+Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo:  \
+	Platform/X11/$(am__dirstamp) \
+	Platform/X11/$(DEPDIR)/$(am__dirstamp)
+Platform/X11/libplank_internal_la-X11Workspace.lo:  \
+	Platform/X11/$(am__dirstamp) \
+	Platform/X11/$(DEPDIR)/$(am__dirstamp)
 
 libplank-internal.la: $(libplank_internal_la_OBJECTS) $(libplank_internal_la_DEPENDENCIES) $(EXTRA_libplank_internal_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(libplank_internal_la_LINK)  $(libplank_internal_la_OBJECTS) $(libplank_internal_la_LIBADD) $(LIBS)
@@ -1568,62 +1563,6 @@ Platform/libplank_internal_la-Workspace.lo: Platform/Workspace.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/libplank_internal_la-Workspace.lo `test -f 'Platform/Workspace.c' || echo '$(srcdir)/'`Platform/Workspace.c
 
-Platform/X11/libplank_internal_la-BamfAppTracker.lo: Platform/X11/BamfAppTracker.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-BamfAppTracker.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-BamfAppTracker.Tpo -c -o Platform/X11/libplank_internal_la-BamfAppTracker.lo `test -f 'Platform/X11/BamfAppTracker.c' || echo '$(srcdir)/'`Platform/X11/BamfAppTracker.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-BamfAppTracker.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-BamfAppTracker.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/BamfAppTracker.c' object='Platform/X11/libplank_internal_la-BamfAppTracker.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-BamfAppTracker.lo `test -f 'Platform/X11/BamfAppTracker.c' || echo '$(srcdir)/'`Platform/X11/BamfAppTracker.c
-
-Platform/X11/libplank_internal_la-X11Backend.lo: Platform/X11/X11Backend.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11Backend.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Tpo -c -o Platform/X11/libplank_internal_la-X11Backend.lo `test -f 'Platform/X11/X11Backend.c' || echo '$(srcdir)/'`Platform/X11/X11Backend.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11Backend.c' object='Platform/X11/libplank_internal_la-X11Backend.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11Backend.lo `test -f 'Platform/X11/X11Backend.c' || echo '$(srcdir)/'`Platform/X11/X11Backend.c
-
-Platform/X11/libplank_internal_la-X11DockSurface.lo: Platform/X11/X11DockSurface.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11DockSurface.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11DockSurface.Tpo -c -o Platform/X11/libplank_internal_la-X11DockSurface.lo `test -f 'Platform/X11/X11DockSurface.c' || echo '$(srcdir)/'`Platform/X11/X11DockSurface.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11DockSurface.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11DockSurface.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11DockSurface.c' object='Platform/X11/libplank_internal_la-X11DockSurface.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11DockSurface.lo `test -f 'Platform/X11/X11DockSurface.c' || echo '$(srcdir)/'`Platform/X11/X11DockSurface.c
-
-Platform/X11/libplank_internal_la-X11EdgeTrigger.lo: Platform/X11/X11EdgeTrigger.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11EdgeTrigger.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Tpo -c -o Platform/X11/libplank_internal_la-X11EdgeTrigger.lo `test -f 'Platform/X11/X11EdgeTrigger.c' || echo '$(srcdir)/'`Platform/X11/X11EdgeTrigger.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11EdgeTrigger.c' object='Platform/X11/libplank_internal_la-X11EdgeTrigger.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11EdgeTrigger.lo `test -f 'Platform/X11/X11EdgeTrigger.c' || echo '$(srcdir)/'`Platform/X11/X11EdgeTrigger.c
-
-Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo: Platform/X11/X11SuperKeyTrigger.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Tpo -c -o Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo `test -f 'Platform/X11/X11SuperKeyTrigger.c' || echo '$(srcdir)/'`Platform/X11/X11SuperKeyTrigger.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11SuperKeyTrigger.c' object='Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo `test -f 'Platform/X11/X11SuperKeyTrigger.c' || echo '$(srcdir)/'`Platform/X11/X11SuperKeyTrigger.c
-
-Platform/X11/libplank_internal_la-X11Toplevel.lo: Platform/X11/X11Toplevel.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11Toplevel.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11Toplevel.Tpo -c -o Platform/X11/libplank_internal_la-X11Toplevel.lo `test -f 'Platform/X11/X11Toplevel.c' || echo '$(srcdir)/'`Platform/X11/X11Toplevel.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11Toplevel.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11Toplevel.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11Toplevel.c' object='Platform/X11/libplank_internal_la-X11Toplevel.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11Toplevel.lo `test -f 'Platform/X11/X11Toplevel.c' || echo '$(srcdir)/'`Platform/X11/X11Toplevel.c
-
-Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo: Platform/X11/X11WindowThumbnailer.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11WindowThumbnailer.Tpo -c -o Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo `test -f 'Platform/X11/X11WindowThumbnailer.c' || echo '$(srcdir)/'`Platform/X11/X11WindowThumbnailer.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11WindowThumbnailer.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11WindowThumbnailer.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11WindowThumbnailer.c' object='Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo `test -f 'Platform/X11/X11WindowThumbnailer.c' || echo '$(srcdir)/'`Platform/X11/X11WindowThumbnailer.c
-
-Platform/X11/libplank_internal_la-X11Workspace.lo: Platform/X11/X11Workspace.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11Workspace.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11Workspace.Tpo -c -o Platform/X11/libplank_internal_la-X11Workspace.lo `test -f 'Platform/X11/X11Workspace.c' || echo '$(srcdir)/'`Platform/X11/X11Workspace.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11Workspace.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11Workspace.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11Workspace.c' object='Platform/X11/libplank_internal_la-X11Workspace.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11Workspace.lo `test -f 'Platform/X11/X11Workspace.c' || echo '$(srcdir)/'`Platform/X11/X11Workspace.c
-
 Services/libplank_internal_la-Accessibility.lo: Services/Accessibility.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Services/libplank_internal_la-Accessibility.lo -MD -MP -MF Services/$(DEPDIR)/libplank_internal_la-Accessibility.Tpo -c -o Services/libplank_internal_la-Accessibility.lo `test -f 'Services/Accessibility.c' || echo '$(srcdir)/'`Services/Accessibility.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Services/$(DEPDIR)/libplank_internal_la-Accessibility.Tpo Services/$(DEPDIR)/libplank_internal_la-Accessibility.Plo
@@ -1714,6 +1653,62 @@ Widgets/libplank_internal_la-DockletViewModel.lo: Widgets/DockletViewModel.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Widgets/DockletViewModel.c' object='Widgets/libplank_internal_la-DockletViewModel.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Widgets/libplank_internal_la-DockletViewModel.lo `test -f 'Widgets/DockletViewModel.c' || echo '$(srcdir)/'`Widgets/DockletViewModel.c
+
+Platform/X11/libplank_internal_la-BamfAppTracker.lo: Platform/X11/BamfAppTracker.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-BamfAppTracker.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-BamfAppTracker.Tpo -c -o Platform/X11/libplank_internal_la-BamfAppTracker.lo `test -f 'Platform/X11/BamfAppTracker.c' || echo '$(srcdir)/'`Platform/X11/BamfAppTracker.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-BamfAppTracker.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-BamfAppTracker.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/BamfAppTracker.c' object='Platform/X11/libplank_internal_la-BamfAppTracker.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-BamfAppTracker.lo `test -f 'Platform/X11/BamfAppTracker.c' || echo '$(srcdir)/'`Platform/X11/BamfAppTracker.c
+
+Platform/X11/libplank_internal_la-X11Backend.lo: Platform/X11/X11Backend.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11Backend.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Tpo -c -o Platform/X11/libplank_internal_la-X11Backend.lo `test -f 'Platform/X11/X11Backend.c' || echo '$(srcdir)/'`Platform/X11/X11Backend.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11Backend.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11Backend.c' object='Platform/X11/libplank_internal_la-X11Backend.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11Backend.lo `test -f 'Platform/X11/X11Backend.c' || echo '$(srcdir)/'`Platform/X11/X11Backend.c
+
+Platform/X11/libplank_internal_la-X11DockSurface.lo: Platform/X11/X11DockSurface.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11DockSurface.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11DockSurface.Tpo -c -o Platform/X11/libplank_internal_la-X11DockSurface.lo `test -f 'Platform/X11/X11DockSurface.c' || echo '$(srcdir)/'`Platform/X11/X11DockSurface.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11DockSurface.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11DockSurface.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11DockSurface.c' object='Platform/X11/libplank_internal_la-X11DockSurface.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11DockSurface.lo `test -f 'Platform/X11/X11DockSurface.c' || echo '$(srcdir)/'`Platform/X11/X11DockSurface.c
+
+Platform/X11/libplank_internal_la-X11EdgeTrigger.lo: Platform/X11/X11EdgeTrigger.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11EdgeTrigger.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Tpo -c -o Platform/X11/libplank_internal_la-X11EdgeTrigger.lo `test -f 'Platform/X11/X11EdgeTrigger.c' || echo '$(srcdir)/'`Platform/X11/X11EdgeTrigger.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11EdgeTrigger.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11EdgeTrigger.c' object='Platform/X11/libplank_internal_la-X11EdgeTrigger.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11EdgeTrigger.lo `test -f 'Platform/X11/X11EdgeTrigger.c' || echo '$(srcdir)/'`Platform/X11/X11EdgeTrigger.c
+
+Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo: Platform/X11/X11SuperKeyTrigger.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Tpo -c -o Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo `test -f 'Platform/X11/X11SuperKeyTrigger.c' || echo '$(srcdir)/'`Platform/X11/X11SuperKeyTrigger.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11SuperKeyTrigger.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11SuperKeyTrigger.c' object='Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11SuperKeyTrigger.lo `test -f 'Platform/X11/X11SuperKeyTrigger.c' || echo '$(srcdir)/'`Platform/X11/X11SuperKeyTrigger.c
+
+Platform/X11/libplank_internal_la-X11Toplevel.lo: Platform/X11/X11Toplevel.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11Toplevel.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11Toplevel.Tpo -c -o Platform/X11/libplank_internal_la-X11Toplevel.lo `test -f 'Platform/X11/X11Toplevel.c' || echo '$(srcdir)/'`Platform/X11/X11Toplevel.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11Toplevel.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11Toplevel.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11Toplevel.c' object='Platform/X11/libplank_internal_la-X11Toplevel.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11Toplevel.lo `test -f 'Platform/X11/X11Toplevel.c' || echo '$(srcdir)/'`Platform/X11/X11Toplevel.c
+
+Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo: Platform/X11/X11WindowThumbnailer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11WindowThumbnailer.Tpo -c -o Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo `test -f 'Platform/X11/X11WindowThumbnailer.c' || echo '$(srcdir)/'`Platform/X11/X11WindowThumbnailer.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11WindowThumbnailer.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11WindowThumbnailer.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11WindowThumbnailer.c' object='Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11WindowThumbnailer.lo `test -f 'Platform/X11/X11WindowThumbnailer.c' || echo '$(srcdir)/'`Platform/X11/X11WindowThumbnailer.c
+
+Platform/X11/libplank_internal_la-X11Workspace.lo: Platform/X11/X11Workspace.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -MT Platform/X11/libplank_internal_la-X11Workspace.lo -MD -MP -MF Platform/X11/$(DEPDIR)/libplank_internal_la-X11Workspace.Tpo -c -o Platform/X11/libplank_internal_la-X11Workspace.lo `test -f 'Platform/X11/X11Workspace.c' || echo '$(srcdir)/'`Platform/X11/X11Workspace.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) Platform/X11/$(DEPDIR)/libplank_internal_la-X11Workspace.Tpo Platform/X11/$(DEPDIR)/libplank_internal_la-X11Workspace.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='Platform/X11/X11Workspace.c' object='Platform/X11/libplank_internal_la-X11Workspace.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libplank_internal_la_CFLAGS) $(CFLAGS) -c -o Platform/X11/libplank_internal_la-X11Workspace.lo `test -f 'Platform/X11/X11Workspace.c' || echo '$(srcdir)/'`Platform/X11/X11Workspace.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

@@ -188,14 +188,6 @@ libplank_internal_la_VALASOURCES = \
 	Platform/ToplevelWaiter.vala \
 	Platform/WindowThumbnailer.vala \
 	Platform/Workspace.vala \
-	Platform/X11/BamfAppTracker.vala \
-	Platform/X11/X11Backend.vala \
-	Platform/X11/X11DockSurface.vala \
-	Platform/X11/X11EdgeTrigger.vala \
-	Platform/X11/X11SuperKeyTrigger.vala \
-	Platform/X11/X11Toplevel.vala \
-	Platform/X11/X11WindowThumbnailer.vala \
-	Platform/X11/X11Workspace.vala \
 	Services/Accessibility.vala \
 	Services/ApplicationUninstallService.vala \
 	Services/CalculatorService.vala \
@@ -210,6 +202,22 @@ libplank_internal_la_VALASOURCES = \
 	Services/Utils.vala \
 	Widgets/DockletViewModel.vala \
 	$(NULL)
+
+# The X11 backend, see docs/x11-aislamiento.md
+libplank_internal_x11_VALASOURCES = \
+	Platform/X11/BamfAppTracker.vala \
+	Platform/X11/X11Backend.vala \
+	Platform/X11/X11DockSurface.vala \
+	Platform/X11/X11EdgeTrigger.vala \
+	Platform/X11/X11SuperKeyTrigger.vala \
+	Platform/X11/X11Toplevel.vala \
+	Platform/X11/X11WindowThumbnailer.vala \
+	Platform/X11/X11Workspace.vala \
+	$(NULL)
+
+if HAVE_X11
+libplank_internal_la_VALASOURCES += $(libplank_internal_x11_VALASOURCES)
+endif
 
 libplank_internal_la_SOURCES = \
 	gtk-compat.c \
@@ -253,6 +261,7 @@ CLEANFILES = \
 EXTRA_DIST = \
 	$(libplank_la_VALASOURCES) \
 	$(libplank_internal_la_VALASOURCES) \
+	$(libplank_internal_x11_VALASOURCES) \
 	abicheck.sh \
 	libplank.symbols \
 	plank.deps \

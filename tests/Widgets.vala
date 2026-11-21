@@ -28,9 +28,12 @@ namespace PlankTests
 		Test.add_func ("/Widgets/HoverWindow/basics", hover_window_basics);
 		Test.add_func ("/Widgets/PopupPosition/all-edges", popup_position_all_edges);
 		Test.add_func ("/Widgets/PopupPosition/centered", popup_position_centered);
+#if HAVE_X11
 		Test.add_func ("/Platform/X11/WindowThumbnailer/follows-changes", window_thumbnails_follow_changes);
+#endif
 	}
 
+#if HAVE_X11
 	void window_thumbnails_follow_changes ()
 	{
 		var shade = 0.2;
@@ -80,6 +83,7 @@ namespace PlankTests
 		thumbnails.clear ();
 		window.destroy ();
 	}
+#endif
 	
 	void composited_window_basics ()
 	{

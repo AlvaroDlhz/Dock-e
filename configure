@@ -779,6 +779,8 @@ GNOMEMENU3_LIBS
 GNOMEMENU3_CFLAGS
 GNOMEMENU3_VALAFLAGS
 DOCKLET_LDFLAGS
+HAVE_X11_FALSE
+HAVE_X11_TRUE
 VAPIGEN
 VALAC
 API_VERSION
@@ -963,6 +965,7 @@ with_aix_soname
 with_sysroot
 enable_libtool_lock
 enable_schemas_compile
+with_x11
 enable_barriers
 enable_dbusmenu
 enable_xdamage
@@ -1678,6 +1681,8 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-sysroot[=DIR]    Search for dependent libraries within DIR (or the
                           compiler's sysroot if not specified).
+  --without-x11           Build without the X11 backend (Wnck, BAMF, Xlib and
+                          its extensions)
   --with-gmock-path       Absolute path to the google-mock source folder
   --with-gtest-path       Absolute path to the google-test source folder
 
@@ -20369,28 +20374,50 @@ PLANK_CORE_PKGS="gobject-2.0 >= $GLIB_MIN_VERSION \
                  gio-unix-2.0 >= $GLIB_MIN_VERSION \
                  gmodule-2.0 \
                  gtk+-3.0 >= $GTK_MIN_VERSION \
-                 gdk-x11-3.0 >= $GTK_MIN_VERSION \
                  gdk-pixbuf-2.0 >= $GDK_PIXBUF_MIN_VERSION \
                  cairo >= $CAIRO_MIN_VERSION \
-                 gee-0.8 \
-                 libbamf3 >= $BAMF_MIN_VERSION \
-                 libwnck-3.0 \
-                 x11"
+                 gee-0.8"
 PLANK_CORE_OPTIONAL_PKGS=""
 
 PLANK_CORE_VALA_PKGS="--pkg gio-unix-2.0 \
                       --pkg gmodule-2.0 \
                       --pkg gtk+-3.0 \
-                      --pkg gdk-x11-3.0 \
                       --pkg gdk-pixbuf-2.0 \
                       --pkg cairo \
                       --pkg gee-0.8 \
-                      --pkg libbamf3 \
-                      --pkg libwnck-3.0 \
-                      --pkg posix \
-                      --pkg x11"
+                      --pkg posix"
 
 VALAFLAGS_CORE=""
+
+# The X11 backend: everything below lib/Platform/X11/ (see docs/x11-aislamiento.md)
+X11_PKGS="gdk-x11-3.0 >= $GTK_MIN_VERSION \
+          libbamf3 >= $BAMF_MIN_VERSION \
+          libwnck-3.0 \
+          x11"
+
+# Check whether --with-x11 was given.
+if test ${with_x11+y}
+then :
+  withval=$with_x11; with_x11=$withval
+else $as_nop
+  with_x11=yes
+fi
+
+if test "x$with_x11" = "xyes" ; then
+    PLANK_CORE_PKGS="$PLANK_CORE_PKGS $X11_PKGS"
+    PLANK_CORE_VALA_PKGS="$PLANK_CORE_VALA_PKGS --pkg gdk-x11-3.0 --pkg libbamf3 --pkg libwnck-3.0 --pkg x11"
+    VALAFLAGS="$VALAFLAGS --define HAVE_X11"
+else
+    with_x11=no
+fi
+ if test "x$with_x11" = "xyes"; then
+  HAVE_X11_TRUE=
+  HAVE_X11_FALSE='#'
+else
+  HAVE_X11_TRUE='#'
+  HAVE_X11_FALSE=
+fi
+
 
 # Docklets
 DOCKLET_LDFLAGS="-module -avoid-version"
@@ -20709,14 +20736,14 @@ else $as_nop
   enable_xfixes50=no
 fi
 
-if test "x$enable_barriers" = "xyes" -a "x$enable_xinput23" = "xyes" -a "x$enable_xfixes50" = "xyes" ; then
+if test "x$with_x11" = "xyes" -a "x$enable_barriers" = "xyes" -a "x$enable_xinput23" = "xyes" -a "x$enable_xfixes50" = "xyes" ; then
     PLANK_CORE_OPTIONAL_PKGS="$PLANK_CORE_OPTIONAL_PKGS $XINPUT_PKGS"
     PLANK_CORE_VALA_PKGS="$PLANK_CORE_VALA_PKGS --pkg xi --pkg xfixes"
     VALAFLAGS="$VALAFLAGS --define HAVE_BARRIERS"
 else
 	enable_barriers=no
 fi
- if test "x$enable_barriers" = "xyes" -a "x$enable_xinput23" = "xyes" -a "x$enable_xfixes50" = "xyes"; then
+ if test "x$enable_barriers" = "xyes"; then
   HAVE_BARRIERS_TRUE=
   HAVE_BARRIERS_FALSE='#'
 else
@@ -20900,6 +20927,9 @@ printf "%s\n" "yes" >&6; }
 fi
 fi
 
+if test "x$with_x11" != "xyes" ; then
+    enable_xdamage=no
+fi
 if test "x$enable_xdamage" = "xyes" ; then
     PLANK_CORE_OPTIONAL_PKGS="$PLANK_CORE_OPTIONAL_PKGS $XDAMAGE_PKGS"
     PLANK_CORE_VALA_PKGS="$PLANK_CORE_VALA_PKGS --pkg xdamage"
@@ -21853,6 +21883,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCXX\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_X11_TRUE}" && test -z "${HAVE_X11_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_X11\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_BARRIERS_TRUE}" && test -z "${HAVE_BARRIERS_FALSE}"; then
@@ -24479,6 +24513,7 @@ ${PACKAGE} ${VERSION}
     Vala Flags..................:  ${VALAFLAGS}
     C Compiler Flags............:  ${CFLAGS}
 
+    X11 backend.................:  ${with_x11}
     Dbusmenu support............:  ${enable_dbusmenu}
     HiDPI support...............:  ${enable_hidpi}
     XInput Barriers support.....:  ${enable_barriers}

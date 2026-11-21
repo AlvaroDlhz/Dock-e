@@ -38,6 +38,14 @@ namespace Plank.Platform
 			Object (display : display);
 		}
 
+		/**
+		 * The backend of the default display, which must be an X11 one.
+		 */
+		public static X11Backend for_default_display ()
+		{
+			return new X11Backend ((Gdk.X11.Display) Gdk.Display.get_default ());
+		}
+
 		construct
 		{
 			supported = Capability.TOPLEVELS
