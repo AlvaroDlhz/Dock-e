@@ -55,7 +55,8 @@ namespace Docky
 			prefs.notify["ShowDate"].connect (handle_prefs_changed);
 			prefs.notify["ShowDigital"].connect (handle_prefs_changed);
 			
-			timer_id = Gdk.threads_add_timeout (1000, (SourceFunc) update_timer);
+			minute = new DateTime.now_local ().get_minute ();
+			schedule_next_minute ();
 			current_theme = (prefs.ShowMilitary ? THEME_BASE_URI + "Default24" : THEME_BASE_URI + "Default");
 		}
 		
@@ -70,6 +71,19 @@ namespace Docky
 			prefs.notify["ShowDigital"].disconnect (handle_prefs_changed);
 		}
 		
+		/**
+		 * Wakes up once, right after the minute changes, instead of asking
+		 * for the time every second.
+		 */
+		void schedule_next_minute ()
+		{
+			var now = new DateTime.now_local ();
+			var remaining = 60.0 - now.get_seconds ();
+			// A little past the boundary, so a timer firing early cannot miss it
+			var delay = (uint) (remaining * 1000.0) + 50U;
+			timer_id = Gdk.threads_add_timeout (delay, (SourceFunc) update_timer);
+		}
+		
 		bool update_timer ()
 		{
 			var now = new DateTime.now_local ();
@@ -78,7 +92,9 @@ namespace Docky
 				minute = now.get_minute ();
 			}
 			
-			return true;
+			// Scheduled anew each time, which also absorbs a suspend or a clock change
+			schedule_next_minute ();
+			return false;
 		}
 		
 		void handle_prefs_changed ()
